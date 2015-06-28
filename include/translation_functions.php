@@ -49,12 +49,15 @@ if ( !isset($known_languages) )
 
 function T_($string)
 {
-   global $Tr;
+   global $Tr, $language_used, $page_translations;
+
+   if ( is_array(@$page_translations) )
+      $page_translations[] = $string;
+
    $s = @$Tr[$string];
    if ( (string)$s != '' )
       return $s;
 
-   global $language_used;
    if ( $language_used == 'N' )
       return '<span class=NativeText>'.$string.'</span>';
 

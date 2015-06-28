@@ -171,8 +171,10 @@ function make_include_files($language=null, $group=null) //must be called from m
  *    2=translated-only (search in original English)
  *    3=translated-only (search in transl-lang)
  *    4=translated-only (with same text as original)
+ * \param $filter_texts null | array with orig-texts to translate (read from APC-cache by scanning previous visited page)
  */
-function translations_query( $translate_lang, $untranslated, $group, $from_row=-1, $alpha_order=false, $filter_en='', $max_len=0 )
+function translations_query( $translate_lang, $untranslated, $group, $from_row=-1, $alpha_order=false, $filter_en='',
+      $max_len=0, $filter_texts=null )
 {
    /* Note: Some items appear two or more times within the untranslated set
       when from different groups. But we can't use:
@@ -221,6 +223,14 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       $query .= " AND $text_field LIKE '%".mysql_addslashes($filter_en)."%'";
    if ( is_numeric($max_len) && $max_len > 0 )
       $query .= " AND LENGTH($text_field) <= $max_len";
+
+   if ( is_array($filter_texts) && count($filter_texts) > 0 )
+   {
+      $q_out = array();
+      foreach( $filter_texts as $f_text )
+         $q_out[] = mysql_addslashes($f_text);
+      $query .= " AND TT.Text IN ('" . implode("','", $q_out) . "')";
+   }
 
    if ( $untranslated == 1 ) // untranslated-only
    {

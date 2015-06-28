@@ -118,7 +118,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
    $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_NO_QUOTA_HIT );
    if ( !$logged_in )
       error('login_if_not_logged_in', 'translate');
-   if ( $player_row['ID'] <= GUESTS_ID_MAX )
+   $my_id = (int)@$player_row['ID'];
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'translate');
 
    $lang_desc = get_language_descriptions_translated(true);
@@ -170,6 +171,16 @@ $info_box = '<br>When translating you should keep the following things in mind:
          $group = $tp_row['Groupname'];
    }
 
+   // read list from APC-cache with all texts from previously visited page by translator
+   $filter_texts = null;
+   $page_visit = (bool)get_request_arg('pvisit');
+   if ( $page_visit && extension_loaded('apc') ) // only if APC-cache present
+   {
+      $cache_result = apc_fetch( "TranslationTexts.$my_id", $cache_success );
+      if ( $cache_success )
+         $filter_texts = $cache_result;
+   }
+
    if ( !$group || !array_key_exists( $group, $translation_groups) )
    {
       $group = 'allgroups';
@@ -194,7 +205,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       if ( !in_array( $translate_lang, $translator_array ) )
          error('not_correct_transl_language', "translate.check.language($translate_lang)");
 
-      $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en, $max_len)
+      $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en, $max_len, $filter_texts )
          or error('mysql_query_failed','translate.translation_query');
 
       $show_rows = (int)@mysql_num_rows($result);
@@ -542,6 +553,11 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'TEXT', sptext(T_('with max. length'), 1),
             'TEXTINPUT', 'max_len', 4, 4, (int)@$_REQUEST['max_len'],
          ));
+      $groupchoice_form->add_row( array(
+            'CELL', $nbcol, '',
+            'CHECKBOX', 'pvisit', 1, T_('Filter on original texts from previous page visit.'), $page_visit,
+         ));
+      $groupchoice_form->add_empty_row();
       if ( $language_name )
       {
          $groupchoice_form->add_row( array(
@@ -549,7 +565,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
                'TEXT', sprintf( T_('Searching with selection [%s] is case-sensitive!'), $arr_translated[3] ) ));
       }
       $groupchoice_form->add_row( array(
-//         'DESCRIPTION', T_('Change to group'),
             'CELL', $nbcol, '',
             'SELECTBOX', 'group', 1, $translation_groups, $group, false,
             'HIDDEN', 'translate_lang', $translate_lang,

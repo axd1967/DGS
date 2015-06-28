@@ -822,6 +822,8 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
 function end_html()
 {
+   global $TheErrors, $ThePage, $player_row, $page_translations;
+
    if ( isset($TheErrors) )
    {
       if ( $TheErrors->error_count() )
@@ -829,9 +831,16 @@ function end_html()
    }
    echo "\n</BODY>\n</HTML>";
 
-   global $ThePage;
    if ( !($ThePage instanceof HTMLPage) )
       ob_end_flush();
+
+   // store collected translation-texts for translators & developers
+   if ( @$player_row['ID'] > GUESTS_ID_MAX && extension_loaded('apc')
+         && ( @$player_row['Translator'] || (@$player_row['admin_level'] & ADMIN_DEVELOPER) ) )
+   {
+      if ( get_base_page() !== 'translate.php' )
+         apc_store( "TranslationTexts.{$player_row['ID']}", $page_translations, SECS_PER_DAY );
+   }
 } //end_html
 
 //push a level in the output stack

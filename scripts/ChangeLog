@@ -13,6 +13,17 @@ ChangeLog
 
 2015-06-28 jug
 
+   * include/make_translationfiles.php (translations_query),
+     include/connect2mysql.php ($page_translations),
+     include/std_functions.php (end_page, end_html),
+     include/translation_functions.php (T_),
+     translate.php:
+   - added filter on translate-page to only show original texts from translators last page-visit
+     collected in APC-memory-cache
+     - on page-visits by a translator or developer collect all original texts to translate
+       in T_(..)-function and store them in APC-memory-cache in end_html()-function
+     - added checkbox on translate-page to filter on texts collected on previous page-visit
+
    * tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_pair_uid,
        ~.load_tournament_game_by_challenger_uid),
      include/board.php (Board.load_from_db),

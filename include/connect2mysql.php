@@ -39,6 +39,9 @@ define('FETCHTYPE_ROW',   'row');
 global $dbcnx; //PHP5
 $dbcnx = 0;
 
+global $page_translations; //PHP5
+$page_translations = array(); // collecting all original translation-texts to translate "this-page"
+
 
 //At least needed when connect2mysql.php is used alone (as in quick_status.php):
 function jump_to($uri, $absolute=false)
