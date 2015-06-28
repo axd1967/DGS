@@ -28,6 +28,14 @@ define('TRANSL_STAT_USED', 'USED');
 define('TRANSL_STAT_CHECK', 'CHECK');
 define('TRANSL_STAT_ORPHAN', 'ORPHAN');
 
+// translation-text-choice (see translations_query()):
+// - apply filter on ORIGINAL|TRANSLATION text, but show UNTRANSLATED/TRANSLATED/ALL
+define('TRLFILT_ORIGINAL_UNTRANSLATED', 0);
+define('TRLFILT_ORIGINAL_TRANSLATED_ALL', 1);
+define('TRLFILT_ORIGINAL_TRANSLATED_SAME', 2);
+define('TRLFILT_ORIGINAL_ALL', 3);
+define('TRLFILT_TRANSLATION', 4);
+
 
 function make_known_languages() //must be called from main dir
 {
@@ -165,20 +173,17 @@ function make_include_files($language=null, $group=null) //must be called from m
 
 /*!
  * \brief Find translations with given restrictions.
- * \param $untranslated
- *    0=all
- *    1=untranslated-only
- *    2=translated-only (search in original English)
- *    3=translated-only (search in transl-lang)
- *    4=translated-only (with same text as original)
+ * \param $translate_filter TRLFILT_...
+ * \param $filter_en custom text entered by translator to additionally filter on text (original or translation
+ *        depending on $translate_filter)
  * \param $filter_texts null | array with orig-texts to translate (read from APC-cache by scanning previous visited page)
  */
-function translations_query( $translate_lang, $untranslated, $group, $from_row=-1, $alpha_order=false, $filter_en='',
+function translations_query( $translate_lang, $translate_filter, $group, $from_row=-1, $alpha_order=false, $filter_custom='',
       $max_len=0, $filter_texts=null )
 {
    /* Note: Some items appear two or more times within the untranslated set
       when from different groups. But we can't use:
-          ( $untranslated == 1 ? "DISTINCT " : "")
+          ( $translate_filter == TRLFILT_ORIGINAL_UNTRANSLATED ? "DISTINCT " : "")
       because the Group_ID column makes the rows distinct.
       Workaround: using "ORDER BY Original_ID LIMIT 50";
        and filter the rows on Original_ID while computing.
@@ -197,7 +202,8 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       $limit = '';
 
    $sql_opts = ( ALLOW_SQL_CALC_ROWS ) ? 'SQL_CALC_FOUND_ROWS' : '';
-   $join_translations = ( $untranslated == 2 || $untranslated == 3 || $untranslated == 4 ) ? 'INNER' : 'LEFT'; // 2/3/4=translated-only
+   $join_translations = ( $translate_filter == TRLFILT_ORIGINAL_TRANSLATED_ALL || $translate_filter == TRLFILT_TRANSLATION
+         || $translate_filter == TRLFILT_ORIGINAL_TRANSLATED_SAME ) ? 'INNER' : 'LEFT'; // 2/3/4=translated-only
    $query = "SELECT $sql_opts Translations.Text"
           . ",TT.ID AS Original_ID"
           . ",TL.ID AS Language_ID"
@@ -218,9 +224,9 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       . " AND TT.Text>''"
       . " AND TT.Translatable!='N'" ;
 
-   $text_field = ( $untranslated == 3 ) ? 'Translations.Text' : 'TT.Text';
-   if ( $filter_en )
-      $query .= " AND $text_field LIKE '%".mysql_addslashes($filter_en)."%'";
+   $text_field = ( $translate_filter == TRLFILT_TRANSLATION ) ? 'Translations.Text' : 'TT.Text';
+   if ( $filter_custom )
+      $query .= " AND $text_field LIKE '%".mysql_addslashes($filter_custom)."%'";
    if ( is_numeric($max_len) && $max_len > 0 )
       $query .= " AND LENGTH($text_field) <= $max_len";
 
@@ -232,14 +238,14 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       $query .= " AND TT.Text IN ('" . implode("','", $q_out) . "')";
    }
 
-   if ( $untranslated == 1 ) // untranslated-only
+   if ( $translate_filter == TRLFILT_ORIGINAL_UNTRANSLATED ) // untranslated-only
    {
       // Translations.Translated IS NULL means "never translated" (LEFT JOIN fails).
       $query .= " AND (Translations.Translated IS NULL OR Translations.Translated='N')";
    }
-   elseif ( $untranslated == 4 ) // translated-only (same as orig text)
+   elseif ( $translate_filter == TRLFILT_ORIGINAL_TRANSLATED_SAME ) // translated-only (same as orig text)
    {
-      // translations with "untranslated"-checkbox are stored with Translations-entry with empty Text-field
+      // translations with "untranslated"-checkbox (same$ID) are stored with Translations-entry with empty Text-field
       $query .= " AND (Translations.Text='' OR TT.Text=Translations.Text)";
    }
 

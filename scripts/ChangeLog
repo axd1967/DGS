@@ -13,6 +13,13 @@ ChangeLog
 
 2015-06-28 jug
 
+   * include/make_translationfiles.php (TRLFILT_...; translations_query),
+     translate.php:
+   - cleanup: for translate-page used constants and clearer var-names for filtering & searching
+     on original or translated texts
+     - on translate-page changed order of text/show-filter orienting on Avic's proposal
+       http://www.dragongoserver.net/forum/read.php?forum=7&thread=44830#44838
+
    * userinfo.php:
    - fix bug: on user-info-page show translated language of user instead of English-language-name
 

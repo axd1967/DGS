@@ -141,7 +141,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $profil_charset = 0;
 
    $group = get_request_arg('group');
-   $untranslated = (int)@$_REQUEST['untranslated']; // see translations_query()
+   $translation_filter = (int)@$_REQUEST['transl_filter']; // TRLFILT_... ; see also translations_query()
    $alpha_order = (int)@$_REQUEST['alpha_order'];
    $filter_en = trim(get_request_arg('filter_en'));
    $max_len = (int)@$_REQUEST['max_len'];
@@ -184,7 +184,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
    if ( !$group || !array_key_exists( $group, $translation_groups) )
    {
       $group = 'allgroups';
-      $untranslated = 1; // default: show untranslated
+      $translation_filter = TRLFILT_ORIGINAL_UNTRANSLATED; // default: filter in original, show untranslated
    }
 
    if ( count( $translator_array ) > 1 )
@@ -205,7 +205,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       if ( !in_array( $translate_lang, $translator_array ) )
          error('not_correct_transl_language', "translate.check.language($translate_lang)");
 
-      $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en, $max_len, $filter_texts )
+      $result = translations_query( $translate_lang, $translation_filter, $group, $from_row, $alpha_order, $filter_en, $max_len, $filter_texts )
          or error('mysql_query_failed','translate.translation_query');
 
       $show_rows = (int)@mysql_num_rows($result);
@@ -222,7 +222,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       jump_to("translate.php?translate_lang=".urlencode($translate_lang) .
          ($profil_charset ? URI_AMP."profil_charset=".$profil_charset : '') .
          URI_AMP."group=".urlencode($group) .
-         ($untranslated ? URI_AMP."untranslated=$untranslated" : '') .
+         ($translation_filter ? URI_AMP."transl_filter=$translation_filter" : '') .
          ($alpha_order ? URI_AMP."alpha_order=$alpha_order" : '') .
          ($filter_en ? URI_AMP."filter_en=".urlencode($filter_en) : '') .
          ($max_len ? URI_AMP."max_len=".urlencode($max_len) : '') .
@@ -259,14 +259,14 @@ $info_box = '<br>When translating you should keep the following things in mind:
         $lang_string.=  ' / ' . $encoding_used;
    }
 
-   $arr_translated = array(
-         1 => 'Untranslated (in original texts)',
-         4 => 'Translated (same as original texts)',
-         2 => 'Translated (in original texts)',
-         0 => 'All texts (in original texts)',
+   $arr_translation_filters = array( // id => "texts $filter_en is applied on", "shown texts"
+         TRLFILT_ORIGINAL_UNTRANSLATED => 'Original texts, Untranslated',
+         TRLFILT_ORIGINAL_TRANSLATED_ALL => 'Original texts, Translated (all)',
+         TRLFILT_ORIGINAL_TRANSLATED_SAME => 'Original texts, Translated (same as original)',
+         TRLFILT_ORIGINAL_ALL => 'Original texts, All',
       );
    if ( $language_name )
-      $arr_translated[3] = sprintf( 'Translated (in %s texts)', $language_name );
+      $arr_translation_filters[TRLFILT_TRANSLATION] = sprintf( 'Translations [%s]', $language_name );
 
 
    $page = 'translate.php';
@@ -277,8 +277,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $page_hiddens['profil_charset'] = 1;
    if ( $group )
       $page_hiddens['group'] = $group;
-   if ( $untranslated )
-      $page_hiddens['untranslated'] = $untranslated;
+   if ( $translation_filter )
+      $page_hiddens['transl_filter'] = $translation_filter;
    if ( $alpha_order )
       $page_hiddens['alpha_order'] = 1;
    if ( $filter_en )
@@ -449,8 +449,10 @@ $info_box = '<br>When translating you should keep the following things in mind:
                   )));
 
          //insert the rx_term highlights as if it was 'faq' (lose) item
-         $orig_preview = make_html_safe( strip_translation_label($orig_string), 'faq', ( $untranslated != 3 ? $rx_term : '' ));
-         $translation_preview = make_html_safe($translation, 'faq', ( $untranslated == 3 ? $rx_term : '' ));
+         $orig_preview = make_html_safe( strip_translation_label($orig_string), 'faq',
+               ( $translation_filter != TRLFILT_TRANSLATION ? $rx_term : '' ));
+         $translation_preview = make_html_safe($translation, 'faq',
+               ( $translation_filter == TRLFILT_TRANSLATION ? $rx_term : '' ));
 
          //execute the textarea_safe() here because of the various_encoding
          $orig_string = textarea_safe( $orig_string, 'iso-8859-1'); //LANG_DEF_CHARSET);
@@ -519,7 +521,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
                'HIDDEN', 'translate_lang', $translate_lang,
                'HIDDEN', 'profil_charset', $profil_charset,
                'HIDDEN', 'group', $group,
-               'HIDDEN', 'untranslated', $untranslated,
+               'HIDDEN', 'transl_filter', $translation_filter,
                'HIDDEN', 'alpha_order', $alpha_order,
                'HIDDEN', 'filter_en', $filter_en,
                'HIDDEN', 'max_len', $max_len,
@@ -562,7 +564,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
       {
          $groupchoice_form->add_row( array(
                'CELL', $nbcol, '',
-               'TEXT', sprintf( T_('Searching with selection [%s] is case-sensitive!'), $arr_translated[3] ) ));
+               'TEXT', sprintf( T_('Searching with selection [%s] is case-sensitive!'),
+                                $arr_translation_filters[TRLFILT_TRANSLATION] ) ));
       }
       $groupchoice_form->add_row( array(
             'CELL', $nbcol, '',
@@ -571,7 +574,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HIDDEN', 'profil_charset', $profil_charset,
             'HIDDEN', 'from_row', 0,
             'HIDDEN', 'tpage', basic_safe($to_transl_page),
-            'SELECTBOX', 'untranslated', 1, $arr_translated, $untranslated, false,
+            'SELECTBOX', 'transl_filter', 1, $arr_translation_filters, $translation_filter, false,
             'SUBMITBUTTON', 'just_group', T_('Show texts'),
             'TEXT', MED_SPACING,
             'CHECKBOX', 'alpha_order', 1, T_('alpha order'), $alpha_order,
@@ -602,7 +605,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'CELL', $nbcol, '',
             'SELECTBOX', 'translate_lang', 1, $vals, $translate_lang, false,
             'HIDDEN', 'group', $group,
-            'HIDDEN', 'untranslated', $untranslated,
+            'HIDDEN', 'transl_filter', $translation_filter,
             'HIDDEN', 'alpha_order', $alpha_order,
             'HIDDEN', 'filter_en', $filter_en,
             'HIDDEN', 'max_len', $max_len,
