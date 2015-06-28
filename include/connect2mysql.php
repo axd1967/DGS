@@ -137,6 +137,7 @@ function db_close()
    $dbcnx= 0;
 }
 
+// return error on failure, false = no-error (=success)
 function connect2mysql($no_errors=false)
 {
    global $dbcnx;
