@@ -40,7 +40,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
        shows the preview of the translation-text.
        <br>
        <b>Caution:</b> this preview examples may sometime differ from the effective
-       display in the normal page because of additional constraints of the normal page.
+       display in the normal page because of additional textual constraints of the markup.
        <br><br>
   <li> Below the english phrase you can also see a <b>date of the last-change</b> (if present).
        <br>
@@ -52,6 +52,14 @@ $info_box = '<br>When translating you should keep the following things in mind:
        <br><br>
   <li> If you need to know the <b>context</b> of a phrase to translate (where it appears on DGS),
        you can ask in the translator forum for help.
+       <br>
+       The server has some English phrases, that overwrite the "native" original English texts,
+       e.g. some abbreviations in tables etc.  To see the "real" original English, you can switch
+       to the "Native texts" in the user-profile or add a <tt>\'&language=N\'</tt> in the URL of a page.
+       <br>
+       A better option to have the context and see the original phrases is to restrict the shown texts
+       with a checkbox in the controls on this translate-page below to <b>filter on original texts
+       from your previous page visit</b>.
        <br><br>
   <li> If a text ends with <b>#label</b> (without space and only alpha-numeric chars),
        for example \'To#2\' or \'All#msg\', this is an alternate text with the same spelling,
@@ -92,18 +100,19 @@ $info_box = '<br>When translating you should keep the following things in mind:
        <br>
        Do not introduce <b>unwanted html</b> elements, use
        &amp;lt; instead of &lt;, &amp;gt; instead of &gt; and &amp;amp; instead of &amp;,
-       if you need to display those characters in your translated string.
+       if you need to display those characters in your translated string.  Especially do not
+       enter markup-tags in the translation when the original text does not contain some.
        <br><br>
   <li> Inside your messages, posts and some other places of DGS, you may use our private
        <b>pseudo-html</b> tags. Those pseudo-tags (like &lt;home ...&gt;, &lt;color ...&gt;)
-       need a special decoding step from our own code to work, and so, they are,
+       need a special decoding step from our own code to work, and so they are,
        most of the time, unusable in the translated strings.
        <br>
        For facilities, we have added the decoding step of our pseudo-tags to the FAQ
        entries (caution: this is not the whole FAQ translation group).
-       So you can use them here (or copy thoses used by the FAQ maintainers).
-       For instance, for links homed at DGS, use not &lt;a href="..."&gt;, but the
-       home-tag, i.e. &lt;home users.php&gt;Users&lt;/home&gt;: this will make the
+       So you can use them here (or copy those used by the FAQ maintainers).
+       For instance, for <b>links homed at DGS</b>, use not &lt;a href="..."&gt;, but the
+       <b>home-tag</b>, i.e. &lt;home users.php&gt;Users&lt;/home&gt;: this will make the
        FAQ entries portable to an other site and is shorter.
        <br>
        The FAQ maintainers also have the possibility to use the note-tag

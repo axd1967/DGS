@@ -19,6 +19,7 @@ ChangeLog
      on original or translated texts
      - on translate-page changed order of text/show-filter orienting on Avic's proposal
        http://www.dragongoserver.net/forum/read.php?forum=7&thread=44830#44838
+   - corrected and amended readme for translators (typos, native texts, warnings)
 
    * userinfo.php:
    - fix bug: on user-info-page show translated language of user instead of English-language-name
