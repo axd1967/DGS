@@ -693,7 +693,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
       }
 
       // Black has set handicap-stones -> setup 2nd-next player in multi-player-game
-      if ( $game_type != GAMETYPE_GO )
+      if ( $tid == 0 && $game_type != GAMETYPE_GO )
       {
          list( $group_color, $group_order, $gpmove_color )
             = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves, $handicap, 1 );
@@ -722,7 +722,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
             "INSERT INTO Moves SET gid=$gid, MoveNr=1, Stone=".BLACK.", PosX=".POSX_PASS.", PosY=0, Hours=0" );
 
          // setup 2nd-next player in multi-player-game, if W-first for shape-game
-         if ( $game_type != GAMETYPE_GO )
+         if ( $tid == 0 && $game_type != GAMETYPE_GO )
          {
             list( $group_color, $group_order, $gpmove_color )
                = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves, $handicap, 1 );

@@ -13,6 +13,17 @@ ChangeLog
 
 2015-06-28 jug
 
+   * tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_pair_uid,
+       ~.load_tournament_game_by_challenger_uid),
+     include/board.php (Board.load_from_db),
+     include/make_game.php (create_game),
+     tournaments/ladder/challenge.php:
+   - fix bug: for ladder-tournament prevent start of 2 games with same user by using table-locking
+     on confirming ladder-challenge
+     - table-lock needed to use dedicated table-aliases for READ-locks
+     - table GamePlayers for multi-player-games need no lock as it's not support for tournaments
+     - on verifying challenge check latest tournament-game only that is not DONE yet
+
    * scripts/tournament_consistency.php (fix_tournament_RegisteredTP, fix_tournament_participant_game_count,
        fix_tournament_ladder_challenge_count, fix_tournament_participant_last_moved):
    - fix bug: clear caches after fix-run of tournament-consistency-script

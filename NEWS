@@ -118,6 +118,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
    * Fixed missing pool-title if 1st table-column is hidden
    * Fixed number of found & total tournament-result entries on tournament-info-page
    * Fixed starting ladder-position for user registering for ladder with rating join-order
+   * Fixed starting two games with same user on ladder-challenges
 
    * Fixed statistics graphs using language-specific caching
    * Fixed to exclude max-rating in a user's rating-range check for waiting-room and tournament-registration

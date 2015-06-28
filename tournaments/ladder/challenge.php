@@ -80,6 +80,25 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
       $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
 
+
+   //HOT-section locking tables for confirming challenge to verify & create tournament-game to avoid race-condition
+   //    of receiving double challenge-request and creating more than one ladder-game with same players as DGS
+   //    does not have real transactions!
+   if ( @$_REQUEST['confirm'] )
+   {
+      $is_locked = true;
+      db_lock( "Tournament.ladder.challenge.vfy_challenge_confirm($tid,$my_id,r$rid)",
+         // WRITE-locks
+         "Errorlog WRITE, Games WRITE, Moves WRITE, Players WRITE, TournamentGames WRITE, TournamentLadder WRITE, " .
+         // READ-locks
+         "Clock READ, Moves AS MV READ, Players AS P READ, Players AS TL_P READ, Players AS TPP READ, " .
+         "TournamentGames AS TG READ, TournamentLadder AS TL READ, TournamentLadderProps AS TLP READ, " .
+         "TournamentParticipant AS TP READ, TournamentProperties AS TPR READ, TournamentRules AS TR READ" );
+   }
+   else
+      $is_locked = false;
+
+
    $tladder_ch = TournamentLadder::load_tournament_ladder_by_user($tid, $my_id); // challenger
    if ( is_null($tladder_ch) )
       $errors[] = T_('Challenger is not participating on ladder');
@@ -152,6 +171,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          $tladder_df->update_incoming_challenges( +1 );
          $tladder_ch->update_outgoing_challenges( +1 );
 
+         // END of HOT-section: after here a "double" order is not started due to checking on TournamentGames-table!
+         db_unlock();
+         $is_locked = false;
+
          $msg = sprintf( T_('%s on ladder-rank #%s has challenged you.#T_ladder'), "<user $ch_uid>", $tladder_ch->Rank )
             . "\n"
             . sprintf( T_('Your current ladder-rank is #%s.#T_ladder'), $tladder_df->Rank )
@@ -178,6 +201,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       $sys_msg = urlencode( T_('Tournament Game started!') );
       jump_to("game.php?gid=$gid".URI_AMP."sysmsg=$sys_msg");
    }
+   if ( $is_locked ) // cleanup db-lock
+      db_unlock();
 
 
    // ---------- Tournament Form -----------------------------------

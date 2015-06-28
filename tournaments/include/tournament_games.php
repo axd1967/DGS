@@ -326,8 +326,8 @@ class TournamentGames
    }//load_tournament_game_by_gid
 
    /*!
-    * \brief Loads and returns TournamentGames-object for given tournament-ID, challenger- and defender-uid
-    *     or reversed roles.
+    * \brief Loads and returns latest TournamentGames-object not DONE for given tournament-ID,
+    *     challenger- and defender-uid or reversed roles.
     * \return NULL if nothing found; TournamentGames otherwise
     */
    public static function load_tournament_game_by_pair_uid( $tid, $ch_uid, $df_uid )
@@ -339,7 +339,8 @@ class TournamentGames
    }//load_tournament_game_by_pair_uid
 
    /*!
-    * \brief Loads and returns TournamentGames-object for given tournament-ID, challenger- and defender-uid.
+    * \brief Loads and returns latest TournamentGames-object for given tournament-ID, challenger- and defender-uid,
+    *        that is not DONE.
     * \return NULL if nothing found; TournamentGames otherwise
     */
    private static function load_tournament_game_by_challenger_uid( $tid, $ch_uid, $df_uid )
@@ -355,7 +356,9 @@ class TournamentGames
       $qsql = self::build_query_sql( $tid );
       $qsql->add_part( SQLP_WHERE,
             'TG.Challenger_uid=' . (int)$ch_uid,
-            'TG.Defender_uid=' . (int)$df_uid );
+            'TG.Defender_uid=' . (int)$df_uid,
+            "TG.Status <> '".TG_STATUS_DONE."'" );
+      $qsql->add_part( SQLP_ORDER, 'TG.ID DESC' );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
       $row = mysql_single_fetch( "$dbgmsg.find_tgame", $qsql->get_select() );

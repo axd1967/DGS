@@ -326,7 +326,7 @@ class Board
       if ( is_null($arr_moves) )
       {
          $db_result = db_query( $dbgmsg,
-            "SELECT MoveNr, Stone, PosX, PosY, Hours FROM Moves WHERE gid=$gid ORDER BY MoveNr" );
+            "SELECT MoveNr, Stone, PosX, PosY, Hours FROM Moves AS MV WHERE MV.gid=$gid ORDER BY MoveNr" );
 
          if ( $db_result )
          {
