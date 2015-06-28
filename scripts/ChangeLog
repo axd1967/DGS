@@ -13,6 +13,9 @@ ChangeLog
 
 2015-06-28 jug
 
+   * userinfo.php:
+   - fix bug: on user-info-page show translated language of user instead of English-language-name
+
    * include/make_translationfiles.php (translations_query),
      include/connect2mysql.php ($page_translations),
      include/std_functions.php (end_page, end_html),

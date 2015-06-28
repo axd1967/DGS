@@ -239,8 +239,9 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                'sinfo' => ( $reject_timeout < 0 ? T_('disabled#rwt') : sprintf(T_('%s days#rwt'), $reject_timeout) )));
       }
 
+      $lang_text = get_language_text(@$row['Lang']);
       $itable2->add_sinfo( sprintf('%s (%s)', T_('Language'), T_('Encoding#lang') ),
-         sprintf('%s (%s)', get_language_text(@$row['Lang']), @$row['Lang']) );
+         sprintf('%s (%s)', T_($lang_text), @$row['Lang']) );
 
       // show user-info
       if ( $twoCols )
