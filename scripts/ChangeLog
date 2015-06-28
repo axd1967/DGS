@@ -11,6 +11,12 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-06-28 jug
+
+   * scripts/tournament_consistency.php (fix_tournament_RegisteredTP, fix_tournament_participant_game_count,
+       fix_tournament_ladder_challenge_count, fix_tournament_participant_last_moved):
+   - fix bug: clear caches after fix-run of tournament-consistency-script
+
 2015-06-27 jug
 
    * include/make_translationfiles.php (translations_query),

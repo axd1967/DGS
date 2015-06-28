@@ -26,6 +26,9 @@ require_once 'include/gui_functions.php';
 require_once 'include/table_columns.php';
 require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_participant.php';
 
 define('SEPLINE', "\n<p><hr>\n");
 
@@ -114,7 +117,7 @@ function do_updates( $dbgmsg, $upd_arr, $do_it )
    {
       echo $query, "\n";
       if ( $do_it )
-         db_query( $dbgmsg, $query );
+         db_query( "$dbgmsg.upd", $query );
    }
    echo '</pre>';
 }//do_updates
@@ -127,20 +130,22 @@ function tid_clause( $field_tid, $tid, $with_op=true, $with_where=false )
 }
 
 
-function fix_tournament_RegisteredTP( $tid, $do_it )
+function fix_tournament_RegisteredTP( $arg_tid, $do_it )
 {
+   $dbgmsg = "tournament_consistency.fix_tournament_RegisteredTP($arg_tid)";
    $begin = getmicrotime();
    $cnt_err = 0;
    echo SEPLINE;
    echo "Fix Tournament.RegisteredTP ...<br>\n";
 
    // note: join slightly faster than using subquery: Posts where User_ID not in (select ID from Players)
-   $result = db_query( "tournament_consistency.fix_tournament_RegisteredTP($tid)",
+   $result = db_query( "$dbgmsg.count",
       "SELECT SQL_SMALL_RESULT TP.tid, T.RegisteredTP, COUNT(*) AS X_Count " .
       "FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid " .
-      "WHERE TP.Status='".TP_STATUS_REGISTER."' " . tid_clause('TP.tid', $tid) .
+      "WHERE TP.Status='".TP_STATUS_REGISTER."' " . tid_clause('TP.tid', $arg_tid) .
       "GROUP BY TP.tid HAVING T.RegisteredTP <> X_Count" );
    $upd_arr = array();
+   $upd_cache = array(); // tid => 1
    while ( $row = mysql_fetch_array($result) )
    {
       $tid = $row['tid'];
@@ -148,11 +153,19 @@ function fix_tournament_RegisteredTP( $tid, $do_it )
       echo sprintf( "Tournament #%s: wrong RegisteredTP found: [%s] -> [%s]<br>\n",
          $tid, $row['RegisteredTP'], $count );
       $upd_arr[] = "UPDATE Tournament SET RegisteredTP=$count WHERE ID=$tid LIMIT 1";
+      $upd_cache[$tid] = 1;
    }
    mysql_free_result($result);
    $cnt_err += count($upd_arr);
 
-   do_updates( 'tournament_consistency.fix_tournament.RegisteredTP', $upd_arr, $do_it );
+   do_updates( $dbgmsg, $upd_arr, $do_it );
+
+   // clear caches
+   if ( $do_it )
+   {
+      foreach( $upd_cache as $tid => $tmp )
+         TournamentCache::delete_cache_tournament( "$dbgmsg($tid)", $tid );
+   }
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
       , " - Tournament.RegisteredTP check Done.";
@@ -163,14 +176,15 @@ function fix_tournament_RegisteredTP( $tid, $do_it )
 
 function fix_tournament_participant_game_count( $arg_tid, $do_it )
 {
+   $dbgmsg = 'tournament_consistency.fix_tournament_participant_game_count';
    $begin = getmicrotime();
    $cnt_err = 0;
    echo SEPLINE;
    echo "Fix TournamentParticipant.Finished/Won/Lost ...<br>\n";
 
    // find finished/won/lost tournament-games for challenger
-   $result = db_query( "tournament_consistency.fix_tournament_participant_game_count.challenger($arg_tid)",
-      "SELECT TP.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Finished, " .
+   $result = db_query( "$dbgmsg.challenger($arg_tid)",
+      "SELECT TP.tid, TP.ID AS rid, TP.uid, TP.Finished, TP.Won, TP.Lost, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Finished, " .
          "SUM(IF(TG.Score<0,1,0)) AS X_ChallengerWon, SUM(IF(TG.Score>0,1,0)) AS X_ChallengerLost " .
       "FROM TournamentParticipant AS TP " .
          "LEFT JOIN TournamentGames AS TG ON TG.Challenger_rid=TP.ID AND TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " .
@@ -190,8 +204,8 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
    mysql_free_result($result);
 
    // find finished/won/lost tournament-games for defender
-   $result = db_query( "tournament_consistency.fix_tournament_participant_game_count.defender($arg_tid)",
-      "SELECT TP.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Finished, " .
+   $result = db_query( "$dbgmsg.defender($arg_tid)",
+      "SELECT TP.tid, TP.ID AS rid, TP.uid, TP.Finished, TP.Won, TP.Lost, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Finished, " .
          "SUM(IF(TG.Score>0,1,0)) AS X_DefenderWon, SUM(IF(TG.Score<0,1,0)) AS X_DefenderLost " .
       "FROM TournamentParticipant AS TP " .
          "LEFT JOIN TournamentGames AS TG ON TG.Defender_rid=TP.ID AND TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " .
@@ -215,11 +229,14 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
    }
    mysql_free_result($result);
 
-   // find descrepancies to fix on TP.Finished/Won/Lost
+   // find discrepancies to fix on TP.Finished/Won/Lost
    // NOTE: matching on TP.ID = rid (which can change over time by re-joining ladder)
    $upd_arr = array();
+   $upd_cache = array(); // tid => [ uid, ... ]
    foreach ( $chk as $tid => $arr_rid )
    {
+      if ( !isset($upd_cache[$tid]) )
+         $upd_cache[$tid] = array();
       foreach ( $arr_rid as $rid => $arr )
       {
          $upd = array();
@@ -245,6 +262,7 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
          if ( count($upd) )
          {
             $upd_arr[] = "UPDATE TournamentParticipant SET ".implode(', ', $upd)." WHERE ID=$rid LIMIT 1";
+            $upd_cache[$tid][] = $arr['uid'];
             echo sprintf( "Tournament #%s: found wrong counts for TP [%s]: %s<br>\n",
                $tid, $rid, implode(', ', $diff) );
          }
@@ -253,7 +271,17 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
 
    $cnt_err += count($upd_arr);
 
-   do_updates( 'tournament_consistency.fix_tournament_participant_game_count', $upd_arr, $do_it );
+   do_updates( $dbgmsg, $upd_arr, $do_it );
+
+   // clear caches
+   if ( $do_it )
+   {
+      foreach( $upd_cache as $tid => $arr_uid )
+      {
+         foreach( $arr_uid as $uid )
+            TournamentParticipant::delete_cache_tournament_participant( "$dbgmsg($tid)", $tid, $uid );
+      }
+   }
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
       , " - TournamentParticipant.Finished/Won/Lost check Done.";
@@ -264,6 +292,7 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
 
 function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
 {
+   $dbgmsg = "tournament_consistency.fix_tournament_ladder_challenge_count($arg_tid)";
    $begin = getmicrotime();
    $cnt_err = 0;
    echo SEPLINE;
@@ -271,7 +300,8 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
 
    // fix TournamentLadder.ChallengesIn
    $upd_arr = array();
-   $result = db_query( "tournament_consistency.fix_tournament_ladder_challenge_count.challenges_in($arg_tid)",
+   $upd_cache = array(); # tid => 1
+   $result = db_query( "$dbgmsg.challenges_in($arg_tid)",
       "SELECT TL.tid, TL.rid, TL.ChallengesIn, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Count " .
       "FROM TournamentLadder AS TL " .
          // NOTE: only TG.uid has index, but join on TG.rid is the important one (as user could have withdrawn from ladder),
@@ -287,6 +317,7 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
    {
       extract($row);
       $upd_arr[] = "UPDATE TournamentLadder SET ChallengesIn=$X_Count WHERE tid=$tid AND rid=$rid LIMIT 1";
+      $upd_cache[$tid] = 1;
       echo sprintf( "Tournament #%s: found wrong TL.ChallengesIn for rid [%s]: %s -> %s<br>\n",
          $tid, $rid, $ChallengesIn, $X_Count );
    }
@@ -294,7 +325,7 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
 
 
    // fix TournamentLadder.ChallengesOut
-   $result = db_query( "tournament_consistency.fix_tournament_ladder_challenge_count.challenges_out($arg_tid)",
+   $result = db_query( "$dbgmsg.challenges_out($arg_tid)",
       "SELECT TL.tid, TL.rid, TL.ChallengesOut, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Count " .
       "FROM TournamentLadder AS TL " .
          "LEFT JOIN TournamentGames AS TG ON TG.Challenger_uid=TL.uid AND TG.Challenger_rid=TL.rid " .
@@ -307,6 +338,7 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
    {
       extract($row);
       $upd_arr[] = "UPDATE TournamentLadder SET ChallengesOut=$X_Count WHERE tid=$tid AND rid=$rid LIMIT 1";
+      $upd_cache[$tid] = 1;
       echo sprintf( "Tournament #%s: found wrong TL.ChallengesOut for rid [%s]: %s -> %s<br>\n",
          $tid, $rid, $ChallengesOut, $X_Count );
    }
@@ -314,7 +346,14 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
 
    $cnt_err += count($upd_arr);
 
-   do_updates( 'tournament_consistency.fix_tournament_ladder_challenge_count', $upd_arr, $do_it );
+   do_updates( $dbgmsg, $upd_arr, $do_it );
+
+   // clear caches
+   if ( $do_it )
+   {
+      foreach( $upd_cache as $tid => $tmp )
+         TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $tid );
+   }
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
       , " - TournamentLadder.ChallengesIn/-Out check Done.";
@@ -323,6 +362,7 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
 }//fix_tournament_ladder_challenge_count
 
 
+// NOTE: manual fix required
 function check_tournament_ladder_unique_rank( $arg_tid )
 {
    $begin = getmicrotime();
@@ -477,8 +517,11 @@ function fix_tournament_participant_last_moved( $arg_tid, $do_it )
 
    // fix TP.Lastmoved
    $upd_arr = array();
+   $upd_cache = array(); # tid => [ uid, ... }
    foreach ( $map_lm as $tid => $data )
    {
+      if ( !isset($upd_cache[$tid]) )
+         $upd_cache[$tid] = array();
       foreach ( $data as $uid => $last_moved )
       {
          // only update TPs with Lastmoved=0
@@ -486,6 +529,7 @@ function fix_tournament_participant_last_moved( $arg_tid, $do_it )
          {
             $upd_arr[] = "UPDATE TournamentParticipant SET Lastmoved=GREATEST(Lastmoved,FROM_UNIXTIME($last_moved)) " .
                "WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."' AND uid=$uid LIMIT 1";
+            $upd_cache[$tid][] = $uid;
             echo sprintf( "TournamentParticipant: found last-move-date [%s] for tid [%s] uid [%s]<br>\n",
                date(DATE_FMT, $last_moved), $tid, $uid );
          }
@@ -495,6 +539,16 @@ function fix_tournament_participant_last_moved( $arg_tid, $do_it )
    $cnt_err += count($upd_arr);
 
    do_updates( 'tournament_consistency.fix_tournament_participant_last_moved', $upd_arr, $do_it );
+
+   // clear caches
+   if ( $do_it )
+   {
+      foreach( $upd_cache as $tid => $arr_uid )
+      {
+         foreach( $arr_uid as $uid )
+            TournamentParticipant::delete_cache_tournament_participant( "$dbgmsg($tid)", $tid, $uid );
+      }
+   }
 
    $row = mysql_single_fetch( "tournament_consistency.fix_tournament_participant_last_moved.count_tp_no_lastmove($arg_tid)",
       "SELECT COUNT(*) AS X_Count " . $tp_lm0_qpart );
