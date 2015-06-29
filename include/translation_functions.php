@@ -135,13 +135,17 @@ function get_language_descriptions_translated( $keep_english=false)
    $result = array();
    foreach ( $known_languages as $browsercode => $array )
    {
+      // NOTE: can use T_($var) because this file does not contain a $TranslateGroups-entry
       foreach ( $array as $charenc => $langname )
-      {
-         $result[ $browsercode . LANG_CHARSET_CHAR . $charenc ] =
-                     ( $keep_english ?$langname :T_($langname) );
-      }
+         $result[ $browsercode . LANG_CHARSET_CHAR . $charenc ] = ( $keep_english ) ? $langname : T_($langname);
    }
    return $result;
+}
+
+function get_language_description_translated( $langname, $keep_english=false)
+{
+   // NOTE: can use T_($var) because this file does not contain a $TranslateGroups-entry
+   return ( $keep_english ) ? $langname : T_($langname);
 }
 
 

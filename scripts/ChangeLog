@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-06-29 jug
+
+   * include/translation_functions.php (get_language_description_translated),
+     userinfo.php:
+   - fix bug #2: on user-info-page show translated language of user instead of English-language-name
+     using function not effected by T_($var)-warning
+
 2015-06-28 jug
 
    * include/make_translationfiles.php (TRLFILT_...; translations_query),

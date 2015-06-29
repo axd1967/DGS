@@ -29,6 +29,7 @@ require_once 'include/countries.php';
 require_once 'include/contacts.php';
 require_once 'include/classlib_user.php';
 require_once 'include/classlib_userpicture.php';
+require_once 'include/translation_functions.php';
 
 $GLOBALS['ThePage'] = new Page('UserInfo');
 
@@ -241,7 +242,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
       $lang_text = get_language_text(@$row['Lang']);
       $itable2->add_sinfo( sprintf('%s (%s)', T_('Language'), T_('Encoding#lang') ),
-         sprintf('%s (%s)', T_($lang_text), @$row['Lang']) );
+         sprintf('%s (%s)', get_language_description_translated($lang_text), @$row['Lang']) );
 
       // show user-info
       if ( $twoCols )
