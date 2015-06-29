@@ -775,6 +775,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Renamed FAQ-page to <home faq.php>Help / FAQ</home> in main-menu, changed access-key from [q] to [h]
       * Rearranged <home forums/>Forums</home> and <home docs.php>Docs</home> in main-menu
       * Added System Bookmarks in top Dragon bar
+      * Rearranged sections on <home people.php>people-page</home> to offer helpful contacts first
 
    * <home status.php>Status page</home>:
       * Show number of games to move in page-title (browser-tab)

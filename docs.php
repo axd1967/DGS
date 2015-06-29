@@ -43,7 +43,7 @@ $GLOBALS['ThePage'] = new Page('Docs', 0, ROBOTS_NO_FOLLOW,
    add_link_page_link('site_map.php', T_('Site map'), T_('Page structure of site'));
    add_link_page_link("faq.php", T_('Help') . ' - ' . T_('FAQ') . ' - ' . T_('Frequently Asked Questions'), T_('Site help & users guide'));
    add_link_page_link("links.php", T_('Links'), T_('Link collection'));
-   add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
+   add_link_page_link("people.php", T_('People'), T_('Support contacts') . ' & ' . T_("who contributes to Dragon"));
 
    $arr_stats = array( "statistics.php" => T_('Statistics') );
    if ( strpos(HOSTNAME,'dragongoserver.net') !== false )

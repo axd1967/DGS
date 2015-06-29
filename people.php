@@ -110,22 +110,69 @@ function get_executives( $level )
    start_page(T_('People'), true, $logged_in, $player_row );
 
    //---------
-   section( 'Contributors', T_('Contributors to Dragon'));
+   section( 'Executives', T_('Administration - Dragon executives - Support contacts') . $img_admin, 'executives' );
 
-   add_contributor( T_("Current maintainer and founder of Dragon")
-                     , 2, 'Erik Ouchterlony' );
+   $MODexclude = array( 'ejlo' );
 
+   $active_weeks = 6; // [weeks]
+   $lastAccess = $NOW - $active_weeks * 7 * SECS_PER_DAY; // 6 weeks
+   echo sprintf( T_('(have been online within the last %s weeks)'), $active_weeks )
+      , ":<br>&nbsp;\n";
 
-   $first = T_("Developer");
-   foreach ( array('rodival' => 'Rod Ival',
-                  'JUG' => 'Jens-Uwe Gaspar',
-                  //'ragou' => 'Ragnar Ouchterlony',
-                  //4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
-                  ) as $uref => $name )
+   $result = db_query( 'people.find_executives',
+      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,".
+            " BIT_COUNT(Adminlevel+0) AS X_AdmLevBitCount," .
+            " UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess" .
+      " FROM Players" .
+      " WHERE Adminlevel>0 AND Lastaccess > FROM_UNIXTIME($lastAccess)" .
+      " ORDER BY X_AdmLevBitCount DESC, ID ASC" );
+
+   $people = array(); // sort-id => row, ...
+   while ( $row = mysql_fetch_array( $result ) )
    {
-      add_contributor( $first, $uref, $name);
+      if ( in_array( $row['Handle'], $MODexclude) )
+         continue;
+
+      list( $sortmetric, $executives) = get_executives( $row['admin_level'] );
+      $people[] = array_merge( array( 'AL' => $executives ), $row );
+   }
+   mysql_free_result($result);
+
+   //shuffle($people);
+   $prevTitle = '<>nil';
+   $title = '';
+   foreach ( $people as $row )
+   {
+      $title = ( $title != $prevTitle || $title != $row['AL'] ) ? $row['AL'] : '';
+      $prevTitle = $title;
+      add_contributor( $title, $row['ID'], $row['Name'], $row['Handle'],
+         ( $logged_in && @$row['X_Lastaccess'] > 0 ? date(DATE_FMT2, $row['X_Lastaccess']) : '') );
+   }
+
+   add_contributor();
+
+
+   //---------
+   section( 'Moderators', T_('Forum moderators') . $img_admin, 'moderators' );
+
+   $MODexclude = array( 'ejlo', 'rodival' );
+
+   $result = db_query( 'people.find_forum_moderators',
+      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level" .
+      " FROM Players" .
+      " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FORUM . ") > 0" .
+      " ORDER BY ID" );
+
+   $first = T_('Forum moderator');
+   while ( $row = mysql_fetch_array( $result ) )
+   {
+      if ( in_array( $row['Handle'], $MODexclude) )
+         continue;
+
+      add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'], '' );
       $first = '';
    }
+   mysql_free_result($result);
 
    add_contributor();
 
@@ -168,74 +215,6 @@ function get_executives( $level )
       add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
          ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
       $first = '';
-   }
-
-   add_contributor();
-
-
-   //---------
-   section( 'Moderators', T_('Forum moderators') . $img_admin, 'moderators' );
-
-   $MODexclude = array( 'ejlo', 'rodival' );
-
-   $result = db_query( 'people.find_forum_moderators',
-      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level" .
-      " FROM Players" .
-      " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FORUM . ") > 0" .
-      " ORDER BY ID" );
-
-   $first = T_('Forum moderator');
-   while ( $row = mysql_fetch_array( $result ) )
-   {
-      if ( in_array( $row['Handle'], $MODexclude) )
-         continue;
-
-      add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'], '' );
-      $first = '';
-   }
-   mysql_free_result($result);
-
-   add_contributor();
-
-
-   //---------
-   section( 'Executives', T_('Administration - Dragon executives') . $img_admin, 'executives' );
-
-   $MODexclude = array( 'ejlo' );
-
-   $active_weeks = 6; // [weeks]
-   $lastAccess = $NOW - $active_weeks * 7 * SECS_PER_DAY; // 6 weeks
-   echo sprintf( T_('(have been online within the last %s weeks)'), $active_weeks )
-      , ":<br>&nbsp;\n";
-
-   $result = db_query( 'people.find_executives',
-      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,".
-            " BIT_COUNT(Adminlevel+0) AS X_AdmLevBitCount," .
-            " UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess" .
-      " FROM Players" .
-      " WHERE Adminlevel>0 AND Lastaccess > FROM_UNIXTIME($lastAccess)" .
-      " ORDER BY X_AdmLevBitCount DESC, ID ASC" );
-
-   $people = array(); // sort-id => row, ...
-   while ( $row = mysql_fetch_array( $result ) )
-   {
-      if ( in_array( $row['Handle'], $MODexclude) )
-         continue;
-
-      list( $sortmetric, $executives) = get_executives( $row['admin_level'] );
-      $people[] = array_merge( array( 'AL' => $executives ), $row );
-   }
-   mysql_free_result($result);
-
-   //shuffle($people);
-   $prevTitle = '<>nil';
-   $title = '';
-   foreach ( $people as $row )
-   {
-      $title = ( $title != $prevTitle || $title != $row['AL'] ) ? $row['AL'] : '';
-      $prevTitle = $title;
-      add_contributor( $title, $row['ID'], $row['Name'], $row['Handle'],
-         ( $logged_in && @$row['X_Lastaccess'] > 0 ? date(DATE_FMT2, $row['X_Lastaccess']) : '') );
    }
 
    add_contributor();
@@ -295,6 +274,27 @@ function get_executives( $level )
             ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
          $first = '';
       }
+   }
+
+   add_contributor();
+
+
+   //---------
+   section( 'Contributors', T_('Contributors to Dragon'));
+
+   add_contributor( T_("Current maintainer and founder of Dragon")
+                     , 2, 'Erik Ouchterlony' );
+
+
+   $first = T_("Developer");
+   foreach ( array('rodival' => 'Rod Ival',
+                  'JUG' => 'Jens-Uwe Gaspar',
+                  //'ragou' => 'Ragnar Ouchterlony',
+                  //4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
+                  ) as $uref => $name )
+   {
+      add_contributor( $first, $uref, $name);
+      $first = '';
    }
 
    add_contributor();

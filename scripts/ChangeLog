@@ -13,6 +13,10 @@ ChangeLog
 
 2015-06-29 jug
 
+   * people.php, docs.php:
+   - (S070.1) overworked people-page: change section-order to give easy access for support, forum-help,
+     faq-help, translators, then info about other contributors & credits
+
    * include/translation_functions.php (get_language_description_translated),
      userinfo.php:
    - fix bug #2: on user-info-page show translated language of user instead of English-language-name
