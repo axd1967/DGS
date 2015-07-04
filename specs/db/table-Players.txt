@@ -51,7 +51,8 @@ O=  | Registerdate     | date                                        | NO   |   
 OuA | Name             | varchar(40)                                 | NO   | MUL |                     |                |
  u  | Email            | varchar(80)                                 | NO   |     |                     |                |
 Ou  | Rank             | varchar(40)                                 | NO   |     |                     |                |
- u  | SendEmail        | set('ON','MOVE','BOARD','MESSAGE')          | NO   |     |                     |                |
+ u  | SendEmail        | set('ON','MOVE','BOARD','MESSAGE','BY_LAST_ACCESS','BY_LAST_NOTIFY')
+                                                                     | NO   |     |                     |                |
  S  | Notify           | enum('NONE','NEXT','NOW','DONE')            | NO   |     | NONE                |                |
  S  | NotifyFlags      | tinyint(3) unsigned                         | NO   |     | 0                   |                |
  SZ | CountMsgNew      | mediumint(9)                                | NO   |     | -1                  |                |
@@ -195,15 +196,20 @@ Zu  | ThumbnailSize    | tinyint(3) unsigned                         | NO   |   
      - DONE : stops further notifications till the players next visit; set after last notification per email
 
 * NotifyFlags : bit-field indicating categories to check for building mail-notifications
+   - NOTE: see consts NOTIFYFLAG_...
    - NOTE about mail-notifications:
      for Players.Notify=NEXT always both, games-to-move and new-messages are checked.
      Checking for new messages almost always is a slow query (7-12 on average); even games-loading (including board) only last <1 sec normally.
      Therefore introduced notify-flags that indicate if new-messages (or other new data) must be checked
      or not on collecting data for mail-notifications.
    - 0x01 : if bit set, mail-notifications must check for new messages; if not set, no check for new messages needed
+   - 0x02 : if bit set, collect entries to notify since user's last-notified time;
+     otherwise by Players.Lastaccess (=any web-access + quick-suite-access)
 
 * SendEmail : user-configuration controlling what notifications to sent per mail
-   - ON : if set, mail-notifications are created at all and being sent out
+   - ON : if set, mail-notifications are created at all and being sent out.
+     if none of MOVE,BOARD,MESSAGE is set, notifications will only contain
+     that there have been new message and/or game-moves (without mentioning the entries)
    - MOVE : mail-notifications contain game-moves since last web-access
    - BOARD : game-moves contain ASCII-board as well
    - MESSAGE : mail-notifications contain new messages since last web-access

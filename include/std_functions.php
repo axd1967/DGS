@@ -1540,6 +1540,7 @@ function delete_cache_message_list( $dbgmsg, $uids )
 
 
 define('NOTIFYFLAG_NEW_MSG', 0x01 ); // new-message awaiting for mail-notifications
+define('NOTIFYFLAG_LAST_NOTIFIED', 0x02 ); // 1=collect notify-entries by last-notified time; 0=by last-access
 
 /*!
  * \brief Sets Players.Notify-field (something to notify) for given uids.

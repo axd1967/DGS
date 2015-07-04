@@ -13,6 +13,25 @@ ChangeLog
 
 2015-07-04 jug
 
+   * include/std_functions.php (NOTIFYFLAG_LAST_NOTIFIED),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Players.txt, specs/db/dragon-ddl.sql,
+     edit_email.php (parse_edit_form, handle_save_mail),
+     halfhourly_cron.php:
+   - (S071) add email-notification option to collect notification-entries by last-notified time
+     - default on edit-email-page for collecting notification-entries is last-access
+     - add note to send email-verification if email is unverified
+     - always set last-notified-time for user after sending email-notification
+-----------
+-- adjust email-notification to collect entries by last-access or last-notified time
+ALTER TABLE Players
+   ADD LastNotified datetime NOT NULL default '0000-00-00 00:00:00' AFTER NotifyFlags ;
+
+-- initialize last-notified with 1 day before last-access, or register-date if unset
+UPDATE Players
+   SET LastNotified = IF(Lastaccess=0, Registerdate, Lastaccess - INTERVAL 1 DAY) ;
+-----------
+
    * halfhourly_cron.php:
    - (A17) half-hourly-cron: log number of email-notifications sent and duration into error-log
 

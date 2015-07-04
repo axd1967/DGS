@@ -161,10 +161,10 @@ if ( !$is_down )
          "UPDATE Players SET Notify='NOW' " .
          "WHERE Notify='NEXT' AND FIND_IN_SET('ON',SendEmail)");
 
-
    // pre-load all users to notify (to free db-result as soon as possible as main-loop can take quite a while)
    $result = db_query( 'halfhourly_cron.find_notifications',
-         "SELECT ID AS uid, Handle, Email, SendEmail, NotifyFlags, UserFlags, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess " .
+         "SELECT ID AS uid, Handle, Email, SendEmail, NotifyFlags, UserFlags, " .
+            "UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess, UNIX_TIMESTAMP(LastNotified) AS X_LastNotified " .
          "FROM Players " .
          "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) " .
          "ORDER BY Lastaccess ASC"); // oldest-access users first (as newer-access-users can see new games/messages anyway)
@@ -181,6 +181,10 @@ if ( !$is_down )
       if ( time() > $max_run_time ) break; // stop script if running too long to avoid chance of concurrent runs
       $row = $arr_item[1];
       extract($row);
+      $collect_time = ( $NotifyFlags & NOTIFYFLAG_LAST_NOTIFIED )
+         ? "FROM_UNIXTIME($X_LastNotified)"
+         : "FROM_UNIXTIME($X_Lastaccess)";
+      $user_new_notified = time() + $timeadjust;
 
       // check for valid email
       $Email = trim($Email);
@@ -222,7 +226,7 @@ if ( !$is_down )
             "FROM Games " .
                "INNER JOIN Players AS black ON black.ID=Games.Black_ID " .
                "INNER JOIN Players AS white ON white.ID=Games.White_ID " .
-            "WHERE ToMove_ID=$uid AND Lastchanged >= FROM_UNIXTIME($X_Lastaccess)";
+            "WHERE ToMove_ID=$uid AND Lastchanged >= $collect_time";
          $gres = db_query( "halfhourly_cron.find_games($uid)", $query );
 
          // pre-load all games of user to notify (to free db-result as soon as possible)
@@ -290,7 +294,7 @@ if ( !$is_down )
             "WHERE me.uid=$uid " .
               "AND me.Folder_nr IN ($folderstring) " .
               "AND me.Sender IN ('N','S') " . //exclude message to myself
-              "AND Messages.Time > FROM_UNIXTIME($X_Lastaccess) " .
+              "AND Messages.Time > $collect_time " .
             "ORDER BY me.mid DESC"; // me.mid (=Messages.ID) has same order as Messages.Time (but does not use temp-table-sort)
 
          $res3 = db_query( "halfhourly_cron.find_new_messages($uid)", $query );
@@ -327,7 +331,8 @@ if ( !$is_down )
          // if loop fails, everyone would be notified again on next start -> so mark user as notified
          // Setting Notify to 'DONE' stop notifications until the player's next visit
          db_query( "halfhourly_cron.nfy_done($uid)",
-            "UPDATE Players SET Notify='DONE', NotifyFlags=0 " .
+            "UPDATE Players SET Notify='DONE', NotifyFlags=NotifyFlags & ~".NOTIFYFLAG_NEW_MSG .
+               ", LastNotified=FROM_UNIXTIME($user_new_notified) " .
             "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
          $cnt_notifies++;
       }

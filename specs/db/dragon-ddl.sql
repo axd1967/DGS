@@ -761,6 +761,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `SendEmail` set('ON','MOVE','BOARD','MESSAGE') NOT NULL default '',
   `Notify` enum('NONE','NEXT','NOW','DONE') NOT NULL default 'NONE',
   `NotifyFlags` tinyint(3) unsigned NOT NULL default '0',
+  `LastNotified` datetime NOT NULL default '0000-00-00 00:00:00',
   `CountMsgNew` mediumint(9) NOT NULL default '-1',
   `CountFeatNew` smallint(6) NOT NULL default '-1',
   `CountBulletinNew` smallint(6) NOT NULL default '-1',

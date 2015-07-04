@@ -119,3 +119,12 @@ ALTER TABLE FAQlog
    ADD Flags tinyint unsigned NOT NULL default '0' AFTER Type ;
 
 
+-- adjust email-notification to collect entries by last-access or last-notified time
+ALTER TABLE Players
+   ADD LastNotified datetime NOT NULL default '0000-00-00 00:00:00' AFTER NotifyFlags ;
+
+-- initialize last-notified with 1 day before last-access, or register-date if unset
+UPDATE Players
+   SET LastNotified = IF(Lastaccess=0, Registerdate, Lastaccess - INTERVAL 1 DAY) ;
+
+

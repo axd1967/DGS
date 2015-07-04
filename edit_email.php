@@ -65,6 +65,11 @@ require_once 'include/table_columns.php';
          3 => T_('Full board and messages'),
       );
 
+   $arr_nfy_collect = array(
+         0 => sptext(T_('Collect entries by last access (web-site or other clients)#notify')) . "<br>\n",
+         NOTIFYFLAG_LAST_NOTIFIED => sptext(T_('Collect entries by last notification time#notify')),
+      );
+
 
    // ----- Email Edit Form ------------------------------
 
@@ -82,9 +87,15 @@ require_once 'include/table_columns.php';
    $form->add_row( array(
          'DESCRIPTION', T_('Email notifications'),
          'SELECTBOX', 'emailnotify', 1, $notify_msg, (int)$vars['gui:email_notify'], false ) );
+   $form->add_row( array(
+         'TAB',
+         'RADIOBUTTONS', 'nfy_collect_by', $arr_nfy_collect, $vars['nfy_collect_by'] ) );
+
+   $form->add_empty_row();
    $row = array(
          'DESCRIPTION', T_('Email'),
          'TEXTINPUT', 'email', 32, 80, $vars['email'] );
+   $start_verify_email = false;
    if ( $vars['email'] )
    {
       if ( verify_invalid_email( "edit_email.check.email", $vars['email'], /*err-die*/false ) )
@@ -92,12 +103,21 @@ require_once 'include/table_columns.php';
       elseif ( $player_row['UserFlags'] & USERFLAG_EMAIL_VERIFIED )
          $text = ( count($errors) ) ? '' : span('WarnMsg', T_('Email is verified!'));
       else
+      {
          $text = span('ErrMsgCode', T_('Email is unverified!'));
+         $start_verify_email = true;
+      }
    }
    else
       $text = span('ErrMsgCode', T_('Email is missing!'));
    array_push( $row, 'TEXT', sptext($text,1) );
    $form->add_row($row);
+   if ( $start_verify_email )
+   {
+      $form->add_row( array(
+            'TAB',
+            'TEXT', span('WarnMsg', T_('Email verification will be sent on saving changes!')), ));
+   }
 
    $form->add_empty_row();
    $form->add_row( array(
@@ -209,6 +229,7 @@ function parse_edit_form( &$cfg_board )
       'gui:email_notify'   => 0,
       'send_email'         => $player_row['SendEmail'], // db-value
       'email'              => $player_row['Email'],
+      'nfy_collect_by'     => ( $player_row['NotifyFlags'] & NOTIFYFLAG_LAST_NOTIFIED ),
       'clear_user_flags'   => 0,
    );
 
@@ -269,6 +290,11 @@ function parse_edit_form( &$cfg_board )
          $sendemail = '';
       $vars['gui:email_notify'] = $emailnotify;
       $vars['send_email'] = $sendemail;
+
+      $nfy_collect_by = (int)@$_REQUEST['nfy_collect_by'];
+      if ( $nfy_collect_by != NOTIFYFLAG_LAST_NOTIFIED ) // correct wrong input (only flag set or unset allowed)
+         $nfy_collect_by = 0;
+      $vars['nfy_collect_by'] = $nfy_collect_by;
    }//is_save
 
    return array( $vars, $errors );
@@ -287,8 +313,11 @@ function handle_save_mail( $nval )
 
    $old_email = $player_row['Email'];
    $new_email = $nval['email'];
+   $nfy_collect_by = $nval['nfy_collect_by'];
    $set_userflags = 0;
    $clear_userflags = $nval['clear_user_flags'];
+   $set_nfy_flags = 0;
+   $clear_nfy_flags = 0;
    if ( $new_email )
    {
       // added missing email or changed email, or verify unverified unchanged email
@@ -296,14 +325,21 @@ function handle_save_mail( $nval )
       if ( !$old_email || $diff_mail || ( !$diff_mail && !($player_row['UserFlags'] & USERFLAG_EMAIL_VERIFIED) ) )
          $set_userflags |= USERFLAG_VERIFY_EMAIL;
    }
+   if ( $nfy_collect_by == NOTIFYFLAG_LAST_NOTIFIED )
+      $set_nfy_flags |= NOTIFYFLAG_LAST_NOTIFIED;
+   else
+      $clear_nfy_flags |= NOTIFYFLAG_LAST_NOTIFIED;
    $infos = array();
 
    $upd = new UpdateQuery('Players');
    $upd->upd_txt('SendEmail', $nval['send_email'] ); // always update even if the same
-   if ( $nval['send_email'] != $player_row['SendEmail'] )
+   if ( ($nval['send_email'] != $player_row['SendEmail'] )
+         || (($player_row['NotifyFlags'] & NOTIFYFLAG_LAST_NOTIFIED) != $nfy_collect_by) )
       $infos[] = T_('Notifications updated!');
    if ( $set_userflags || $clear_userflags )
       $upd->upd_raw('UserFlags', "(UserFlags | $set_userflags) & ~$clear_userflags" );
+   if ( $set_nfy_flags || $clear_nfy_flags )
+      $upd->upd_raw('NotifyFlags', "(NotifyFlags | $set_nfy_flags) & ~$clear_nfy_flags" );
 
    $reload = false;
    ta_begin();

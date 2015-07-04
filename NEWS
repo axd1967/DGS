@@ -77,6 +77,9 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added games-count needed to reach next hero-badge-level on own user-info-page and for quick-suite user-info-handler
       * Added language-setting of user with full encoding
 
+   * User profile:
+      * Added email-notification option to collect notification-entries by last-notified time
+
    * Rating graph:
       * Added option in <home edit_profile.php>user-profile</home> to configure to show rating-graph by games,
         default is to show rating-graph by time
