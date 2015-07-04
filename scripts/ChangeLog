@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-07-04 jug
+
+   * halfhourly_cron.php:
+   - (A17) half-hourly-cron: log number of email-notifications sent and duration into error-log
+
 2015-06-29 jug
 
    * people.php, docs.php:

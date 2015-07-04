@@ -174,6 +174,8 @@ if ( !$is_down )
    mysql_free_result($result);
 
    // loop over users to notify
+   $cnt_notifies = 0;
+   $begin_time_notifies = time();
    while ( list(, $arr_item) = $nfyuser_iterator->getListIterator() )
    {
       if ( time() > $max_run_time ) break; // stop script if running too long to avoid chance of concurrent runs
@@ -327,10 +329,14 @@ if ( !$is_down )
          db_query( "halfhourly_cron.nfy_done($uid)",
             "UPDATE Players SET Notify='DONE', NotifyFlags=0 " .
             "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
+         $cnt_notifies++;
       }
 
       //error_log( sprintf("MONITOR[halfhourly_cron.mail_notifications](%s): GAME %s, MSG %s, MAIL %s", $uid, $time_games - $begin_time, $time_msgs - $time_games, $time_mail - $time_msgs ) );
    } //notifications found
+
+   error_log( sprintf("MONITOR[halfhourly_cron.mail_notifications]: %s mails sent in %s sec",
+      $cnt_notifies, time() - $begin_time_notifies ) );
 
 
 
