@@ -21,6 +21,7 @@ $TranslateGroups[] = "Docs";
 
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
+require_once 'include/db/contribution.php';
 
 $GLOBALS['ThePage'] = new Page('People');
 
@@ -70,7 +71,7 @@ $GLOBALS['ThePage'] = new Page('People');
       $title = ( $title != $prevTitle || $title != $row['AL'] ) ? $row['AL'] : '';
       $prevTitle = $title;
       add_contributor( $title, $row['ID'], $row['Name'], $row['Handle'],
-         ( $logged_in && @$row['X_Lastaccess'] > 0 ? date(DATE_FMT2, $row['X_Lastaccess']) : '') );
+         ( $logged_in && @$row['X_Lastaccess'] > 0 ? '['.date(DATE_FMT2, $row['X_Lastaccess']).']' : '') );
    }
 
    add_contributor();
@@ -93,7 +94,7 @@ $GLOBALS['ThePage'] = new Page('People');
       if ( in_array( $row['Handle'], $MODexclude) )
          continue;
 
-      add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'], '' );
+      add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'] );
       $first = '';
    }
    mysql_free_result($result);
@@ -137,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('People');
       if ( in_array( $row['Handle'], $FAQexclude) )
          continue;
       add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
-         ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
+         ( ($extra_info && $row['LastUpdate']) ? '['.date(DATE_FMT2, $row['LastUpdate']).']' : '') );
       $first = '';
    }
 
@@ -195,7 +196,7 @@ $GLOBALS['ThePage'] = new Page('People');
       foreach ( $translators as $row )
       {
          add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
-            ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
+            ( ($extra_info && $row['LastUpdate']) ? '['.date(DATE_FMT2, $row['LastUpdate']).']' : '') );
          $first = '';
       }
    }
@@ -206,19 +207,20 @@ $GLOBALS['ThePage'] = new Page('People');
    //---------
    section( 'Contributors', T_('Contributors to Dragon'));
 
-   add_contributor( T_("Current maintainer and founder of Dragon")
-                     , 2, 'Erik Ouchterlony' );
+   // load user contributions
+   $contrib_iterator = new ListIterator( 'people.list',
+         null,
+         'ORDER BY CTB.Category ASC, CTB.uid ASC' );
+   $contrib_iterator = Contribution::load_contributions( $contrib_iterator, 0, true );
 
-
-   $first = T_("Developer");
-   foreach ( array('rodival' => 'Rod Ival',
-                  'JUG' => 'Jens-Uwe Gaspar',
-                  //'ragou' => 'Ragnar Ouchterlony',
-                  //4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
-                  ) as $uref => $name )
+   $curr_category = '';
+   while ( list(,$arr_item) = $contrib_iterator->getListIterator() )
    {
-      add_contributor( $first, $uref, $name);
-      $first = '';
+      list( $ctb, $orow ) = $arr_item;
+      $group_category = ( $curr_category != $ctb->Category ) ? Contribution::getCategoryText($ctb->Category) : '';
+      add_contributor( $group_category, $ctb->uid, $ctb->crow['CTB_Name'], $ctb->crow['CTB_Handle'],
+         make_html_safe( wordwrap($ctb->Comment, 60, "<br>\n"), true), 'black smaller' );
+      $curr_category = $ctb->Category;
    }
 
    add_contributor();
@@ -259,12 +261,11 @@ $GLOBALS['ThePage'] = new Page('People');
 
    add_contributor();
 
-
    end_page();
 }//main
 
 
-function add_contributor_link( $text=false, $link, $extra='')
+function add_contributor_link( $text=false, $link, $extra='', $extra_class='PeopleExtra')
 {
    static $started = false;
    static $c = 0;
@@ -295,17 +296,15 @@ function add_contributor_link( $text=false, $link, $extra='')
 
    echo "<tr class=$class><td class=Rubric>$text</td>\n"
       . "<td class=People>$link</td>"
-      . "<td class=Extra>"
-      . ( $extra ? "<span>[$extra]</span>" : '' )
-      . "</td></tr>\n";
+      . "<td class=\"$extra_class\">$extra</td></tr>\n";
 
    return $c;
 }//add_contributor_link
 
-function add_contributor( $text=false, $uref='', $name=false, $handle=false, $extra='' )
+function add_contributor( $text=false, $uref='', $name=false, $handle=false, $extra='', $extra_class='PeopleExtra' )
 {
    $ulink = user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, '', $uref, $name, $handle);
-   add_contributor_link( $text, $ulink, $extra );
+   add_contributor_link( $text, $ulink, $extra, $extra_class );
 }
 
 function build_icon( $icon_name, $text )

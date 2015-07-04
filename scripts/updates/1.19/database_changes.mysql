@@ -128,3 +128,15 @@ UPDATE Players
    SET LastNotified = IF(Lastaccess=0, Registerdate, Lastaccess - INTERVAL 1 DAY) ;
 
 
+-- added table to store info about server-specific contributions
+CREATE TABLE Contribution (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  Category enum('FOUNDER','DEV_MAIN','DEV_RECRUIT','DEV_CLIENT','OTHER') NOT NULL,
+  Comment varchar(255) NOT NULL default '',
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Updated datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (ID)
+) ENGINE=MyISAM ;
+
+

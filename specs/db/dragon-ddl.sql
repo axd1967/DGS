@@ -199,6 +199,22 @@ CREATE TABLE IF NOT EXISTS `Contacts` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `Contribution`
+--
+
+CREATE TABLE `Contribution` (
+  `ID` int(11) NOT NULL auto_increment,
+  `uid` int(11) NOT NULL,
+  `Category` enum('FOUNDER','DEV_MAIN','DEV_RECRUIT','DEV_CLIENT','OTHER') NOT NULL,
+  `Comment` varchar(255) NOT NULL default '',
+  `Created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Updated` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Errorlog`
 --
 

@@ -13,6 +13,37 @@ ChangeLog
 
 2015-07-04 jug
 
+   * include/db/contribution.php (class Contribution, ~.__construct, ~.setCategory, ~.to_string,
+       ~.persist, ~.insert, ~.update, ~.delete, ~.fillEntityData, ~.build_query_sql, ~.new_from_row,
+       ~.load_contribution, ~.load_contributions, ~.getCategoryText),
+     include/form_functions.php (Form.has_rows),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Players.txt, specs/db/dragon-ddl.sql,
+     skins/dragon/screen.css,
+     people.php (add_contributor_link, add_contributor),
+     admin_contrib.php (parse_edit_form),
+     admin.php, userinfo.php:
+   - (S070.2) replace static "contributors" on people-page with server-specific user-contributions list
+     - added editor for admins to add, edit, remove user contributions
+     - save user-contributions in new db-table Contribution with category and comment
+     - people-page: show user-contributions from db-table with comments in black-color
+     - people-page: removed statically configured developer-users
+       has to be re-added in specific DEV/LIVE-server
+     - user-info-page: added admin-link to manage user contributions for user
+-----------
+-- added table to store info about server-specific contributions
+CREATE TABLE Contribution (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  Category enum('FOUNDER','DEV_MAIN','DEV_RECRUIT','DEV_CLIENT','OTHER') NOT NULL,
+  Comment varchar(255) NOT NULL default '',
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Updated datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (ID)
+) ENGINE=MyISAM ;
+-----------
+
    * include/std_functions.php (NOTIFYFLAG_LAST_NOTIFIED),
      scripts/updates/1.19/database_changes.mysql,
      specs/db/table-Players.txt, specs/db/dragon-ddl.sql,

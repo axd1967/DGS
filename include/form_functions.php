@@ -433,6 +433,11 @@ class Form
       return $this->tabindex;
    }
 
+   public function has_rows()
+   {
+      return (bool)count($this->rows);
+   }
+
    /*!
     * \brief Allows to overwrite (reconfigure) form-element-config (not for read-only)
     * \param $name     form-element name, e.g. DESCRIPTION

@@ -1801,7 +1801,7 @@ body.People table.People td.People a {
    color: black;
 }
 
-body.People table.People span {
+body.People table.People td.PeopleExtra {
    color: green;
 }
 
@@ -3601,6 +3601,7 @@ table#adminusersTable td span.Flags {
    font-size: 80%;
 }
 table#adminusersTable tr,
+table#contribTable tr,
 table#faqlogTable tr,
 table#errorlogTable tr,
 table#adminlogTable tr,

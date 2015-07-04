@@ -318,3 +318,40 @@ Description:
 * Lastchanged : date of last access with uid/IP
 
 
+
+###########################################################################
+## --- Contribution ---
+
+Description:
+   Table used to store contributions for user-id to be shown on people-page.
+   Multiple entries per user-id allowed.
+
+| Field    | Type                               | Null | Key | Default             | Extra          |
++----------+------------------------------------+------+-----+---------------------+----------------+
+| ID       | int(11)                            | NO   | PRI | NULL                | auto_increment |
+| uid      | int(11)                            | NO   |     | NULL                |                |
+| Category | enum('FOUNDER','DEV_MAIN','DEV_RECRUIT','DEV_CLIENT','OTHER')
+                                                | NO   |     | NULL                |                |
+| Comment  | varchar(255)                       | NO   |     |                     |                |
+| Created  | datetime                           | NO   |     | 0000-00-00 00:00:00 |                |
+| Updated  | datetime                           | NO   |     | 0000-00-00 00:00:00 |                |
+
+# Fields:
+
+* uid : FK Players.ID
+
+* Category : contribution-categories
+   - used values: defined consts CONTRIB_CAT_... in 'include/db/contribution.php'
+      - FOUNDER      = founder of Dragon Go Server
+      - DEV_MAIN     = main developer (server-code)
+      - DEV_RECRUIT  = recruit developer (server-code)
+      - DEV_CLIENT   = client developer (client-code, e.g. notifier, mobile-apps, bots)
+      - OTHER        = miscellaneous contributions
+
+* Comment : comment about a users contribution
+
+* Created : creation-date of entry
+
+* Updated : date of last update of entry
+
+

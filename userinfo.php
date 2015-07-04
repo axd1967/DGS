@@ -42,7 +42,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       error('login_if_not_logged_in', 'userinfo');
 
    $my_id = $player_row['ID'];
-   $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
+   $is_admin_dev = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
    $is_game_admin = (@$player_row['admin_level'] & ADMIN_GAME);
 
    get_request_user( $uid, $uhandle, true);
@@ -83,7 +83,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    }
 
    $count_mpg_run = 0; // count MP-games of user
-   $show_mpg = ( $my_info || $is_admin || $is_game_admin );
+   $show_mpg = ( $my_info || $is_admin_dev || $is_game_admin );
    if ( $show_mpg )
    {
       $gp_row = mysql_single_fetch( "userinfo.count_gameplayer($uid)",
@@ -146,7 +146,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $hero_img = echo_image_hero_badge($hero_ratio);
       $games_next_herolevel = User::determine_games_next_hero_level( $hero_ratio,
          $row['Finished'], $row['GamesWeaker'], $row['RatingStatus'] );
-      $hero_info = build_hero_info( ($my_info || $is_admin || $is_game_admin),
+      $hero_info = build_hero_info( ($my_info || $is_admin_dev || $is_game_admin),
          $hero_ratio, $hero_img, $games_next_herolevel );
 
       // draw user-info fields in two separate columns
@@ -168,7 +168,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
          $night_time_str = sprintf( '<span title="%s: %s">%s</span>',
             basic_safe(T_('User local nighttime')), basic_safe($night_time_str), $mytime_night_start_str );
       $itable2->add_sinfo( T_('Nighttime'), $night_time_str . $img_nighttime );
-      if ( $is_admin )
+      if ( $is_admin_dev )
       { // show player clock
          $itable2->add_row( array(
                   'rattb' => 'class="DebugInfo"',
@@ -226,12 +226,12 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       if ( $show_mpg )
       {
          $itable2->add_row( array(
-               'rattb' => ($is_admin && !$my_info) ? 'class="DebugInfo"' : '',
+               'rattb' => ($is_admin_dev && !$my_info) ? 'class="DebugInfo"' : '',
                'sname' => anchor( $run_mpg_link, T_('MP-games')),
                'sinfo' => sprintf( T_('%s (Running), %s (Setup)#mpg'), $count_mpg_run, $row['GamesMPG'] ) ));
       }
 
-      if ( $my_info || $is_admin || $is_game_admin )
+      if ( $my_info || $is_admin_dev || $is_game_admin )
       {
          $reject_timeout = (int)@$row['RejectTimeoutWin'];
          $itable2->add_row( array(
@@ -366,11 +366,13 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       }
    }
 
-   if ( $is_admin )
+   if ( $is_admin_dev )
    {
       $menu_array[T_('Admin user')] =
          array( 'url' => 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode($user_handle),
                 'class' => 'AdminLink' );
+      $menu_array[T_('Admin user contributions')] =
+         array( 'url' => "admin_contrib.php?edit=new".URI_AMP."uid=$uid", 'class' => 'AdminLink' );
    }
    if ( $uid > GUESTS_ID_MAX && Bulletin::is_bulletin_admin() )
    {
