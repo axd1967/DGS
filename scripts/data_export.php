@@ -266,6 +266,7 @@ function get_tables( $database)
             'ConfigBoard',
             'ConfigPages',
             'Contacts',
+            'Contribution',
             'Errorlog',
             'FAQ',
             'FAQlog',
