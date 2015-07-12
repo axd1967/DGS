@@ -205,7 +205,7 @@ $GLOBALS['ThePage'] = new Page('People');
 
 
    //---------
-   section( 'Contributors', T_('Contributors to Dragon'));
+   section( 'Contributors', T_('Contributors to Dragon'), 'contrib');
 
    // load user contributions
    $contrib_iterator = new ListIterator( 'people.list',
