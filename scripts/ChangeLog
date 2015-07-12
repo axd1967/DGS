@@ -11,6 +11,8 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+### ----- release-1_19_8-20150712 -----
+
 2015-07-12 jug
 
    * tournaments/include/tournament_pool.php (TournamentPool.get_cmp_rank):
