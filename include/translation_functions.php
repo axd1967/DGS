@@ -17,6 +17,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// IMPORTANT NOTE: this page MUST NOT declare a $TranslateGroups[] entry!!
+//   see get_language_descriptions_translated()-function and 'scripts/README.translations'
+
 /*
     translation_functions.php is only included from std_functions.php
 >>Info:
@@ -128,6 +131,7 @@ function include_translate_group($group, $language='') //must be called from mai
 }
 
 
+// SPECIAL NOTE: see 'scripts/README.translations' how this method works
 function get_language_descriptions_translated( $keep_english=false)
 {
    global $known_languages;

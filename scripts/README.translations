@@ -25,22 +25,35 @@
 
 # NOTE:
 # keep in mind, that translation-text discovery only works correctly,
-# if T_('')-call is correct. Only constant quoted strings are valid.
-# Using defined constants does not work, because the eval-scope would need
-# to know the constant when parse in the script 'scripts/generate_translation_texts.php'.
-# Variables within texts are not allowed, because they can't be statically
-# used as translation texts!
+# if the T_('')-call is correct. Only constant quoted strings are valid.
+#
+# - Using defined constants does not work, because the eval-scope would need
+#   to know the constant when parse in the script 'scripts/generate_translation_texts.php'.
+#
+# - Variables within texts are not allowed, because they can't be statically
+#   used as translation texts!
+#
+# - There are two exceptions to the above two restrictions:
+#
+#   1. see method 'get_language_descriptions_translated()' in 'include/translation_functions.php'
+#      There a variable is used.  This only works, because the file does not contain
+#      a $TranslateGroups-entry (explained below) and is therefore not scanned for
+#      translation-texts (otherwise it would be reported as error on creating translations).
+#      And additionally this only works, because the English original texts in that method
+#      are inserted on an indirect way appearing in the server-generated file
+#      'translations/known_languages.php' by the admin-page to manage translation-languages.
+#
+#   2. Variables can be used when all possible instances of the variable are declared
+#      translation texts somewhere in a "registered page" (with TranslateGroup), even
+#      if the statements are never executed. For example see 'statisticspng.php'.
+#      Variables can then be used by defining a placeholder-function like:
+#
+#           $TW_ = 'T_';   echo $TW_($var) . $TW_(func());
 #
 # Examples (valid):   T_('text')  T_('a' . 'b')
 # Examples (invalid): T_($var)  T_(" .. $var ")  T_( func() )
 # Examples (invalid): T_(DEF_CONST)   // with previous define('DEF_CONST', 'text');
 #
-# Variables can be used when all possible instances of the variable are declared
-# translation texts somewhere in a "registered page" (with TranslateGroup), even
-# if the statements are never executed. For example see 'statisticspng.php'.
-# Variables can then be used by defining a placeholder-function like:
-#
-#    $TW_ = 'T_';   echo $TW_($var) . $TW_(func());
 #
 # Leading and trailing white-spaces are not allowed within a T_('text ').
 # Those are trimmed away. You have to use the white-space outside of the
