@@ -118,9 +118,8 @@ class TournamentPool
 
    public function get_cmp_rank()
    {
-      if ( $this->Rank == TPOOLRK_WITHDRAW )
-         return 127; // lowest prio
-      elseif ( $this->Rank == TPOOLRK_NO_RANK )
+      // NOTE: 127 = lowest prio
+      if ( $this->Rank == TPOOLRK_WITHDRAW || $this->Rank == TPOOLRK_NO_RANK )
          return $this->CalcRank;
       else
          return abs($this->Rank);
