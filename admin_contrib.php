@@ -169,7 +169,7 @@ require_once 'include/error_codes.php';
       if ( $ctable->Is_Column_Displayed[ 4] )
          $row_str[ 4] = Contribution::getCategoryText($ctb->Category);
       if ( $ctable->Is_Column_Displayed[ 5] )
-         $row_str[ 5] = make_html_safe( wordwrap($ctb->Comment, 60), true);
+         $row_str[ 5] = make_html_safe( $ctb->Comment, true);
       if ( $ctable->Is_Column_Displayed[ 6] )
          $row_str[ 6] = ($ctb->Created > 0) ? date(DATE_FMT2, $ctb->Created) : '';
       if ( $ctable->Is_Column_Displayed[ 7] )
@@ -211,7 +211,7 @@ require_once 'include/error_codes.php';
                'TEXT', Contribution::getCategoryText($contrib->Category), ));
          $cform->add_row( array(
                'DESCRIPTION', T_('Comment'),
-               'OWNHTML', '<td class="Preview">' . make_html_safe( wordwrap($contrib->Comment, 60), true) . '</td>', ));
+               'OWNHTML', '<td class="Preview">' . make_html_safe( $contrib->Comment, true) . '</td>', ));
          if ( $contrib->Created > 0 )
             $cform->add_row( array(
                   'DESCRIPTION', T_('Created'),
@@ -254,7 +254,7 @@ require_once 'include/error_codes.php';
          $cform->add_empty_row();
          $cform->add_row( array(
                'DESCRIPTION', T_('Preview'),
-               'OWNHTML', '<td class="Preview">' . make_html_safe( wordwrap($contrib->Comment, 60), true) . '</td>', ));
+               'OWNHTML', '<td class="Preview">' . make_html_safe( $contrib->Comment, true) . '</td>', ));
       }
    }
 

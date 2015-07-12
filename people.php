@@ -219,7 +219,7 @@ $GLOBALS['ThePage'] = new Page('People');
       list( $ctb, $orow ) = $arr_item;
       $group_category = ( $curr_category != $ctb->Category ) ? Contribution::getCategoryText($ctb->Category) : '';
       add_contributor( $group_category, $ctb->uid, $ctb->crow['CTB_Name'], $ctb->crow['CTB_Handle'],
-         make_html_safe( wordwrap($ctb->Comment, 60), true), 'black smaller' );
+         make_html_safe( $ctb->Comment, true), 'black smaller' );
       $curr_category = $ctb->Category;
    }
 
