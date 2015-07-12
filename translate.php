@@ -182,7 +182,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
    // read list from APC-cache with all texts from previously visited page by translator
    $filter_texts = null;
-   $page_visit = (bool)get_request_arg('pvisit');
+   $page_visit = (get_request_arg('pvisit')) ? 1 : 0;
    if ( $page_visit && extension_loaded('apc') ) // only if APC-cache present
    {
       $cache_result = apc_fetch( "TranslationTexts.$my_id", $cache_success );
@@ -235,7 +235,10 @@ $info_box = '<br>When translating you should keep the following things in mind:
          ($alpha_order ? URI_AMP."alpha_order=$alpha_order" : '') .
          ($filter_en ? URI_AMP."filter_en=".urlencode($filter_en) : '') .
          ($max_len ? URI_AMP."max_len=".urlencode($max_len) : '') .
-         ($from_row > 0 ? URI_AMP."from_row=$from_row" : '') );
+         ($from_row > 0 ? URI_AMP."from_row=$from_row" : '') .
+         ($to_transl_page ? URI_AMP."tpage=".urlencode($to_transl_page) : '') .
+         ($page_visit ? URI_AMP."pvisit=$page_visit" : '')
+         );
    }
 
 
@@ -299,7 +302,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
    if ( $to_transl_page )
       $page_hiddens['tpage'] = $to_transl_page;
    if ( $page_visit )
-      $page_hiddens['pvisit'] = ($page_visit) ? 1 : 0;
+      $page_hiddens['pvisit'] = $page_visit;
 
    $tabindex= 1;
 
@@ -537,6 +540,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
                'HIDDEN', 'filter_en', $filter_en,
                'HIDDEN', 'max_len', $max_len,
                'HIDDEN', 'from_row', $from_row,
+               'HIDDEN', 'tpage', $to_transl_page,
+               'HIDDEN', 'pvisit', $page_visit,
                'SUBMITBUTTONX', 'save',
                   T_('Apply translation changes to Dragon'),
                   array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
@@ -584,7 +589,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HIDDEN', 'translate_lang', $translate_lang,
             'HIDDEN', 'profil_charset', $profil_charset,
             'HIDDEN', 'from_row', 0,
-            'HIDDEN', 'tpage', basic_safe($to_transl_page),
+            'HIDDEN', 'tpage', $to_transl_page,
             'SELECTBOX', 'transl_filter', 1, $arr_translation_filters, $translation_filter, false,
             'SUBMITBUTTON', 'just_group', T_('Show texts'),
             'TEXT', MED_SPACING,
@@ -622,6 +627,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HIDDEN', 'max_len', $max_len,
             'HIDDEN', 'from_row', 0,
             'HIDDEN', 'tpage', $to_transl_page,
+            'HIDDEN', 'pvisit', $page_visit,
             'SUBMITBUTTON', 'cl', T_('Select'),
          ));
 

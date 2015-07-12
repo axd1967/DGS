@@ -17,6 +17,8 @@ ChangeLog
 
    * translate.php:
    - fix bug: missed new page-visit filter-option-value for paging on translate-page
+   - fix bug: correctly handle URL-args (tpage & pvisit) in the 3 different forms
+     on translate-page especially on submitting changes
 
    * tournaments/include/tournament_pool.php (TournamentPool.get_cmp_rank):
    - (T026) on round-robin tournament pool-view keep "withdrawn"-players at their "original" rank
