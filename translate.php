@@ -298,6 +298,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $page_hiddens['from_row'] = $from_row;
    if ( $to_transl_page )
       $page_hiddens['tpage'] = $to_transl_page;
+   if ( $page_visit )
+      $page_hiddens['pvisit'] = ($page_visit) ? 1 : 0;
 
    $tabindex= 1;
 

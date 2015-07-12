@@ -15,6 +15,9 @@ ChangeLog
 
 2015-07-12 jug
 
+   * translate.php:
+   - fix bug: missed new page-visit filter-option-value for paging on translate-page
+
    * tournaments/include/tournament_pool.php (TournamentPool.get_cmp_rank):
    - (T026) on round-robin tournament pool-view keep "withdrawn"-players at their "original" rank
      instead of ordered to pool-bottom
