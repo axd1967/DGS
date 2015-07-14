@@ -269,7 +269,7 @@ require_once 'include/error_codes.php';
       $menu_array[T_('New user contributions')] = $page."?uid=$uid".URI_AMP."edit=new";
       $menu_array[T_('Admin user contributions')] = $page."?uid=$uid";
    }
-   $menu_array[T_('People')] = 'people.php';
+   $menu_array[T_('People')] = 'people.php#contrib';
 
    end_page(@$menu_array);
 }//main
