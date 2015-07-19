@@ -170,16 +170,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
    ksort( $translation_groups);
    $translation_groups['allgroups'] = 'All groups';
 
-   $to_transl_page = @$_REQUEST['tpage'];
-   if ( !$group && $to_transl_page )
-   {
-      $tp_row = mysql_single_fetch( 'translate.get_group_from_page',
-         "SELECT TG.Groupname FROM TranslationPages AS TP INNER JOIN TranslationGroups AS TG ON TG.ID=TP.Group_ID " .
-         "WHERE TP.Page='".mysql_addslashes($to_transl_page)."' LIMIT 1" );
-      if ( $tp_row )
-         $group = $tp_row['Groupname'];
-   }
-
    // read list from APC-cache with all texts from previously visited page by translator
    $filter_texts = null;
    $page_visit = (get_request_arg('pvisit')) ? 1 : 0;
@@ -236,7 +226,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
          ($filter_en ? URI_AMP."filter_en=".urlencode($filter_en) : '') .
          ($max_len ? URI_AMP."max_len=".urlencode($max_len) : '') .
          ($from_row > 0 ? URI_AMP."from_row=$from_row" : '') .
-         ($to_transl_page ? URI_AMP."tpage=".urlencode($to_transl_page) : '') .
          ($page_visit ? URI_AMP."pvisit=$page_visit" : '')
          );
    }
@@ -299,8 +288,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $page_hiddens['max_len'] = $max_len;
    if ( $from_row > 0 )
       $page_hiddens['from_row'] = $from_row;
-   if ( $to_transl_page )
-      $page_hiddens['tpage'] = $to_transl_page;
    if ( $page_visit )
       $page_hiddens['pvisit'] = $page_visit;
 
@@ -331,8 +318,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $translate_form = new Form( 'translate', 'translate.php', FORM_POST );
       $translate_form->add_row( array(
             'CELL', $nbcol, '', //set $nbcol for the table
-            'HEADER', T_('Translate the following strings'),
-            'TEXT', build_translation_page_group_info($to_transl_page, $group), ));
+            'HEADER', T_('Translate the following strings'), ));
 
       $translate_form->add_row( array(
             'CELL', $nbcol, '',
@@ -540,7 +526,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
                'HIDDEN', 'filter_en', $filter_en,
                'HIDDEN', 'max_len', $max_len,
                'HIDDEN', 'from_row', $from_row,
-               'HIDDEN', 'tpage', $to_transl_page,
                'HIDDEN', 'pvisit', $page_visit,
                'SUBMITBUTTONX', 'save',
                   T_('Apply translation changes to Dragon'),
@@ -589,7 +574,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HIDDEN', 'translate_lang', $translate_lang,
             'HIDDEN', 'profil_charset', $profil_charset,
             'HIDDEN', 'from_row', 0,
-            'HIDDEN', 'tpage', $to_transl_page,
             'SELECTBOX', 'transl_filter', 1, $arr_translation_filters, $translation_filter, false,
             'SUBMITBUTTON', 'just_group', T_('Show texts'),
             'TEXT', MED_SPACING,
@@ -626,7 +610,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HIDDEN', 'filter_en', $filter_en,
             'HIDDEN', 'max_len', $max_len,
             'HIDDEN', 'from_row', 0,
-            'HIDDEN', 'tpage', $to_transl_page,
             'HIDDEN', 'pvisit', $page_visit,
             'SUBMITBUTTON', 'cl', T_('Select'),
          ));
@@ -729,20 +712,5 @@ function update_translation( $transl_lang, $result, $show_rows )
 
    make_include_files($transl_lang); //must be called from main dir
 }//update_translation
-
-function build_translation_page_group_info( $page, $group )
-{
-   static $BR = "<br><br>\n";
-   if ( $page )
-   {
-      if ( $group == 'allgroups' )
-         return sprintf( T_('No translation group found for page [%s].'), $page ) . $BR;
-      else
-         return sprintf( T_('Translation texts of group [%s] for page [%s]#translate'),
-               $group, htmlspecialchars($page)) . $BR;
-   }
-
-   return '';
-}//build_translation_page_group_info
 
 ?>

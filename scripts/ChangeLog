@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-07-19 jug
+
+   * include/std_functions.php (end_page),
+     include/globals.php (DGS_VERSION),
+     translate.php:
+   - removed Translate-link "page" for translators to select texts of translation-group of current page
+
 ### ----- release-1_19_8-20150712 -----
 
 2015-07-12 jug

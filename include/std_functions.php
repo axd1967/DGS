@@ -789,12 +789,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
       if ( @$player_row['Translator'] && !$printable )
       {
-         $curr_page = get_base_page();
          echo anchor( $base_path.'translate.php', T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE )),
-            MINI_SPACING,
-            span('smaller',
-               anchor( $base_path.'translate.php?tpage='.urlencode($curr_page),
-                  sprintf('(%s)', T_('page#translate'))) ),
             SMALL_SPACING;
       }
 
