@@ -370,7 +370,6 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       case 'game.php':
       case 'game_editor.php':
       case 'forum/read.php':
-      case 'old_goban_editor.php':
          $enable_js_game = true;
          break;
    }

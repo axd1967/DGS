@@ -1515,7 +1515,6 @@ message.php
 message_thread.php
 new_game.php
 news.php
-old_goban_editor.php
 opponents.php
 people.php
 - policy.php

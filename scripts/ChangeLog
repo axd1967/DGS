@@ -15,7 +15,10 @@ ChangeLog
 
    * include/std_functions.php (start_html),
      js/game-editor.js (DGS.GamePageEditor.makeDocReady),
-     js/jquery-1.11.3.min.js, js/jquery-ui-1.11.4.custom.min.js:
+     js/jquery-1.11.3.min.js,
+     js/jquery-1.9.1.min.js [REMOVED],
+     js/jquery-ui-1.11.4.custom.min.js,
+     js/jquery-ui-1.10.3.custom.min.js [REMOVED]:
    - updated jquery & jquery-ui
      - updated jquery 1.9.1 -> 1.11.3
      - updated jquery-ui 1.10.3 -> 1.11.4, removed ui-draggable/resizable, added ui-sortable for portlets
