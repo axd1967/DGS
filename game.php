@@ -1554,53 +1554,29 @@ function draw_board_info($board)
    if ( count($board->infos) <= 0 )
       return '';
 
-   $fmts= array(
-      //array(POSX_ADDTIME, $MoveNr, TimeFrom, TimeTo(=$Stone), $Hours, ByoReset);
-      POSX_ADDTIME => array(
-         array( T_('%2$s had added %4$s to %3$s %5$s at move %1$d'),
-                T_('%2$s had restarted byoyomi for %3$s at move %1$d') ),
-         // [ colnum, mapping ]
-         array( 0, null), //MoveNr
-         array( 1, array( WHITE => T_('White'), BLACK => T_('Black'), //From
-                          STONE_TD_ADDTIME => T_('Tournament director') )),
-         array( 2, array( BLACK => T_('White'), WHITE => T_('Black'))), //To
-         array( 3, 'string(TimeFormat::echo_time)'), //Hours
-         array( 4, array( 0 => '', 1 => T_('and restarted byoyomi'))), //Reset
-      ),
-   );
+   $fmt_role_from = array( WHITE => T_('White'), BLACK => T_('Black'), STONE_TD_ADDTIME => T_('Tournament director') );
+   $fmt_role_to   = array( BLACK => T_('White'), WHITE => T_('Black') );
 
-   $txt= '';
+   $board_infos = array();
    foreach ( $board->infos as $row )
    {
-      $key = array_shift($row);
-      $sub = @$fmts[$key];
-      if ( $sub )
+      list( $key, $move_nr, $role_from, $role_to, $hours, $byo_reset ) = $row;
+      if ( $key == POSX_ADDTIME )
       {
-         //echo var_export($row, true);
-         $fmtarr = array_shift($sub);
-         $fmt = (is_array($fmtarr)) ? $fmtarr[($row[2] > 0) ? 0 : 1] : $fmtarr;
-         $val = array();
-         $cnt_sub = count($sub);
-         for ( $i=0; $i < $cnt_sub; $i++ )
-         {
-            list($col, $fct) = $sub[$i];
-            //echo "$col=> $tmp<br>";
-            if ( is_array($fct) )
-               $val[$i] = $fct[$row[$col]];
-            else if ( is_string($fct) )
-               $val[$i] = TimeFormat::echo_time($row[$col]);
-            else
-               $val[$i] = $row[$col];
-         }
-         //echo var_export($val, true);
-         $str= vsprintf($fmt, $val);
-         if ( $str )
-            $txt.= "<dd>$str</dd>\n";
+         $arr_time = array();
+         if ( $hours > 0 )
+            $arr_time[] = '+' . TimeFormat::echo_time($hours);
+         if ( $byo_reset )
+            $arr_time[] = T_('byoyomi reset#addtime');
+
+         $board_infos[] = sprintf( T_('Time changed at move %s (%s): %s -> %s#addtime'),
+            $move_nr, implode(', ', $arr_time), $fmt_role_from[$role_from], $fmt_role_to[$role_to] );
       }
    }
-   if ( $txt )
-      $txt= "<dl class=\"BoardInfos\">\n$txt</dl>\n";
-   return $txt;
+
+   return ( count($board_infos) > 0 )
+      ? "<dl class=\"BoardInfos\">\n<dd>" . implode('</dd><dd>', $board_infos) . "</dd></dl>\n"
+      : '';
 } //draw_board_info
 
 

@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-07-25 jug
+
+   * game.php (draw_board_info):
+   - corrected and simplified text for board-info about adding time on game-page
+
 2015-07-19 jug
 
    * include/std_functions.php (end_page),
