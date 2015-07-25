@@ -89,7 +89,7 @@ require_once 'forum/post.php';
    if ( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum', "forum_read.check.forum_visible($forum_id,$my_id)");
 
-   // for GoDiagrams
+   // for Gobans (go-diagram)
    $preview = isset($_POST['preview']);
    $cfg_board = null; // only load ConfigBoard if post contains go-diagram
 
@@ -116,7 +116,6 @@ require_once 'forum/post.php';
    }
 
    $preview_ID = ($edit > 0 ? $edit : @$_REQUEST['parent']+0 );
-   $preview_GoDiagrams = NULL;
    if ( $preview )
    {
       $preview_Subject = trim(get_request_arg('Subject'));
@@ -127,8 +126,6 @@ require_once 'forum/post.php';
 
       if ( !($edit > 0) )
          $reply = @$_REQUEST['parent']+0;
-//      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
-//         $preview_GoDiagrams = GoDiagram::create_godiagrams($preview_Text, $cfg_board);
    }
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id, $thread );
@@ -293,10 +290,7 @@ require_once 'forum/post.php';
       }
 
       // draw current post
-      $GoDiagrams = NULL;
-//      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
-//         $GoDiagrams = GoDiagram::find_godiagrams($post->text, $cfg_board);
-      $disp_forum->draw_post( $drawmode, $post, $is_my_post, $GoDiagrams );
+      $disp_forum->draw_post( $drawmode, $post, $is_my_post );
 
       // preview of new or existing post (within existing thread)
       $pvw_post = $post->copy_post(); // copy for preview/edit
@@ -306,8 +300,7 @@ require_once 'forum/post.php';
 
          $pvw_post->subject = $preview_Subject;
          $pvw_post->text = $preview_Text;
-         $GoDiagrams = $preview_GoDiagrams;
-         $disp_forum->draw_post(DRAWPOST_PREVIEW, $pvw_post, false, $GoDiagrams );
+         $disp_forum->draw_post(DRAWPOST_PREVIEW, $pvw_post, false );
       }
 
       // input-form for reply/edit-post
@@ -324,11 +317,9 @@ require_once 'forum/post.php';
             }
             else
                $pvw_post_text = '';
-            $GoDiagrams = null;
          }
          echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-         $disp_forum->forum_message_box($drawmode_type, $pid, $GoDiagrams, $post_errmsg,
-            $pvw_post->subject, $pvw_post_text);
+         $disp_forum->forum_message_box( $drawmode_type, $pid, $post_errmsg, $pvw_post->subject, $pvw_post_text );
          echo "</td></tr>\n";
       }
    } //posts loop
@@ -343,11 +334,10 @@ require_once 'forum/post.php';
          $post = new ForumPost( 0, $forum_id, 0, null, 0, 0, 0, $preview_Subject, $preview_Text );
          if ( get_request_arg('ReadOnly') )
             $post->flags |= FPOST_FLAG_READ_ONLY;
-         $GoDiagrams = $preview_GoDiagrams;
-         $disp_forum->draw_post(DRAWPOST_PREVIEW, $post, false, $GoDiagrams );
+         $disp_forum->draw_post( DRAWPOST_PREVIEW, $post, false );
 
          echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-         $disp_forum->forum_message_box(DRAWPOST_PREVIEW, $thread, $GoDiagrams, $post_errmsg,
+         $disp_forum->forum_message_box( DRAWPOST_PREVIEW, $thread, $post_errmsg,
             $post->subject, $post->text, $post->flags );
          echo "</td></tr>\n";
       }
@@ -359,7 +349,7 @@ require_once 'forum/post.php';
          echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
          if ( $thread > 0 )
             echo '<hr>';
-         $disp_forum->forum_message_box(DRAWPOST_NORMAL, $thread, null, '', $thread_Subject);
+         $disp_forum->forum_message_box( DRAWPOST_NORMAL, $thread, '', $thread_Subject );
          echo "</td></tr>\n";
       }
 
@@ -407,13 +397,13 @@ function show_revision_history( $revhist_thread, $display_forum, $post_id )
 
    $display_forum->forum_start_table('Revision');
    $display_forum->change_depth( 1 );
-   $display_forum->draw_post( DRAWPOST_REPLY|MASK_DRAWPOST_NO_NUM, $revhist_thread->thread_post, null );
+   $display_forum->draw_post( DRAWPOST_REPLY|MASK_DRAWPOST_NO_NUM, $revhist_thread->thread_post, false );
 
    echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
    $display_forum->change_depth( 2 );
    foreach ( $revhist_thread->posts as $post )
    {
-      $display_forum->draw_post( DRAWPOST_EDIT|MASK_DRAWPOST_NO_NUM, $post, true, null );
+      $display_forum->draw_post( DRAWPOST_EDIT|MASK_DRAWPOST_NO_NUM, $post, true );
       echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
    }
 

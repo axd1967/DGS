@@ -282,7 +282,6 @@ function get_tables( $database)
             'Games',
             'GamesNotes',
             'GamesPriority',
-            'GoDiagrams',
             'Intro',
             'IpStats',
             'Links',

@@ -13,6 +13,21 @@ ChangeLog
 
 2015-07-25 jug
 
+   * forum/forum_functions.php (class DisplayForum.forum_message_box, ~.draw_post),
+     include/classlib_goban.php (class MarkupHandlerGoban),
+     include/config.php (ALLOW_GO_DIAGRAMS [removed]),
+     include/std_functions.php (start_html),
+     include/GoDiagram.php [removed],
+     js/goeditor.js [removed],
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/dragon-ddl.sql, scripts/data_export.php,
+     forum/post.php, forum/read.php, forum/search.php:
+   - cleanup: removed old JavaScript-based go-editor along with used GoDiagrams-table
+-----------
+-- cleanup: removed old JavaScript-based go-editor along with used GoDiagrams-table
+DROP TABLE GoDiagrams ;
+-----------
+
    * include/std_functions.php (start_html),
      include/globals (CSS_VERSION),
      js/game-editor.js (DGS.GamePageEditor.makeDocReady),

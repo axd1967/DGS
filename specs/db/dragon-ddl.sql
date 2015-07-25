@@ -542,26 +542,6 @@ CREATE TABLE IF NOT EXISTS `GamesPriority` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `GoDiagrams`
---
-
-CREATE TABLE IF NOT EXISTS `GoDiagrams` (
-  `ID` int(11) NOT NULL auto_increment,
-  `Size` tinyint(3) unsigned NOT NULL,
-  `View_Left` tinyint(4) NOT NULL default '0',
-  `View_Right` tinyint(4) NOT NULL default '0',
-  `View_Up` tinyint(4) NOT NULL default '0',
-  `View_Down` tinyint(4) NOT NULL default '0',
-  `Date` datetime NOT NULL default '0000-00-00 00:00:00',
-  `Saved` enum('Y','N') NOT NULL default 'N',
-  `Data` text NOT NULL,
-  `SGF` text NOT NULL,
-  PRIMARY KEY  (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `Intro`
 --
 

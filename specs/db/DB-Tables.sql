@@ -592,24 +592,6 @@ CREATE TABLE Forumreads (
 ) TYPE=MyISAM;
 
 #
-# Table structure for table 'GoDiagrams'
-#
-
-CREATE TABLE GoDiagrams (
-   ID int(11) NOT NULL auto_increment, -- ??
-   Size int(11) default NULL, -- ??
-   View_Left int(11) default NULL, -- ??
-   View_Right int(11) default NULL, -- ??
-   View_Up int(11) default NULL, -- ??
-   View_Down int(11) default NULL, -- ??
-   Date datetime NOT NULL default '0000-00-00 00:00:00', -- ??
-   Saved enum('Y','N') NOT NULL default 'N', -- ??
-   Data text NOT NULL, -- ??
-   SGF text NOT NULL, -- ??
-   PRIMARY KEY  (ID)
-) TYPE=MyISAM;
-
-#
 # Table structure for table 'FAQ'
 #
 

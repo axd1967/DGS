@@ -140,3 +140,7 @@ CREATE TABLE Contribution (
 ) ENGINE=MyISAM ;
 
 
+-- cleanup: removed old JavaScript-based go-editor along with used GoDiagrams-table
+DROP TABLE GoDiagrams ;
+
+

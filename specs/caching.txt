@@ -1578,7 +1578,6 @@ include/quick/quick_suite.php
 include/quick/quick_user.php
 include/quick/quick_wroom.php
 
-include/GoDiagram.php
 include/admin_faq_functions.php
 include/board.php
 include/cache_clock.php

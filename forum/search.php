@@ -278,7 +278,7 @@ require_once 'include/filterlib_mysqlmatch.php';
       if ( $hidden )
          $drawmode |= MASK_DRAWPOST_HIDDEN;
 
-      $disp_forum->draw_post( $drawmode, $post, $is_my_post, null );
+      $disp_forum->draw_post( $drawmode, $post, $is_my_post );
 
       echo "<tr><td colspan=$cols></td></tr>\n"; //separator
    }

@@ -72,8 +72,6 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
    if ( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($Text) ) // lazy-load
       $cfg_board = ConfigBoard::load_config_board_or_default($uid);
 
-//   $allow_go_diagrams = ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() );
-//   if ( $allow_go_diagrams) $GoDiagrams = GoDiagram::create_godiagrams($Text, $cfg_board);
    $Subject = mysql_addslashes( $Subject);
    $Text = mysql_addslashes( $Text);
 
@@ -215,8 +213,6 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
       {
          hit_thread( $Thread_ID );
       }
-
-//      if ( $allow_go_diagrams) GoDiagram::save_diagrams($GoDiagrams);
 
       $flog_actsuffix = ( $Thread_ID == $New_ID ) ? FORUMLOGACT_SUFFIX_NEW_THREAD : FORUMLOGACT_SUFFIX_REPLY;
       if ( $moderated ) // hidden post

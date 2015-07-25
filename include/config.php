@@ -248,9 +248,6 @@ define('ALLOW_TOURNAMENTS', 'LADDER|ROUNDROBIN');
 // NOTE: can be overwritten by Players.AdminOptions(ADMOPT_ALLOW_TOURNEY_CREATE)
 define('ALLOW_TOURNAMENTS_CREATE_BY_USER', false);
 
-// Allow usage of GoDiagrams (only working with JavaScript)
-define('ALLOW_GO_DIAGRAMS', false);
-
 // Allow usage of Game-Editor / Game-Viewer
 define('ALLOW_GAME_EDITOR', false);
 define('ENABLE_GAME_VIEWER', false);

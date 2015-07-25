@@ -36,7 +36,6 @@ Folders
 Forums
 Games
 GamesNotes
-GoDiagrams
 Intro
 Links
 Messages

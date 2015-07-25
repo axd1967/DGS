@@ -407,8 +407,6 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
             if ( ALLOW_GAME_EDITOR )
                echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goban-editor.js?t=$ts\"></script>"; //TODO refactor later
          }
-         if ( ALLOW_GO_DIAGRAMS )
-            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
       }
 
       // additional JS-code (after including JS-libs)

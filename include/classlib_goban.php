@@ -34,8 +34,6 @@ require_once 'include/goban_handler_gfx.php';
  /*!
   * \class MarkupHandlerGoban
   * \brief Static helper class managing parsing and formatting of <igoban...>-tag.
-  *
-  * \note TODO later integrate <goban...>-tag as well (integrating GoDiagram.php)
   */
 class MarkupHandlerGoban
 {

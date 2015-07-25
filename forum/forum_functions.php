@@ -35,7 +35,6 @@ require_once 'include/rating.php';
 require_once 'include/dgs_cache.php';
 require_once 'forum/class_forum_options.php';
 require_once 'forum/class_forum_read.php';
-//if ( ALLOW_GO_DIAGRAMS ) require_once 'include/GoDiagram.php';
 
 
 //must follow the "ORDER BY PosIndex" order and have at least 64 chars:
@@ -562,7 +561,7 @@ class DisplayForum
 
    // \param $drawmode one of DRAWPOST_NORMAL | PREVIEW | EDIT | REPLY
    // \note checking for thread-read-only flag must be done at caller-side
-   public function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $ErrorMsg='', $Subject='', $Text='', $Flags=0 )
+   public function forum_message_box( $drawmode, $post_id, $ErrorMsg='', $Subject='', $Text='', $Flags=0 )
    {
       global $player_row;
       if ( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) ) // user not allowed to post
@@ -611,24 +610,9 @@ class DisplayForum
                ($Flags & FPOST_FLAG_READ_ONLY), ));
       }
 
-      $arr_dump_diagrams = array();
-/*
-      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
-      {
-         $diagrams_str = GoDiagram::draw_editors($GoDiagrams);
-         if ( !empty($diagrams_str) )
-         {
-            $form->add_row( array( 'OWNHTML', "<td colspan=2>$diagrams_str</td>" ));
-            $arr_dump_diagrams = array( 'onClick' => "dump_all_data('$msg_form');" );
-         }
-      }
-*/
-
       $form->add_row( array(
-            'SUBMITBUTTONX', 'post', ' ' . T_('Post') . ' ',
-                  array( 'accesskey' => ACCKEY_ACT_EXECUTE ) + $arr_dump_diagrams,
-            'SUBMITBUTTONX', 'preview', ' ' . T_('Preview') . ' ',
-                  array( 'accesskey' => ACCKEY_ACT_PREVIEW ) + $arr_dump_diagrams ));
+            'SUBMITBUTTONX', 'post', ' ' . T_('Post') . ' ', array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+            'SUBMITBUTTONX', 'preview', ' ' . T_('Preview') . ' ', array( 'accesskey' => ACCKEY_ACT_PREVIEW ), ));
 
       $form->echo_string(1);
    }//forum_message_box
@@ -716,7 +700,7 @@ class DisplayForum
     * \param $drawmode DRAWPOST_..., MASK_DRAWPOST_...
     * \param $post: ForumPost-object to draw
     */
-   public function draw_post( $drawmode, $post, $is_my_post, $GoDiagrams=null )
+   public function draw_post( $drawmode, $post, $is_my_post )
    {
       global $NOW, $player_row, $base_path;
 
@@ -735,8 +719,6 @@ class DisplayForum
       // highlight terms in Subject/Text
       $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $this->rx_term );
       $txt = make_html_safe( $post->text, true, $this->rx_term );
-//      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
-//         $txt = GoDiagram::replace_goban_tags_with_boards($txt, $GoDiagrams);
       $txt = MarkupHandlerGoban::replace_igoban_tags( $txt );
       if ( strlen($txt) == 0 ) $txt = '&nbsp;';
 
@@ -1590,7 +1572,7 @@ class ForumThread
       mysql_free_result($result);
    }//load_revision_history
 
-   /*! \brief Returns true, if one of loaded posts contains a go-diagram. */
+   /*! \brief Returns true, if one of loaded posts contains a go-diagram (igoban-tag). */
    public function contains_goban()
    {
       foreach ( $this->posts as $post_id => $post )

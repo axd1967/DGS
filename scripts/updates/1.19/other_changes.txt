@@ -5,12 +5,15 @@
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_TVISIT for caching tournament-visit-table
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_CONT_FP_HIDE for caching contacts forum-post hide-list
 # - removed ALLOW_OLD_GOBAN_EDITOR
+# - removed ALLOW_GO_DIAGRAMS
 
 -----------
 # removed files
 rm old_goban_editor.php
 rm js/jquery-1.9.1.min.js
 rm js/jquery-ui-1.10.3.custom.min.js
+rm js/goeditor.js
+rm include/GoDiagram.php
 
 -----------
 # added images
