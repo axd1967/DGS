@@ -13,6 +13,13 @@ ChangeLog
 
 2015-07-25 jug
 
+   * include/std_functions.php (start_html),
+     js/game-editor.js (DGS.GamePageEditor.makeDocReady),
+     js/jquery-1.11.3.min.js, js/jquery-ui-1.11.4.custom.min.js:
+   - updated jquery & jquery-ui
+     - updated jquery 1.9.1 -> 1.11.3
+     - updated jquery-ui 1.10.3 -> 1.11.4, removed ui-draggable/resizable, added ui-sortable for portlets
+
    * game.php (draw_board_info):
    - corrected and simplified text for board-info about adding time on game-page
 

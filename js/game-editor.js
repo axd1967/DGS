@@ -157,14 +157,6 @@ $.extend( DGS.GamePageEditor.prototype, {
          me.handle_key_press( evt );
       });
 
-      $("#GameMessage").draggable({ handle: "#GameMessageHeader", opacity: 0.50 });
-      $("#GameMessage").resizable({
-         alsoResize: "#GameMessageBody",
-         minWidth: 300, minHeight: 150,  maxWidth: 600, maxHeight: 600
-      });
-      $("#GameMessageBody").resizable();
-      $("#GameMessageBody div.ui-resizable-handle").remove(); // removes resizable-handle for inner element
-
       $("#tabs").show(); // hidden till all elements built
 
       me.goto_move();

@@ -399,8 +399,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
          //TODO later compress jquery + other-js into 2 separate compressed JS with dojo-toolkit and updated JS_VERSION
          if ( ALLOW_GAME_EDITOR || ENABLE_GAME_VIEWER )
          {
-            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.9.1.min.js\"></script>";
-            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-ui-1.10.3.custom.min.js\"></script>";
+            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.11.3.min.js\"></script>";
+            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-ui-1.11.4.custom.min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery.scrollTo-1.4.3.1-min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/lang-ext.js?t=$ts\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/gametree.js?t=$ts\"></script>";
