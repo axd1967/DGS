@@ -125,13 +125,15 @@ $.extend( DGS.GamePageEditor.prototype, {
 
       $("#tabs").tabs({ active: 0 });
 
-      this.old_game_notes = $("#gameNotes").val();
-      $("#gameNotes").on("change input propertychange", function( evt ) { // NOTE: undo/redo-events not captured
-         me.handle_action_note_changes( this, evt );
-      });
-      $("#saveNotes").click( function( evt ) {
-         me.handle_action_save_notes( this, evt );
-      });
+      if ( document.getElementById('gameNotes') ) {
+         this.old_game_notes = $("#gameNotes").val();
+         $("#gameNotes").on("change input propertychange", function( evt ) { // NOTE: undo/redo-events not captured
+            me.handle_action_note_changes( this, evt );
+         });
+         $("#saveNotes").click( function( evt ) {
+            me.handle_action_save_notes( this, evt );
+         });
+      }
 
       $("#GameMsgTool_ToggleComment").click( { action: "hide" }, function( evt ) {
          me.handle_action_toggle_comment( this, evt );
@@ -550,8 +552,8 @@ DGS.QuickRemoteApi = {
    show_error_box : function( evt, error_text ) {
       var pos = { left: evt.pageX - 20, top: evt.pageY - 20 };
       var msg = "<span class=\"ErrMsgCode\">" + T_js['error_occured'] + ":</span> " + error_text;
-      $("#JSInfoBox").html(msg).css(pos).fadeIn(200).on("mouseleave", function() {
-         $(this).off("mouseleave").fadeOut(500);
+      $("#JSInfoBox").html(msg).css(pos).scrollTop(0).scrollLeft(0).fadeIn(200).on("mouseleave click", function() {
+         $(this).off("mouseleave click").fadeOut(500);
       });
    },
 

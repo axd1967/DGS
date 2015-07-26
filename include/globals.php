@@ -26,11 +26,11 @@ require_once 'include/config-local.php';
  */
 
 define('DGS_VERSION', '1.19.9'); // ARCHITECTURE(1=php).MAJOR.MINOR
-define('CSS_VERSION', '20150725193700'); // take UTC-timestamp of skins/dragon/screen.css
-define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
+define('CSS_VERSION', '20150726153700'); // take UTC-timestamp of skins/dragon/screen.css
+define('JS_VERSION',  '20150726153700'); // take UTC-timestamp of newest js/*.js script
 
 // global version of quick-suite: increased with each release
-define('QUICK_VERSION', 9);
+define('QUICK_VERSION', 10);
 define('QUICK_SUITE_VERSION', DGS_VERSION.':'.QUICK_VERSION);
 
 // ---------- General stuff----------------------------------------

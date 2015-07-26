@@ -341,6 +341,7 @@ function recover_language( $player_row=null) //must be called from main dir
    }
    $language_used = $language;
 
+error_log("recover_language(".@$player_row['ID']."): encoding_used=[$encoding_used]");
    return $language_used;
 }//recover_language
 

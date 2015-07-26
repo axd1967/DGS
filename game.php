@@ -1114,25 +1114,30 @@ function draw_moves( $gid, $move, $handicap )
 
 function draw_game_tools()
 {
-   global $base_path, $game_row, $game_setup, $TheBoard, $tourney, $notes;
+   global $base_path, $game_row, $game_setup, $TheBoard, $tourney, $notes, $my_game, $my_mpgame;
    $img_chg_note = image($base_path."images/star3.gif", T_('Notes have unsaved changes!#ged'), null, 'id=NotesChanged');
-
+   $show_notes = ( $my_game || $my_mpgame );
 
    echo "</td>\n",
       "<td id=ToolsArea class=\"GameTools NoPrint\">",
          "<div id=tabs>\n",
             "<ul>\n",
                "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
-               "<li>", anchor('#tab_GameNotes', T_('Notes#ged') . ' ' . $img_chg_note, T_('Private game notes')), "</li>\n",
+               ( $show_notes
+                  ? "<li>" . anchor('#tab_GameNotes', T_('Notes#ged') . ' ' . $img_chg_note, T_('Private game notes')) . "</li>\n"
+                  : '' ),
                "<li>", anchor('#tab_GameAnalysis', T_('Analyse#ged'), T_('Analyse game#ged')), "</li>\n",
             "</ul>\n",
             "<div id=tab_GameInfo class=tab>\n";
    draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
-   echo     "</div>\n",
-            "<div id=tab_GameNotes class=tab>\n";
-   draw_notes(null, $notes, 12, 65); // use fixed size
-   echo     "</div>\n",
-            "<div id=tab_GameAnalysis class=\"tab\">\n", build_tab_GameAnalysis(), "</div>\n",
+   echo     "</div>\n";
+   if ( $show_notes )
+   {
+      echo "<div id=tab_GameNotes class=tab>\n";
+      draw_notes(null, $notes, 12, 65); // use fixed size
+      echo "</div>\n";
+   }
+   echo     "<div id=tab_GameAnalysis class=\"tab\">\n", build_tab_GameAnalysis(), "</div>\n",
          "</div>\n",
          "<div id=GameMessage>\n",
             "<div id=GameMessageHeader>", T_('Messages#ged'), build_comment_tools(), "</div>\n",

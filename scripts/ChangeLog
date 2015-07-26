@@ -11,6 +11,19 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-07-26 jug
+
+   * include/game_functions.php (GameHelper.update_game_notes),
+     include/globals.php (CSS_VERSION, JS_VERSION, QUICK_VERSION),
+     js/game-editor.js (DGS.GamePageEditor.makeDocReady),
+     skins/dragon/screen.css, specs/quick_suite.txt,
+     game.php (draw_game_tools):
+   - fix bugs: show and save private game-notes only to game-players & fix showing errors
+     - bugfix: for JS-game-viewer hiding game-notes for non game-players
+     - bugfix: for quick-do-suite prevent saving of game-notes to non game-players
+     - bugfix: fade-out error-box for JS-game-viewer on mouse-click as well
+     - bugfix: add auto-overflow on bigger content and scroll to left-top for error-box of JS-game-viewer
+
 2015-07-25 jug
 
    * forum/forum_functions.php (class DisplayForum.forum_message_box, ~.draw_post),

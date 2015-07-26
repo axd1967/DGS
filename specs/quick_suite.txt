@@ -458,7 +458,8 @@ Purpose:
       - retrieve information about a game (info, game-notes);
         corresponding pages: "game.php", "gameinfo.php"
 
-         - save game-notes
+      - save game-notes
+        corresponding pages: "game.php"
 
       - retrieve list of games;
         corresponding pages: "status.php", "quick_status.php", "show_games.php"
@@ -874,12 +875,13 @@ Commands:
             "notes" : "",      # users game-notes (only for logged-in user)
          }
 
-   "save_notes" : save private game-notes for game
+   "save_notes" : save private game-notes for game (only for own game)
       - required opts: GID, NOTES
          - to remove notes use empty NOTES-argument
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
+         - not_game_player : notes can only be saved for players of game
 
       - Result (JSON) =
          {

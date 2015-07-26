@@ -1458,9 +1458,22 @@ class GameHelper
       return $row;
    }//load_cache_game_notes
 
+   /*!
+    * \brief Updates GamesNotes for given game-id and user, but only if user is player of game.
+    * \throws error 'not_game_player' if user not a player of the game
+    */
    public static function update_game_notes( $dbgmsg, $gid, $uid, $hidden, $notes )
    {
+      $gid = (int)$gid;
+      $uid = (int)$uid;
       $dbgmsg = "GameHelper:update_game_notes($gid,$uid,$hidden).$dbgmsg";
+
+      $row = mysql_single_fetch( "$dbgmsg.chk_my_game",
+         "SELECT IF(ISNULL(GP.uid),IF(G.Black_ID=$uid OR G.White_ID=$uid,1,0),2) AS X_MyGame " .
+         "FROM Games AS G LEFT JOIN GamePlayers AS GP ON GP.gid=G.ID and GP.uid=$uid where G.ID=$gid LIMIT 1" );
+      if ( (int)@$row['X_MyGame'] == 0 )
+         error('not_game_player', $dbgmsg);
+
       if ( $hidden != 'Y' )
          $hidden = 'N'; // use default (not hidden) for invalid args
 

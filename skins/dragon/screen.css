@@ -1140,6 +1140,7 @@ div#JSInfoBox {
    border: 1px solid #0C41C9;
    background: #f7f5ff;
    text-align: left;
+   overflow: auto;
 }
 
 
