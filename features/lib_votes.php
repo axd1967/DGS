@@ -561,24 +561,24 @@ class Feature
       {
          $query = "UPDATE Players SET CountFeatNew=-1 WHERE CountFeatNew>=0";
          if ( $uid > 0 )
-            $query .= " AND ID='$uid' LIMIT 1";
+            $query .= " AND ID=$uid LIMIT 1";
          db_query( "$dbgmsg.reset", $query );
       }
       elseif ( is_numeric($diff) && $diff != 0 )
       {
          $query = "UPDATE Players SET CountFeatNew=CountFeatNew+($diff) WHERE CountFeatNew>=0";
          if ( $uid > 0 )
-            $query .= " AND ID='$uid' LIMIT 1";
+            $query .= " AND ID=$uid LIMIT 1";
          db_query( "$dbgmsg.upd", $query );
       }
       elseif ( (string)$diff == COUNTNEW_RECALC && $uid > 0 )
       {
          global $player_row;
-         $count_new = count_features_new( $uid );
+         $count_new = count_feature_new( $uid );
          if ( @$player_row['ID'] == $uid )
             $player_row['CountFeatNew'] = $count_new;
          db_query( "$dbgmsg.recalc",
-            "UPDATE Players SET CountFeatNew=$count_new WHERE ID='$uid' LIMIT 1" );
+            "UPDATE Players SET CountFeatNew=$count_new WHERE ID=$uid LIMIT 1" );
       }
    }//update_count_feature_new
 

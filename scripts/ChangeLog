@@ -11,6 +11,15 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-07-27 jug
+
+   * features/lib_votes.php (Feature.update_count_feature_new),
+     features/edit_feature.php:
+   - bugfixes for re-calc of new-feature-count on changing feature-status
+     - fix bug: re-calc new-feature-count for all users on changing feature-status,
+       because +/-1 on count may be wrong if users already voted
+     - fix bug: method of call on re-calc of new-features-count for specific user
+
 2015-07-26 jug
 
    * include/game_functions.php (GameHelper.update_game_notes),
