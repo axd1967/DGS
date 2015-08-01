@@ -326,8 +326,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    // NOTE: check after add_or_del_column()-call
    // only activate if column shown for user to reduce server-load for page
    // avoiding additional outer-join on Clock-table !!
-   $load_remaining_time = ( $running && !$all && $uid == $my_id
-      && ($gtable->is_column_displayed(39) || $gtable->is_column_displayed(40)) );
+   $load_remaining_time = $running && ($gtable->is_column_displayed(39) || $gtable->is_column_displayed(40));
 
    // only load tournament-title for tournament-icon in game-info-column
    $load_tourney = ( ALLOW_TOURNAMENTS && $gtable->is_column_displayed(32) );
@@ -441,8 +440,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 36: >  FU+RU [userStartRating] (User-StartRating)
  * 37: >  FU [userEndRating] (User-EndRating)
  * 38: >  FU [userRatingDiff] (User-RatingDiff)
- * 39: >  RU (my remaining time)
- * 40: >  RU (oppenent remaining time)
+ * 39: >  OB+RA+RU (RU: my remaining time, OB+RA: Black remaining time)
+ * 40: >  OB+RA+RU (RU: oppenent remaining time, OB+RA: White remaining time)
  * 41: >  FU (Indicator if there are (hidden) game-comments)
  * 42:    TournamentGames.Status (+ TG_FLAG_GAME_DETACHED)
  * 43:    Ruleset
@@ -592,6 +591,11 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       $gtable->add_tablehead(39, new TableHead( T_('My time remaining#header'), T_('My time remaining')), null, TABLE_NO_SORT);
       $gtable->add_tablehead(40, new TableHead( T_('Opponent time remaining#header'), T_('Opponent time remaining')), null, TABLE_NO_SORT);
    }
+   else if ( $observe || $running ) //OB+RA+RU(other)
+   {
+      $gtable->add_tablehead(39, new TableHead( T_('Black time remaining#header'), T_('Black time remaining')), null, TABLE_NO_SORT);
+      $gtable->add_tablehead(40, new TableHead( T_('White time remaining#header'), T_('White time remaining')), null, TABLE_NO_SORT);
+   }
 
    if ( $observe_all )
       $gtable->set_default_sort( 34, 13 ); //on ObsCount,Lastchanged
@@ -604,7 +608,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    // build SQL-query
    $qsql = $glc->build_games_query( $load_user_ratingdiff, $load_remaining_time, $show_game_prio, $load_tourney );
    $qsql->merge( $gtable->get_query() );
-   $query = $qsql->get_select() . "$order$limit";
+   $query = $qsql->get_select() . $order . $limit;
 
    $result = db_query( 'show_games.find_games', $query);
 
@@ -831,7 +835,15 @@ $GLOBALS['ThePage'] = new Page('GamesList');
                $row_arr[40] = build_time_remaining( $row, $opp_col, $is_to_move );
             }
          }
-      } //else //OB
+      }
+
+      if ( ($all || !$is_mine) && ($observe || $running) )
+      {
+         if ( $gtable->Is_Column_Displayed[39] ) // Black-RemTime
+            $row_arr[39] = build_time_remaining( $row, BLACK, ($Black_ID == $ToMove_ID) );
+         if ( $gtable->Is_Column_Displayed[40] ) // White-RemTime
+            $row_arr[40] = build_time_remaining( $row, WHITE, ($White_ID == $ToMove_ID) );
+      }
 
       if ( $gtable->Is_Column_Displayed[6] )
          $row_arr[6] = $Size;

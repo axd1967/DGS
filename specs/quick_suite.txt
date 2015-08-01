@@ -636,7 +636,7 @@ Commands:
             "black_gameinfo" : {    # game-info of black-user
                "prisoners" : 3,                         # prisoners
                "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status, see [4.QST]);
-                                                        # - field only filled for games where black or white user is logged-in user
+                                                        # - field only filled for started games for black and white user
                                                         # - field empty for finished games
                "rating_start" : "3k (-7%)",             # start-rating
                "rating_start_elo" : "1792.59326171875", # start-rating ELO

@@ -144,3 +144,10 @@ CREATE TABLE Contribution (
 DROP TABLE GoDiagrams ;
 
 
+-- hide Black/White-remaining-time for observing/observed/running-all view per default
+UPDATE ConfigPages SET
+   ColumnsGamesObserved2=ColumnsGamesObserved2 & ~0x300,
+   ColumnsGamesObservedAll2=ColumnsGamesObservedAll2 & ~0x300,
+   ColumnsGamesRunningAll2=ColumnsGamesRunningAll2 & ~0x300 ;
+
+

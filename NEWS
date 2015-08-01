@@ -95,10 +95,11 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Games:
       * Added file-pattern-formatting for SGF-download: $M = moves-count, $H0 = handicap (with 0), $T = game-type
-      * Added sort-order for status-games ordered by last moved (newest first)
-      * Added white wood background in user profile for display of game-board
+      * Added sort-order for <home status.php>status-games</home> ordered by last moved (newest first)
+      * Added white wood background in <home edit_profile.php>user profile</home> for display of game-board
+      * Added remaining time for Black & White user on <home show_games.php>game-lists-page</home> for all views with started games
       * Added tooltips on long column headers on <home show_games.php>game-lists-page</home>
-      * Changed order of columns on games-page by moving current-rating near user-info
+      * Changed order of columns on <home show_games.php>games-page</home> by moving current-rating near user-info
       * Enforce manual handicap-type for shape-games in waiting-room and for invitations
 
    * Time settings restricted:

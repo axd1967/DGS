@@ -11,6 +11,24 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-08-01 jug
+
+   * include/quick/quick_game_info.php (QuickHandlerGameInfo.fill_game_info),
+     include/gamelist_control.php (GameListControl.build_games_query),
+     scripts/updates/1.19/database_changes.mysql,
+     scripts/updates/1.19/other_changes.txt,
+     specs/quick_suite.txt,
+     show_games.php:
+   - added Black-/White-remaining-time on show-games-page and in quick-do suite for
+     game-info & game-list handlers for observing, observed and all running games view
+-----------
+-- hide Black/White-remaining-time for observing/observed/running-all view per default
+UPDATE ConfigPages SET
+   ColumnsGamesObserved2=ColumnsGamesObserved2 & ~0x300,
+   ColumnsGamesObservedAll2=ColumnsGamesObservedAll2 & ~0x300,
+   ColumnsGamesRunningAll2=ColumnsGamesRunningAll2 & ~0x300 ;
+-----------
+
 2015-07-27 jug
 
    * features/lib_votes.php (Feature.update_count_feature_new),

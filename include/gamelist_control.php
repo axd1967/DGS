@@ -172,7 +172,12 @@ class GameListControl
             $qsql->add_part( SQLP_WHERE, "G.Status='".GAME_STATUS_FINISHED."'" );
          }
          elseif ( $is_running ) //RA
+         {
+            if ( $load_remaining_time )
+               $need_ticks = true;
+
             $qsql->add_part( SQLP_WHERE, 'G.Status' . IS_STARTED_GAME );
+         }
       }
       elseif ( $this->is_info() ) // INFO
       {
@@ -253,11 +258,10 @@ class GameListControl
          {
             $qsql->add_part( SQLP_WHERE, 'G.Status' . IS_STARTED_GAME );
 
-            if ( $load_remaining_time ) //RU
-               $need_ticks = true;
-
             if ( $load_game_prio )
                GameHelper::extend_query_with_game_prio( $qsql, $uid, true, 'G' );
+            if ( $load_remaining_time )
+               $need_ticks = true;
          }
 
          if ( $this->mp_game )
@@ -278,6 +282,7 @@ class GameListControl
             $qsql->useUnionAll();
          }
       }//FU+RU
+
 
       if ( $need_bw_user_info )
          self::extend_game_list_query_with_user_info( $qsql, 'G' );

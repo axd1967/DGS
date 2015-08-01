@@ -197,7 +197,7 @@ class QuickHandlerGameInfo extends QuickHandler
          $icol = ($col == BLACK) ? 'Black' : 'White';
          $prefix = strtolower($icol);
          $uid = (int)$row[$icol.'_ID'];
-         if ( $game_started && $is_my_game )
+         if ( $game_started )
          {
             $time_remaining = build_time_remaining( $row, $col,
                   /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
