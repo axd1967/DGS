@@ -580,6 +580,7 @@ DGS.QuickRemoteApi = {
       return $.ajax({
          type: "POST",
          url:  DGS.QuickRemoteApi.quick_url,
+         dataType: "json",
          data: { obj: "game", cmd: "save_notes", gid: gid, notes: notes },
          success: function( data, req_status, xhr ) {
             DGS.QuickRemoteApi.handle_quick_do_success( data, T_js['save_success'], fn_success, scope, evt );
