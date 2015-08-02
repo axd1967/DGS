@@ -168,7 +168,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $translation_groups[$row[0]] = $row[0];
    mysql_free_result( $result);
    ksort( $translation_groups);
-   $translation_groups['allgroups'] = 'All groups';
+   $translation_groups[TRANSL_GROUP_ALL] = 'All groups';
 
    // read list from APC-cache with all texts from previously visited page by translator
    $filter_texts = null;
@@ -182,7 +182,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
    if ( !$group || !array_key_exists( $group, $translation_groups) )
    {
-      $group = 'allgroups';
+      $group = TRANSL_GROUP_ALL;
       $translation_filter = TRLFILT_ORIGINAL_UNTRANSLATED; // default: filter in original, show untranslated
    }
 
@@ -396,16 +396,9 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
       $translate_form->add_row( array( 'HR' ) );
 
-      $oid= -1;
       while ( ($row = mysql_fetch_assoc($result)) && $show_rows-- > 0 )
       {
-         /* see the translations_query() function for the constraints
-          * on the "ORDER BY" clause associated with this "$oid" filter:
-          */
-         if ( $oid == $row['Original_ID'] )
-            continue;
          $oid = $row['Original_ID'];
-
          $orig_string = $row['Original'];
          if ( $is_preview )
          {
@@ -424,7 +417,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
          if ( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
             $debuginfo = "<br><span class=\"DebugInfo smaller\">"
                . "L=".$row['Language_ID']
-               . ", G=".$row['Group_ID']
                . ", TP=".$row['Type']
                . ", ST=".$row['Status']
                . ", T=$oid [".$row['Translated'].'/'.$row['Translatable'].']'

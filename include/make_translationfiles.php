@@ -36,6 +36,8 @@ define('TRLFILT_ORIGINAL_TRANSLATED_SAME', 2);
 define('TRLFILT_ORIGINAL_ALL', 3);
 define('TRLFILT_TRANSLATION', 4);
 
+define('TRANSL_GROUP_ALL', 'allgroups');
+
 
 function make_known_languages() //must be called from main dir
 {
@@ -182,15 +184,22 @@ function translations_query( $translate_lang, $translate_filter, $group, $from_r
       $max_len=0, $filter_texts=null )
 {
    /* Note: Some items appear two or more times within the untranslated set
-      when from different groups. But we can't use:
+      when from different translation-groups. But we can't use:
           ( $translate_filter == TRLFILT_ORIGINAL_UNTRANSLATED ? "DISTINCT " : "")
       because the Group_ID column makes the rows distinct.
-      Workaround: using "ORDER BY Original_ID LIMIT 50";
-       and filter the rows on Original_ID while computing.
+
+      Workaround: using "ORDER BY Original_ID LIMIT 50" and filter the rows on Original_ID while computing.
       The previous sort was:
-          "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
-      As the Original are identical when the Original_ID are identical,
-      an other possible sort is "ORDER BY Original,Original_ID";
+          "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50"
+
+      As the Original-values are identical when the Original_ID are identical,
+      another possible sort is "ORDER BY Original,Original_ID"
+
+      02-Aug-2015/JUG: removed joins to get group-info for translations only if filtered on group.
+      This avoids the removal of "double"-entries and the pages on the translate-page always show
+      an equal number of entries (which is less confusing to translators).
+      Like this, the group-ID can not always be shown any more (but was only shown to developers anyway).
+      Also, the translation-entry-count is now always correct (not including the double entries).
    */
    if ( $alpha_order )
       $order = ' ORDER BY Original,Original_ID';
@@ -204,10 +213,14 @@ function translations_query( $translate_lang, $translate_filter, $group, $from_r
    $sql_opts = ( ALLOW_SQL_CALC_ROWS ) ? 'SQL_CALC_FOUND_ROWS' : '';
    $join_translations = ( $translate_filter == TRLFILT_ORIGINAL_TRANSLATED_ALL || $translate_filter == TRLFILT_TRANSLATION
          || $translate_filter == TRLFILT_ORIGINAL_TRANSLATED_SAME ) ? 'INNER' : 'LEFT'; // 2/3/4=translated-only
+   $join_groups = ( $group != TRANSL_GROUP_ALL )
+      ? "INNER JOIN TranslationGroups AS TG " .
+        "INNER JOIN TranslationFoundInGroup TFIG ON TFIG.Group_ID=TG.ID AND TFIG.Text_ID=TT.ID"
+      : '';
+
    $query = "SELECT $sql_opts Translations.Text"
           . ",TT.ID AS Original_ID"
           . ",TL.ID AS Language_ID"
-          . ",TFIG.Group_ID"
           . ",TT.Text AS Original"
           . ",TT.Translatable"
           . ",TT.Type"
@@ -216,8 +229,7 @@ function translations_query( $translate_lang, $translate_filter, $group, $from_r
           . ",UNIX_TIMESTAMP(Translations.Updated) AS T_Updated"
           . ",Translations.Translated"
    . " FROM TranslationTexts AS TT"
-      . " INNER JOIN TranslationGroups AS TG"
-      . " INNER JOIN TranslationFoundInGroup TFIG ON TFIG.Group_ID=TG.ID AND TFIG.Text_ID=TT.ID"
+      . " $join_groups "
       . " INNER JOIN TranslationLanguages AS TL"
       . " $join_translations JOIN Translations ON Translations.Original_ID=TT.ID AND Translations.Language_ID=TL.ID"
    . " WHERE TL.Language='".mysql_addslashes($translate_lang)."'"
@@ -249,7 +261,7 @@ function translations_query( $translate_lang, $translate_filter, $group, $from_r
       $query .= " AND (Translations.Text='' OR TT.Text=Translations.Text)";
    }
 
-   if ( $group != 'allgroups' )
+   if ( $group != TRANSL_GROUP_ALL )
       $query .= " AND TG.Groupname='".mysql_addslashes($group)."'";
    $query .= $order.$limit;
 

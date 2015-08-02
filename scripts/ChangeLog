@@ -11,6 +11,18 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-08-02 jug
+
+   * include/make_translationfiles.php (TRANSL_GROUP_ALL; translations_query),
+     translate.php:
+   - fix bug on translate-page:
+     removed skipping same translation-entries due to occurence in multiple translation-groups.
+     Translation-entries that appear in multiple translation-groups would occur by translation-SQL-query
+     multiple times. The multiple entries had been removed in loop, which lead to pages contain less entry
+     than a page should show, and also the total translation-entry-count was including the double entries,
+     which was very confusing for translators.
+     New approach now is to join with the group-tables only if texts from a specific group are selected.
+
 2015-08-01 jug
 
    * include/quick/quick_game_info.php (QuickHandlerGameInfo.fill_game_info),
