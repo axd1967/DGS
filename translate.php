@@ -396,6 +396,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
       $translate_form->add_row( array( 'HR' ) );
 
+      $oid = -1 ;
       while ( ($row = mysql_fetch_assoc($result)) && $show_rows-- > 0 )
       {
          $oid = $row['Original_ID'];
