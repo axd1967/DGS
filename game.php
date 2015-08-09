@@ -1147,9 +1147,11 @@ function draw_game_tools()
 
 function build_comment_tools()
 {
-   global $base_path;
+   global $base_path, $my_game, $my_mpgame;
    return " <div id=GameMessageTools>"
-      . image($base_path."images/up.png", T_('Show my previous move#ged'), null, 'id=GameMsgTool_GoToMyPreviousMove')
+      . (( $my_game || $my_mpgame )
+         ? image($base_path."images/up.png", T_('Show my previous move#ged'), null, 'id=GameMsgTool_GoToMyPreviousMove')
+         : '' )
       . image($base_path."13/wm.gif", T_('Show current move comment#ged'), null, 'id=GameMsgTool_ScrollToCurrMove')
       . image($base_path."images/comment_hide.png", T_('Hide comments#ged'), null, 'id=GameMsgTool_ToggleComment')
       . "</div>";

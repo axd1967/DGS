@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-08-09 jug
+
+   * game.php (build_comment_tools):
+   - fix bug for JS-game-viewer: tool "go to my previous move" only possible for own games
+
 2015-08-02 jug
 
    * include/make_translationfiles.php (TRANSL_GROUP_ALL; translations_query),
