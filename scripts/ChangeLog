@@ -13,10 +13,11 @@ ChangeLog
 
 2015-08-09 jug
 
-   * game.php (draw_game_tools):
+   * include/globals.php (CSS_VERSION), skins/dragon/screen.css, game.php (draw_game_tools):
    - JS-game-viewer:
      - moved game-info box back to original position
      - change order of tools-tabs Analyse 1st & Notes 2nd
+     - moved message-box into Analyse-tab with fixed width
 
    * include/globals.php (JS_VERSION),
      js/game-editor.js:

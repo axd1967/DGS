@@ -1126,18 +1126,19 @@ function draw_game_tools()
                   ? "<li>" . anchor('#tab_GameNotes', T_('Notes#ged') . ' ' . $img_chg_note, T_('Private game notes')) . "</li>\n"
                   : '' ),
             "</ul>\n",
-            "<div id=tab_GameAnalysis class=\"tab\">\n", build_tab_GameAnalysis(), "</div>\n";
+            "<div id=tab_GameAnalysis class=\"tab\">\n", build_tab_GameAnalysis(),
+               "<div id=GameMessage>\n",
+                  "<div id=GameMessageHeader>", T_('Messages#ged'), build_comment_tools(), "</div>\n",
+                  "<div id=GameMessageBody>\n", build_move_comments(), "</div>\n",
+               "</div>\n",
+            "</div>\n";
    if ( $show_notes )
    {
       echo "<div id=tab_GameNotes class=tab>\n";
       draw_notes(null, $notes, 12, 65); // use fixed size
       echo "</div>\n";
    }
-   echo  "</div>\n",
-         "<div id=GameMessage>\n",
-            "<div id=GameMessageHeader>", T_('Messages#ged'), build_comment_tools(), "</div>\n",
-            "<div id=GameMessageBody>\n", build_move_comments(), "</div>\n",
-         "</div>\n";
+   echo  "</div>\n";
 }//draw_game_tools
 
 function build_comment_tools()
