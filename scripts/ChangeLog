@@ -13,6 +13,10 @@ ChangeLog
 
 2015-08-09 jug
 
+   * include/globals.php (JS_VERSION),
+     js/game-editor.js:
+   - game-viewer: disable saving-notes with JavaScript due to encoding problems till after utf8-migration
+
    * game.php (build_comment_tools):
    - fix bug for JS-game-viewer: tool "go to my previous move" only possible for own games
 

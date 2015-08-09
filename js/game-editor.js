@@ -130,9 +130,9 @@ $.extend( DGS.GamePageEditor.prototype, {
          $("#gameNotes").on("change input propertychange", function( evt ) { // NOTE: undo/redo-events not captured
             me.handle_action_note_changes( this, evt );
          });
-         $("#saveNotes").click( function( evt ) {
-            me.handle_action_save_notes( this, evt );
-         });
+
+         // disable till utf8-migration done due to encoding problems
+         //$("#saveNotes").click( function( evt ) { me.handle_action_save_notes( this, evt ); });
       }
 
       $("#GameMsgTool_ToggleComment").click( { action: "hide" }, function( evt ) {
