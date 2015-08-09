@@ -871,8 +871,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    echo "\n</FORM>";
 
    echo "\n<HR>";
-   if ( !$show_game_tools )
-      draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
+   draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
 
 
 
@@ -1122,15 +1121,11 @@ function draw_game_tools()
       "<td id=ToolsArea class=\"GameTools NoPrint\">",
          "<div id=tabs>\n",
             "<ul>\n",
-               "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
                ( $show_notes
                   ? "<li>" . anchor('#tab_GameNotes', T_('Notes#ged') . ' ' . $img_chg_note, T_('Private game notes')) . "</li>\n"
                   : '' ),
                "<li>", anchor('#tab_GameAnalysis', T_('Analyse#ged'), T_('Analyse game#ged')), "</li>\n",
-            "</ul>\n",
-            "<div id=tab_GameInfo class=tab>\n";
-   draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
-   echo     "</div>\n";
+            "</ul>\n";
    if ( $show_notes )
    {
       echo "<div id=tab_GameNotes class=tab>\n";
