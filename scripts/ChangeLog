@@ -14,7 +14,9 @@ ChangeLog
 2015-08-09 jug
 
    * game.php (draw_game_tools):
-   - JS-game-viewer: moved game-info box back to original position
+   - JS-game-viewer:
+     - moved game-info box back to original position
+     - change order of tools-tabs Analyse 1st & Notes 2nd
 
    * include/globals.php (JS_VERSION),
      js/game-editor.js:
