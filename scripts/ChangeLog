@@ -13,11 +13,14 @@ ChangeLog
 
 2015-08-09 jug
 
-   * include/globals.php (CSS_VERSION), skins/dragon/screen.css, game.php (draw_game_tools):
+   * include/globals.php (CSS_VERSION), skins/dragon/screen.css,
+     game.php (draw_game_info, draw_game_tools):
    - JS-game-viewer:
      - moved game-info box back to original position
      - change order of tools-tabs Analyse 1st & Notes 2nd
      - moved message-box into Analyse-tab with fixed width
+     - restored game-info-box with formatting color/user/rank/prisoners & ruleset/rated/handicap/komi
+       into one line
 
    * include/globals.php (JS_VERSION),
      js/game-editor.js:

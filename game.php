@@ -1385,12 +1385,9 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
 
    echo '<table class=GameInfos>', "\n";
 
-   // with JS-game-tools put prisoner-info into 2nd-line with time-remaining & indent lines on starting-icons
-   // otherwise: prisoners in 1st-line and not always indent (e.g. time-info)
-
-   $cols = ( $show_game_tools ) ? 3 : 4; // 3=icon|user+imgs|rank, 4=(like 3) | prisoners
+   $cols = 4; // 4=icon|user+imgs|rank | prisoners
    $cols_r = $cols - 1;
-   $cols_r1 = ( $cols == 4 ) ? $cols : $cols_r; // remaining cols for one element on single line
+   $cols_r1 = $cols; // remaining cols for one element on single line
    $to_move = get_to_move( $game_row, 'game.bad_ToMove_ID' );
    $img_tomove = SMALL_SPACING . image( $base_path.'images/backward.gif', T_('Player to move'), null, 'class="InTextImage"' );
    $all_moves = ( $board->curr_move >= $board->max_moves );
@@ -1455,16 +1452,12 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
       echo "<tr class={$pfx}Info>\n", // blackInfo/whiteInfo
          "<td class=Color>", $icon_col, "</td>\n",
          "<td class=Name>", $user_ref, $user_tomove_img, $user_off_time, "</td>\n",
-         "<td class=\"Ratings right\">", $user_rating, "</td>\n",
-         ( $cols == 4 ? $td_prisoners : '' ),
-         "</tr>\n";
+         "<td class=\"Ratings right\">", $user_rating, "</td>\n", $td_prisoners, "</tr>\n";
 
-      if ( $game_is_started || $cols == 3 )
+      if ( $game_is_started )
       {
          echo "<tr class={$pfx}Info>\n",
-            "<td colspan=$cols_r1>$time_remaining</td>\n",
-            ( $cols == 4 ? '' : $td_prisoners ),
-            "</tr>\n";
+            "<td colspan=$cols_r1>$time_remaining</td>\n</tr>\n";
       }
    }//black/white-rows
 
@@ -1524,17 +1517,11 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
          echo_image_shapeinfo($shape_id, $game_row['Size'], $game_row['ShapeSnapshot'], false, false, true),
          T_('Ruleset'), ': ', Ruleset::getRulesetText($game_row['Ruleset']),
          $sep, T_('Rated'), ': ', ( ($game_row['Rated'] == 'N') ? T_('No') : T_('Yes') ),
-      ( $cols == 3
-         ? "</td>\n</tr>\n" .
-           "<tr>\n<td></td>\n" .
-           "<td colspan=\"$cols_r\">"
-         : $sep ),
-         T_('Handicap'), ': ', $game_row['Handicap'],
+         $sep, T_('Handicap'), ': ', $game_row['Handicap'],
          $sep, T_('Komi'), ': ', $komi,
       "</td>\n</tr>\n";
 
    echo "<tr>\n",
-      ( $cols == 4 ? '' : "<td></td>\n" ),
       "<td colspan=\"$cols_r1\">", T_('Time limit'), ': ',
          TimeFormat::echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
             $game_row['Byotime'], $game_row['Byoperiods'], TIMEFMT_ADDTYPE|TIMEFMT_SHORT),
