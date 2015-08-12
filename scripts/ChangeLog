@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-08-12 jug
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     show_games.php:
+   - added user-online column on my/user-running-games page showing state of user
+     being online or on vacation
+
 2015-08-09 jug
 
    * include/globals.php (CSS_VERSION), skins/dragon/screen.css,

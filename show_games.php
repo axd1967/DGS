@@ -449,6 +449,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 45: >  FU+RU (TG_Challenge)
  * 46: >  RU (X_Priority)
  * 47:    Indicator if there are attached SGFs
+ * 48:    RU (user online)
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -562,6 +563,13 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    }
 
    $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
+
+   if ( $running && !$all )
+   {
+      $gtable->add_tablehead(48, new TableHeadImage( T_('User online#header'), 'images/online.gif',
+         sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
+            . ', ' . T_('or on vacation#header') ), 'Image', 0 );
+   }
 
    // col 13 must be static for RESTRICT_SHOW_GAMES_ALL
    $table_mode13 = ($restrict_games) ? TABLE_NO_HIDE : 0;
@@ -834,6 +842,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
                $is_to_move = ( $X_Color & 0x10 ); // opp-turn -> use clock
                $row_arr[40] = build_time_remaining( $row, $opp_col, $is_to_move );
             }
+            if ( !$all && $gtable->Is_Column_Displayed[48] )
+               $row_arr[48] = echo_user_online_vacation( @$oppOnVacation, @$oppLastaccess );
          }
       }
 

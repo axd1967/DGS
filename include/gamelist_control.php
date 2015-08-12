@@ -202,7 +202,8 @@ class GameListControl
                "IF(G.Black_ID=$uid, G.White_Start_Rating, G.Black_Start_Rating) AS oppStartRating",
                "IF(G.Black_ID=$uid, G.Black_Start_Rating, G.White_Start_Rating) AS userStartRating",
                "IF(G.Black_ID=$uid, $uid, G.White_ID) AS userID",
-               'UNIX_TIMESTAMP(Opp.Lastaccess) AS oppLastaccess' );
+               'UNIX_TIMESTAMP(Opp.Lastaccess) AS oppLastaccess',
+               'Opp.OnVacation AS oppOnVacation' );
             $qsql->add_part( SQLP_FROM, 'Players AS Opp' );
          }
 
