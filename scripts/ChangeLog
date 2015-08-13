@@ -11,6 +11,12 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-08-13 jug
+
+   * include/db/waitingroom.php (Waitingroom.build_query_sql),
+     waiting_room.php:
+   - added user-online column in waiting-room for view with other offers
+
 2015-08-12 jug
 
    * include/gamelist_control.php (GameListControl.build_games_query),

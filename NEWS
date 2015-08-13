@@ -85,6 +85,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
         default is to show rating-graph by time
 
    * <home waiting_room.php>Waiting room</home>:
+      * Added user-online column page showing state of user being online or on vacation
       * Added column with <image table.gif>-icon linked to finished games with opponent
       * Added column with creation-date of waiting-room entries
       * Hide user-related columns for view with own waiting-room entries

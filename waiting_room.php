@@ -165,6 +165,9 @@ require_once 'include/wroom_control.php';
       $wrtable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'WRP_Handle+');
       $wrtable->add_tablehead(15, T_('Country#header'), 'Image', 0, 'WRP_Country+');
       $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'WRP_Rating2-');
+      $wrtable->add_tablehead(23, new TableHeadImage( T_('User online#header'), 'images/online.gif',
+         sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
+            . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    }
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead(20, T_('GameType#header'), '', TABLE_NO_HIDE, 'GameType+');
@@ -323,6 +326,8 @@ require_once 'include/wroom_control.php';
             $row_arr[21] = echo_image_opp_games( $my_id, $WRP_Handle, /*fin*/true );
          if ( $wrtable->Is_Column_Displayed[22] )
             $row_arr[22] = ( $X_Time > 0 ) ? date(DATE_FMT, $X_Time) : '';
+         if ( @$wrtable->Is_Column_Displayed[23] )
+            $row_arr[23] = echo_user_online_vacation( @$row['WRP_OnVacation'], @$row['WRP_Lastaccess'] );
 
          $wrtable->add_row( $row_arr );
       }//while
