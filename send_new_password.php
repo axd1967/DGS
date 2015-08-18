@@ -103,7 +103,7 @@ Both the old and the new password will also be valid until
    ta_begin();
    {//HOT-section to save new password
       admin_log( @$player_row['ID'], @$player_row['Handle'],
-         "send a new password to $pswduser at $Email.");
+         "send a new password to $pswduser at $Email");
 
       db_query( "send_new_password.update($pswduser)",
             "UPDATE Players " .
