@@ -1279,10 +1279,10 @@ class GameHelper
    public static function determine_finished_game_hero_uid( $black_id, $white_id, $b_start_rating, $w_start_rating )
    {
       if ( $b_start_rating >= MIN_RATING
-            && ( $w_start_rating <= -OUT_OF_RATING || $b_start_rating > $w_start_rating + MIN_RATDIFF_HERO ) )
+            && ( $w_start_rating <= -OUT_OF_RATING || $b_start_rating >= $w_start_rating + MIN_RATDIFF_HERO ) )
          $hero_uid = $black_id;
       elseif ( $w_start_rating >= MIN_RATING
-            && ( $b_start_rating <= -OUT_OF_RATING || $w_start_rating > $b_start_rating + MIN_RATDIFF_HERO ) )
+            && ( $b_start_rating <= -OUT_OF_RATING || $w_start_rating >= $b_start_rating + MIN_RATDIFF_HERO ) )
          $hero_uid = $white_id;
       else
          $hero_uid = 0;
