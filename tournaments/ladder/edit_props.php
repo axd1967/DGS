@@ -231,20 +231,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',        T_('months'), ));
    $tform->add_empty_row();
 
-   // crowning king
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Crown King#T_ladder'),
-         'TEXTINPUT',   'crownking', 8, 8, $vars['crownking'],
-         'TEXT',
-            sprintf( '[%s], %s',
-               TimeFormat::_echo_time( $tl_props->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ),
-               T_('time in hours top rank must be kept, format: "99d 99h"#T_ladder') ), ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Crown King Check time#T_ladder'),
-         'TEXTINPUT',   'crownstart', 20, 20, $vars['crownstart'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE )), ));
-   $tform->add_empty_row();
-
    // consecutive-wins threshold
    $tform->add_row( array(
          'DESCRIPTION', T_('Consecutive Wins Threshold#T_ladder'),
@@ -317,8 +303,6 @@ function parse_edit_form( &$tlp, $t_limits )
       'join_order'      => $tlp->UserJoinOrder,
       'uabs_days'       => $tlp->UserAbsenceDays,
       'rankplen'        => $tlp->RankPeriodLength,
-      'crownking'       => $tlp->CrownKingHours,
-      'crownstart'      => formatDate($tlp->CrownKingStart),
       'seqwins_threshold' => $tlp->SeqWinsThreshold,
    );
 
@@ -331,7 +315,6 @@ function parse_edit_form( &$tlp, $t_limits )
    if ( $is_posted )
    {
       $old_vals['chall_range_rat'] = $tlp->ChallengeRangeRating;
-      $old_vals['crownstart'] = $tlp->CrownKingStart;
 
       $new_value = $vars['chall_range_abs'];
       if ( TournamentUtils::isNumberOrEmpty($new_value, true)
@@ -467,22 +450,6 @@ function parse_edit_form( &$tlp, $t_limits )
          $errors[] = sprintf( T_('Expecting number for rank archiving period length in range %s months#T_ladder'),
             build_range_text(1, 255) );
 
-      $new_value = $vars['crownking'];
-      $parsed_hours = TimeFormat::parse_time_days_hours( $new_value );
-      if ( !is_null($parsed_hours) )
-         $tlp->CrownKingHours = $parsed_hours;
-      else
-         $errors[] = T_('Expecting time for crowning king.#T_ladder');
-
-      $parsed_value = parseDate( T_('Crown King Check time#T_ladder'), $vars['crownstart'] );
-      if ( is_numeric($parsed_value) )
-      {
-         $tlp->CrownKingStart = $parsed_value;
-         $vars['crownstart'] = formatDate($tlp->CrownKingStart);
-      }
-      else
-         $errors[] = $parsed_value;
-
       $new_value = $vars['seqwins_threshold'];
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= 255 )
          $tlp->SeqWinsThreshold = (int)$new_value;
@@ -520,8 +487,6 @@ function parse_edit_form( &$tlp, $t_limits )
       if ( $old_vals['join_order'] != $tlp->UserJoinOrder ) $edits[] = T_('User Join Order#T_ladder');
       if ( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('User Absence#T_ladder');
       if ( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('Rank Archiving Period length#T_ladder');
-      if ( $old_vals['crownking'] != $tlp->CrownKingHours ) $edits[] = T_('Crown King#T_ladder');
-      if ( $old_vals['crownstart'] != $tlp->CrownKingStart ) $edits[] = T_('Crown King Check time#T_ladder');
       if ( $old_vals['seqwins_threshold'] != $tlp->SeqWinsThreshold ) $edits[] = T_('Consecutive Wins Threshold#T_ladder');
    }
 

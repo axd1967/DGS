@@ -39,7 +39,6 @@
 # #type[src_lang] file:line call  ### use-case description  => action-category - action-comments
 #E[L=cron] ./daily_cron.php:90: send_message( "daily_cron.waitingroom.del_mpg.notify_master($wr_id,$gid,$master_uid)",  ### msg from CRON to MPG-game-master about deletion of WROOM-entry  => OK(target -> #S)
 #E[L=cron] ./halfhourly_cron.php:189: send_message( "halfhourly_cron.notify.bad_email($uid)",  ### msg from CRON to user about invalid-email & deactivated email-notification  => OK(target -> #S)
-#E[L=cron] ./tournaments/include/tournament_ladder_helper.php:347: send_message( "TLH:process_tournament_ladder_crown_king.check.tid($tid)",  ### msg from CRON to user about ladder-crowned-king  => OK(target -> #S)
 #E[L=user] ./admin_game.php:163: send_message( 'confirm', $Text, $Subject,   ### msg from admin to game players about game-deletion  => OK(targets -> #U)
 #E[L=user] ./game_players.php:1467: send_message( 'confirm', $Text, $Subject,  ### msg from MPG-game-master to user-list about MPG-game-deletion  => OK(targets -> #U)
 #E[L=user] ./include/std_functions.php:3536: send_message( $dbgmsg.'send_msg', $Text, $Subject  ### msg from CRON(timeout) or from USER to user about deleted observed-games due to game-end  => OK(targets -> #U/S)

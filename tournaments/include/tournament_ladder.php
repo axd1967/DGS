@@ -1382,18 +1382,6 @@ class TournamentLadder
          "UPDATE TournamentLadder SET HistoryRank=PeriodRank, PeriodRank=Rank WHERE tid=$tid" );
    }
 
-   public static function process_crown_king_reset_rank( $tid, $rid )
-   {
-      global $NOW;
-      if ( !is_numeric($tid) || $tid <= 0 )
-         error('invalid_args', "TournamentLadder:process_crown_king.check.tid($tid,$rid)");
-      if ( !is_numeric($rid) || $rid <= 0 )
-         error('invalid_args', "TournamentLadder:process_crown_king.check.rid($tid,$rid)");
-
-      return db_query( "TournamentLadder:process_crown_king($tid,$rid)",
-         "UPDATE TournamentLadder SET RankChanged=FROM_UNIXTIME($NOW) WHERE tid=$tid AND rid=$rid LIMIT 1" );
-   }
-
    /*! \brief Returns true if edit-ladder is allowed concerning tourney-locks. */
    public static function allow_edit_ladder( $tourney, &$return_errors )
    {

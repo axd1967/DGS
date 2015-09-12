@@ -151,3 +151,9 @@ UPDATE ConfigPages SET
    ColumnsGamesRunningAll2=ColumnsGamesRunningAll2 & ~0x300 ;
 
 
+-- remove automatic crowning of king for ladder-tournaments
+ALTER TABLE TournamentLadderProps
+   DROP COLUMN CrownKingHours,
+   DROP COLUMN CrownKingStart ;
+
+

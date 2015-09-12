@@ -378,12 +378,6 @@ class TournamentLogHelper
          $msg[] = sprintf(self::$DIFF_FMT, 'UserAbsenceDays', $old_tlp->UserAbsenceDays, $new_tlp->UserAbsenceDays );
       if ( $old_tlp->RankPeriodLength != $new_tlp->RankPeriodLength )
          $msg[] = sprintf(self::$DIFF_FMT, 'RankPeriodLength', $old_tlp->RankPeriodLength, $new_tlp->RankPeriodLength );
-      if ( $old_tlp->CrownKingHours != $new_tlp->CrownKingHours )
-         $msg[] = sprintf(self::$DIFF_FMT, 'CrownKingHours', $old_tlp->CrownKingHours, $new_tlp->CrownKingHours );
-      if ( $old_tlp->CrownKingStart != $new_tlp->CrownKingStart )
-         $msg[] = sprintf(self::$DIFF_FMT, 'CrownKingStart',
-            ( $old_tlp->CrownKingStart > 0 ? date(DATE_FMT, $old_tlp->CrownKingStart) : ''),
-            ( $new_tlp->CrownKingStart > 0 ? date(DATE_FMT, $new_tlp->CrownKingStart) : '') );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TLP_Data', TLOG_ACT_CHANGE, 0,
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));

@@ -13,6 +13,25 @@ ChangeLog
 
 2015-09-12 jug
 
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.__construct,
+       ~.fillEntityData, ~.check_ladder_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_crown_king),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_ladder_props),
+     tournaments/include/tournament_ladder.php (TournamentLadder),
+     scripts/updates/1.19/database_changes.mysql, specs/db/dragon-ddl.sql,
+     specs/db/table-Tournaments.txt, specs/Notifications-EVAL.txt, NEWS,
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/admin.php, tournaments/cron_tournaments.php:
+   - (T016.d) removed automatic crowning of king-of-the-hill for ladder-tournaments
+     - still allow manual crowning by T-director
+     - commented out tournament-cron hourly processing
+-----------
+-- remove automatic crowning of king for ladder-tournaments
+ALTER TABLE TournamentLadderProps
+   DROP COLUMN CrownKingHours,
+   DROP COLUMN CrownKingStart ;
+-----------
+
    * include/globals.php (CSS_VERSION),
      skins/dragon/screen.css,
      tournaments/ladder/challenge.php (add_form_user_info):

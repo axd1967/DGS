@@ -56,8 +56,8 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
                   'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
                   'MaxChallenges', 'PenaltyTimeout', 'PenaltyLimit', 'UserAbsenceDays', 'RankPeriodLength',
-                  'CrownKingHours', 'SeqWinsThreshold',
-      FTYPE_DATE, 'Lastchanged', 'CrownKingStart',
+                  'SeqWinsThreshold',
+      FTYPE_DATE, 'Lastchanged',
       FTYPE_ENUM, 'DetermineChallenger', 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss',
                   'UserJoinOrder'
    );
@@ -89,8 +89,6 @@ class TournamentLadderProps
    public $UserJoinOrder;
    public $UserAbsenceDays;
    public $RankPeriodLength;
-   public $CrownKingHours;
-   public $CrownKingStart;
    public $SeqWinsThreshold;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
@@ -102,7 +100,7 @@ class TournamentLadderProps
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST,
          $penalty_timeout=0, $penalty_limit=0, $user_join_order=TLP_JOINORDER_REGTIME,
-         $user_absence_days=0, $rank_period_len=1, $crown_king_hours=0, $crown_king_start=0, $seq_wins_threshold=0 )
+         $user_absence_days=0, $rank_period_len=1, $seq_wins_threshold=0 )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -127,8 +125,6 @@ class TournamentLadderProps
       $this->setUserJoinOrder($user_join_order);
       $this->UserAbsenceDays = (int)$user_absence_days;
       $this->RankPeriodLength = limit( (int)$rank_period_len, 1, 255, 1 );
-      $this->CrownKingHours = (int)$crown_king_hours;
-      $this->CrownKingStart = (int)$crown_king_start;
       $this->SeqWinsThreshold = (int)$seq_wins_threshold;
    }//__construct
 
@@ -242,8 +238,6 @@ class TournamentLadderProps
       $data->set_value( 'UserJoinOrder', $this->UserJoinOrder );
       $data->set_value( 'UserAbsenceDays', $this->UserAbsenceDays );
       $data->set_value( 'RankPeriodLength', $this->RankPeriodLength );
-      $data->set_value( 'CrownKingHours', $this->CrownKingHours );
-      $data->set_value( 'CrownKingStart', $this->CrownKingStart );
       $data->set_value( 'SeqWinsThreshold', $this->SeqWinsThreshold );
       return $data;
    }
@@ -310,12 +304,6 @@ class TournamentLadderProps
       if ( $this->RankPeriodLength < 1 || $this->RankPeriodLength > 255 )
          $errors[] = sprintf( T_('Rank-period length must be in range %s months.#T_ladder'),
             build_range_text(1, 255) );
-
-      if ( $this->CrownKingHours < 0 || $this->RankPeriodLength > 50000 )
-         $errors[] = sprintf( T_('Crowning of king time must be in range %s hours.#T_ladder'),
-            build_range_text(0, 50000) );
-      if ( ($this->CrownKingHours > 0 && $this->CrownKingStart == 0) || ($this->CrownKingHours ==0 && $this->CrownKingStart > 0) )
-         $errors[] = T_('For auto-crowning of king you need both settings (hours and check start date).#T_ladder');
 
       if ( $this->SeqWinsThreshold < 0 || $this->SeqWinsThreshold > 255 )
          $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Consecutive Wins Threshold#T_ladder'),
@@ -441,12 +429,6 @@ class TournamentLadderProps
          ( ($this->RankPeriodLength == 1)
                ? T_('1 month')
                : sprintf( T_('%s months'), $this->RankPeriodLength ) );
-
-      // crowning king
-      if ( $this->CrownKingHours > 0 )
-         $arr_props[] = sprintf( T_('You will be crowned as "King of the Hill" after keeping the top rank for %s.#T_ladder'),
-            TimeFormat::_echo_time( $this->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ) ) . "\n" .
-            sprintf( T_('The check for this starts at [%s].#T_ladder'), date(DATE_FMT, $this->CrownKingStart) );
 
       // consecutive-wins
       if ( $this->SeqWinsThreshold > 0 )
@@ -776,8 +758,6 @@ class TournamentLadderProps
             @$row['UserJoinOrder'],
             @$row['UserAbsenceDays'],
             @$row['RankPeriodLength'],
-            @$row['CrownKingHours'],
-            @$row['X_CrownKingStart'],
             @$row['SeqWinsThreshold']
          );
       return $tlp;

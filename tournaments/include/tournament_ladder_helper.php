@@ -251,55 +251,8 @@ class TournamentLadderHelper
 
 
    /*!
-    * \brief Checks if a king is to be crowned for a ladder-tournament.
-    * \return ListIterator with data to crown ladder-king.
-    * \see TournamentLadderHelper:process_tournament_ladder_crown_king()
-    */
-   public static function load_ladder_crown_kings( $iterator=null )
-   {
-      global $NOW;
-      $qsql = new QuerySQL(
-         SQLP_FIELDS,
-            'T.ID AS tid',
-            'TL.uid',
-            'TL.rid',
-            'TL.Rank',
-            'UNIX_TIMESTAMP(TL.RankChanged) AS X_RankChanged',
-            'TLP.CrownKingHours',
-            'P.Rating2',
-            'T.Owner_ID AS owner_uid',
-         SQLP_FROM,
-            'Tournament AS T',
-            'INNER JOIN TournamentLadderProps AS TLP ON TLP.tid=T.ID',
-            'INNER JOIN TournamentLadder AS TL ON TL.tid=T.ID',
-            'INNER JOIN Players AS P ON P.ID=TL.uid',
-         SQLP_WHERE,
-            "T.Status='".TOURNEY_STATUS_PLAY."'",
-            "T.Type='".TOURNEY_TYPE_LADDER."'",
-            'TLP.CrownKingHours > 0',
-            "TLP.CrownKingStart <= FROM_UNIXTIME($NOW)",
-            'TL.Rank=1',
-            'TL.RankChanged > 0',
-            "TL.RankChanged < FROM_UNIXTIME($NOW) - INTERVAL TLP.CrownKingHours HOUR"
-         );
-
-      if ( is_null($iterator) )
-         $iterator = new ListIterator( 'TLH:load_ladder_crown_kings' );
-      $iterator->addQuerySQLMerge( $qsql );
-      $result = db_query( "TLH:load_ladder_crown_kings", $iterator->buildQuery() );
-      $iterator->setResultRows( mysql_num_rows($result) );
-
-      while ( $row = mysql_fetch_array($result) )
-         $iterator->addItem( null, $row );
-      mysql_free_result($result);
-
-      return $iterator;
-   }//load_ladder_crown_kings
-
-   /*!
     * \brief Crowns King with information given in $row.
-    * \param $row map with fields: tid, uid, rid, Rank, X_RankChanged, CrownKingHours, Rating2, owner_uid
-    * \see TournamentLadderHelper.load_ladder_crown_kings()
+    * \param $row map with fields: tid, uid, rid, Rank, X_RankChanged, Rating2, owner_uid
     */
    public static function process_tournament_ladder_crown_king( $row, $tlog_type, $by_tdir_uid=0 )
    {
@@ -313,7 +266,7 @@ class TournamentLadderHelper
 
       $tresult = new TournamentResult( 0, $tid, $row['uid'], $row['rid'], $row['Rating2'],
          TRESULTTYPE_TL_KING_OF_THE_HILL, /*round*/1, /*start*/$row['X_RankChanged'], /*end*/$NOW,
-         0, $row['Rank'], '', 'set by CRON' );
+         0, $row['Rank'], '', ($by_tdir_uid <= 0 ? 'set by CRON' : "set by uid $by_tdir_uid") );
 
       $nfy_uids = TournamentDirector::load_tournament_directors_uid( $tid );
       $nfy_uids[] = $row['owner_uid'];
@@ -339,9 +292,6 @@ class TournamentLadderHelper
       ta_begin();
       {//HOT-section to insert crowned-king for ladder-tournament as tournament-result
          $tresult->persist(); // add T-result
-
-         // reset TL.RankChanged
-         TournamentLadder::process_crown_king_reset_rank( $tid, $row['rid'] );
 
          // notify TDs + owner
          send_message( "TLH:process_tournament_ladder_crown_king.check.tid($tid)",

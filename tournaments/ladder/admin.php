@@ -214,7 +214,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          }
          ta_end();
       }
-      elseif ( @$_REQUEST['ta_crownking'] && $allow_edit_user && $tl_props->CrownKingHours == 0 )
+      elseif ( @$_REQUEST['ta_crownking'] && $allow_edit_user )
       {
          TournamentLadderHelper::process_tournament_ladder_crown_king( array(
                'tid'             => $tid,
@@ -222,7 +222,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
                'rid'             => $tladder_user->rid,
                'Rank'            => $tladder_user->Rank,
                'X_RankChanged'   => $tladder_user->RankChanged,
-               'CrownKingHours'  => $tl_props->CrownKingHours,
                'Rating2'         => $user->Rating,
                'owner_uid'       => $tourney->Owner_ID, ),
             $allow_edit_tourney, $my_id );
@@ -406,20 +405,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    $tform->add_row( array( 'HR' ));
    $tform->add_row( array( 'HEADER', T_('Crown King of the Hill#T_ladder') ));
-   if ( !$is_delete && !is_null($user) && !is_null($tladder_user) && $authorise_edit_user
-         && $tl_props->CrownKingHours == 0 ) // valid user and no auto-crowning
+   if ( !$is_delete && !is_null($user) && !is_null($tladder_user) && $authorise_edit_user ) // valid user
    {
       add_form_edit_user( $tform, $user,
          'ta_crownking', /*confirm*/false, T_("Crown user [%s] as 'King of the Hill'#T_ladder"),
          T_('User will be crowned as king. This is stored as tournament result.'),
          /*notify*/0,
          T_('User will NOT be notified of this. All tournament directors and owner will be notified.') );
-   }
-   elseif ( !$is_delete && $tl_props->CrownKingHours > 0 )
-   {
-      $tform->add_row( array(
-            'CELL', 2, '',
-            'TEXT', T_('Crowning of King is done automatically for this ladder tournament.'), ));
    }
    $tform->add_empty_row();
 

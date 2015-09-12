@@ -95,6 +95,7 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
    // NOTE: added special hourly-jobs here to avoid the complexity of cron-locking
    //       of hourly_cron/tournament-cron-scripts
 
+   /* NOTE: unused at the moment, keep for later
    $row = mysql_single_fetch( 'cron_tournament.hourly.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
@@ -105,9 +106,10 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
          db_query( 'cron_tournament.hourly.next_run_date',
             "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
 
-         run_hourly();
+         //run_hourly();
       }
    }
+   */
 
 
 
@@ -234,31 +236,5 @@ function run_once_daily()
    TournamentVisit::cleanup_tournament_visits();
 
 }//run_once_daily
-
-
-function run_hourly()
-{
-   global $tcache;
-
-   // ---------- Check for crowning of "King of the Hill"
-
-   $tres_iterator = TournamentLadderHelper::load_ladder_crown_kings(
-      new ListIterator( 'cron_tournament.load_ladder_crown_kings' ));
-
-   ta_begin();
-   {//HOT-section to crown kings for ladder-tournaments
-      while ( list(,$arr_item) = $tres_iterator->getListIterator() )
-      {
-         list( ,$orow ) = $arr_item;
-         $tid = $orow['tid'];
-
-         $tcache->release_tournament_cron_lock( $tid );
-         if ( $tcache->set_tournament_cron_lock( $tid ) )
-            TournamentLadderHelper::process_tournament_ladder_crown_king( $orow, TLOG_TYPE_CRON );
-      }
-      $tcache->release_tournament_cron_lock();
-   }
-   ta_end();
-}//run_hourly
 
 ?>

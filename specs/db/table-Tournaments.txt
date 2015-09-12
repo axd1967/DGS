@@ -603,8 +603,6 @@ Description:
 | UserJoinOrder          | enum('REGTIME','RATING','RANDOM')                                              | NO   |     | REGTIME             |       |
 | UserAbsenceDays        | tinyint(3) unsigned                                                            | NO   | MUL | 0                   |       |
 | RankPeriodLength       | tinyint(3) unsigned                                                            | NO   |     | 1                   |       |
-| CrownKingHours         | smallint(5) unsigned                                                           | NO   |     | 0                   |       |
-| CrownKingStart         | datetime                                                                       | NO   |     | 0000-00-00 00:00:00 |       |
 | SeqWinsThreshold       | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
 
 
@@ -704,12 +702,6 @@ Description:
    - unit is number of months
    - each new period at start of month, the ladder-tournament current ranks
      are copied to PeriodRank-field and former PeriodRank copied to HistoryRank-field
-
-* CrownKingHours : number of hours player must keep top-rank to be crowned king (of the hill)
-   - 0 = no automatic crowning of king, then also CrownKingStart must be 0
-
-* CrownKingStart : date from when CRON should check for king-crowning
-   - 0 = no automatic crowning of king, then also CrownKingHours must be 0
 
 * SeqWinsThreshold : min-threshold to be crossed by ladder-user SeqWinsBest to enter tournament-result
    - 0 = disabled
