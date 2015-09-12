@@ -275,11 +275,18 @@ function add_form_user_info( &$tform, $utype, $user, $tladder, $trules )
    $tform->add_row( array( 'HR' ));
    if ( !is_null($user) )
    {
+      if ( $user->urow['OnVacation'] > 0 )
+         $vac_str = sprintf('%s %s (%s)', SEP_SPACING, span('OnVacation', T_('On vacation')),
+            span('smaller', TimeFormat::echo_onvacation($user->urow['OnVacation'])) );
+      else
+         $vac_str = '';
+
       $tform->add_row( array(
             'DESCRIPTION', span('bold', $utype),
             'TEXT', $user->user_reference(),
-            'TEXT', echo_off_time( false, $user->urow['OnVacation'], null, @$trules->WeekendClock ),
-            'TEXT', SEP_SPACING . echo_rating( $user->Rating, true, $user->ID), ));
+            'TEXT', SMALL_SPACING . echo_user_online_vacation( $user->urow['OnVacation'], $user->Lastaccess ),
+            'TEXT', SEP_SPACING . echo_rating( $user->Rating, true, $user->ID),
+            'TEXT', $vac_str, ));
       if ( isset($user->urow['TP_Rating']) )
          $tform->add_row( array(
                'DESCRIPTION', T_('Tournament Rating'),

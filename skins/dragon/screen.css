@@ -1257,7 +1257,8 @@ table.Infos td.RubricWarning {
 table.Infos .RubricOnVacation a,
 table.Infos .RubricOnVacation,
 table.Infos .OnVacation a,
-table.Infos .OnVacation {
+table.Infos .OnVacation,
+span.OnVacation {
    color: red;
    font-weight: bold;
    white-space: nowrap;
@@ -2565,12 +2566,6 @@ table.GameInfos tr.whiteInfo {
 table.GameInfos td.Prisoners,
 table.GameInfos td.Ratings {
    padding-left: 1em;
-}
-
-table.GameInfos span.OnVacation {
-   color: red;
-   font-weight: bold;
-   white-space: nowrap;
 }
 
 table.GameInfos tr.BoardInfos {

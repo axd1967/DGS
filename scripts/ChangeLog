@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-09-12 jug
+
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     tournaments/ladder/challenge.php (add_form_user_info):
+   - clearer show user being on vacation on ladder-tournament challenge
+
 2015-08-26 jug
 
    * include/game_functions.php (GameHelper.determine_finished_game_hero_uid):
