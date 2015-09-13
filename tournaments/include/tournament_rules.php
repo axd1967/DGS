@@ -828,7 +828,7 @@ class TournamentRules
             $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with stronger player getting Black#tourney');
             $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with stronger player getting White#tourney');
             $arr[TRULE_HANDITYPE_DOUBLE] = T_('Double game');
-            $arr[TRULE_HANDITYPE_ALTERNATE] = T_('Alternating colors game');
+            $arr[TRULE_HANDITYPE_ALTERNATE] = T_('Manual games with alternating color');
          }
          self::$ARR_TRULES_TEXTS[$key] = $arr;
       }
