@@ -191,6 +191,7 @@ function make_invite_game_setup_from_url( $my_urow, $opp_urow )
 
       case HTYPE_NIGIRI:
       case HTYPE_DOUBLE:
+      case HTYPE_ALTERNATE: // shouldn't happen
       case HTYPE_BLACK:
       case HTYPE_WHITE:
          break;
@@ -408,6 +409,10 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
             $i_am_black = false;
          else
             $i_am_black = false;
+         break;
+
+      case HTYPE_ALTERNATE: // only for tournaments
+         error('internal_error', "$dbg.bad.htype($handicaptype)");
          break;
 
       //case HTYPE_NIGIRI: // default

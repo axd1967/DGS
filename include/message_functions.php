@@ -448,13 +448,18 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             'TEXT', $sugg_prop ));
    }//conv/proper-HType
 
-   // Manual game: nigiri, double, black, white
+   // Manual game: nigiri, double, black, white, alternate
    $handi_stones = build_arr_handicap_stones( /*def*/false );
    if ( !$is_view_mpgame && !$is_view_fairkomi )
    {
       $color_arr = GameTexts::get_manual_handicap_types();
-      if ( ( $formstyle == GSET_TOURNAMENT_LADDER ) || $is_view_mpgame )
+      if ( !$is_fstyle_tourney )
+         unset($color_arr[HTYPE_ALTERNATE]);
+      elseif ( $formstyle == GSET_TOURNAMENT_LADDER )
+      {
+         unset($color_arr[HTYPE_ALTERNATE]);
          unset($color_arr[HTYPE_DOUBLE]);
+      }
 
       if ( $formstyle == GSET_TOURNAMENT_LADDER )
          $color_txt = T_('Color Challenger#T_ladder');

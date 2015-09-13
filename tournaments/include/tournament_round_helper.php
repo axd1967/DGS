@@ -168,7 +168,15 @@ class TournamentRoundHelper
 
       // read T-games: read all existing TGames for specified pools to check if creation has been partly done
       $check_tgames = array(); // uid.uid => game-count
+      $created_games_col = array(); // uid.opp-id => BLACK | WHITE; only used for ALTERNATE-htype
       $tg_iterator = new ListIterator( "$dbgmsg.find_tgames" );
+      if ( $trules->Handicaptype == TRULE_HANDITYPE_ALTERNATE )
+      {
+         // for htype ALTERNATE: read all created Games for existing Black/White-distribution
+         $tg_iterator->addQuerySQLMerge( new QuerySQL(
+               SQLP_FIELDS, 'G.Black_ID AS G_Black_ID', 'G.White_ID AS G_White_ID',
+               SQLP_FROM,   'INNER JOIN Games AS G ON G.ID=TG.gid' ));
+      }
       $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID, $create_pools );
       while ( list(,$arr_item) = $tg_iterator->getListIterator() )
       {
@@ -179,6 +187,13 @@ class TournamentRoundHelper
             $check_tgames[$fkey] = 1;
          else
             ++$check_tgames[$fkey];
+         if ( $trules->Handicaptype == TRULE_HANDITYPE_ALTERNATE )
+         {
+            $b_uid = $orow['G_Black_ID'];
+            $w_uid = $orow['G_White_ID'];
+            $created_games_col["$b_uid.$w_uid"] = BLACK;
+            $created_games_col["$w_uid.$b_uid"] = WHITE;
+         }
       }
       unset($tg_iterator);
 
@@ -207,6 +222,8 @@ class TournamentRoundHelper
 
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
+      if ( $trules->Handicaptype == TRULE_HANDITYPE_ALTERNATE )
+         $poolTables->reorder_pool_users_by_tp_id();
       $arr_poolusers = $poolTables->get_pool_users();
       $expected_games = $poolTables->calc_pool_games_count( $games_factor );
 
@@ -220,7 +237,8 @@ class TournamentRoundHelper
       else
       {
          list( $count_games, $count_old_games ) =
-            self::start_games_for_specificed_pools( $tround, $trules, $arr_poolusers, $poolTables, $check_tgames );
+            self::start_games_for_specificed_pools(
+               $tround, $trules, $arr_poolusers, $poolTables, $check_tgames, $created_games_col );
 
          if ( $count_games > 0 )
          {
@@ -253,8 +271,11 @@ class TournamentRoundHelper
     * \internal used by start_tournament_round_games()
     * \return arr( count-games-created, count-old-games-existing, count-games-expected )
     */
-   private static function start_games_for_specificed_pools( $tround, $trules, $arr_poolusers, $poolTables, $check_tgames )
+   private static function start_games_for_specificed_pools( $tround, $trules, $arr_poolusers, $poolTables,
+         $check_tgames, $created_games_col )
    {
+      mt_srand((double)microtime()*1000000);
+
       // loop over specified pools
       echo "<table id=\"Progress\"><tr><td><ul>\n";
       $count_games = $count_old_games = $progress = 0;
@@ -266,12 +287,20 @@ class TournamentRoundHelper
 
          echo "<br>\n<li>", sprintf( T_('Pool %s of %s'), $pool, $cnt_pools ), ":<br>\n";
 
+         // determine start-color for alternating color
+         $chall_col_start_black = ( $trules->Handicaptype == TRULE_HANDITYPE_ALTERNATE )
+            ? self::determine_htype_alternate_start_color( $arr_users, $created_games_col )
+            : null;
+
          $count_game_curr = $count_games;
          while ( count($arr_users) )
          {
             $ch_uid = array_shift( $arr_users ); // challenger
             $ch_tpool = $poolTables->get_user_tournament_pool( $ch_uid );
             $user_ch = $ch_tpool->User;
+
+            // start new (user-row) with same color to alternate (only used for TRULE_HANDITYPE_ALTERNATE)
+            $chall_col_black = $chall_col_start_black;
 
             // start game with all remaining opponent-users (as defender)
             foreach ( $arr_users as $df_uid )
@@ -285,10 +314,13 @@ class TournamentRoundHelper
                   $count_old_games += $cnt_exist_tgames;
                else // NEW
                {
-                  $arr_tg = self::create_pairing_games( $trules, $tround->ID, $pool, $user_ch, $df_tpool->User );
+                  $arr_tg = self::create_pairing_games( $trules, $tround->ID, $pool, $user_ch, $df_tpool->User,
+                     $chall_col_black );
                   if ( is_array($arr_tg) )
                      $count_games += count($arr_tg);
                }
+
+               $chall_col_black = !$chall_col_black; // alternate color
 
                if ( !(++$progress % 10) )
                   echo sprintf( T_('Step %s. Created %s games so far ...#tourney') . "<br>\n", $progress, $count_games );
@@ -304,6 +336,23 @@ class TournamentRoundHelper
       return array( $count_games, $count_old_games );
    }//start_games_for_specificed_pools
 
+   private static function determine_htype_alternate_start_color( $arr_users, $created_games )
+   {
+      $chall_col_start_black = (bool) mt_rand(0,1); // start with random start-color (per pool)
+
+      // determine start-color from already created pool-games in previous (broken) pairing-run
+      if ( count($arr_users) >= 2 )
+      {
+         $ch_uid = $arr_users[0];
+         $df_uid = $arr_users[1];
+         $chk_col = (int)@$created_games_col["$ch_uid.$df_uid"];
+         if ( $chk_col )
+            $chall_col_start_black = ($chk_col == BLACK);
+      }
+
+      return $chall_col_start_black;
+   }//determine_htype_alternate_start_color
+
    /*!
     * \brief Creates tournament game (or games for DOUBLE) for specific pairing of two users for round-robin-tourneys.
     * \internal
@@ -316,9 +365,9 @@ class TournamentRoundHelper
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   private static function create_pairing_games( $trules, $tround_id, $pool, $user_ch, $user_df )
+   private static function create_pairing_games( $trules, $tround_id, $pool, $user_ch, $user_df, $chall_col_black )
    {
-      $gids = $trules->create_tournament_games( $user_ch, $user_df );
+      $gids = $trules->create_tournament_games( $user_ch, $user_df, $chall_col_black );
       if ( !$gids )
          return null;
 

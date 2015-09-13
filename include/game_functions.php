@@ -94,6 +94,7 @@ define('HTYPE_NIGIRI',  'nigiri'); // manual, color nigiri
 define('HTYPE_DOUBLE',  'double'); // manual, color double (=black and white)
 define('HTYPE_BLACK',   'black'); // manual, color black
 define('HTYPE_WHITE',   'white'); // manual, color white
+define('HTYPE_ALTERNATE', 'alternate'); // manual, alternate colors (only for round-robin-tournament)
 define('HTYPE_AUCTION_SECRET', 'auko_sec'); // fair-komi: secret auction komi
 define('HTYPE_AUCTION_OPEN',   'auko_opn'); // fair-komi: open auction komi
 define('HTYPE_YOU_KOMI_I_COLOR', 'div_ykic'); // fair-komi: You cut (choose komi), I choose (color)
@@ -2645,6 +2646,7 @@ class GameSetup
          HTYPE_AUCTION_OPEN      => 'T8',
          HTYPE_YOU_KOMI_I_COLOR  => 'T9',
          HTYPE_I_KOMI_YOU_COLOR  => 'T10',
+         HTYPE_ALTERNATE => 'T11',
 
          // map GameSetup-handi-type -> Handicap-types
          'T1'  => HTYPE_CONV,
@@ -2657,6 +2659,7 @@ class GameSetup
          'T8'  => HTYPE_AUCTION_OPEN,
          'T9'  => HTYPE_YOU_KOMI_I_COLOR,
          'T10' => HTYPE_I_KOMI_YOU_COLOR,
+         'T11' => HTYPE_ALTERNATE,
 
          // map JigoMode -> encoded GameSetup-jigo-mode
          JIGOMODE_KEEP_KOMI   => 'J0',
@@ -3623,7 +3626,7 @@ class GameSetupBuilder
    {
       $url['cat_htype'] = $cat_htype;
       if ( !is_null($gs_htype) && $cat_htype === CAT_HTYPE_MANUAL )
-         $url['color_m'] = $gs_htype;
+         $url['color_m'] = ($gs_htype == HTYPE_ALTERNATE) ? HTYPE_NIGIRI : $gs_htype;
       elseif ( !$this->is_template && $this->game->DoubleGame_ID != 0 )
          $url['color_m'] = HTYPE_DOUBLE;
       elseif ( !$this->is_template && $this->my_id == $this->game->Black_ID )
@@ -5397,12 +5400,13 @@ function get_category_handicaptype( $handitype )
 {
    // handicap-type => handicaptype-category
    static $ARR_HTYPES = array(
-         HTYPE_CONV     => CAT_HTYPE_CONV,
-         HTYPE_PROPER   => CAT_HTYPE_PROPER,
-         HTYPE_NIGIRI   => CAT_HTYPE_MANUAL,
-         HTYPE_DOUBLE   => CAT_HTYPE_MANUAL,
-         HTYPE_BLACK    => CAT_HTYPE_MANUAL,
-         HTYPE_WHITE    => CAT_HTYPE_MANUAL,
+         HTYPE_CONV        => CAT_HTYPE_CONV,
+         HTYPE_PROPER      => CAT_HTYPE_PROPER,
+         HTYPE_NIGIRI      => CAT_HTYPE_MANUAL,
+         HTYPE_DOUBLE      => CAT_HTYPE_MANUAL,
+         HTYPE_BLACK       => CAT_HTYPE_MANUAL,
+         HTYPE_WHITE       => CAT_HTYPE_MANUAL,
+         HTYPE_ALTERNATE   => CAT_HTYPE_MANUAL,
          HTYPE_AUCTION_SECRET   => CAT_HTYPE_FAIR_KOMI,
          HTYPE_AUCTION_OPEN     => CAT_HTYPE_FAIR_KOMI,
          HTYPE_YOU_KOMI_I_COLOR => CAT_HTYPE_FAIR_KOMI,

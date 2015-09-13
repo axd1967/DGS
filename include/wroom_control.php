@@ -296,6 +296,10 @@ class WaitingroomControl
             $i_am_black = true; // game-offerer wants WHITE, so challenger gets BLACK
             break;
 
+         case HTYPE_ALTERNATE: // only for tournaments
+            error('internal_error', "WC:join_waitingroom_game.bad.htype($handicaptype)");
+            break;
+
          case HTYPE_AUCTION_SECRET:
          case HTYPE_AUCTION_OPEN:
          case HTYPE_I_KOMI_YOU_COLOR:

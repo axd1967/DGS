@@ -451,6 +451,25 @@ class PoolTables
    }//fill_pools
 
    /*!
+    * \brief Reorders users in all pools by TP.ID (needed for TRULE_HANDITYPE_ALTERNATE).
+    * IMPORTANT NOTE: only works if TP_ID has been loaded into TournamentPool for users!
+    */
+   public function reorder_pool_users_by_tp_id()
+   {
+      foreach ( $this->pools as $pool => $arr_users )
+         usort( $this->pools[$pool], array( $this, '_compare_user_tp_id' ) );
+   }//reorder_pool_users
+
+   /*! \internal Comparator-function to sort users of pool by TP.ID. */
+   private function _compare_user_tp_id( $a_uid, $b_uid )
+   {
+      $a_tpool = $this->users[$a_uid];
+      $b_tpool = $this->users[$b_uid];
+
+      return cmp_int( $a_tpool->User->urow['TP_ID'], $b_tpool->User->urow['TP_ID'] );
+   }//_compare_user_tp_id
+
+   /*!
     * \brief Sets TournamentGames for pool-tables and count games.
     * \note also sets this->tpoints for consecutive pool-viewing & other actions calculating points/rank of pool.
     */
@@ -534,7 +553,7 @@ class PoolTables
       }
    }//fill_games
 
-   /*! \internal Comparator-function to sort users of pool. */
+   /*! \internal Comparator-function to sort users of pool by pool-rank. */
    private function _compare_user_ranks( $a_uid, $b_uid )
    {
       $a_tpool = $this->users[$a_uid];

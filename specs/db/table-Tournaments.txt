@@ -367,7 +367,8 @@ Description:
 | Flags         | smallint(5) unsigned                                    | NO   |     | 0                   |                |
 | Ruleset       | enum('JAPANESE','CHINESE')                              | NO   |     | JAPANESE            |                |
 | Size          | tinyint(3) unsigned                                     | NO   | MUL | 19                  |                |
-| Handicaptype  | enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') | NO   |     | CONV                |                |
+| Handicaptype  | enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE','ALTERNATE')
+                                                                          | NO   |     | CONV                |                |
 | AdjKomi       | decimal(4,1)                                            | NO   |     | 0.0                 |                |
 | JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                | NO   |     | KEEP_KOMI           |                |
 | Handicap      | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
@@ -411,6 +412,9 @@ Description:
      - ladder-tournament:      manual game with challenger getting black | white
      - round-robin-tournament: manual game with stronger player getting black | white
    - DOUBLE = double game
+     - ladder-tournament:      not supported, because it makes no sense for ladders
+     - round-robin-tournament: supported
+   - ALTERNATE = alternate Black and White for one player
      - ladder-tournament:      not supported, because it makes no sense for ladders
      - round-robin-tournament: supported
    - in relation to Waitingroom-table noted enums in upper-case

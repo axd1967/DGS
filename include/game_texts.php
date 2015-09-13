@@ -50,10 +50,11 @@ class GameTexts
       if ( is_null($ARR_GAME_MAN_HTYPES) )
       {
          $ARR_GAME_MAN_HTYPES = array(
-            HTYPE_NIGIRI => T_('Nigiri#htman'),
-            HTYPE_DOUBLE => T_('Double#htman'),
-            HTYPE_BLACK  => T_('Black#htman'),
-            HTYPE_WHITE  => T_('White#htman'),
+            HTYPE_NIGIRI      => T_('Nigiri#htman'),
+            HTYPE_ALTERNATE   => T_('Alternate#htman'), // only for tournaments
+            HTYPE_DOUBLE      => T_('Double#htman'),
+            HTYPE_BLACK       => T_('Black#htman'),
+            HTYPE_WHITE       => T_('White#htman'),
          );
       }
       return is_null($htype) ? $ARR_GAME_MAN_HTYPES : @$ARR_GAME_MAN_HTYPES[$htype];

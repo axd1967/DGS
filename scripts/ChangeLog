@@ -11,6 +11,33 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-09-13 jug
+
+   * tournaments/include/tournament_rules.php (TRULE_HANDITYPE_ALTERNATE; class TournamentRules,
+       ~.convertEditForm_to_TournamentRules, ~.create_tournament_games, ~.prepare_create_game_row,
+       ~.getHandicaptypeText, ~.convert_trule_handicaptype_to_stdhtype),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.start_tournament_round_games,
+       ~.start_games_for_specificed_pools, ~.determine_htype_alternate_start_color, ~.create_pairing_games),
+     include/game_functions.php (HTYPE_ALTERNATE; GameSetup.MAP_GAME_SETUP;
+       GameSetupBuilder.build_url_cat_htype_manual; get_category_handicaptype),
+     tournaments/include/tournament_pool_classes.php (PoolTables.reorder_pool_users_by_tp_id,
+       ~._compare_user_tp_id),
+     include/make_game.php (make_invite_game_setup_from_url, accept_invite_game),
+     include/wroom_control.php (WaitingroomControl.join_waitingroom_game),
+     include/game_texts.php (GameTexts.get_manual_handicap_types),
+     include/message_functions.php (game_settings_form),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt:
+   - add handicap-type to "alternate" colors for round-robin-tournaments
+     - new handicap-type to get balanced black/white game-distribution for tournament-participants
+     - alternating colors only for round-robin-tournaments, forbid for invitations and waiting-room
+     - start each pool with random start-color, then continue alternating color filling up pool
+-----------
+-- added handicap-type to alternate color for round-robin-tournaments
+ALTER TABLE TournamentRules
+   MODIFY Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE','ALTERNATE') NOT NULL default 'CONV' ;
+-----------
+
 2015-09-12 jug
 
    * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.__construct,

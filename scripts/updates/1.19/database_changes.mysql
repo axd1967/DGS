@@ -157,3 +157,8 @@ ALTER TABLE TournamentLadderProps
    DROP COLUMN CrownKingStart ;
 
 
+-- added handicap-type to alternate color for round-robin-tournaments
+ALTER TABLE TournamentRules
+   MODIFY Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE','ALTERNATE') NOT NULL default 'CONV' ;
+
+

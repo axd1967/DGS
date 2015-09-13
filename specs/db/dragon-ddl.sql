@@ -1367,7 +1367,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRules` (
   `Flags` smallint(5) unsigned NOT NULL default '0',
   `Ruleset` enum('JAPANESE','CHINESE') NOT NULL default 'JAPANESE',
   `Size` tinyint(3) unsigned NOT NULL default '19',
-  `Handicaptype` enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') NOT NULL default 'CONV',
+  `Handicaptype` enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE','ALTERNATE') NOT NULL default 'CONV',
   `AdjKomi` decimal(4,1) NOT NULL default '0.0',
   `JigoMode` enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI',
   `Handicap` tinyint(3) unsigned NOT NULL default '0',
