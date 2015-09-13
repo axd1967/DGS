@@ -56,6 +56,9 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
          * Show tournament-data on games-list only for non-detached tournament-games
          * Hide annulled tournament-games from tournament-games-list
 
+   * Round-Robin-Tournament:
+      * Added manual handicap-type 'Alternate' for balanced color distribution in pool-games
+
    Minor changes:
 
    * Markup tags and Images:

@@ -11,6 +11,8 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+### ----- release-1_19_9-20150913 -----
+
 2015-09-13 jug
 
    * tournaments/include/tournament_rules.php (TRULE_HANDITYPE_ALTERNATE; class TournamentRules,
