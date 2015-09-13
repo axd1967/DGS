@@ -371,13 +371,13 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
    {
       case HTYPE_CONV:
          if ( !$iamrated || !$opprated )
-            error('no_initial_rating', "$dbgmsg.check.conv_H.rating");
+            error('no_initial_rating', "$dbg.check.conv_H.rating");
          list( $handicap, $komi, $i_am_black, $is_nigiri ) = $game_settings->suggest_conventional( $my_rating, $opprating );
          break;
 
       case HTYPE_PROPER:
          if ( !$iamrated || !$opprated )
-            error('no_initial_rating', "$dbgmsg.check.prop.rating");
+            error('no_initial_rating', "$dbg.check.prop.rating");
          list( $handicap, $komi, $i_am_black, $is_nigiri ) = $game_settings->suggest_proper( $my_rating, $opprating );
          break;
 
