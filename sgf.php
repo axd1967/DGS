@@ -103,7 +103,7 @@ else
             if ( $sgf->mpg_active_user['Sessioncode'] == safe_getcookie('sessioncode')
                   && $sgf->mpg_active_user['X_Sessionexpire'] >= $NOW )
             {
-               $owned_uid = $sgf->mpg_active_user[0];
+               $owned_uid = $sgf->mpg_active_user['uid'];
                $owned_comments = BLACK; // <>DAME
             }
          }
