@@ -13,6 +13,12 @@ ChangeLog
 
 2015-09-19 jug
 
+   * include/sgf_builder.php (SgfBuilder.build_sgf, ~.build_sgf_moves, ~.add_game_notes, ~.build_sgf_end):
+   - fix bug for SGF-download: put private-game-notes of player in same C[] SGF-property as last-move
+     comment instead of non-SGF-compliant 2nd C-prop
+     - append game-notes for unfinished games in last-move comment
+     - append game-notes for finished games after RESULT-info in extra SGF-node
+
    * sgf.php:
    - fix bug for SGF-download: include private-game-notes for players in MPG by correcting
      identification of MP-game-player

@@ -644,7 +644,12 @@ class SgfBuilder
          $this->build_sgf_moves( $owned_comments );
 
       $this->build_sgf_result();
-      $this->build_sgf_end( $owned_comments );
+
+      // add game-notes for finished-games after RESULT
+      if ( $this->game_row['Status'] == GAME_STATUS_FINISHED )
+         $this->add_game_notes( $owned_comments );
+
+      $this->build_sgf_end();
    }//build_sgf
 
    /*! \brief Builds root-node for SGF. */
@@ -814,7 +819,7 @@ class SgfBuilder
    }//build_sgf_setup
 
    /*!
-    * \brief Builds moves.
+    * \brief Builds moves (and add game-notes for unfinished games).
     * \param $owned_comments see build_sgf()-func
     * \note see also load_from_db()-func in 'include/board.php'
     */
@@ -920,9 +925,6 @@ class SgfBuilder
 
                   $this->sgf_echo_points( $this->points );
                   $this->points = array();
-
-                  $this->sgf_echo_comment( $this->node_com );
-                  $this->node_com = '';
                }
                elseif ( $this->sgf_trim_nr >= 0 )
                {// move
@@ -960,7 +962,6 @@ class SgfBuilder
                   }
                   else
                   { //pass, normal move or non AB handicap
-
                      if ( $PosX == POSX_PASS )
                      {
                         $this->sgf_echo_prop($color, '', $MoveNr); //move property, do not use [tt] for PASS
@@ -976,16 +977,20 @@ class SgfBuilder
 
                      $this->points = array();
                   }
-
-                  $this->sgf_echo_comment( $this->node_com );
-                  $this->node_com = '';
                }
+
+               // add game-notes for unfinished-games in last move
+               if ( $MoveNr == $Moves && $Status != GAME_STATUS_FINISHED )
+                  $this->add_game_notes( $owned_comments );
+
+               $this->sgf_echo_comment( $this->node_com );
+               $this->node_com = '';
                break;
             }//case WHITE/BLACK
          }//switch $Stone
 
          $this->sgf_trim_nr--;
-      }
+      }//moves-loop
    }//build_sgf_moves
 
 
@@ -1215,8 +1220,8 @@ class SgfBuilder
          $this->node_com .= " (set by admin)";
    }//build_sgf_result
 
-   /*! \brief Finishes SGF-tree. */
-   private function build_sgf_end( $owned_comments )
+   /*! \brief Add game-notes in $this->node_com. */
+   private function add_game_notes( $owned_comments )
    {
       $notes = ( $owned_comments == BLACK || $owned_comments == WHITE ) ? trim($this->player_notes) : '';
       if ( (string)$notes != '' )
@@ -1224,7 +1229,11 @@ class SgfBuilder
          $player_txt = $this->buildPlayerName( $owned_comments, $this->is_mpgame );
          $this->node_com .= "\n\nNotes - $player_txt:\n" . $notes ;
       }
+   }//add_game_notes
 
+   /*! \brief Finishes SGF-tree. */
+   private function build_sgf_end()
+   {
       $this->sgf_echo_comment( $this->node_com );
       $this->node_com = '';
 
