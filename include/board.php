@@ -99,9 +99,16 @@ class Board
 
    private function get_last_move_mark_type()
    {
-      return ( 0 && ( $this->stone_size == 21 || $this->stone_size == 25 ) )
-         ? 'ms' // special last-move-marker
+      /* Halloween 2015 (animated) */
+      return ( 0 && ( $this->stone_size == 25 ) )
+         ? 'msa' // special last-move-marker (2015 animated)
          : 'm'; // normal last-move-marker
+
+      /* Halloween 2014
+      return ( 0 && ( $this->stone_size == 21 || $this->stone_size == 25 ) )
+         ? 'ms' // special last-move-marker (2014)
+         : 'm'; // normal last-move-marker
+       */
    }
 
    public function debug_array( $sep=':' )

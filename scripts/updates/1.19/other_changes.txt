@@ -20,10 +20,14 @@ rm include/GoDiagram.php
 copy /images/smallwood16.gif
 copy /images/halloween-b.gif
 copy /images/halloween-w.gif
+copy /images/halloween-ab.gif
+copy /images/halloween-aw.gif
 copy /21/bms.gif
 copy /21/wms.gif
 copy /25/bms.gif
 copy /25/wms.gif
+copy /25/bmsa.gif
+copy /25/wmsa.gif
 
 -----------
 # clear APC-cache due to changes of cached objects:
