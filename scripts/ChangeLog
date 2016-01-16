@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-01-16 jug
+
+   * show_games.php:
+   - added game start-time column on game-lists for all views
+
 2015-09-19 jug
 
    * include/sgf_builder.php (SgfBuilder.build_sgf, ~.build_sgf_moves, ~.add_game_notes, ~.build_sgf_end):

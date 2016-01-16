@@ -210,6 +210,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gfilter->add_filter(43, 'Selection', Ruleset::build_ruleset_filter_array('G.'), true);
    $gfilter->add_filter(44, 'GameType', $game_type_filter_array, true,
          array( FC_MPGAME => $allow_mpgame ));
+   $gfilter->add_filter(49, 'RelativeDate', 'G.Starttime', true,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8, ));
 
    if ( !$observe && !$all ) //FU+RU
    {
@@ -450,6 +452,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 46: >  RU (X_Priority)
  * 47:    Indicator if there are attached SGFs
  * 48:    RU (user online)
+ * 49:    Starttime
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -570,6 +573,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
             . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    }
+
+   $gtable->add_tablehead(49, T_('Start Time'), 'Date', 0, 'Starttime-');
 
    // col 13 must be static for RESTRICT_SHOW_GAMES_ALL
    $table_mode13 = ($restrict_games) ? TABLE_NO_HIDE : 0;
@@ -897,6 +902,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
       if ( $gtable->Is_Column_Displayed[47] && ($Flags & GAMEFLAGS_ATTACHED_SGF) )
          $row_arr[47] = echo_image_game_sgf($ID);
+      if ( $gtable->Is_Column_Displayed[49] )
+         $row_arr[49] = ( $X_Starttime > 0 ? date(DATE_FMT, $X_Starttime) : '' );
 
       $gtable->add_row( $row_arr );
    }//while
