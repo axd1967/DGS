@@ -52,6 +52,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $game = mysql_single_fetch( 'game_comments.find_game',
       'SELECT G.Status, G.GameType, G.GamePlayers, G.Handicap, G.Moves, G.Black_ID, G.White_ID' .
          ', black.Name AS Blackname, white.Name AS Whitename' .
+         ', black.Handle AS B_Handle, white.Handle AS W_Handle' .
       ' FROM Games AS G' .
          ' INNER JOIN Players AS black ON black.ID=G.Black_ID ' .
          ' INNER JOIN Players AS white ON white.ID=G.White_ID ' .
@@ -107,8 +108,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ctable->add_tablehead(1, T_('Moves'), 'Move');
-   if ( $is_mp_game )
-      $ctable->add_tablehead(3, T_('Player') );
+   $ctable->add_tablehead(3, T_('Player') );
    $ctable->add_tablehead(2, T_('Comments'), 'Comment');
 
    $cnt_comments = $mpg_user = 0;
@@ -117,6 +117,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    {
       $move_nr = (int)$row['MoveNr'];
       $Text = @$arr_movemsg[$move_nr];
+      $is_black = ( $row['Stone'] == BLACK );
 
       $Text = $gc_helper->filter_comment( $Text, $move_nr, $row['Stone'], $my_color, /*html*/true );
       if ( (string)$Text == '' )
@@ -127,7 +128,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $cnt_comments++;
 
       $color_class = ' class="InTextStone"';
-      if ( $row['Stone'] == BLACK )
+      if ( $is_black )
          $colortxt = '<img src="17/b.gif" alt="' . T_('Black') . "\"$color_class>" ;
       else
          $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$color_class>" ;
@@ -137,6 +138,10 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $crow_strings[2] = $Text;
       if ( $is_mp_game && is_array($mpg_user) )
          $crow_strings[3] = user_reference( REF_LINK, 1, '', $mpg_user['uid'], $mpg_user['Handle'], '' );
+      else
+         $crow_strings[3] = user_reference( REF_LINK, 1, '',
+            ($is_black ? $game['Black_ID'] : $game['White_ID']),
+            ($is_black ? $game['B_Handle'] : $game['W_Handle']), '' );
 
       $ctable->add_row( $crow_strings );
    }

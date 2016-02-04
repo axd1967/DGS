@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-02-04 jug
+
+   * game_comments.php:
+   - always show player column on game-comments-page to indicate author of comment (not only for MPG)
+
 2016-01-16 jug
 
    * show_games.php:
