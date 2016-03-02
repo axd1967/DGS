@@ -35,7 +35,7 @@ require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
-define('DAYS_MIN_REG_ENDTIME', 7);
+define('DAYS_MIN_REG_ENDTIME', 3);
 
 
 {
