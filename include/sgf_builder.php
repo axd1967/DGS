@@ -983,6 +983,7 @@ class SgfBuilder
                if ( $MoveNr == $Moves && $Status != GAME_STATUS_FINISHED )
                   $this->add_game_notes( $owned_comments );
 
+               //error_log("C@$MoveNr $PosX/$PosY [{$this->sgf_trim_nr}]: {$this->node_com}");
                $this->sgf_echo_comment( $this->node_com );
                $this->node_com = '';
                break;
