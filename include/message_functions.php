@@ -1242,7 +1242,7 @@ function build_game_restriction_notes()
  * \param $html false=no HTML-entities
  * \return NO_VALUE if no restrictions; otherwise string-list of with found restriction
  *
- * \note Difference between "Restrictions"-column from waiting-room-list and "real" restrictions in game-info-table:
+ * \note Difference between "Restrictions"-column from waiting-room-list and "real" restrictions in wroom-game-info-table:
  *   - waiting-room-restrictions show all "potentially" restricting factors (even if some of them are not restricted
  *     for the particular offer and user viewing the offers).
  *   - while in the game-info-table the "real" restricted attributes are shown with a restricted-warning!
