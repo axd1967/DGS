@@ -146,9 +146,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead( 3, T_('Name#header'), 'User', 0 );
       $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
       $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
-      $ltable->add_tablehead( 6, T_('User Rating#header'), 'Rating', 0 );
+      $ltable->add_tablehead( 6, new TableHead( T_('User Rating#header'), T_('User Rating')), 'Rating', 0 );
       if ( $need_tp_rating )
-         $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
+         $ltable->add_tablehead(14, new TableHead( T_('Tournament Rating#header'), T_('Tournament Rating')), 'Rating', 0 );
       $ltable->add_tablehead( 7, T_('Actions#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead(12, new TableHeadImage( T_('Running and finished tournament games'), 'images/table.gif'), 'ImageLeft', 0 );
       $ltable->add_tablehead( 8, T_('Challenges-In#header'), '', TABLE_NO_HIDE );
@@ -161,7 +161,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead(15, new TableHeadImage( T_('User online#header'), 'images/online.gif',
          sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) . ', ' . T_('or on vacation#header') ),
          'Image', 0 );
-      $ltable->add_tablehead(13, T_('Last access#T_header'), 'Right', 0 );
+      $ltable->add_tablehead(13, new TableHead( T_('Last access#T_header'), T_('Last access')), 'Right', 0 );
       $ltable->add_tablehead(18, new TableHead( T_('Tournament last move#T_header'), T_('Tournament last move')), 'Right', 0 );
       $ltable->add_tablehead(11, T_('Started#header'), 'Date', 0 );
 

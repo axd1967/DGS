@@ -187,7 +187,7 @@ require_once 'include/wroom_control.php';
    // View "merged" "Handicap + StdPlacement (in Settings column),
    // but has separate column on StdPlacement for filtering on it:
    if ( ENABLE_STDHANDICAP )
-      $wrtable->add_tablehead(13, T_('Standard placement#header'), '', 0, 'StdHandicap-');
+      $wrtable->add_tablehead(13, new TableHead( T_('Standard placement#header'), T_('Standard placement')), '', 0, 'StdHandicap-');
 
    $wrtable->set_default_sort( 3, 2); //on WRP_Rating2,WRP_Handle
    $order = $wrtable->current_order_string('ID+');

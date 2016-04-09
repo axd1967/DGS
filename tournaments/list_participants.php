@@ -112,15 +112,16 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $tptable->add_tablehead( 4, T_('Country#header'), 'Image', 0, 'Country+');
    $tptable->add_tablehead( 5, T_('Current Rating#header'), 'Rating', 0, 'Rating2-');
    $tptable->add_tablehead( 6, T_('Comment#header'), null, TABLE_NO_SORT);
-   $tptable->add_tablehead( 7, T_('Reg ID#T_header'), 'Number', 0, 'ID+');
+   $tptable->add_tablehead( 7, new TableHead( T_('Reg ID#T_header'), T_('Registration ID')), 'Number', 0, 'ID+');
    $tptable->add_tablehead( 8, T_('Status#header'), 'Enum', ($allow_edit_tourney ? TABLE_NO_HIDE : 0), 'Status+');
    if ( $allow_edit_tourney )
       $tptable->add_tablehead( 9, T_('Flags#header'), 'Enum', 0, 'Flags+');
    $tptable->add_tablehead(10, T_('Round#header'), 'Number', 0, 'NextRound-');
    $tptable->add_tablehead(15, new TableHeadImage( T_('Running and finished tournament games'), 'images/table.gif'),
       'Image', TABLE_NO_SORT);
-   $tptable->add_tablehead(11, T_('Tournament Rating#header'), 'Rating', 0, ( $has_tp_rating ? 'TP.Rating-' : 'Rating2-' ));
-   $tptable->add_tablehead(16, T_('Finished#header'), 'Number', 0, 'Finished-');
+   $tptable->add_tablehead(11, new TableHead( T_('Tournament Rating#header'), T_('Tournament Rating')), 'Rating', 0,
+      ( $has_tp_rating ? 'TP.Rating-' : 'Rating2-' ));
+   $tptable->add_tablehead(16, new TableHead( T_('Finished#header'), T_('Finished games')), 'Number', 0, 'Finished-');
    $tptable->add_tablehead(17, T_('Won#header'), 'Number', 0, 'Won-');
    $tptable->add_tablehead(18, T_('Lost#header'), 'Number', 0, 'Lost-');
    if ( $allow_edit_tourney )

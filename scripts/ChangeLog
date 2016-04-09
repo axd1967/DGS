@@ -11,6 +11,14 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-04-09 jug
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table),
+     tournaments/ladder/view.php, tournaments/list_participants.php, features/list_votes.php,
+     opponents.php, users.php, waiting_room.php:
+   - added more descriptive tooltips for abbreviated headers in table-list pages:
+     feature-votes, opponents, users, tournament-participants, waiting-room, ladder-view, round-robin pool-view
+
 2016-03-02 jug
 
    * tournaments/edit_properties.php:

@@ -77,8 +77,8 @@ require_once 'features/lib_votes.php';
    $vtable->add_tablehead(15, new TableHead( T_('My Points#header'), T_('My voted points')), 'NumberC', 0, 'myPoints-');
    $vtable->add_tablehead(10, T_('Points#header'),  'Number', 0, 'sumPoints-');
    $vtable->add_tablehead(11, T_('#Votes#header'),  'Number', 0, 'countVotes-');
-   $vtable->add_tablehead(12, T_('#Y#header'),      'Number', 0, 'countYes-');
-   $vtable->add_tablehead(13, T_('#N#header'),      'Number', 0, 'countNo-');
+   $vtable->add_tablehead(12, new TableHead( T_('#Y#header'), T_('Positive votes')), 'Number', 0, 'countYes-');
+   $vtable->add_tablehead(13, new TableHead( T_('#N#header'), T_('Negative votes')), 'Number', 0, 'countNo-');
 
    $vtable->set_default_sort(10, 1); //on sumPoints, ID
    $order = $vtable->current_order_string();
