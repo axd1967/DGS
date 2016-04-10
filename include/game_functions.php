@@ -5706,12 +5706,12 @@ function get_color_titles()
 }
 
 
-define('MOVESTAT_TIMESLOT', 30); // minutes
+define('MOVESTAT_TIMESLOT', 60); // minutes
 
 /*! \brief increase MoveStats by one for given user. */
 function increaseMoveStats( $uid )
 {
-   return; // not used currently
+   //return; // not used currently
 
    $loctime = get_utc_timeinfo(); // need UTC to equalize all users on time-slot
    $time_min = floor( $loctime['tm_min'] / MOVESTAT_TIMESLOT ) * MOVESTAT_TIMESLOT;
