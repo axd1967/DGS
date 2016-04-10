@@ -108,8 +108,9 @@ define('TE_MAX_PROP', 2); // max. tournament-extension-property
 // ---------- Tournament Director Stuff ---------------------------
 
 // see also TournamentDirector::getFlagsText()
-define('TD_FLAG_GAME_END', 0x0001);
-define('TD_FLAG_GAME_ADD_TIME', 0x0002);
+define('TD_FLAG_GAME_END',       0x0001);
+define('TD_FLAG_GAME_ADD_TIME',  0x0002);
+define('TD_FLAG_ADMIN_EDIT',     0x0004);
 
 // ---------- Tournament Participant Stuff ------------------------
 

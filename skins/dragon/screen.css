@@ -3091,6 +3091,9 @@ span.AdminTournament {
    font-weight: bold;
    background: red;
 }
+span.TDWarning {
+   color: red;
+}
 
 span.EditNote {
    font-size: 80%;

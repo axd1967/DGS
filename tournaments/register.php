@@ -79,7 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.register', $tid );
 
-   $status_errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, false );
+   $status_errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, null, null, false );
 
    // existing application ? (check matching tid & uid if loaded by rid)
    if ( $rid > 0 )

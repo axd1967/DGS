@@ -147,6 +147,8 @@ Description:
      (only when on TournamentGames.Status=PLAY)
    - 0x0002 = TD_FLAG_GAME_ADD_TIME = TD is allowed to add time
      to players of tournament-game as long as game is running
+   - 0x0004 = TD_FLAG_ADMIN_EDIT = TD is allowed to edit tournament-info & rules
+     even if not in T-status 'NEW' (similar to what a T-admin can do)
 
 * Comment : public comment about TD, may be empty
 

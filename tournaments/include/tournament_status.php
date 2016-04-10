@@ -384,16 +384,22 @@ class TournamentStatus
     * \brief Checks if current tournament-status allows certain action.
     * \param $errmsgfmt error-message-format expecting two args: 1. tourney-status, 2. expected status-list
     * \param $arr_status status-array
+    * \param $arr_status_td_adm_edit status-array to check against $t_director with TD_FLAG_ADMIN_EDIT rights
+    * \param $t_director if TournamentDirector-object check tournament-status against $arr_status_td_adm_edit
+    *       and director-flags
     * \param $allow_admin if true, admin can do anything; otherwise admin is treated like non-admin
     * \return error-list; empty if no error
     */
-   private function check_action_status( $errmsgfmt, $arr_status, $allow_admin=true )
+   private function check_action_status( $errmsgfmt, $arr_status, $arr_status_td_adm_edit=null, $t_director=null,
+         $allow_admin=true )
    {
       $errors = array();
 
       // T-Admin can do anything at any time
       if ( $allow_admin && TournamentUtils::isAdmin() )
          $allow = true;
+      elseif ( is_array($arr_status_td_adm_edit) && !is_null($t_director) )
+         $allow = ($t_director->Flags & TD_FLAG_ADMIN_EDIT) && in_array($this->tourney->Status, $arr_status_td_adm_edit);
       else
          $allow = in_array($this->tourney->Status, $arr_status);
 
@@ -407,18 +413,18 @@ class TournamentStatus
       return $errors;
    }//check_action_status
 
-   public function check_edit_status( $arr_status, $allow_admin=true )
+   public function check_edit_status( $arr_status, $arr_status_td_adm_edit=null, $t_director=null, $allow_admin=true )
    {
       return $this->check_action_status(
          T_('Edit is forbidden for tournament on status [%s], only allowed for [%s] !'),
-         $arr_status, $allow_admin );
+         $arr_status, $arr_status_td_adm_edit, $t_director, $allow_admin );
    }
 
-   public function check_view_status( $arr_status, $allow_admin=true )
+   public function check_view_status( $arr_status, $arr_status_td_adm_edit=null, $t_director=null, $allow_admin=true )
    {
       return $this->check_action_status(
          T_('View of tournament is forbidden on status [%s], only allowed for [%s] !'),
-         $arr_status, $allow_admin );
+         $arr_status, $arr_status_td_adm_edit, $t_director, $allow_admin );
    }
 
 } // end of 'TournamentStatus'

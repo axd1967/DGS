@@ -3763,7 +3763,7 @@ function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true, $linecl
       return '';
 
    if ( $colspan <= 0 )
-      return span($errclass, ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
+      return span($errclass, ( $errmsg ? "$errmsg:" : '')) . "<br>\n" . span($lineclass, '* ' . implode("<br>\n* ", $errors));
    else
    {
       $out = "\n<ul>";

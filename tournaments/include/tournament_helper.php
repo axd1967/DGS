@@ -174,7 +174,7 @@ class TournamentHelper
       // registration only on allowed tournament-status
       $tstatus = new TournamentStatus( $tourney );
       $ttype = TournamentFactory::getTournament($tourney->WizardType);
-      $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, false );
+      $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, null, null, false );
       if ( count($errors) > 0 )
          $out[] = 'E:STAT';
 

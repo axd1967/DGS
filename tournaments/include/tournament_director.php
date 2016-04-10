@@ -79,6 +79,11 @@ class TournamentDirector
       return implode(', ', $arr);
    }//formatFlags
 
+   public function isEditAdmin()
+   {
+      return ($this->Flags & TD_FLAG_ADMIN_EDIT);
+   }
+
    /*! \brief Inserts or updates TournamentDirector in database. */
    public function persist()
    {
@@ -320,6 +325,7 @@ class TournamentDirector
          $arr = array();
          $arr[TD_FLAG_GAME_END] = T_('Game End#TD_flag');
          $arr[TD_FLAG_GAME_ADD_TIME] = T_('Add Time#TD_flag');
+         $arr[TD_FLAG_ADMIN_EDIT] = T_('Admin Edit#TD_flag');
          $ARR_TDIR_FLAGS = $arr;
       }
 
@@ -337,6 +343,14 @@ class TournamentDirector
          TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED
       );
       return $statuslist;
+   }
+
+   public static function buildAdminEditWarnings( $warnings, $colspan=0 )
+   {
+      return buildErrorListString(
+            sprintf( T_('There are some warnings for you as director with \'%s\'-rights'),
+                  self::getFlagsText(TD_FLAG_ADMIN_EDIT) ),
+            $warnings, $colspan, true, 'WarnMsg', 'TDWarning' );
    }
 
    public static function delete_cache_tournament_director( $dbgmsg, $tid )

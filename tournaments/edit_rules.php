@@ -69,10 +69,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_rules.edit_tournament($tid,$my_id)");
 
+   $tdir = TournamentCache::is_cache_tournament_director( 'Tournament.edit_rules.find_tdir', $tid, $my_id );
    $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.edit_rules', $tid );
    $trule->TourneyType = $tourney->Type; // for parsing rules
 
-   $errors = $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() );
+   $td_warn_status = ($tdir->isEditAdmin()) ? $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() ) : null;
+   $errors = $tstatus->check_edit_status(
+      TournamentRules::get_edit_tournament_status(), $ttype->allow_edit_tourney_status_td_adm_edit, $tdir );
    if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
@@ -118,6 +121,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
       $trform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+   }
+   if ( count(@$td_warn_status) )
+   {
+      $trform->add_row( array(
+            'DESCRIPTION', T_('Warnings'),
+            'TEXT', TournamentDirector::buildAdminEditWarnings($td_warn_status) ));
+      $trform->add_empty_row();
    }
 
    $formstyle = ($tourney->Type == TOURNEY_TYPE_LADDER) ? GSET_TOURNAMENT_LADDER : GSET_TOURNAMENT_ROUNDROBIN;

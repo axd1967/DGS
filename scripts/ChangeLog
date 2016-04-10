@@ -13,6 +13,26 @@ ChangeLog
 
 2016-04-10 jug
 
+   * tournaments/include/tournament_status.php (TournamentStatus.check_action_status,
+       ~.check_edit_status, ~.check_view_status),
+     tournaments/include/tournament_director.php (TournamentDirector.isEditAdmin, ~.getFlagsText,
+       ~.buildAdminEditWarnings),
+     tournaments/include/tournament_helper.php (TournamentHelper.build_tournament_join_restrictions),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.__construct),
+     tournaments/include/tournament_template.php (class TournamentTemplate),
+     tournaments/include/tournament_globals.php (TD_FLAG_ADMIN_EDIT),
+     include/std_functions.php (buildErrorListString),
+     specs/db/table-Tournaments.txt, skins/dragon/screen.css,
+     tournaments/edit_director.php, tournaments/edit_rules.php,
+     tournaments/edit_tournament.php, tournaments/register.php:
+   - allow tournament-directors with special rights to edit certain tournament-data
+     on other tournament-status than normally allowed
+     - added tournament-director flag ADMIN_EDIT that can be enabled to allow editing of tournament-data
+     - allow ADMIN_EDIT-tournament-directors to edit tournament-info & tournament-rules
+       on tournament-status NEW, REGISTER
+       - additionally for ladder-tournaments editing also allowed on PLAY status
+     - show nasty-red/teal-formatted extra-warning if editing allowed for ADMIN_EDIT-tournament-directors
+
    * message.php, new_game.php:
    - cleanup: unify error-text for showing list of errors
 

@@ -134,6 +134,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $arr_flags = array(
       TD_FLAG_GAME_END        => 'flag_gend',
       TD_FLAG_GAME_ADD_TIME   => 'flag_addtime',
+      TD_FLAG_ADMIN_EDIT      => 'flag_admedit',
    );
 
    // check + parse edit-form
