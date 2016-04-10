@@ -517,7 +517,7 @@ function fix_tournament_participant_last_moved( $arg_tid, $do_it )
 
    // fix TP.Lastmoved
    $upd_arr = array();
-   $upd_cache = array(); # tid => [ uid, ... }
+   $upd_cache = array(); # tid => [ uid, ... ]
    foreach ( $map_lm as $tid => $data )
    {
       if ( !isset($upd_cache[$tid]) )
