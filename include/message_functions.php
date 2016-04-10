@@ -965,7 +965,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       $itable->add_scaption(T_('Players info'));
       $itable->add_sinfo( T_('My Rating'), echo_rating($my_rating,true,$my_id) );
       $itable->add_sinfo( T_('Opponent Rating'), echo_rating($other_rating,true,$other_id) );
-      $itable->add_sinfo( T_('Games with opponent'), sprintf( T_('%s running, %s finished'), 
+      $itable->add_sinfo( T_('Games with opponent'), sprintf( T_('%s running, %s finished'),
             (int)@$game_row['X_GOPP_Running'], (int)@$game_row['X_GOPP_Finished'] ) );
 
       $itable->add_scaption(T_('Game info'));
@@ -1234,7 +1234,7 @@ function build_game_restriction_notes()
                      T_('same offer#same_opp'), T_('same offer after N days#same_opp') ),
          sprintf( T_('Handicap-type (conventional and proper handicap-type need a rating for calculations), marked by "%s"#wroom'),
                   'CHT' ), // calculated-handicap-type
-         sprintf( T_('User has no rating, marked by "%s"#wroom'), 'RT' ),
+         sprintf( T_('User has no rating and rating would be required for handicap calculations, marked by "%s"#wroom'), 'RT' ),
          sprintf( T_('Contact-option \'Hide waiting room games\', marked by "%s"'),
                   sprintf('[%s]', T_('Hidden#wroom')) ),
       );
