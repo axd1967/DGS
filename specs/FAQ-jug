@@ -1,0 +1,373 @@
+FAQ-DGS: [ 1=big-changes, 2=new-topic/new-refs-involved, 3=edit, 4=edit-but-could-be-more, 5=edit-with-some-new, 6=new-simple ]
+Version: $Id: FAQ-DGS,v 1.2 2013/08/09 21:14:19 jug Exp jug $
+==========================================================================
+
+Open_Tasks_Stack:
+#---------------
+- 3 DOC:  [site] new icons FAQ-entry: medals, more?, no-result, ...
+- 2 DOC:  [user] hero-percentage + badge: user-info-page, users/opps-list;; H.E.R.O. ?;; http://www.dragongoserver.net/forum/read.php?forum=3&thread=41407#41418;; http://www.dragongoserver.net/faq.php?read=t&cat=12#Entry421
+- 2 DOC:  [wroom] hero-percentage restriction for wroom: new-game, wroom-list (restrictions, user-id-badge), wroom-info
+- 2 DOC:  [user] win-percentage: renamed from Perc->Win%, added filter
+- 2 DOC:  [game] correct fair-komi search: not possible for finished games: http://www.dragongoserver.net/faq.php?read=t&cat=18&e=394#Entry394
+- 2 DOC:  [faq] password-reset: http://www.dragongoserver.net/admin_faq.php?ot=0&view=366&edit=1&type=e&id=368
+
+ToDo_FAQ_1_0_15:
+- 2 DOC:  [faq] redo private-game-notes http://www.dragongoserver.net/faq.php?read=t&cat=365&e=229#Entry229 : explain game-notes 1st (not as 2nd)
+- 2 DOC:  [faq] http://www.dragongoserver.net/forum/read.php?forum=2&thread=38167#38190 : add doc about time-formats
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=41 : items on top (user-id/name + rating), then 1st 3 unread bulletins (-> link new topic), then messages (new + reply; now configurable), then status-games, then MPGs to setup;; status-games fields (+ruleset, time-remaining see time-specs - not "time limit", +user-online-icon & <10min online, prio, notes-start);; can set status-games next-game-order now;; time-remaining shown in red (3d) in yellow (7d)
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=246 : filter-search key-shortcut 'e' (not 'x'), filter-reset key-shortcut 'z';; fulltext can give warning for stopwords;; search-pages: +shapes, opponents (add with users?), +features, +bulletins, +surveys;; mention (link) Search-profiles -> new topic;; add special-search "FAQ-search"->link
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=221 : add icons for icons, add msg-tree + icons (thread-view, initial msg), templates-link -> new template-topic, add follow-moving checkbox
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=222 : users-page: added fields ("user online"-icon (like on status-page), user-picture (-> new how to add one), type (robot, pro, teacher) with icons (-> what user-types), register-date);; added show player-rank (pos) in users-list (-> new topic)
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=230 : single-game-page: add optional move-message above the board, add optional last-move-captures (if enabled) on the left, add optional numbers of captures moves for move-numbering (if enabled), add scoring-info for games in scoring or finished, add hidden-comments for finished game + icon, add "sgf-move-num", move-selector does not show all moves, "hidden" comments can also be seen after a game is finished by everyone;; players-info (icons weekend-clock, night-time, vacation), for MPG also the player of last-move + color is shown, add different topic for fair-komi-negotiation, game-info-icon with link to game-info-page;; bottom-links "both" at first, both (resign, delete 10mov, add-time), all users (show game-info), "resume-playing" and "done" in scoring for player to move;; i have the feeling we need a separate section for all this game-page-stuff!!;; eidogo
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=305&edit=1&type=e&id=401 : [MP-game] FAQ: user joins WR (WaitingroomJoined inserted), then master removes user, then user can't rejoin WR b/c of WRJ-entry -> keep it b/c user has been removed (was "unwanted")
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=358&edit=1&type=e&id=416 : opponents-page: (table-icon linked to games with that user), page-time in bottom-bar to check if net is slow or server
+------------------ NEW:
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=56&edit=1&type=e&id=60 : see http://www.dragongoserver.net/forum/read.php?forum=2&thread=34827#34834 : night-time <-> sleeping-time
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=339&edit=1&type=e&id=344 : new topic about "voting on features" in "Dragon menus"-section: feature-vote-page, feature-vote-results; links from main-menu (features -> vote-results), New-features to feature-voting;; features only added by feature-admin (when properly discussed in forums, and not outright opposed by developer);; features to ask community for "urgent"-required features;; voting with points (+ or - or neutral) with max. 5p per feature, vote-status (new, vote, work, done, live, nack), size (S, M, L, XL, XXL, EPIC);; voting possible if moved in game within 30d, min 5 rated games; feature-points increased by 1p every 20days if moved within last 6 weeks;; points are returned if feature is implemented or rejected
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=17&edit=1&type=e&id=354 : new topic in "Dragon menus": "What are the fields/features of the main-menu?" -> positionable (left-side or top), links to main-features with links: status, wroom, user-info, msg + NEW-indicator (N), send-msg, inv, new-game, users, contacts, games, intro, help/faq, site-map, docs, forums + NEW-indicator (*), bulletins + NEW-indicator (N), features + NEW-indicator (N)
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=339&edit=1&type=e&id=340 : new topic about "surveys" in "Dragon menus"-section: <survey>-tag, new survey by survey-admin (fields: type (points, sum, single, multi), status (new, active, closed, del), points min/max, title, opts, user-list);; link in site-map or on forum-list;; vote on survey: title (shows subject, status, number of voters, creation-date), blue=your-vote, red=all-votes (only shown if your vote given); points-type (can give points in range min/max on every item); sum-type (give points in range on every item but max in total); single-type (select one item); multi-type (select multi-items)
+------------------
+- 4 DOC:  [faq] edit: game-info-icon with thumbnail (+ icons): B/W-stones, empty, capture;; on icon-page for game-lists;; thumbnail also for shape-games (shape-icon)
+- 2 DOC:  [faq] add new topic for markup : <survey>
+- ? DOC:  [faq] TODO: game-preview, wroom-list (show probable "settings", removed reply-box on joining), user-pic-icon, status (# in browser-tab), RSS (bulletins added)
+- ? DOC:  [faq] mention JavaScript-peculiarity with pop-ups: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2539107
+- 1 DOC:  [live] http://www.dragongoserver.net/admin_faq.php?ot=0&view=160&edit=1&type=e&id=304 : prepare/write FAQ-entries for all new 1.0.15 features, most important what's-new + feat-announce
+
+
+ToDo_FAQ_1_0_16_AreaScoring:
+- 2 DOC:  [faq] [newgame] Area-Scoring: (S10) write FAQ with diff between area and territory scoring: DGS-rulesets 'Japanese' (terr-scoring, no pass-tones, no W-play-last), 'Chinese' (area-scoring, no pass stones, no W-play-last); 'AGA-Territory' (would be terr-scoring, +pass-stones, +W-play-last)
+- 2 DOC:  [quick] (S4) sgf: chinese-ruleset scoring: KGS-client <-> DGS-server, check http://localhost/dev/game.php?gid=320135; document that KGS-client cgoban calc for area is off by B+1 for H>0
+- 2 DOC:  [game] (S4) fix area-scoring: http://www.dragongoserver.net/forum/read.php?forum=4&thread=32466 ;; counting / showing add/sub stones;; example
+- 2 DOC:  [game] explain "Japanese rules" applied (hypothetical play);; what to do on disputes;; how to handle certain situations: http://www.dragongoserver.net/forum/read.php?forum=5&thread=39871#39873
+
+ToDo_FAQ_1_0_16:
+- 7 DOC:  [site][faq] Intro-contents: [welcome], [what is DGS? see curr intro-page, no realtime], [register account, profile, Nighttime/ccode/email, bio, password] [playing: rating->rated games, join/offer in WR, invite, play-tutorial http://www.playgo.to/interactive/, start/play/end game] [help: FAQ/help, forums, site-overview/features, forums, people]
+- 2 DOC:  [faq] registration: email mandatory, mail-verification to activate account
+- 4 DOC:  [faq] edit-user-profile: splitted for email-change + notification; need mail-verification; manage verifications
+- 4 DOC:  [faq] new-game/invite: default-max-handicap, adjust-H/K for invite as well, merged simple/expert-view into new-std-game, adj-H/K only for conv/proper-htype
+- 4 DOC:  [faq] new-game/invite/games/wroom: added ruleset chinese; chinese-ruleset <-> jap-ruleset
+- 3 DOC:  [faq] new-game/invite: disable "rated"-field if unrated player involved
+- 3 DOC:  [faq] game-page: add icon user-to-move
+- 3 DOC:  [faq] MPG: added deletion in setup-mode by game-master
+- 3 DOC:  [faq] feature-voting: also allowed for users only with unrated games
+- 3 DOC:  [faq] user-info/games: last-access = combined web + quick-last-access
+- 3 DOC:  [faq] main-menu tooltips added
+- 2 DOC:  [faq] tournaments, types (ladder), scope (dragon,public,priv), status (new, register, pair, play, finished, delete/admin); processes around Ts for different roles (viewer, participant, director, initiator, admin);; good ladder doc: http://www.itsyourturn.com/iyt.dll?t?i=103&id=1455;; http://www.itsyourturn.com/t_helptopic2180.html
+- 2 DOC:  [faq] tournament-process for participant: register, apply, invited; communication; support -> T-dirs
+- 2 DOC:  [faq] tournament-specifics (ladder): join ladder, retreat from ladder; view T-ladder-info (locked, ranks, pop-up state); challenges (in/out); links/data in ladder-info
+- 2 DOC:  [faq] tournament-specifics (ladder) for T-dir: invite, remove user from ladder, edit-ladder-rank, ladder-lock
+- 2 DOC:  [faq] tournaments, types (ladder), scope (dragon,public,priv), status (new, register, pair, play, finished, delete/admin); T-wizard to create; T-list (views + fields); T-info page (info + funcs for user + funcs for T-dirs); T-news; T-dirs; T-log;
+- 2 DOC:  [faq] managing tournaments for TDirs: edit-T-info, T-news, T-bulletins, edit-T-dirs, T-locks, T-status-editor, T-props-edit, T-rules-edit, edit-T-participant;; edit T-ladder-props; crown-king
+- 2 DOC:  [faq] tournaments normal-page adjustments: games-list (shoy only T-specific games, T-game-status, game-role for ladders)
+- 2 DOC:  [tourney] game-info-page: tournament-game-role "Challenger/Defender" does not check switched-at-game-end into account for finished games -> or explain in FAQ, that that is the original role regardless of ladder-props
+- 2 DOC:  [faq] admin-stuff regarding tournaments (see NEWS)
+- 3 DOC:  [faq] general changes for tournaments (see NEWS), <tourney x> markup
+- 6 DOC:  [faq] new admin-topics addressing "Finish game by setting game-result, Change game rated-status, Delete running & finished game, Change rating": can be done by game-admin, though don't advertise too much (admins don't want to have so much to do)
+- 1 DOC:  [faq] new section "Dragon overview" for main-features listed with refs to to sub-sections or topics !? -> like re-arranged Dragon intro a bit
+- 2 DOC:  [faq] adjust links to cvs-code-browser -> using git-browser
+- 5 DOC:  [faq] check all FAQ-entries for consistency of links
+- 1 DOC:  [faq] fill new section: "Dragon administration"
+- 1 DOC:  [specs]: Rated-tourney, but TG.score changed by TD -> Rating-system uses game-result and not TG-result
+
+ToDos_Doc_Tournaments_1_0_17:
+- 1 DOC:  [tourney] HOW TO create T-descr: http://www.dragongoserver.net/forum/read.php?forum=11&thread=26295#26338
+- 5 DOC:  [tourney] GEN/TL/TRR: add more docs/specs in 'specs/tournaments.txt'
+- 9 DOC:  [tourney] TRR: tournament-lifecycle: T-status: PLAY >> FINALIZE(?) >> CLOSED;; -> extra FINALIZE-T-status not needed, finalizing can be done on PLAY-status with the pre-condition current-round-status=DONE, PLAY >> PAIR handled by special use-case (w/o checks), PLAY >> CLOSED possible with same precondition (+T-results done);; T-CLOSE-lock is needed for ladder to stop new registrations to do the finalizing-steps
+- 9 DOC:  [tourney] TRR: (T017.b) (S18.1a) T-params: Hahn-pointing-system http://senseis.xmp.net/?HahnPointingSystem; or Mego=Bangneki-scoring-system; or more flexible: share_points=Y/N, points_per_score=1_per_10(or_x), base_points; set in relation to bye/forfeit/jigo: (a) simple no-share step=1p/10p base=0; (b) configurable
+- 9 DOC:  [tourney] GEN: (T004.3) void-result: DOC in specs/tournaments.txt
+- 9 DOC:  [tourney] GEN: (T004.3b) Forfeit (=bye); when it happens: for K.O.-tourneys, or if pool only has one user, or player exits pool in-between, not for ladders -> handled auto or by TD
+- 9 DOC:  [tourney] TRR: User withdraw = retreat from tourney, no advance to next round !? -> handle with set-rank-pool-winner & game-annulling
+- 9 DOC:  [tourney] GEN: (S65.c) admin-game: inform players about no-result + consequences (on normal game only <-> T-game dep on tournament)
+
+ToDo_FAQ_1_0_18:
+- 3 DOC:  [user] FAQ add terms 'SDK/DDK' -> FT
+- 3 DOC:  [site] new icons FAQ-entry: medals, more?, no-result, ...
+- 2 DOC:  [user] hero-percentage + badge: user-info-page, users/opps-list
+- 2 DOC:  [wroom] hero-percentage restriction for wroom: new-game, wroom-list (restrictions, user-id-badge), wroom-info
+- 2 DOC:  [user] win-percentage: renamed from Perc->Win%, added filter
+- 3 DOC:  [tourney] hall-of-fame lists only TOP-10 with hint to omitted entries
+- 3 DOC:  [tourney] T-directors are notified with priv-bulletin after last game in round has finished
+- 3 DOC:  [tourney] T-log added filters + full-navi
+- 3 DOC:  [game] toggled-marks-view for finished-game
+- 3 DOC:  [site] encoding added on translation-stats-page as hint for used-encoding for other users langs
+- 3 DOC:  [site] intro-page admin-editor can use DGS-tags now (like FAQ, while Links can not use them)
+- 3 DOC:  [adm] translator-search case-sensitive in texts of selected transl-lang
+- 4 DOC:  [game] sgf-game-archive on SF-net for download, ask support to refresh http://www.dragongoserver.net/forum/read.php?forum=4&thread=39569#39730
+
+ToDo_FAQ_1_19_x:
+- 1 ADM:  [faq] take over all changes for 1.19.x from TODO-file
+
+#-------------------------------------------------------------------------
+
+To_Review_FAQ_by_Natives:
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=106 : hover over a rating gives the exact (internal) rating (ELO);; has been added for quick allowing other representations
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=107 : hover over a rating gives the exact (internal) rating (ELO);; has been added for quick allowing other representations
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=111 : where to find "double"-game -> manual settings -> select-box "My color" -> Double;; perhaps in new topic?
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=138 : also tables on pages: opponents, bulletins -> added "etc."
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=227 : also tables on pages: opponents, bulletins -> added "etc."
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=206 : add <game 123,S> for setup-pos
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=241 : soon: yes -> perhaps remove FAQ-entry -> removed entry
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=114 : "observed games" have been splitted in "games I'm observing" and "all observed games", also possible to toggle for all users (including players) now;; topic "can i observe my own games?" -> yes (maybe hide)
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=173 : mention that using quick-suite is not influencing last-access-date (last-quick-access in user-info), so does not "count" as "visit" -> (already there)
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=214 : key-shortcuts: add 'new-game' (n), 'translate' (t->l, t=tourney), 'FAQ' (q -> h=help), add 'Vote' (v); filter-search (e), filter-reset (z)
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=223 : yes, now there is;; search in language, or (if checked) in english original
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=225 : stopwords-warning added
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=228 : JS enabled (supported by browser, enabled in user-profile);; use other example "finished" (slow page) -> "running"
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=76 : ask one of the developers
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=259 : replace all with: searching for FAQ added -> removed
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=232 : mention "(User online)"-icon <image online.gif> in resp. column on status-page
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=235 : mention "last-capture-marking" (from user-profile);; but still better to note about ko in private-game-notes (because ko can be non-immediate);; mention new options for move-numbering "relative" and "reverse"
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=237 : replace "here"-link on text "Forum search page" instead, link "Forum overview page" to forums/index-page, add "number of threads in a forum", last post (author switchable)
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=238 : mark "new"-indicator with color=red, bar-link "Mark all thread as read" if there are some "new"-entries, last post (author switchable), hits (how often thread has been read);; number of rows (=max-table-rows from user-profile), can be changed on thread-overview (not saved)
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=287 : bookmark added (top-bar): "Latest forum posts" (4 weeks) = redirection into forum-search
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=289 : add link to "message system"
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=46 : now also possible when it's not your move (need confirmation)
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=47 : game-resign now also possible when it's not your turn (need confirmation)
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=88 : added (see also NEWS): <strike>, <hr>;; replace "ordinary link" <a href="..."> (yeah works too), but use <http: |text> or <_http:...> instead
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=318&edit=1&type=e&id=319 : game-board images
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=318&edit=1&type=e&id=322 : game icons
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=318&edit=1&type=e&id=323 : user icons
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=318&edit=1&type=e&id=324 : message icons
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=318&edit=1&type=e&id=325 : forum icons
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=318&edit=1&type=e&id=326 : general icons
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=318&edit=1&type=e&id=327 : table-listing icons
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=318&edit=1&type=e&id=328 : faq-editor icons
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=271 : -> move into "markup"-section with title "How can I add images?" (or similar): <image>-tag only for FAQ (also usable in forums), but only with DGS-images (no external/remote images);; only other is to add a user-picture now
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=282 : open in new window: added <home_ ...>text</home>, added <_http://...> and <_http://... |link-text>
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=317 : new topic about "Bookmarks" in "Dragon menus"-section: standard bookmarks: latest forum posts, opponents online, users online, edit-vacation, edit-profile
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=349 : new topic in "Dragon games": "How many games can I start at the same time?" -> restricted to 200 (but keep some reserve in case you want to join more or tournaments);; warning is showed on 75% of max amount
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=353 : new topic in "Dragon games": "Can I start a game with the same settings of an existing game?" -> yes, either game-info-page (invite with rematch, new-game with copy-new-game) or templates (saved for invite/messages/new-game)
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=345 : presence of "hidden comments" is shown with icon on game-page or game-list now;; perhaps as own FAQ-topic "How do I know that there are hidden game comments?"
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=143 : on game-page weekend-clock-icon is shown on weekend (when clock is not running)
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=42 : new topic "How can I see if the clock is stopped for a game?" : on game-page behind the user: vacation-icon, weekend-clock-icon, night-time-icon
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=276 : SGF-move-number is shown on game-page next to moves-selectbox;; full SGF-specs (for geeks) in quick-suite-specs [4.SGF];; see also NEWS (quite some changes there)
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=57 : add formats for time-limit and time-remaining (see also time-specs) - jap
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=58 : add formats for time-limit and time-remaining (see also time-specs) - can
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=59 : add formats for time-limit and time-remaining (see also time-specs) - fis
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=273 : moved "quota system"-description from http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=263;; changed title "quota system" -> "what is my user access quota?"
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=263 : moved "quota-system" to http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=273
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=303 : correct caching for RSS/WAP/QST;; added quick-do (QDO)
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=339&edit=1&type=e&id=362 : how to communicate with others?
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=360&edit=1&type=e&id=136 : what are dragon messages? -> changed to address only private-msg
+- 1 DOC:  [faq] re-ordered + re-grouped new/old categories: site-access, users, user-prefs, msg, game-setup, games, games-play, contacts, admin
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=17&edit=1&type=e&id=320 : new topic in "Dragon menus.." about "What are the fields on the game-info-page?": what is game-info?; game-id, game-type, status, start-time, last-move/end-time, ruleset, size, H, K, rated, weekend-clock, std-h, time-settins + rem-time, player-info (off-time with icons, curr-rating, start-rating);; can set game-prio for status-game;; can open new invititation (rematch) or new-game (copy new-game) with same settings;; link to initial invitation-msg (if invitation), double-game-id (if present);; show fair-komi-negotiation
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=19&edit=1&type=e&id=27 : correct feature-stuff
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=139 : added rank-converter
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=105&edit=1&type=e&id=348 : new topic about rank-converter
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=363 : how can i change the order of the status-games?
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=364 : How can I order the status games by a customized priority?
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=17&edit=1&type=e&id=346 : new topic about "Profiles" in "Dragon searching"-section: on table-filters (form-element left to "Search"): current values, clear values, reset values, save as default, save as profile;; if saved one: load profile, delete-profile;; perhaps multiple topics "What are profiles? and how to use them?"
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=329 : new topic about "shapes" (see NEWS): start with fix-board-setup, shape-list, "how to create shape?" (goban-editor -> link, manually, upload sgf, load from DGS-game);; save-shape -> name, size, public-flag, start-col, notes; preview, switch-colors, save;; "How to start shape-game?" -> shape-list: open shape (then invite or new-game or edit-shape), hover on shape-icon shows thumbnail, edit-shape;; "What happens when shape is changed after shape-game is started?" -> nothing, game references shape (by id), but on game-start the pattern is copied, so a change does not change existing games (but only for new shape-games with that pattern);; changed saved shape (without saved) and go to view-shape shows comparison of changes (incl. board);; once invitation/new-game created shape cannot be changed any more (also not with dispute)
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=104 : no, but upload as shape then invite or start new-game with that shape -> yes, shape-upload
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=279&edit=1&type=e&id=336 : add new topic for markup : <igoban SL1>
+- 1 DOC:  [faq] re-structure / re-organize FAQ-sections (new / re-order)
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=27 : if sound, feature-admin can add feature to vote on
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=17&edit=1&type=e&id=350 : new topic in "Dragon menus": "Can I save a template for a new game or invitation?" -> yes, with templates;; new topic in "Dragon menus" about "Templates" (see NEWS) to save game-settings for invite/new-game or game-messages;; almost every template can be used for either invite or new-game (except MPG - this only for new-game);; delete-template with trash-icon (confirmation);; restrictions (see NEWS);; + 2 extra-topics "How to save/use template?"
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=357&edit=1&type=e&id=387 : game-offer-types
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=352 : new topic in "Dragon games": "Can I reject a win of a game?" -> yes (under some conditions) with "reject-win-by-timeout" (in user-profile)
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=357&edit=1&type=e&id=386 : items for wroom-game-offer (or invitation-game-settings receiving inv-msg !?)
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=44 : place wr-game in new_game-page (not in wroom any longer) -> ref new topic "new game" !?
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=210 : replace completly, replaced by "new_game.php"-page (views: simple, expert, MPG, fair-komi, shapes, templates);; adjust/new topic about different views of new-game-page (expert-view): games-to-add, board-size, handicap-type (conv, proper, manual (nigiri, double, black, white) + H/K, adj/min/max-H, std-H, adj-K/jigo-mode, time-settings (JAP/CAN/FIS) + weekend-clock; restrictions: rated-game, rating-range, min-rated-fin-games, same-opponent (always, x times, x days), comment;; input-errors are now shown instead of redirected to error-page;; simple-view (restricted to some fields);; fair-komi-view (restricted fields, Fair-komi-option);; MPG-view (restricted fields, game-players-field)
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=391 : new topic about "Settings"-column in waiting-room
+- 6 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=392 : prevent join same-opponent for waiting-room
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=258 : suitable is comprised of other fields (remove "past"-talk): see also 'notes' in WR; Type (handicap-type = filter), rating-range, rated-max-games, max-started-games, same-opp-check, hide-wr (can still be joined)
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=211 : new-game -> new_game-page;; notes-section about restrictions;; new col-fields (user-type, game-type, type, settings(!), ruleset)
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=127 : red-background means a lot more now (see notes on wroom), "hide"-games can still be joined;; list restrictions
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=17&edit=1&type=e&id=343 : new topic about "new user-bulletin": admin can create bulletin to all also to be edited by user, e.g. for global announcements (tournaments);; don't ad too much (we don't want to flood the users with announcements)
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=231 : waiting-room replaced with "new_game"-page
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=273 : quota (count+expire) shown in page-bottom, 1=means one hit more get you blocked (ref to "i'm blocked"-topic); quota counts for web-site/quick-do-suite/quick-play; if quota-low (ca. 10) -> quota-warning is shown at top-page;; also add link to "responsibly" use server
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=212 : invite also possible from contacts-page, also from templates-page (saved game), also from running/finished games (from gameinfo-page with rematch);; invite is restricted (fewer fields as for new-game because "preview" + manual-change possible), probably settings for conv/proper shown on preview, dispute shows game-setting-diffs, game-invitations >6 months are deleted (msgs still there, but not usable for invitation any longer)
+- 2 DOC:  [faq] http://www.dragongoserver.net/faq.php?read=t&cat=357&e=393#Entry393 : what is fair-komi?; explain types (auction-komi open/secret, div&choose you komi/I komi first)
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=351 : new topic in "Dragon games" about "Fair-komi handling/negotiation" (see also NEWS): "How to start a fair-komi-game?" (even game only, new-game-fair-komi); time counts on negotiation
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=394 : how to find fair-komi games?
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=365&edit=1&type=e&id=75 : clarify / structure for type of game-messages: private between players, <c> public, <h> hidden
+- 3 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=all&edit=1&type=e&id=276 : clarify type of downloads; w/o comments, normal, with all comments
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=410 : attach SGF (game-review)
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=17&edit=1&type=c&id=305 : new FAQ-section "Multi-player games": see specs/multi-player-games.txt: from (1) intro: "Type of multi-player games", "What is Team-Go (MPG)?", "What is Zen-Go (MPG)";; from (2a): "Create new MPG" (new-game-page MPG, including shapes, no fair-komi), "Find users to play with", "Invite a specific (single) known player", "Add a game-offer in the waiting-room", "Remove a joined player", "Choose group-color and handicap for players", "Choose group-order for players", "Start game";; from (2b): "List of my MPGs" (how to find MPGs), "Info about MPGs";; from (2c) how to play a MPG: "Show info about MP-game (game-player-page)", "Show game-comments of MP-game", "Download SGF of MP-game", "Play move, Resign, Delete, End MP-game", "Quick-suite support" (see quick-suite-specs);; "How can I delete a MPG?" (only by admin);; "Why does my MPG does not appear in the game-lists?" (see specs);; "How to communicate with the other players of a MPG?" (MPG-bulletin private-announcement)
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=236 : added view "all observed games";; added fields: for view "all/user/my running/finished games, my/all observed games" (game-info column with icon to game-info-page + thumbnail + optional shape, ruleset, game-type), for view "all observed games" (obs-count, game-of-mine), for view "my running games" (my/opp-remaining-time, opp-last-access), for view "my finished games" (hidden game comments);; add icons for "Won?" column
+- 4 DOC:  [faq] own waiting games into new view "My waiting games": http://www.dragongoserver.net/admin_faq.php?ot=0&view=all&edit=1&type=e&id=211
+- 4 DOC:  [faq] http://www.dragongoserver.net/faq.php?read=t&cat=18#Entry18 : changes on status-page;; http://www.dragongoserver.net/admin_faq.php?ot=0&view=18&edit=1&type=e&id=41
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=0&edit=1&type=e&id=301 : hae? -> deleted
+- 4 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=239 : mark "new" with red-color, focus on first "new" not correct ? (only if tree hidden), field author with his rank, admins/moderator-icon, actions added (for navigation to 1st, previous, next parent/post, start/end);; hide/show tree-thread-overview (linked to posts with author + lastchanged), blue+bold = own posts, NEWs are linked from tree to post, from post-new to next-new, Refresh-link in bars, thread-hits in header-line, executives marked with admin-icon
+- 5 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=209 : edit rank + rating (init) now on separate page "edit_rating.php" (from user-info "Change rating & rank");; edit-rating later also described;; "Can I change my rating?" -> normally not, see notes on "edit_ranks.php"-page
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&view=12&edit=1&type=e&id=355 : new topic in "Dragon users..": explain all profile-options: name, open, country, lang, timezone, nighttime, notifications, email, bulletin-cats, reject-win-by-timeout (-> new topic); table-max-rows, enable JS, menu-pos, table-button; board-stuff: stone-size, wood-color, smooth, coords, move-numbering, last-move-capture (see NEWS);; private game-notes;; change for browser-only
+- 1 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=219 : yes, there's a new interface quick-do-suite (see specs); currently supported by quick-do (see NEWS) with handlers: game, user, msg, folder, contact, waitingroom, bulletin (check specs for implemented commands);; quick-status (still working, add version2 with new fields, see NEWS, see specs);; quick-play (still working, but will be removed in the future -> use quick-do-instead, see specs)
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=203 : new fields (last-quick-access, Reject win by timeout -> new topic (only own viewable), timezone, user localtime, night-time, link to games-lost-by-timeout, MP-games);; added bottom-links (+ = new pages): edit-profile, + change-rating & rank, + edit-user-picture;; see http://www.dragongoserver.net/forum/read.php?forum=4&thread=18683#32834
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=278 : see also edit_ranks-page
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=41 : items on top (user-id/name + rating), then 1st 3 unread bulletins (-> link new topic), then messages (new + reply; now configurable), then status-games, then MPGs to setup;; status-games fields (+ruleset, time-remaining see time-specs - not "time limit", +user-online-icon & <10min online, prio, notes-start)
+- 2 DOC:  [faq] http://www.dragongoserver.net/admin_faq.php?ot=0&edit=1&type=e&id=303 : WAP (same restriction as for RSS is in place);; quick_play (uses now same quota as web-page or quick-do-suite);; quick-status (not restricted, but has progressive caching), see specs;; added new quick-do-suite (restricted to use same quota as web-page)
+
+#--------------------------------- tourney & other diffs for T-docs + FAQ
+- 3 DOC:  [tourney] TRR: slice-modes: http://senseis.xmp.net/?GroupPairing
+- 5 DOC:  [tourney] TRR: add guidelines how to handle "withdraw from TRR"
+- 8 DOC:  [tourney] Matrix: adjust 'specs/tournaments.txt' for Matrix-ttype accordingly
+- 7 DOC:  [faq] add question in FAQ for [tourney] ladder: T-Registration: show expected # of simul games; for round-robin: depends on pool-size and #rounds -> add as feature on T-info page
+
+   - add more translatable-texts for statistics-page
+
+   - added tournament-title in tooltip on tournament-icon on games-lists
+
+   - added shortcut edit-icons on games-list linked to tournament-game-admin
+     - show edit-link only for tournament-director and only if tournament-status can still be modified
+     - extended title with tournament-games with full tournament-title
+
+   - added new game-score FORFEIT to support a "bye" for round-robin-tournaments
+     - game-admin: added ending game with forfeit for either Black or White player by game-admin,
+       game is changed to unrated on forfeit,
+       players are informed in game-end message about implicit unrated-change on forfeiting
+     - tournament-game-admin: added ending game with forfeit by tournament-director
+     - edit-points: added points-calculation for forfeited game in examples-preview
+     - view-pools: mark forfeited game in pool-results of round-robin-tournaments
+       with dashed black border
+     - use TournamentPoints.PointsForfeit for point-calculations in tournament-pool
+     - process game-forfeit for ladder-tournaments like a game by timeout
+     - extended FilterScore to support searching game-score for forfeited games
+     - extended short-output of game-score for game-page/SGF/quick-suite with "B/W+F"
+     - added count of forfeited games on opponents-page
+
+   - added NO-RESULT as result for game-end, set by game-admin
+     - NOTE: Games.Score=0 can now be Jigo OR No-Result, need to check Games.Flags to differ between them!
+     - NOTE: 'Void' is synonym for No-Result, used for SGF-download and quick-suite and for filters
+       as it's shorter
+     - tournament-game-admin: added setting game-end of NO-RESULT,
+       set TG.Score=0 + TG.Flags=TG_FLAG_GAME_NO_RESULT
+     - game-admin: added setting game-end of NO-RESULT,
+       set G.Score=0 + G.Flags=GAMEFLAGS_NO_RESULT + G.Rated=N
+     - game-admin: allowing to overwrite jigo-check preventing jigo for tournament-rules forbidding jigo
+     - game-admin: setting jigo as game-result does not require color-choice
+     - process game-end taking over NO-RESULT game-result from Games-table to TournamentGames-table
+       converting NO-RESULT-flag
+       - ladder-tournament: skip rematch-wait for game ended with NO-RESULT
+       - round-robin-tournament: use TournamentPoints.PointsNoResult for NO-RESULT game-end
+         for point-calculation in pools
+     - view-pools: mark NO-RESULT game in pool-results of round-robin-tournaments with grey background
+     - edit-points: added points-calculation for NO-RESULT game in examples-preview
+     - extended Score-filter with No-Result
+     - games-list: added No-Result in score-column, extended score/won-filter with search for VOID-result
+     - games-list: added tooltips for won-column icons
+     - sgf-download: added Void-result for RE[]-prop, added '=VOID' as $r for download-filename-format
+     - opponents-page: added count for no-result, differ from jigo-count
+
+
+tourney-stuff:
+   - show "StartRound; NextRound" on tournament-participant-list in round-column if values are different
+   - filter tournament-participants-list on NextRound as StartRound is only relevant for registration-checks but need list for pooling higher rounds
+   - added link on tourney-management-page to tournament-participants-list for current round
+
+   - full-cycle + checks for T-status & T-round-status state-transitions
+   - added text describing purpose of public-user-comment and user-message-box
+
+   - implemented change of tournament-status to CLOSED to finish tournament
+     - edit-status: added warnings on changing tournament-status, that should be resolved but can be ignored by directors
+     - edit-status: added current tournament-status and round-info
+     - show warning about missing tournament-results for last-round of tournament
+     - show error if there are unfinished tournament-rounds for round-robins
+     - show warning if there are tournament participants for round-robins on higher start rounds than last round
+     - show warning if there is more than one pool in last round
+
+   - show start-round of tournament-participant in tournament-status-section
+
+   - added game-annulling to detach game from tournament having no further effect on tournament
+     - setting TG.Score=0, TG.Flags=TG_FLAG_GAME_DETACHED, G.Rated=N, G.Flags=GAMEFLAGS_TG_DETACHED
+     - tournament-game-admin: added game-annulling which is the same as "detaching",
+       making game unrated, setting detached flags in tournament-game and Games-table
+     - tournament-game-admin: setting jigo as game-result does not require color-choice
+     - edit-points: added points-calculation for annulled game in examples-preview
+     - view-pools: mark annulled game in pool-results of round-robin-tournaments with orange background
+     - view-pools: renamed CSS for MatrixJigo to MatrixDraw
+
+   - edit-ranks for round-robin-tournament: refactored clearing rank(=0) to naming it "withdrawing" pool-user for clearer purpose
+   - edit-ranks for round-robins: allow withdrawing pool-user set by T-director even if Pool-Rank still unset
+   - round-robins edit-ranks: revise error-checks on pool-winners & extend warnings for current round
+     - allow that pool can have no pool-winners, e.g. if all pool-users withdrew or many games has been annulled
+     - change error on pool having no pool-winner into warning
+     - add warning if ALL players of a pool are marked as pool-winners, normally there should be less pool-winners
+     - add warning if there's not even one pool-winners in all pools
+     - add warning if for potential next-round there not at least 2 players
+
+   - view-pools: show pools-count in round-summary-line
+
+   - round-robins edit-pairing:
+     - handle partial starting of tournament games for selected pools
+     - collect all inconsistencies at once when starting games for pools
+     - switch tournament-round-status to PLAY only if all games for all pools have been started
+     - added number of started games in pool-summary
+     - show progress on starting games in smaller steps 25 -> 10
+     - adding 3-hour expire-check on starting-games-lock on using tournament-extension
+     - adjusted writing of tournament-log for partial starting of games
+     - bugfix: release start-games-lock when return errors after finding inconsistencies
+
+   - allow editing of tournament-round-properties only for tournament-round-status INIT
+   - round-robin: allow view-pools only on PLAY/CLOSED tournament-status and on PAIR for T-directors
+   - for round-robin-tournaments:
+     - round-robin: added links on top to view-pools of other rounds
+     - on edit-rounds-page restricted adding/removing/setting rounds to tournament-admin
+     - added action start-next-round on edit-rounds-page to mark next-rounders from current round, switch tournament-status, add new round and set current round to new round
+     - added & revised checks for missing next-rounders on setting current tournament-round
+     - show pool-summary also if tournament/round-status prevents edit
+     - added pools-games integrity check on showing pool-summary with fix-directions
+     - view-pools for round-robin-tournaments: added column with table-icon linked to users running tournament-games
+
+   - added table TournamentPoints to store point-configuration for round-robin-tournaments
+     - added edit-page 'edit_points.php' to configure TournamentPoints with score-example-preview
+     - added tests for TournamentPoints score-point-calculation
+     - view-pools: use tournament-points-calculation in pools on view-pools
+     - view-pools: enhanced tooltip on game-reference in pools with game-score
+     - added caching for loading tournament-points
+     - added free input-fields in examples-preview on edit-points-page to allow directors to test other point-configs
+
+   - fixed pool-notes for round-robin-tournaments view-pools-page
+     - added color-scheme used for pool-matrix for all possible game-results
+     - added notes about points-config for simple and Hahn points-type for tournament
+
+   - for ladders:
+     - view-ladder: add link on own-rank-info to jump near own position in ladder
+     - view-ladder: added table-column with outgoing challenges, which is deactivated per default
+     - view-ladder: renamed header-column 'Challenges' -> Challenges-In
+     - renamed "retreat" from ladder to "withdraw" from ladder
+     - extended tournament-results to support ladder sequently-wins & public & private comment on entry
+
+   - added tracking of sequently wins and best sequently wins for participants in ladder-tournament
+     - increase seq-wins for winner (including jigo) on processing game-end
+     - reset seq-wins for loser (excluding jigo) on processing game-end for
+     - added column in ladder-view showing sequently wins and best value
+     - added script to fix sequently wins for all users of ladder-tournament
+
+   - adjusted texts in web-UI: changed some game "detached (from tournament)" to game "annulled"
+     for clearer term, but technically keep "detaching"
+
+   - added search for 'Annulled' games in TournamentGames-status-filter in tournament-games-list
+
+   - adjusted texts for ladder-tournaments about game-annulling (=detach-game) and NO-RESULT:
+     - added no-change-actions for ladder-properties-notes for annulled-game and NO-RESULT-game
+     - clarified texts, clarified game-annulling = "detaching" of tournament-games,
+       adding that game is made unrated
+     - user-withdrawal: added number of running tournament-games of user
+     - ladder-admin: used star-icon for prefixing note-items, use some word-wrapping for long notes
+
+   - added new page with list of all tournament-results in preparation for editing-tournament-results
+     - added filter showing only my tournament-results
+     - added links to tournament-results-list-page in results-section on view-tournament-page
+     - cached TOP-10 tournament-results showed on view-tournament-page
+     - refactored TournamentGuiHelper.build_tournament_results()
+       into new class TournamentResultControl merging different views of tournament-results
+
+   - added edit-result-page to add/update/delete tournament-result-entries
+     - show tournament-info for specified user and round dependent on tournament-type
+     - auto-fill in tournament-results entry from loaded tournament-info-data
+     - edit-results: added preview of new tournament-result
+     - edit-results: show existing tournament-result-entry, extend date-parsing with seconds
+     - edit-result-page: added operations to add new, update or delete existing tournament-result entry, preview and cancel operation
+     - round-robins edit-result: create tournament-results from pool-winners of specified round
+       - added bottom-link to view-pools/view-ladder for specific tournament-type
+
+   - show only "Open" tournaments (status REGISTER/PAIR/PLAY) per default in tournaments-list
+
+   - Tournament logging for all TRR-actions performed by admins, owner, directors, cron and users
+
+game-admin:
+   - allow toggle of rated-status also for tournament-game, but show warning to communicate to tournament-directors
+   - added bottom-link for game-admin on game-page
+   - game-admin: add warning about game-ending for tournament-game
+
+
