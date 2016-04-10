@@ -40,14 +40,15 @@ require_once 'tournaments/include/tournament_log_helper.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentGameAdmin');
 
-define('GA_NEED_COLOR', 0x100); // add bitmask if result needs color (B|W) to set result for
-define('GA_RES_SCORE',   1 | GA_NEED_COLOR);
-define('GA_RES_RESIGN',  2 | GA_NEED_COLOR);
-define('GA_RES_TIMOUT',  3 | GA_NEED_COLOR);
-define('GA_RES_FORFEIT', 4 | GA_NEED_COLOR);
-define('GA_RES_DRAW',      5);
-define('GA_RES_NO_RESULT', 6);
-define('GA_RES_ANNUL',     7);
+// Game-Admin-Tournament
+define('GAT_NEED_COLOR', 0x100); // add bitmask if result needs color (B|W) to set result for
+define('GAT_RES_SCORE',   1 | GAT_NEED_COLOR);
+define('GAT_RES_RESIGN',  2 | GAT_NEED_COLOR);
+define('GAT_RES_TIMOUT',  3 | GAT_NEED_COLOR);
+define('GAT_RES_FORFEIT', 4 | GAT_NEED_COLOR);
+define('GAT_RES_DRAW',      5);
+define('GAT_RES_NO_RESULT', 6);
+define('GAT_RES_ANNUL',     7);
 
 
 {
@@ -134,7 +135,7 @@ define('GA_RES_ANNUL',     7);
             $success = $tgame->update_score( 'Tournament.game_admin', /*old-st*/TG_STATUS_PLAY );
             if ( $success )
             {
-               if ( $ttype->allow_game_annul && $vars['result'] == GA_RES_ANNUL && ($tgame->Flags & TG_FLAG_GAME_DETACHED) )
+               if ( $ttype->allow_game_annul && $vars['result'] == GAT_RES_ANNUL && ($tgame->Flags & TG_FLAG_GAME_DETACHED) )
                   Games::detach_games( "Tournament.game_admin($tid)", array( $tgame->gid ) );
 
                // clear cache
@@ -333,24 +334,24 @@ function parse_edit_form( &$tgame, $tourney, $ttype, $trule, $game )
       $vars['color'] = ($game_score <= 0) ? BLACK : WHITE; // BLACK default for score=0
       $vars['score'] = '';
       if ( abs($tgame->Score) == SCORE_RESIGN )
-         $vars['result'] = GA_RES_RESIGN;
+         $vars['result'] = GAT_RES_RESIGN;
       elseif ( abs($tgame->Score) == SCORE_TIME )
-         $vars['result'] = GA_RES_TIMOUT;
+         $vars['result'] = GAT_RES_TIMOUT;
       elseif ( abs($tgame->Score) == SCORE_FORFEIT )
-         $vars['result'] = GA_RES_FORFEIT;
+         $vars['result'] = GAT_RES_FORFEIT;
       else
       {
          if ( $tgame->Flags & TG_FLAG_GAME_DETACHED )
-            $vars['result'] = GA_RES_ANNUL;
+            $vars['result'] = GAT_RES_ANNUL;
          else if ( abs($tgame->Score) == 0 )
          {
             if ( $tgame->Flags & TG_FLAG_GAME_NO_RESULT )
-               $vars['result'] = GA_RES_NO_RESULT;
+               $vars['result'] = GAT_RES_NO_RESULT;
             else
-               $vars['result'] = GA_RES_DRAW;
+               $vars['result'] = GAT_RES_DRAW;
          }
          else
-            $vars['result'] = GA_RES_SCORE;
+            $vars['result'] = GAT_RES_SCORE;
          $vars['score'] = abs($game_score);
       }
    }
@@ -369,7 +370,7 @@ function parse_edit_form( &$tgame, $tourney, $ttype, $trule, $game )
 
    // parse URL-vars
    $new_result = (int)$vars['result'];
-   if ( ( @$_REQUEST['gend_save'] && ($new_result & GA_NEED_COLOR) ) || @$_REQUEST['addtime_save'] )
+   if ( ( @$_REQUEST['gend_save'] && ($new_result & GAT_NEED_COLOR) ) || @$_REQUEST['addtime_save'] )
    {
       $new_value = $vars['color'];
       if ( (string)$new_value == '' )
@@ -386,9 +387,9 @@ function parse_edit_form( &$tgame, $tourney, $ttype, $trule, $game )
       // parse & check values
       if ( !$new_result )
          $errors[] = T_('Missing choice of game-end result');
-      else if ( $new_result != GA_RES_SCORE && $new_result != GA_RES_RESIGN
-            && $new_result != GA_RES_TIMOUT && $new_result != GA_RES_FORFEIT
-            && $new_result != GA_RES_DRAW && $new_result != GA_RES_NO_RESULT && $new_result != GA_RES_ANNUL )
+      else if ( $new_result != GAT_RES_SCORE && $new_result != GAT_RES_RESIGN
+            && $new_result != GAT_RES_TIMOUT && $new_result != GAT_RES_FORFEIT
+            && $new_result != GAT_RES_DRAW && $new_result != GAT_RES_NO_RESULT && $new_result != GAT_RES_ANNUL )
       {
          // this shouldn't happen with radio-buttons
          error('assert', "Tournament.game_admin.parse_edit_form.check.result($tid,$gid,$new_result)");
@@ -397,7 +398,7 @@ function parse_edit_form( &$tgame, $tourney, $ttype, $trule, $game )
          $vars['result'] = (int)$new_result;
 
       $new_score = null;
-      if ( $new_result == GA_RES_SCORE )
+      if ( $new_result == GAT_RES_SCORE )
       {
          $new_value = trim($vars['score']);
          if ( (string)$new_value == '' )
@@ -411,13 +412,13 @@ function parse_edit_form( &$tgame, $tourney, $ttype, $trule, $game )
          else
             $vars['score'] = $new_score = (float)$new_value;
       }
-      elseif ( $new_result == GA_RES_DRAW || $new_result == GA_RES_NO_RESULT )
+      elseif ( $new_result == GAT_RES_DRAW || $new_result == GAT_RES_NO_RESULT )
          $new_score = 0;
-      elseif ( $new_result == GA_RES_ANNUL && !$ttype->allow_game_annul )
+      elseif ( $new_result == GAT_RES_ANNUL && !$ttype->allow_game_annul )
          $errors[] = sprintf( T_('Annulling tournament-game is not allowed for type of this tournament [%s].'),
             Tournament::getTypeText($tourney->Type) );
 
-      if ( ($new_result == GA_RES_SCORE || $new_result == GA_RES_DRAW || $new_result == GA_RES_NO_RESULT)
+      if ( ($new_result == GAT_RES_SCORE || $new_result == GAT_RES_DRAW || $new_result == GAT_RES_NO_RESULT)
             && !is_null($new_score) && !@$_REQUEST['jigo_check'] ) // jigo_check=1: skip jigo-check
       {
          $jigo_behaviour = $trule->determineJigoBehaviour();
@@ -432,16 +433,16 @@ function parse_edit_form( &$tgame, $tourney, $ttype, $trule, $game )
          $game_flags = 0;
          switch ( (int)$vars['result'] )
          {
-            case GA_RES_SCORE:   $game_score = (float)$vars['score']; break;
-            case GA_RES_RESIGN:  $game_score = SCORE_RESIGN; break;
-            case GA_RES_TIMOUT:  $game_score = SCORE_TIME; break;
-            case GA_RES_FORFEIT: $game_score = SCORE_FORFEIT; break;
-            case GA_RES_DRAW:    $game_score = 0; break;
-            case GA_RES_NO_RESULT:
+            case GAT_RES_SCORE:   $game_score = (float)$vars['score']; break;
+            case GAT_RES_RESIGN:  $game_score = SCORE_RESIGN; break;
+            case GAT_RES_TIMOUT:  $game_score = SCORE_TIME; break;
+            case GAT_RES_FORFEIT: $game_score = SCORE_FORFEIT; break;
+            case GAT_RES_DRAW:    $game_score = 0; break;
+            case GAT_RES_NO_RESULT:
                $game_flags = TG_FLAG_GAME_NO_RESULT;
                $game_score = 0;
                break;
-            case GA_RES_ANNUL:
+            case GAT_RES_ANNUL:
                $game_flags = TG_FLAG_GAME_DETACHED;
                $game_score = 0;
                break;
@@ -503,28 +504,28 @@ function draw_game_end( $ttype, $tgame, $trule )
          'RADIOBUTTONSX', 'color', array( BLACK => T_('Black') ), @$vars['color'], $disabled,
          'TEXT', SMALL_SPACING . T_('wins by#TG_admin') . SMALL_SPACING,
          'CELL', 1, '',
-         'RADIOBUTTONSX', 'result', array( GA_RES_SCORE => T_('Score') ), @$vars['result'], $disabled,
+         'RADIOBUTTONSX', 'result', array( GAT_RES_SCORE => T_('Score') ), @$vars['result'], $disabled,
          'TEXT', MED_SPACING,
          'TEXTINPUTX', 'score', 6, 6, @$vars['score'], $disabled, ));
    $tform->add_row( array(
          'RADIOBUTTONSX', 'color', array( WHITE => T_('White') ), @$vars['color'], $disabled,
          'CELL', 1, '',
-         'RADIOBUTTONSX', 'result', array( GA_RES_RESIGN => T_('Resignation') ), @$vars['result'], $disabled, ));
+         'RADIOBUTTONSX', 'result', array( GAT_RES_RESIGN => T_('Resignation') ), @$vars['result'], $disabled, ));
    $tform->add_row( array(
          'TAB',
-         'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout') ), @$vars['result'], $disabled, ));
+         'RADIOBUTTONSX', 'result', array( GAT_RES_TIMOUT => T_('Timeout') ), @$vars['result'], $disabled, ));
    $tform->add_row( array(
          'TAB',
-         'RADIOBUTTONSX', 'result', array( GA_RES_FORFEIT => T_('Forfeit') ), @$vars['result'], $disabled, ));
+         'RADIOBUTTONSX', 'result', array( GAT_RES_FORFEIT => T_('Forfeit') ), @$vars['result'], $disabled, ));
 
    $tform->add_row( array( 'HR', ));
    $tform->add_row( array(
-         'RADIOBUTTONSX', 'result', array( GA_RES_DRAW => T_('Draw (=Jigo)') ), @$vars['result'], $disabled, ));
+         'RADIOBUTTONSX', 'result', array( GAT_RES_DRAW => T_('Draw (=Jigo)') ), @$vars['result'], $disabled, ));
    $tform->add_row( array(
-         'RADIOBUTTONSX', 'result', array( GA_RES_NO_RESULT => T_('No-Result (=Void)') ), @$vars['result'], $disabled, ));
+         'RADIOBUTTONSX', 'result', array( GAT_RES_NO_RESULT => T_('No-Result (=Void)') ), @$vars['result'], $disabled, ));
    $tform->add_row( array(
          'CELL', 2, '',
-         'RADIOBUTTONSX', 'result', array( GA_RES_ANNUL => T_('Annul game (detach from tournament)') ),
+         'RADIOBUTTONSX', 'result', array( GAT_RES_ANNUL => T_('Annul game (detach from tournament)') ),
                @$vars['result'], ( ( $disabled || !$ttype->allow_game_annul ) ? 'disabled=1' : '' ),
          'TEXT', ( !$ttype->allow_game_annul ? ' --- ' . T_('not allowed for this tournament-type') : '' ), ));
 
