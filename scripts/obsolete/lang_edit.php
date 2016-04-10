@@ -2,7 +2,7 @@
 
 /*
 Dragon Go Server
-Copyright (C) 2001-2015  Erik Ouchterlony
+Copyright (C) 2001-  Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

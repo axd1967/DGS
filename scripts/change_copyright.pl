@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ## Dragon Go Server
-## Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
+## Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU Affero General Public License as
@@ -68,7 +68,7 @@ foreach my $file (@files) {
    print STDERR "Processing file [$file] ...\n";
    #--------------------------------------------------------
    # update copyright
-   $buf =~ s/Copyright .C. \d+(-\d+)? /Copyright (C) 2001-$year /m;
+   $buf =~ s/Copyright .C. \d+(-\d+)? /Copyright (C) 2001- /m;
    #--------------------------------------------------------
 
    # write file back
