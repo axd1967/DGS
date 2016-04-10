@@ -1292,6 +1292,7 @@ Commands:
 
                "own_started_games" : 3,   # own started games (total) = Running games (from user-info page)
                "opp_started_games" : 0,   # number of games already started with opponent
+               "opp_finished_games" : 8,  # number of finished games with opponent
                "calc_type" : 1,           # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
                "calc_color" : "black",    # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
                "calc_handicap" : 3,       # probable/fix handicap
@@ -1711,6 +1712,7 @@ Commands:
             "join_err" : "",           # if not-empty, contains error-reasons why joining not possible (e.g. max-games reached,
                                        #    MPG already joined, opponents max-games reached)
             "opp_started_games" : 0,   # number of games already started with opponent
+            "opp_finished_games" : 8,  # number of finished games with opponent
             "calc_type" : 1,           # quality of setings: 0=own-game-offer, 1=probable-setting (conv/proper depends on rating),
                                        #    2=fix-calculated, 3=MPG (color/handicap/komi set by game-master)
             "calc_color" : "black",    # probable/fix color of logged-in user: '' | mpg | double | fairkomi | nigiri | black | white

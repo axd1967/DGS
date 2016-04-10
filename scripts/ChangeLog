@@ -13,6 +13,17 @@ ChangeLog
 
 2016-04-10 jug
 
+   * include/game_functions.php (GameHelper.count_games_with_opponent, echo_accept_same_opponent),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.fill_wroom_object),
+     include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),
+     include/wroom_control.php (WaitingroomControl.build_waiting_room_query),
+     include/message_functions.php (game_info_table),
+     specs/quick_suite.txt, message.php, waiting_room.php (add_old_game_form):
+   - show number of running & finished games with opponent on waiting-room-info & invitation
+     for web-site & quick-suite
+     - added 'opp_finished_games' in quick-suite handler for message-invitation & waiting-room
+     - cleanup: replaced GameHelper::count_started_games() with count_games_with_opponent()
+
    * include/game_functions.php (SAMEOPP_ONLY_NEW, SAMEOPP_TOTAL_STARTED;
        append_form_add_waiting_room_game, echo_accept_same_opponent),
      include/wroom_control.php (WaitingroomControl.build_waiting_room_query, ~.join_waitingroom_game),

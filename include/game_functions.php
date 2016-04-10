@@ -1311,12 +1311,26 @@ class GameHelper
       return $hero_uid;
    }//determine_finished_game_hero_uid
 
-   /*! \brief Returns number of started games (used for same-opponent-check). */
-   public static function count_started_games( $uid, $opp )
+   /*!
+    * \brief Fills result-map( prefix.'Running|Finished' => count ) with started & finished games for a pair of players.
+    * \param $uid if 0 fills result-map with 0 values for expected keys
+    */
+   public static function count_games_with_opponent( $uid, $opp, &$result, $prefix='' )
    {
-      $row = User::load_game_stats_for_users( 'GameHelper:count_started_games', $uid, $opp );
-      return ($row) ? (int)$row['Running'] : 0;
-   }//count_started_games
+      $uid = (int)$uid;
+      $opp = (int)$opp;
+      $result[$prefix.'Running'] = $result[$prefix.'Finished'] = 0;
+      if ( $uid == 0 )
+         return null;
+
+      $row = User::load_game_stats_for_users( 'GameHelper:count_games_with_opponent', $uid, $opp );
+      if ( $row && !is_null($result) )
+      {
+         $result[$prefix.'Running'] = $row['Running'];
+         $result[$prefix.'Finished'] = $row['Finished'];
+      }
+      return $row;
+   }//count_games_with_opponent
 
    /*!
     * \brief Updates clock-values for game.
@@ -5588,7 +5602,7 @@ function echo_started_games( $game_count )
 
 // WaitingRoom.SameOpponent: 0=always, -127=only-if-never-played-before, <-101=(-n-100) total times (run-games),
 //                           <0=n times (same game-offer), >0=after n days
-// \param $game_row expecting JoinedCount, X_TotalCount
+// \param $game_row expecting JoinedCount, X_GOPP_Running
 function echo_accept_same_opponent( $same_opp, $game_row=null )
 {
    if ( $same_opp == 0 )
@@ -5602,8 +5616,8 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
          $out = T_('1 total time (started games)#same_opp');
       else
          $out = sprintf( T_('%s total times (started games)#same_opp'), -$same_opp + SAMEOPP_TOTAL_STARTED );
-      if ( is_array($game_row) && (int)@$game_row['X_TotalCount'] > 0 )
-         $out .= ' (' . echo_started_games($game_row['X_TotalCount']) . ')';
+      if ( is_array($game_row) && (int)@$game_row['X_GOPP_Running'] > 0 )
+         $out .= ' (' . echo_started_games($game_row['X_GOPP_Running']) . ')';
    }
    elseif ( $same_opp < 0 )
    {
@@ -5616,7 +5630,7 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
          $join_fmt = ($game_row['JoinedCount'] > 1)
             ? T_('joined %s games#same_opp')
             : T_('joined %s game#same_opp');
-         $out .= ' (' . sprintf( $join_fmt, $game_row['JoinedCount'] ) . ')';
+         $out .= sprintf( " ($join_fmt)", $game_row['JoinedCount'] );
       }
    }
    else

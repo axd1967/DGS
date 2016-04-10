@@ -854,12 +854,13 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
    $MaxHandicap = DEFAULT_MAX_HANDICAP;
 
    // $game_row containing:
-   // - for GSET_WAITINGROOM: Waitingroom.*; calculated, goodrated, haverating; WaitingroomJoined.JoinedCount; X_TotalCount
+   // - for GSET_WAITINGROOM: Waitingroom.*; calculated, goodrated, haverating; WaitingroomJoined.JoinedCount;
+   //      X_GOPP_Running/Finished
    // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus,
    //   Games: fields mentioned in DgsMessage::build_message_base_query-func with full-data;
-   //          X_TotalCount
+   //          X_GOPP_Running/Finished
    extract($game_row);
 
    $my_id = $player_row['ID'];
@@ -964,7 +965,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       $itable->add_scaption(T_('Players info'));
       $itable->add_sinfo( T_('My Rating'), echo_rating($my_rating,true,$my_id) );
       $itable->add_sinfo( T_('Opponent Rating'), echo_rating($other_rating,true,$other_id) );
-      $itable->add_sinfo( T_('Started games'), sprintf( T_('%s (games with opponent)'), (int)@$game_row['X_TotalCount'] ) );
+      $itable->add_sinfo( T_('Games with opponent'), sprintf( T_('%s running, %s finished'), 
+            (int)@$game_row['X_GOPP_Running'], (int)@$game_row['X_GOPP_Finished'] ) );
 
       $itable->add_scaption(T_('Game info'));
    }
@@ -1187,7 +1189,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       $gs_calc->calculate_settings( $my_id );
 
       if ( $tablestyle == GSET_WAITINGROOM && !$is_my_game )
-         $itable->add_sinfo( T_('Started games'), (int)@$game_row['X_TotalCount'] );
+         $itable->add_sinfo( T_('Games with opponent'), sprintf( T_('%s running, %s finished'),
+               (int)@$game_row['X_GOPP_Running'], (int)@$game_row['X_GOPP_Finished'] ) );
 
       // determine color
       if ( $gs_calc->calc_color == GSC_COL_DOUBLE )

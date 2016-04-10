@@ -384,6 +384,9 @@ class QuickHandlerMessage extends QuickHandler
             if ( is_null($game_inv) )
                error('invite_bad_gamesetup', "QuickHandlerMessage.fill_message_info.miss_game_inv($gid,{$row['ToMove_ID']})");
 
+            $gopp_row = array();
+            GameHelper::count_games_with_opponent( $my_id, $other_uid, $gopp_row );
+
             $time_limit = TimeFormat::echo_time_limit(
                   $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
                   TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
@@ -421,7 +424,8 @@ class QuickHandlerMessage extends QuickHandler
                   'time_periods' => $row['Byoperiods'],
 
                   'own_started_games' => (int)$player_row['Running'],
-                  'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
+                  'opp_started_games' => (int)$gopp_row['Running'],
+                  'opp_finished_games' => (int)$gopp_row['Finished'],
                   'calc_type' => $gs_calc->calc_type,
                   'calc_color' => $gs_calc->calc_color,
                   'calc_handicap' => $gs_calc->calc_handicap,

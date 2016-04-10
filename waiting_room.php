@@ -389,7 +389,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
 
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
 
-   $game_row['X_TotalCount'] = ($is_my_game) ? 0 : GameHelper::count_started_games( $my_id, $opp_id );
+   GameHelper::count_games_with_opponent( ($is_my_game ? 0 : $my_id), $opp_id, $game_row, 'X_GOPP_' );
    foreach ( $ARR_COPY_FIELDS as $src => $trg )
       $game_row[$trg] = $game_row[$src];
 

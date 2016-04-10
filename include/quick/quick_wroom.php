@@ -166,10 +166,11 @@ class QuickHandlerWaitingroom extends QuickHandler
       if ( $restrictions == NO_VALUE )
          $restrictions = '';
 
-      $opp_started_games = $join_warning = $join_error = '';
+      $join_warning = $join_error = '';
+      $gopp_row = array();
       if ( !$is_list && !$wro->is_my_game() )
       {
-         $opp_started_games = GameHelper::count_started_games( $this->my_id, $wr->uid );
+         GameHelper::count_games_with_opponent( $this->my_id, $wr->uid, $gopp_row );
 
          list( $can_join, $html_out, $join_warning, $join_error ) = $wro->check_joining_waitingroom(/*html*/false);
          if ( !$can_join )
@@ -216,7 +217,8 @@ class QuickHandlerWaitingroom extends QuickHandler
       {
          $result['join_warn'] = $join_warning;
          $result['join_err'] = $join_error;
-         $result['opp_started_games'] = $opp_started_games;
+         $result['opp_started_games'] = (int)@$gopp_row['Running'];
+         $result['opp_finished_games'] = (int)@$gopp_row['Finished'];
       }
 
       $result['calc_type'] = $wro->resultType;

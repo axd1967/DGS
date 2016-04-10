@@ -106,7 +106,7 @@ class WaitingroomControl
          "$sql_goodmaxgames AS goodmaxgames",
          "$sql_goodsameopp AS goodsameopp",
          "$sql_goodhero AS goodhero",
-         "IF(WR.uid=$my_id OR WR.SameOpponent > ".SAMEOPP_TOTAL_STARTED.",0, COALESCE(GS.Running,0)) AS X_TotalCount"
+         'COALESCE(GS.Running,0) AS X_GOPP_Running', 'COALESCE(GS.Finished,0) AS X_GOPP_Finished'
          );
       $qsql->add_part( SQLP_FROM,
          "LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=WR.ID" );

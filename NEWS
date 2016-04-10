@@ -82,7 +82,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added number and ratio of different opponents of user
       * Added language-setting of user with full encoding
 
-   * <home userinfo.php>User info page</home>, <home users.php>Users list</home>, <home opponents.php>Opponents list</home>:
+   * <home userinfo.php>User info page</home>, <home users.php>Users list</home>, <home opponents.php>Opponents list</home>, Waiting room info page:
       * Added number of started and finished games with specific opponent
       * On <home opponents.php>Opponents list page</home> show table-icon linked to running and finished games
         only if user has such games with opponent
@@ -126,6 +126,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
    * Quick-Suite (alternative interface "quick_do.php"):
       * Extended game-handler to set standard handicap placement
       * Extended message-handler to set 'own_started_games' for invitations to support restrictions by bots
+      * Extended message-handler & waiting-room-handler to set 'opp_finished_games' with finished games with opponent
       * Extended user-handler to return 'hits' and 'moves' on info-command returning number of web-site-access and game-moves
       * Extended user-handler to return count and ratio of different opponents of a user on info-command
 

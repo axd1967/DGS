@@ -405,8 +405,7 @@ define('MSGBOXROWS_INVITE', 6);
          section('invite', T_('Game Invitation') );
          echo $maxGamesCheck->get_warn_text();
 
-         // load total started games
-         $msg_row['X_TotalCount'] = GameHelper::count_started_games( $my_id, $other_id );
+         GameHelper::count_games_with_opponent( $my_id, $other_id, $msg_row, 'X_GOPP_' );
 
          $game_invitations = GameInvitation::load_game_invitations( $Game_ID );
          if ( count($game_invitations) != 2 )
