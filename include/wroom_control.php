@@ -88,8 +88,9 @@ class WaitingroomControl
          ? "IF(WR.uid=$my_id OR (WRP.Running + WRP.GamesMPG < ".MAX_GAMESRUN."),1,0)" : 1;
 
       $sql_goodsameopp =
-         "CASE WHEN (WR.uid=$my_id OR WR.SameOpponent=0 OR (WR.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
-              "WHEN (WR.SameOpponent < ".SAMEOPP_TOTAL.") THEN (COALESCE(GS.Running,0) < -WR.SameOpponent + ".SAMEOPP_TOTAL.") " . // total-times-check
+         "CASE WHEN (WR.uid=$my_id OR WR.SameOpponent=0 OR (WR.SameOpponent > ".SAMEOPP_TOTAL_STARTED." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
+              "WHEN (WR.SameOpponent = ".SAMEOPP_ONLY_NEW.") THEN (COALESCE(GS.Running,0) + COALESCE(GS.Finished,0) = 0) " . // never-played-before-check
+              "WHEN (WR.SameOpponent < ".SAMEOPP_TOTAL_STARTED.") THEN (COALESCE(GS.Running,0) < -WR.SameOpponent + ".SAMEOPP_TOTAL_STARTED.") " . // total-times-started-games-check
               "WHEN (WR.SameOpponent<0) THEN (WRJ.JoinedCount < -WR.SameOpponent) " . // same-offer-times-check
               "ELSE (WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) " . // same-offer-date-check
               "END";
@@ -105,7 +106,7 @@ class WaitingroomControl
          "$sql_goodmaxgames AS goodmaxgames",
          "$sql_goodsameopp AS goodsameopp",
          "$sql_goodhero AS goodhero",
-         "IF(WR.uid=$my_id OR WR.SameOpponent > ".SAMEOPP_TOTAL.",0, COALESCE(GS.Running,0)) AS X_TotalCount"
+         "IF(WR.uid=$my_id OR WR.SameOpponent > ".SAMEOPP_TOTAL_STARTED.",0, COALESCE(GS.Running,0)) AS X_TotalCount"
          );
       $qsql->add_part( SQLP_FROM,
          "LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=WR.ID" );
@@ -184,8 +185,9 @@ class WaitingroomControl
          ? "IF(P.Running + P.GamesMPG < ".MAX_GAMESRUN.",1,0)" : 1;
 
       $sql_goodsameopp =
-         "CASE WHEN (W.uid=$my_id OR W.SameOpponent=0 OR (W.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
-              "WHEN (W.SameOpponent < ".SAMEOPP_TOTAL.") THEN (COALESCE(GS.Running,0) < -W.SameOpponent + ".SAMEOPP_TOTAL." ) " . // total-times-check
+         "CASE WHEN (W.uid=$my_id OR W.SameOpponent=0 OR (W.SameOpponent > ".SAMEOPP_TOTAL_STARTED." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
+              "WHEN (W.SameOpponent = ".SAMEOPP_ONLY_NEW.") THEN (COALESCE(GS.Running,0) + COALESCE(GS.Finished,0) = 0) " . // never-played-before-check
+              "WHEN (W.SameOpponent < ".SAMEOPP_TOTAL_STARTED.") THEN (COALESCE(GS.Running,0) < -W.SameOpponent + ".SAMEOPP_TOTAL_STARTED." ) " . // total-times-running-games-check
               "WHEN (W.SameOpponent<0) THEN (WRJ.JoinedCount < -W.SameOpponent) " . // same-offer-times-check
               "ELSE (WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) " . // same-offer-date-check
               "END";
@@ -377,7 +379,7 @@ class WaitingroomControl
 
          $same_opp = $game_row['SameOpponent'];
          $query_so = '';
-         if ( $same_opp < 0 ) // restriction on count
+         if ( $same_opp > SAMEOPP_TOTAL_STARTED && $same_opp < 0 ) // restriction on count
          {
             if ( $game_row['X_wrj_exists'] )
                $query_so = 'UPDATE WaitingroomJoined SET JoinedCount=JoinedCount+1 '

@@ -94,6 +94,9 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added option in <home edit_profile.php>user-profile</home> to configure to show rating-graph by games,
         default is to show rating-graph by time
 
+   * <home new_game.php>New game</home>:
+      * Added waiting-room restriction to only accept opponents that user never played before
+
    * <home waiting_room.php>Waiting room</home>:
       * Added user-online column page showing state of user being online or on vacation
       * Added column with <image table.gif>-icon linked to finished games with opponent

@@ -85,7 +85,8 @@ define('JIGOMODE_ALLOW_JIGO', 'ALLOW_JIGO');
 define('JIGOMODE_NO_JIGO',    'NO_JIGO');
 define('CHECK_JIGOMODE', 'KEEP_KOMI|ALLOW_JIGO|NO_JIGO');
 
-define('SAMEOPP_TOTAL', -100); // base-value for total-game Waitingroom.SameOpponent-check
+define('SAMEOPP_ONLY_NEW', -127);
+define('SAMEOPP_TOTAL_STARTED', -100); // base-value for total-started-games Waitingroom.SameOpponent-check
 
 // handicap-types, see Waitingroom.Handicaptype in specs/db/table-Waitingroom.txt
 define('HTYPE_CONV',    'conv'); // conventional handicap
@@ -5563,7 +5564,8 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
 
    if ( $viewmode == GSETVIEW_STANDARD || $viewmode == GSETVIEW_FAIRKOMI )
    {
-      $same_opp_array = build_accept_same_opponent_array(array( 0,  -101, -102, -103,  -1, -2, -3,  3, 7, 14 ));
+      $same_opp_array = build_accept_same_opponent_array(array( 0, SAMEOPP_ONLY_NEW,
+            SAMEOPP_TOTAL_STARTED-1, SAMEOPP_TOTAL_STARTED-2, SAMEOPP_TOTAL_STARTED-3,  -1, -2, -3,  3, 7, 14 ));
       $mform->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
                               'SELECTBOX', 'same_opp', 1, $same_opp_array, $same_opponent, false, ));
    }
@@ -5584,19 +5586,22 @@ function echo_started_games( $game_count )
    return sprintf( $fmt, $game_count );
 }
 
-// WaitingRoom.SameOpponent: 0=always, <-101=(-n-100) total times, <0=n times (same game-offer), >0=after n days
+// WaitingRoom.SameOpponent: 0=always, -127=only-if-never-played-before, <-101=(-n-100) total times (run-games),
+//                           <0=n times (same game-offer), >0=after n days
 // \param $game_row expecting JoinedCount, X_TotalCount
 function echo_accept_same_opponent( $same_opp, $game_row=null )
 {
    if ( $same_opp == 0 )
       return T_('always#same_opp');
+   elseif( $same_opp == SAMEOPP_ONLY_NEW )
+      return T_('accept only, if never played before#same_opp');
 
-   if ( $same_opp < SAMEOPP_TOTAL )
+   if ( $same_opp < SAMEOPP_TOTAL_STARTED )
    {
-      if ($same_opp == SAMEOPP_TOTAL-1 )
-         $out = T_('1 total time#same_opp');
+      if ($same_opp == SAMEOPP_TOTAL_STARTED-1 )
+         $out = T_('1 total time (started games)#same_opp');
       else
-         $out = sprintf( T_('%s total times#same_opp'), -$same_opp + SAMEOPP_TOTAL );
+         $out = sprintf( T_('%s total times (started games)#same_opp'), -$same_opp + SAMEOPP_TOTAL_STARTED );
       if ( is_array($game_row) && (int)@$game_row['X_TotalCount'] > 0 )
          $out .= ' (' . echo_started_games($game_row['X_TotalCount']) . ')';
    }

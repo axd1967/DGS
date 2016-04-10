@@ -173,14 +173,15 @@ Important Note:
 
 * SameOpponent : restrictions on challenger for same game-offer
    - join-status is kept in table 'WaitingroomJoined'
-   -  0 = no restriction if same opponent joins more than one game of same game-offer,
-          table WaitingroomJoined is not used in this case
-   - < -100 = restrict same opponent for game-offer to max. number of total games,
-          so number of all started games with opponent must be < -N -100
+   - 0 = no restriction if same opponent joins more than one game of same game-offer,
+         table WaitingroomJoined is not used in this case
+   - -127 = restrict opponent to allow only users never played before
+   - < -100 = restrict same opponent for game-offer to max. number of total started games,
+         so number of all started games with opponent must be < -N -100
    - <0 = restrict same opponent for game-offer to max. number of times to join,
-          keeping track of joined number of games with 'WaitingroomJoined.JoinedCount'
+         keeping track of joined number of games with 'WaitingroomJoined.JoinedCount'
    - >0 = restrict same opponent for game-offer to min. time [days] to pass for next join,
-          keeping track of joined number of games with 'WaitingroomJoined.ExpiresDate'
+         keeping track of joined number of games with 'WaitingroomJoined.ExpiresDate'
 
 * ShapeSnapshot : extended snapshot of shape-game
    - see Games.ShapeSnapshot in 'specs/db/table-Games.txt'

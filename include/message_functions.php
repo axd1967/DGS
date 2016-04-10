@@ -1150,9 +1150,14 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       $same_opp_str = echo_accept_same_opponent($SameOpponent, $game_row);
       if ( $SameOpponent != 0 )
       {
-         $itable->add_sinfo(
-            T_('Accept same opponent'), $same_opp_str,
-            ( $goodsameopp ? '' : warning_cell_attb( $restricted_text . T_('User already has started games#wroom')) ) );
+         if ( $goodsameopp )
+            $warn_text = '';
+         else
+            $warn_text = ( $SameOpponent == SAMEOPP_ONLY_NEW )
+                  ? T_('User already has played with you before#wroom')
+                  : T_('User already has started games#wroom');
+         $itable->add_sinfo( T_('Accept same opponent'), $same_opp_str,
+               ( $warn_text ? warning_cell_attb( $restricted_text . $warn_text ) : '' ));
       }
    }
 
@@ -1220,8 +1225,10 @@ function build_game_restriction_notes()
          sprintf( T_('Max. number of opponents started games must not exceed limits, marked by "%s"#wroom'),
                   'MXG' ),
          sprintf( T_('Min. hero percentage, e.g. "%s"#wroom'), 'H%[40-]' ),
-         sprintf( T_('Acceptance mode for challenges from same opponent, e.g. "%s" (total) or "%s" or "%s"#wroom'),
-                  'SOT[1]', 'SO[1x]', 'SO[&gt;7d]' ),
+         T_('Acceptance mode for challenges from same opponent:') .
+               sprintf(" \"NEW\" (%s),\n&nbsp;&nbsp;\"SOS[1]\" (%s), \"SO[1x]\" (%s), \"SO[&gt;7d] (%s)\"",
+                     T_('never played before#wroom'), T_('total started games#wroom'),
+                     T_('same offer#same_opp'), T_('same offer after N days#same_opp') ),
          sprintf( T_('Handicap-type (conventional and proper handicap-type need a rating for calculations), marked by "%s"#wroom'),
                   'CHT' ), // calculated-handicap-type
          sprintf( T_('User has no rating, marked by "%s"#wroom'), 'RT' ),
@@ -1281,12 +1288,14 @@ function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedG
 
    if ( !is_null($SameOpponent) )
    {
-      if ( $SameOpponent < SAMEOPP_TOTAL )
-         $out[] = sprintf( 'SOT[%s]', -$SameOpponent + SAMEOPP_TOTAL ); // N total times
+      if ( $SameOpponent == SAMEOPP_ONLY_NEW )
+         $out[] = 'NEW'; // accept only if never played before (all games, except MPGs)
+      elseif ( $SameOpponent < SAMEOPP_TOTAL_STARTED )
+         $out[] = sprintf( 'SOS[%s]', -$SameOpponent + SAMEOPP_TOTAL_STARTED ); // N total times (started games)
       elseif ( $SameOpponent < 0 )
-         $out[] = sprintf( 'SO[%sx]', -$SameOpponent ); // N times
+         $out[] = sprintf( 'SO[%sx]', -$SameOpponent ); // N times (same offer)
       elseif ( $SameOpponent > 0 )
-         $out[] = sprintf( 'SO[&gt;%sd]', $SameOpponent ); // after N days
+         $out[] = sprintf( 'SO[&gt;%sd]', $SameOpponent ); // after N days (same offer)
    }
 
    if ( !is_null($haverating) && !$haverating )

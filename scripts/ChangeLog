@@ -13,6 +13,17 @@ ChangeLog
 
 2016-04-10 jug
 
+   * include/game_functions.php (SAMEOPP_ONLY_NEW, SAMEOPP_TOTAL_STARTED;
+       append_form_add_waiting_room_game, echo_accept_same_opponent),
+     include/wroom_control.php (WaitingroomControl.build_waiting_room_query, ~.join_waitingroom_game),
+     include/message_functions.php (game_info_table, echo_game_restrictions),
+     specs/db/table-Waitingroom.txt:
+   - added option in accept-same-order restriction to only accept offers if opponent never played
+     before with user
+     - used Waitingroom.SameOpponent = -127 for new option
+     - cleanup: replaced SOT[n] -> SOS[n] for same-offer Started games
+     - cleanup: optimization to not write WaitingroomJoined-table for SAMEOPP_TOTAL_STARTED-options
+
    * include/game_functions.php (GameHelper.delete_running_game, ~.delete_finished_unrated_game,
        ~.update_players_start_game, ~.update_players_end_game, ~.count_started_games),
      include/classlib_user.php (User.load_game_stats_for_users, ~.load_different_opponents_for_all_games),
@@ -22,7 +33,7 @@ ChangeLog
      include/message_functions.php (game_info_table),
      scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
      specs/db/table-Games.txt, specs/db/dragon-ddl.sql, specs/quick_suite.txt,
-     scripts/index.php, opponents.php, userinfo.php, users.php, NEWS:
+     scripts/index.php, opponents.php, userinfo.php, users.php:
    - added GameStats-table to track running & finished non-MP games between two players
      - show number of different opponents of all games & ratio on user-info-page & invitation-game-info
      - show number of started / finished games with opponent on user-info/users/opponents-page
