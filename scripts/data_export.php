@@ -279,6 +279,7 @@ function get_tables( $database)
             'GameInvitation',
             'GamePlayers',
             'GameSgf',
+            'GameStats',
             'Games',
             'GamesNotes',
             'GamesPriority',
