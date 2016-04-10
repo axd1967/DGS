@@ -542,6 +542,21 @@ CREATE TABLE IF NOT EXISTS `GamesPriority` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `GameStats`
+--
+
+CREATE TABLE `GameStats` (
+  `uid` int(11) NOT NULL,
+  `oid` int(11) NOT NULL,
+  `Running` smallint(5) unsigned NOT NULL default '0',
+  `Finished` mediumint(8) unsigned NOT NULL default '0',
+  UNIQUE KEY `uid_oid` (`uid`,`oid`),
+  KEY `oid` (`oid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Intro`
 --
 

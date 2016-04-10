@@ -1099,6 +1099,10 @@ Commands:
                                      #     0 = already reached gold-badge (highest level)
                                      #    >0 = games with weaker-players >1k-diff needed to reach next hero-level,
                                      #    <0 = number of min. finished games needed to calculate hero-ratio
+            "opp_games_running" : 2,      # number of running games with opponent (only set if not my user-info)
+            "opp_games_finished" : 7,     # number of finished games (only set if not my user-info)
+            "diff_opps_games_all": 32,    # number of different opponents of all games (without MP-games)
+            "diff_opps_ratio_all": 0.216  # ratio of different opponents of all games (without MP-games)
          }
 
       - Result Values:

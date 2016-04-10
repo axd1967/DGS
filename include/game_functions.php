@@ -1048,7 +1048,7 @@ class GameHelper
    /*!
     * \brief Deletes non-tourney non-detached (=non-annulled) game and all related tables for given game-id,
     *       if not finished yet.
-    * \param $upd_players if true, also decrease Players.Running
+    * \param $upd_players if true, also decrease Players.Running & GameStatus.Running
     * \return true on success, false on invalid args or invalid game to delete (finished, tourney)
     */
    public static function delete_running_game( $gid, $upd_players=true )
@@ -1084,6 +1084,10 @@ class GameHelper
             {
                db_query( "GameHelper:delete_running_game.upd_players($gid,$Black_ID,$White_ID)",
                   "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
+               db_query( "GameHelper:delete_running_game.upd_gamestats($gid,$Black_ID,$White_ID)",
+                  // only UPDATE as entries exist for started game
+                  "UPDATE GameStats SET Running=Running-1 " .
+                  "WHERE uid=IF($Black_ID<$White_ID,$Black_ID,$White_ID) AND oid=IF($Black_ID<$White_ID,$White_ID,$Black_ID) LIMIT 1" );
             }
             else
                MultiPlayerGame::update_players_end_mpgame( $gid, ($grow['Status'] == GAME_STATUS_SETUP), /*del*/true );
@@ -1106,7 +1110,7 @@ class GameHelper
    /*!
     * \brief Deletes finished non-tourney non-detached (=non-annulled) unrated game and all related tables
     *       for given game-id.
-    * \note Players-table will be updated (decrease Players.Finished/etc)
+    * \note Players-table will be updated (decrease Players.Finished & GameStats.Finished)
     * \return true on success, false on invalid args or invalid game to delete (not finished, tourney,
     *       annulled, rated game)
     */
@@ -1140,6 +1144,11 @@ class GameHelper
             $White_ID = (int)@$grow['White_ID'];
             db_query( "GameHelper:delete_finished_unrated_game.upd_players($gid,$Black_ID,$White_ID)",
                "UPDATE Players SET Finished=Finished-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
+
+            db_query( "GameHelper:delete_finished_unrated_game.upd_gamestats($gid,$Black_ID,$White_ID)",
+               // only UPDATE as entries exist for finished game
+               "UPDATE GameStats SET Finished=Finished-1 " .
+               "WHERE uid=IF($Black_ID<$White_ID,$Black_ID,$White_ID) AND oid=IF($Black_ID<$White_ID,$White_ID,$Black_ID) LIMIT 1" );
          }
          else
          {
@@ -1229,15 +1238,20 @@ class GameHelper
    public static function update_players_start_game( $dbgmsg, $uid1, $uid2, $game_count, $rated_game )
    {
       $dbgmsg = "GameHelper:update_players_start_game($uid1,$uid2,$game_count,$rated_game).$dbgmsg";
-      if ( !is_numeric($uid1) || !is_numeric($uid2) )
-         error('invalid_args', "$dbgmsg.check.uids");
+      if ( !is_numeric($uid1) || !is_numeric($uid2) || !is_numeric($game_count) || $game_count <= 0 )
+         error('invalid_args', "$dbgmsg.check.uids_gcnt");
 
       $upd_players = new UpdateQuery('Players');
-      $upd_players->upd_raw('Running', "Running + " . (int)$game_count );
+      $upd_players->upd_raw('Running', "Running + $game_count" );
       if ( $rated_game )
          $upd_players->upd_txt('RatingStatus', RATING_RATED);
       db_query( "$dbgmsg.update",
          "UPDATE Players SET " . $upd_players->get_query() . " WHERE ID IN ($uid1,$uid2) LIMIT 2" );
+
+      db_query( "$dbgmsg.update",
+         "INSERT INTO GameStats (uid,oid,Running) " .
+         "VALUES (IF($uid1<$uid2,$uid1,$uid2),IF($uid1<$uid2,$uid2,$uid1),$game_count) " .
+         "ON DUPLICATE KEY UPDATE Running=Running + $game_count" );
    }//update_players_start_game
 
    /*!
@@ -1263,6 +1277,11 @@ class GameHelper
             .($rated_status ? '' : ", RatedGames=RatedGames+1"
                .($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
              ). " WHERE ID=$black_id LIMIT 1" );
+
+         db_query( $dbgmsg."GameHelper:update_players_end_game.upd_gamestats($gid,$black_id,$white_id)",
+            // only UPDATE as entries exist for started game
+            "UPDATE GameStats SET Running=Running-1, Finished=Finished+1 " .
+            "WHERE uid=IF($black_id<$white_id,$black_id,$white_id) AND oid=IF($black_id<$white_id,$white_id,$black_id) LIMIT 1" );
 
          // track game-count with weaker player
          $hero_uid = self::determine_finished_game_hero_uid( $black_id, $white_id, $black_start_rating, $white_start_rating );
@@ -1294,11 +1313,8 @@ class GameHelper
    /*! \brief Returns number of started games (used for same-opponent-check). */
    public static function count_started_games( $uid, $opp )
    {
-      $row = mysql_single_fetch( "GameHelper:count_started_games($uid,$opp)",
-            "SELECT ((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$uid AND G1.White_ID=$opp) + " .
-                   " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=$opp AND G2.White_ID=$uid)) " .
-                   "AS X_Count" );
-      return ($row) ? (int)$row['X_Count'] : 0;
+      $row = User::load_game_stats_for_users( 'GameHelper:count_started_games', $uid, $opp );
+      return ($row) ? (int)$row['Running'] : 0;
    }//count_started_games
 
    /*!

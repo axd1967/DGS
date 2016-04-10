@@ -67,6 +67,7 @@ require_once 'include/std_functions.php';
             'player_consistency.php'      => "Check consistency of Players-data",
             'forum_consistency.php'       => "Check consistency of Forums-data",
             'game_consistency.php'        => "Check consistency of Games-data",
+            'game_stats_consistency.php'  => "Check consistency of GamesStats-data",
             'message_consistency.php'     => "Check consistency of Message-data",
             'tournament_consistency.php'  => "Check consistency of Tournament-data",
             'voting_consistency.php'      => "Check consistency of Feature- & Survey-data",
@@ -91,6 +92,8 @@ require_once 'include/std_functions.php';
             '1.0.16/fix_game_invitations.php'     => "Migrate old 1.0.15-style game-invitations",
          "Migration scripts for release 1.0.18, use <b>ONLY</b> if you know how they work !!<br>\n(see 1.0.18/database_changes.mysql)" => 0,
             '1.0.18/fix_hero_ratio.php'      => "Sets Players.WeakerGames for hero awards and enrich game-setup",
+         "Migration scripts for release 1.0.19, use <b>ONLY</b> if you know how they work !!<br>\n" => 0,
+            '1.19/seed_game_stats.php'       => "Drops and fill GameStats table (need server down)!",
       ),
    ); //arr_scripts
 

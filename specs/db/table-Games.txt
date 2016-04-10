@@ -644,6 +644,43 @@ Description:
 
 
 ###########################################################################
+## --- GameStats ---
+
+Description:
+   Table to store game-statistics about players in a regular game (non MPG).
+
+Notes:
+   - For each game (only GameType='GO', i.e. no MP-games), the entries for
+     the White and Black players are updated to match the number of running
+     and finished games between them.
+
+   - For a pair of players there will only be one entry to avoid redundancy (with uid < oid).
+     However this makes joining more complex as the join has to match uid with
+     the smaller user-IDs.
+
+   - It can occur, that there are entries with (Running + Fininshed) == 0,
+     e.g. if a user started a game, but then deleted it.
+
+
+| Field    | Type                  | Null | Key | Default | Extra |
++----------+-----------------------+------+-----+---------+-------+
+| uid      | int(11)               | NO   | PRI | NULL    |       |
+| oid      | int(11)               | NO   | PRI | NULL    |       |
+| Running  | smallint(5) unsigned  | NO   |     | 0       |       |
+| Finished | mediumint(8) unsigned | NO   |     | 0       |       |
+
+## Fields:
+
+* uid, oid : foreign key to Players.ID
+   - for all entries in the table: uid < oid
+
+* Running : number of running games between user uid & oid (excluding MP-games)
+
+* Finished : number of finished games between user uid & oid (excluding MP-games)
+
+
+
+###########################################################################
 ## --- MoveStats ---
 
 Description:

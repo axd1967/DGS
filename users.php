@@ -118,6 +118,10 @@ require_once 'include/classlib_userpicture.php';
          array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ) );
    $ufilter->add_filter(23, 'Numeric', 'IF(P.Finished>='.MIN_FIN_GAMES_HERO_AWARD.',100*P.GamesWeaker/P.Finished,0)', true,
          array( FC_SIZE => 4, FC_SYNTAX_HELP => 'NUM %' ));
+   $ufilter->add_filter(24, 'Numeric', 'COALESCE(GS.Running,0)', true,
+         array( FC_SIZE => 4 ));
+   $ufilter->add_filter(25, 'Numeric', 'COALESCE(GS.Finished,0)', true,
+         array( FC_SIZE => 4 ));
    $f_active =& $ufilter->get_filter(13);
 
    $ufilter->init(); // parse current value from _GET
@@ -153,6 +157,10 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead( 7, new TableHead( T_('#Games#header'), T_('#Games') ), 'Number', 0, 'Games-');
    $utable->add_tablehead( 8, new TableHead( T_('Running#header'), T_('Running games') ), 'Number', 0, 'Running-');
    $utable->add_tablehead( 9, new TableHead( T_('Finished#header'), T_('Finished games') ), 'Number', 0, 'Finished-');
+   $utable->add_tablehead(24, new TableHead( T_('#Running games with user#header'), T_('Running games with user')),
+         'Number', 0, 'GS_Running-');
+   $utable->add_tablehead(25, new TableHead( T_('#Finished games with user#header'), T_('Finished games with user')),
+         'Number', 0, 'GS_Finished-');
    $utable->add_tablehead(17, T_('Rated#header'), 'Number', 0, 'RatedGames-');
    $utable->add_tablehead(10, T_('Won#header'), 'Number', 0, 'Won-');
    $utable->add_tablehead(11, T_('Lost#header'), 'Number', 0, 'Lost-');
@@ -192,6 +200,12 @@ require_once 'include/classlib_userpicture.php';
       'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU',
       'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
    $qsql->add_part( SQLP_FROM, 'Players AS P' );
+
+   $uid = $my_id;
+   $qsql->add_part( SQLP_FIELDS,
+      'COALESCE(GS.Running,0) AS GS_Running', 'COALESCE(GS.Finished,0) AS GS_Finished' );
+   $qsql->add_part( SQLP_FROM,
+      "LEFT JOIN GameStats AS GS ON GS.uid=IF($uid<P.ID,$uid,P.ID) AND GS.oid=IF($uid<P.ID,P.ID,$uid)" );
 
    if ( $observe_gid )
       $qsql->add_part( SQLP_FROM, "INNER JOIN Observers AS OB ON P.ID=OB.uid AND OB.gid=$observe_gid" );
@@ -311,6 +325,10 @@ require_once 'include/classlib_userpicture.php';
             ? echo_image_hero_badge($hero_ratio) . ' ' . sprintf('%d%%', 100*$hero_ratio)
             : '';
       }
+      if ( $utable->Is_Column_Displayed[24] )
+         $urow_strings[24] = $row['GS_Running'];
+      if ( $utable->Is_Column_Displayed[25] )
+         $urow_strings[25] = $row['GS_Finished'];
 
       if ( $show_pivot && ($ID == $my_id ) ) // mine
          $urow_strings['extra_class'] = 'ShowPosUser';

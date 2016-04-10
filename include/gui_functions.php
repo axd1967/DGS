@@ -424,6 +424,7 @@ function echo_image_table( $img_gametable, $url, $title, $withSep=true )
          $title );
 }
 
+// \param $is_finished true = finished games, false = running-games
 function echo_image_opp_games( $uid, $opp_handle, $is_finished )
 {
    $link_fmt = ( $is_finished )
@@ -520,12 +521,19 @@ function spacing( $str, $space_count=0, $tag_l='', $tag_r=null )
 // \param $class 'id=id attr=...' or else 'classname'
 function span( $class, $str='', $strfmt='%s', $title='' )
 {
-   if ( $title )
+   if ( (string)$title != '' )
       $title = " title=\"" . basic_safe($title) . "\"";
    if ( strpos($class,'=') !== false )
       return sprintf( "<span " . attb_build($class) . $title . ">$strfmt</span>", $str );
    else
       return sprintf( "<span class=\"$class\"$title>$strfmt</span>", $str );
+}
+
+function textWithTitle( $str='', $title='' )
+{
+   if ( (string)$title != '' )
+      $title = " title=\"" . basic_safe($title) . "\"";
+   return "<span $title>$str</span>";
 }
 
 // NOTE: if $datefmt contains 'D' or 'M', format_translated_date()-function must be used instead to keep month/weekday translated!

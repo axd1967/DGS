@@ -341,6 +341,52 @@ class User
          return 0;
    }//determine_hero_badge
 
+   /*!
+    * \brief Loads GameStats about all games (without MP-games) for pair of players.
+    * \return map( Running/Finished => count )
+    */
+   public static function load_game_stats_for_users( $dbgmsg, $uid, $oid )
+   {
+      static $ARR_NO_RESULT = array( 'Running' => 0, 'Finished' => 0 );
+
+      if ( $uid == $oid )
+         return $ARR_NO_RESULT;
+      elseif ( $uid > $oid )
+         swap($uid, $oid);
+
+      $row = mysql_single_fetch( $dbgmsg.".User:load_game_stats_for_users($uid,$oid)",
+            "SELECT Running, Finished FROM GameStats WHERE uid=$uid AND oid=$oid LIMIT 1" );
+      return ($row) ? $row : $ARR_NO_RESULT;
+   }//load_game_stats_for_users
+
+   /*!
+    * \brief Loads and calculates different-opponents of all games (without MP-games) for given user.
+    * \return map( count_diff_opps_all_games|count_all_games|ratio_all_games => value )
+    */
+   public static function load_different_opponents_for_all_games( $dbgmsg, $uid )
+   {
+      $row = mysql_single_fetch( $dbgmsg.".User:load_different_opponents_for_all_games($uid)",
+            "SELECT SUM(Running + Finished) AS X_CNT_ALL_GAMES, COUNT(*) AS X_CNT_DIFF_OPPS_ALL_GAMES " .
+            "FROM GameStats WHERE (uid=$uid or oid=$uid) AND (Running + Finished > 0)" );
+
+      $count_all_games = $count_diff_opps_all_games = $ratio_all_games = 0;
+      if ( $row )
+      {
+         $count_all_games = $row['X_CNT_ALL_GAMES'];
+         if ( $count_all_games > 0 )
+         {
+            $count_diff_opps_all_games = $row['X_CNT_DIFF_OPPS_ALL_GAMES'];
+            $ratio_all_games = $count_diff_opps_all_games / $count_all_games;
+         }
+      }
+
+      return array(
+            'count_diff_opps_all_games' => $count_diff_opps_all_games,
+            'count_all_games' => $count_all_games,
+            'ratio_all_games' => $ratio_all_games,
+         );
+   }//load_different_opponents_for_all_games
+
 } // end of 'User'
 
 ?>

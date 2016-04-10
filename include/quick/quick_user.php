@@ -50,7 +50,9 @@ class QuickHandlerUser extends QuickHandler
    private $uid = 0;
    private $handle = '';
 
-   private $user;
+   private $user = null;
+   private $game_stats = null;
+   private $diff_opps = null;
 
 
    // ---------- Interface ----------------------------------------
@@ -66,7 +68,7 @@ class QuickHandlerUser extends QuickHandler
       $this->uid = (int)get_request_arg(USEROPT_UID);
       $this->handle = get_request_arg(USEROPT_USER);
 
-      $this->user = null;
+      $this->user = $this->game_stats = $this->diff_opps = null;
    }
 
    public function prepare()
@@ -74,7 +76,8 @@ class QuickHandlerUser extends QuickHandler
       global $player_row;
 
       // see specs/quick_suite.txt (3b)
-      $dbgmsg = "QuickHandlerUser.prepare({$this->uid},{$this->handle})";
+      $my_id = (int)@$player_row['ID'];
+      $dbgmsg = "QuickHandlerUser.prepare($my_id,{$this->uid},{$this->handle})";
       $this->checkCommand( $dbgmsg, USER_COMMANDS );
       $cmd = $this->quick_object->cmd;
 
@@ -82,7 +85,7 @@ class QuickHandlerUser extends QuickHandler
       if ( ($this->uid == 0 || (string)$this->uid == '') && (string)$this->handle == '' )
       {
          // use logged-in user as default
-         $this->uid = (int)@$player_row['ID'];
+         $this->uid = $my_id;
          if ( $this->uid <= 0 )
             error('invalid_args', "$dbgmsg.miss_user");
       }
@@ -97,6 +100,11 @@ class QuickHandlerUser extends QuickHandler
 
       if ( is_null($this->user) )
          error('unknown_user', "$dbgmsg.find_user");
+      else
+      {
+         $this->game_stats = User::load_game_stats_for_users( $dbgmsg, $my_id, $this->user->ID );
+         $this->diff_opps = User::load_different_opponents_for_all_games( $dbgmsg, $this->user->ID );
+      }
 
       // check for invalid-action
    }//prepare
@@ -148,6 +156,17 @@ class QuickHandlerUser extends QuickHandler
       if ( $my_info )
          $this->addResultKey( 'hero_games_next',
             ( $games_next_herolevel < 0 ? -MIN_FIN_GAMES_HERO_AWARD : $games_next_herolevel ) );
+
+      if ( !$my_info )
+      {
+         $this->addResultKey( 'opp_games_running', (int)$this->game_stats['Running'] );
+         $this->addResultKey( 'opp_games_finished', (int)$this->game_stats['Finished'] );
+      }
+      if ( is_array($this->diff_opps) )
+      {
+         $this->addResultKey( 'diff_opps_games_all', (int)$this->diff_opps['count_diff_opps_all_games'] );
+         $this->addResultKey( 'diff_opps_ratio_all', (float)$this->diff_opps['ratio_all_games'] );
+      }
    }//process
 
 

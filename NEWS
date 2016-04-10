@@ -79,7 +79,13 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * <home userinfo.php>User info page</home>:
       * Added games-count needed to reach next hero-badge-level on own user-info-page and for quick-suite user-info-handler
+      * Added number and ratio of different opponents of user
       * Added language-setting of user with full encoding
+
+   * <home userinfo.php>User info page</home>, <home users.php>Users list</home>, <home opponents.php>Opponents list</home>:
+      * Added number of started and finished games with specific opponent
+      * On <home opponents.php>Opponents list page</home> show table-icon linked to running and finished games
+        only if user has such games with opponent
 
    * User profile:
       * Added <home edit_email.php>email-notification</home> option to collect notification-entries by last-notified time
@@ -118,6 +124,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Extended game-handler to set standard handicap placement
       * Extended message-handler to set 'own_started_games' for invitations to support restrictions by bots
       * Extended user-handler to return 'hits' and 'moves' on info-command returning number of web-site-access and game-moves
+      * Extended user-handler to return count and ratio of different opponents of a user on info-command
 
    * <home docs.php>Docs</home>:
       * <home people.php>People page</home>:
@@ -149,6 +156,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
    * Improvements of database queries
       * Messages: optimized search for invitations
       * Added caching for contacts forum-post hide-list
+      * Replaced nested count-queries with simple GameStats-query
 
    Administrative changes:
 
@@ -156,6 +164,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added editor for user contributions and admin-link on user-info to manage contributions of user
       * Added optional target user rating-range for admin-created bulletins
       * Mark annulled tournament-games in games-list for game-/tournament-/developer-admin
+      * Added consistency scripts to seed and fix GameStats-table
 
    * Changes for FAQ-editors:
       * Show also hidden FAQ/introduction/links-entries in respective page-lists

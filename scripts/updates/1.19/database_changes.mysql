@@ -162,3 +162,17 @@ ALTER TABLE TournamentRules
    MODIFY Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE','ALTERNATE') NOT NULL default 'CONV' ;
 
 
+-- added table to store game-stats about players in games
+CREATE TABLE GameStats (
+  uid int NOT NULL,
+  oid int NOT NULL,
+  Running smallint unsigned NOT NULL default 0,
+  Finished mediumint unsigned NOT NULL default 0,
+  UNIQUE KEY uid_oid (uid,oid),
+  KEY oid (oid)
+) ENGINE=MyISAM ;
+
+-- execute fix-script (with do_it=1) with server-down to seed empty GameStats-table for all existing games
+--    'scripts/updates/1.19/seed_game_stats.php'
+
+

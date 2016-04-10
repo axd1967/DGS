@@ -96,6 +96,10 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
    $has_contact = Contact::has_contact($my_id, $uid);
 
+   $game_stats = User::load_game_stats_for_users( 'userinfo', $my_id, $uid );
+   $diff_opps = User::load_different_opponents_for_all_games( 'userinfo', $uid );
+
+
    $name_safe = make_html_safe($row['Name']);
    $handle_safe = $row['Handle'];
 
@@ -207,21 +211,34 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                '', 'class=OnVacation' );
       }
 
-      $itable2->add_sinfo(
-         anchor( $run_link, T_('Running games')) .
-            ($my_info ? '' : MED_SPACING . echo_image_opp_games( $my_id, $user_handle, /*fin*/false )),
+      $other_info_running_games = $other_info_finished_games = '';
+      if ( !$my_info )
+      {
+         $other_info_running_games = MED_SPACING . echo_image_opp_games( $my_id, $user_handle, /*fin*/false )
+               . MINI_SPACING . span('none smaller', '%s', $game_stats['Running'], T_('Running games with opponent'));
+         $other_info_finished_games = MED_SPACING . echo_image_opp_games( $my_id, $user_handle, /*fin*/true )
+               . MINI_SPACING . span('none smaller', '%s', $game_stats['Finished'], T_('Finished games with opponent'));
+      }
+      $itable2->add_sinfo( anchor( $run_link, T_('Running games')) . $other_info_running_games,
          $row['Running'] );
-      $itable2->add_sinfo(
-         anchor( $fin_link, T_('Finished games')) .
-            ($my_info ? '' : MED_SPACING . echo_image_opp_games( $my_id, $user_handle, /*fin*/true )),
+      $itable2->add_sinfo( anchor( $fin_link, T_('Finished games')) . $other_info_finished_games,
          $row['Finished'] . MED_SPACING . '/ '
-            . span('smaller', sprintf( '(%s)', anchor( $fin_link_timeout, T_('Games lost by timeout')))) );
+            . span('smaller', sprintf( '(%s)', anchor( $fin_link_timeout, T_('Timeouts'), T_('Games lost by timeout')))) );
       $itable2->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
       $itable2->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
       $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
       $itable2->add_sinfo( T_('Rated Win %') . ' / ' . T_('Hero %'),
-         $rated_win_percent . ' / ' .
-         implode('', $hero_info) );
+         $rated_win_percent . ' / ' . implode('', $hero_info) );
+
+      if ( $diff_opps['count_all_games'] > 0 )
+      {
+         $itable2->add_sinfo( T_('Different opponents'),
+               textWithTitle( $diff_opps['count_diff_opps_all_games'],
+                     sprintf('%s (%s)', T_('Different opponents of all games'), T_('without MP-games')) )
+               . MED_SPACING . '/ ' .
+               textWithTitle( sprintf('%1.1f%%', 100 * $diff_opps['ratio_all_games']),
+                     sprintf('%s (%s)', T_('Ratio of different opponents of all games'), T_('without MP-games') )) );
+      }
 
       if ( $show_mpg )
       {

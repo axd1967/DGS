@@ -33,6 +33,10 @@ require_once 'include/classlib_profile.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/classlib_userpicture.php';
 
+define('FSTATVAL_ALL', 0);
+define('FSTATVAL_RUN', 1);
+define('FSTATVAL_FIN', 2);
+
 
 {
    connect2mysql();
@@ -124,6 +128,8 @@ require_once 'include/classlib_userpicture.php';
          array( FC_DEFAULT => 2 ) );
    $usfilter->init();
    $f_status =& $usfilter->get_filter(4);
+   $f_status_val = $f_status->get_value();
+   $finished = ( $f_status_val == FSTATVAL_FIN );
 
    // table filters: use same table-IDs as in users.php(!)
    // NOTE: Filters on Players.Name/Handle must not allow leading wildcard
@@ -169,6 +175,10 @@ require_once 'include/classlib_userpicture.php';
          array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ) );
    $ufilter->add_filter(23, 'Numeric', 'IF(P.Finished>='.MIN_FIN_GAMES_HERO_AWARD.',100*P.GamesWeaker/P.Finished,0)', true,
          array( FC_SIZE => 4, FC_SYNTAX_HELP => 'NUM %' ));
+   $ufilter->add_filter(24, 'Numeric', 'COALESCE(GS.Running,0)', true,
+         array( FC_SIZE => 4 ));
+   $ufilter->add_filter(25, 'Numeric', 'COALESCE(GS.Finished,0)', true,
+         array( FC_SIZE => 4 ));
    $ufilter->init(); // parse current value from _GET
 
    // init table
@@ -215,6 +225,10 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead( 7, new TableHead( T_('#Games#header'), T_('#Games') ), 'Number', 0, 'Games-');
    $utable->add_tablehead( 8, new TableHead( T_('Running#header'), T_('Running games') ), 'Number', 0, 'Running-');
    $utable->add_tablehead( 9, new TableHead( T_('Finished#header'), T_('Finished games') ), 'Number', 0, 'Finished-');
+   $utable->add_tablehead(24, new TableHead( T_('#Running games with user#header'),
+      sprintf('%s (%s)', T_('Running games with user'), T_('Restrictions do not apply'))), 'Number', 0, 'GS_Running-');
+   $utable->add_tablehead(25, new TableHead( T_('#Finished games with user#header'),
+      sprintf('%s (%s)', T_('Finished games with user'), T_('Restrictions do not apply'))), 'Number', 0, 'GS_Finished-');
    $utable->add_tablehead(17, T_('Rated#header'), 'Number', 0, 'RatedGames-');
    $utable->add_tablehead(10, T_('Won#header'), 'Number', 0, 'Won-');
    $utable->add_tablehead(11, T_('Lost#header'), 'Number', 0, 'Lost-');
@@ -249,8 +263,10 @@ require_once 'include/classlib_userpicture.php';
          'FILTER',      $usfilter, 2 ));
    $usform->add_row( array(
          'DESCRIPTION', T_('Status'),
-         'FILTER',      $usfilter, 4,
-         'TEXT',        ' (' . T_('full stats only for finished games') . ')' ));
+         'FILTER',      $usfilter, 4, ));
+   $usform->add_row( array(
+         'TAB',
+         'TEXT', span('smaller', sprintf('(%s; %s)', T_('full stats only for finished games'), T_('without MP-games')) )) );
    $usform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
@@ -267,7 +283,6 @@ require_once 'include/classlib_userpicture.php';
    // build SQL-query (for user-table)
    $query_usfilter = $usfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
    $query_ufilter  = $utable->get_query(); // clause-parts for filter
-   $finished = ( $f_status->get_value() == 2);
 
    $uqsql = new QuerySQL( // base-query is to show only opponents
       SQLP_OPTS, 'DISTINCT',
@@ -289,24 +304,30 @@ require_once 'include/classlib_userpicture.php';
       'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU',
       'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
    $uqsql->add_part( SQLP_FROM, 'Players AS P' );
+   if ( !$opp )
+   {
+      $uqsql->add_part( SQLP_FIELDS,
+         'COALESCE(GS.Running,0) AS GS_Running', 'COALESCE(GS.Finished,0) AS GS_Finished' );
+      $uqsql->add_part( SQLP_FROM,
+         "LEFT JOIN GameStats AS GS ON GS.uid=IF($uid<P.ID,$uid,P.ID) AND GS.oid=IF($uid<P.ID,P.ID,$uid)" );
+   }
    $uqsql->merge( $query_usfilter );
    $uqsql->merge( $query_ufilter );
    $query = $uqsql->get_select() . "$order$limit";
 
-
-   // build SQL-query (for stats-fields)
-   $qsql = new QuerySQL();
-   $qsql->add_part( SQLP_FIELDS,
-      'COUNT(*) as cntGames',
-      'SUM(IF(G.Handicap>0,1,0)) as cntHandicap',
-      'MAX(G.Handicap) as maxHandicap',
-      'SUM(IF(G.Score=0 AND (G.Flags & '.GAMEFLAGS_NO_RESULT.')=0,1,0)) as cntJigo',
-      'SUM(IF(G.Score=0 AND G.Flags > 0 AND (G.Flags & '.GAMEFLAGS_NO_RESULT.'),1,0)) as cntVoid' );
-   $qsql->add_part( SQLP_FROM, 'Games AS G' );
-   $qsql->merge ( $query_usfilter ); // clause-parts for filter
-
    if ( $opp )
    {
+      // build SQL-query (for stats-fields)
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS,
+         'COUNT(*) as cntGames',
+         'SUM(IF(G.Handicap>0,1,0)) as cntHandicap',
+         'MAX(G.Handicap) as maxHandicap',
+         'SUM(IF(G.Score=0 AND (G.Flags & '.GAMEFLAGS_NO_RESULT.')=0,1,0)) as cntJigo',
+         'SUM(IF(G.Score=0 AND G.Flags > 0 AND (G.Flags & '.GAMEFLAGS_NO_RESULT.'),1,0)) as cntVoid' );
+      $qsql->add_part( SQLP_FROM, 'Games AS G' );
+      $qsql->merge ( $query_usfilter ); // clause-parts for filter
+
       // uid is black
       $qsql_black = new QuerySQL( SQLP_WHERE, "G.Black_ID=$uid", "G.White_ID=$opp" );
       $qsql_black->add_part( SQLP_FIELDS,
@@ -396,7 +417,7 @@ require_once 'include/classlib_userpicture.php';
       $filterURL .= URI_AMP;
 
    // build user-table
-   if ( !is_null($result) )
+   if ( !is_null($result) ) // only if !$opp
    {
       while ( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
@@ -451,8 +472,12 @@ require_once 'include/classlib_userpicture.php';
             $urow_strings[20] = echo_user_online_vacation( @$row['OnVacation'], @$row['LastaccessU'] );
          if ( $utable->Is_Column_Displayed[21] )
          {
-            // don't use full selection of filter-values to link to opponent-games
-            $urow_strings[21] = echo_image_opp_games( $uid, $row['Handle'], $finished );
+            $out = array();
+            if ( $f_status_val != FSTATVAL_FIN ) // ALL | RUN
+               $out[] = ($row['GS_Running'] > 0) ? echo_image_opp_games( $uid, $row['Handle'], false ) : insert_width(20);
+            if ( $f_status_val != FSTATVAL_RUN ) // ALL | FIN
+               $out[] = ($row['GS_Finished'] > 0) ? echo_image_opp_games( $uid, $row['Handle'], true ) : insert_width(20);
+            $urow_strings[21] = implode('', $out);
          }
          if ( $utable->Is_Column_Displayed[22] )
             $urow_strings[22] = ($row['X_Registerdate'] > 0 ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
@@ -463,6 +488,10 @@ require_once 'include/classlib_userpicture.php';
                ? echo_image_hero_badge($hero_ratio) . ' ' . sprintf('%d%%', 100*$hero_ratio)
                : '';
          }
+         if ( $utable->Is_Column_Displayed[24] )
+            $urow_strings[24] = $row['GS_Running'];
+         if ( $utable->Is_Column_Displayed[25] )
+            $urow_strings[25] = $row['GS_Finished'];
 
          $utable->add_row( $urow_strings );
       }

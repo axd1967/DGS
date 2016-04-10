@@ -89,10 +89,7 @@ class WaitingroomControl
 
       $sql_goodsameopp =
          "CASE WHEN (WR.uid=$my_id OR WR.SameOpponent=0 OR (WR.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
-              "WHEN (WR.SameOpponent < ".SAMEOPP_TOTAL.") THEN ( " . // total-times-check
-                  "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=WR.uid) + " .
-                  " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=WR.uid AND G2.White_ID=$my_id)) " .
-                  "< -WR.SameOpponent + ".SAMEOPP_TOTAL." ) " .
+              "WHEN (WR.SameOpponent < ".SAMEOPP_TOTAL.") THEN (COALESCE(GS.Running,0) < -WR.SameOpponent + ".SAMEOPP_TOTAL.") " . // total-times-check
               "WHEN (WR.SameOpponent<0) THEN (WRJ.JoinedCount < -WR.SameOpponent) " . // same-offer-times-check
               "ELSE (WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) " . // same-offer-date-check
               "END";
@@ -108,12 +105,12 @@ class WaitingroomControl
          "$sql_goodmaxgames AS goodmaxgames",
          "$sql_goodsameopp AS goodsameopp",
          "$sql_goodhero AS goodhero",
-         "IF(WR.uid=$my_id OR WR.SameOpponent > ".SAMEOPP_TOTAL.",0, " .
-              "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=WR.uid) + " .
-              " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=WR.uid AND G2.White_ID=$my_id)) ) AS X_TotalCount"
+         "IF(WR.uid=$my_id OR WR.SameOpponent > ".SAMEOPP_TOTAL.",0, COALESCE(GS.Running,0)) AS X_TotalCount"
          );
       $qsql->add_part( SQLP_FROM,
          "LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=WR.ID" );
+      $qsql->add_part( SQLP_FROM,
+         "LEFT JOIN GameStats AS GS ON GS.uid=IF($my_id<WR.uid,$my_id,WR.uid) AND GS.oid=IF($my_id<WR.uid,WR.uid,$my_id)" );
       if ( $suitable && MaxGamesCheck::is_limited() )
          $qsql->add_part( SQLP_HAVING, 'goodmaxgames' );
 
@@ -188,10 +185,7 @@ class WaitingroomControl
 
       $sql_goodsameopp =
          "CASE WHEN (W.uid=$my_id OR W.SameOpponent=0 OR (W.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
-              "WHEN (W.SameOpponent < ".SAMEOPP_TOTAL.") THEN ( " . // total-times-check
-                  "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=W.uid) + " .
-                  " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=W.uid AND G2.White_ID=$my_id)) " .
-                  "< -W.SameOpponent + ".SAMEOPP_TOTAL." ) " .
+              "WHEN (W.SameOpponent < ".SAMEOPP_TOTAL.") THEN (COALESCE(GS.Running,0) < -W.SameOpponent + ".SAMEOPP_TOTAL." ) " . // total-times-check
               "WHEN (W.SameOpponent<0) THEN (WRJ.JoinedCount < -W.SameOpponent) " . // same-offer-times-check
               "ELSE (WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) " . // same-offer-date-check
               "END";
@@ -211,6 +205,7 @@ class WaitingroomControl
                . " LEFT JOIN Players AS P ON P.ID=W.uid"
                . " LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id"
                . " LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=W.ID"
+               . " LEFT JOIN GameStats AS GS ON GS.uid=IF($my_id<W.uid,$my_id,W.uid) AND GS.oid=IF($my_id<W.uid,W.uid,$my_id)"
             . " WHERE W.ID=$wr_id AND W.nrGames>0"
             . " HAVING C_denied=0";
       $game_row = mysql_single_fetch( "WC:join_waitingroom_game.find_game($wr_id,$my_id)", $query);
