@@ -13,6 +13,9 @@ ChangeLog
 
 2016-04-10 jug
 
+   * message.php, new_game.php:
+   - cleanup: unify error-text for showing list of errors
+
    * include/game_functions.php (GameHelper.count_games_with_opponent, echo_accept_same_opponent),
      include/quick/quick_wroom.php (QuickHandlerWaitingroom.fill_wroom_object),
      include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),

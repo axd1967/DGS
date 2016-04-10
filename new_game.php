@@ -123,7 +123,7 @@ require_once 'include/utilities.php';
       if ( count($errors) > 0 )
       {
          echo "<br>\n<table><tr>",
-            buildErrorListString( T_('There have been some errors'), array_unique($errors), 1 ),
+            buildErrorListString( T_('There are some errors'), array_unique($errors), 1 ),
             "</tr></table>";
          $need_redraw = true;
       }

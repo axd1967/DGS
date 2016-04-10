@@ -551,7 +551,7 @@ define('MSGBOXROWS_INVITE', 6);
    if ( $has_errors )
    {
       echo "<br>\n<table><tr>",
-         buildErrorListString( T_('There have been some errors'), array_unique($errors), 1 ),
+         buildErrorListString( T_('There are some errors'), array_unique($errors), 1 ),
          "</tr></table>";
    }
 
