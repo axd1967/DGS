@@ -40,23 +40,29 @@ require_once 'tournaments/include/tournament_round.php';
  /*!
   * \class PublicRoundRobinTournament
   *
-  * \brief Template-pattern for official "DGS Round-Robin"-tournament
+  * \brief Template-pattern for official "Public Round-Robin"-tournament
   */
 class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
 {
    public function __construct()
    {
+      $min_tp = 3;
+      $max_tp = 64;
+      $max_pools = 8;
+      $max_rounds = 3;
+
       parent::__construct( TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN,
-         T_('Public Round-Robin with single round and one pool#tourney'),
+         sprintf( T_('Public Round-Robin with %s participants, %s pools, %s rounds#tourney'),
+            "$min_tp-$max_tp", "1-$max_pools", "1-$max_rounds" ),
          TOURNEY_TITLE_GAME_RESTRICTION );
 
       // overwrite tournament-type-specific properties
       $this->need_admin_create_tourney = false;
-      $this->limits->setLimits( TLIMITS_MAX_TP, true, 3, 16 );
-      $this->limits->setLimits( TLIMITS_TRD_MAX_ROUNDS, false, 1 );
-      $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 3, 16 );
-      $this->limits->setLimits( TLIMITS_TRD_MAX_POOLSIZE, false, 3, 16 );
-      $this->limits->setLimits( TLIMITS_TRD_MAX_POOLCOUNT, true, 1 );
+      $this->limits->setLimits( TLIMITS_MAX_TP, true, $min_tp, $max_tp );
+      $this->limits->setLimits( TLIMITS_TRD_MAX_ROUNDS, false, $max_rounds );
+      $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 2, 16 );
+      $this->limits->setLimits( TLIMITS_TRD_MAX_POOLSIZE, false, 2, 16 );
+      $this->limits->setLimits( TLIMITS_TRD_MAX_POOLCOUNT, true, 1, $max_pools );
       $this->limits->setLimits( TLIMITS_TRD_TP_MAX_GAMES, false, 0, 18 ); // 10 TP max for DOUBLE-htype
       $this->limits->setLimits( TLIMITS_TPR_RATING_USE_MODE, false, TLIM_TPR_RUM_NO_COPY_CUSTOM );
    }
@@ -75,13 +81,13 @@ class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
 
       $trules = new TournamentRules();
       $trules->Size = 19;
-      $trules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
+      $trules->Handicaptype = TRULE_HANDITYPE_ALTERNATE;
 
       $tpoints = new TournamentPoints();
       $tpoints->setDefaults( TPOINTSTYPE_SIMPLE );
 
       $tround = new TournamentRound();
-      $tround->MinPoolSize = 3;
+      $tround->MinPoolSize = 2;
       $tround->MaxPoolSize = 8;
       $tround->MaxPoolCount = 1;
       $tround->PoolWinnerRanks = 3;

@@ -13,6 +13,13 @@ ChangeLog
 
 2016-04-11 jug
 
+   * tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.__construct,
+       ~.createTournament),
+     tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct,
+       ~.createTournament):
+   - increased limits for private & public round-robin tournaments: max-TP 3-64, pools 1-8, rounds 1-3
+   - adjusted creation-defaults for private & public round-robin-tournaments: pool-min-TP=2, HTYPE_ALTERNATE
+
    * tournaments/include/tournament_status.php (TournamentStatus.check_action_status),
      tournaments/edit_tournament.php:
    - bugfix: non Admin-Edit tournament-directors couldn't edit any longer
