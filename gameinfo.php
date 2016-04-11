@@ -289,8 +289,8 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo(
          T_('Last move'),
          array(
-            date(DATE_FMT2, @$grow['Black_LastMove']),
-            date(DATE_FMT2, @$grow['White_LastMove']),
+            ( @$grow['Black_LastMove'] > 0 ? date(DATE_FMT2, @$grow['Black_LastMove']) : '' ),
+            ( @$grow['White_LastMove'] > 0 ? date(DATE_FMT2, @$grow['White_LastMove']) : '' ),
          ));
    if ( @$grow['Black_OnVacation'] > 0 || @$grow['White_OnVacation'] > 0 )
    {

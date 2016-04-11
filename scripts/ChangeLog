@@ -13,6 +13,9 @@ ChangeLog
 
 2016-04-11 jug
 
+   * gameinfo.php:
+   - bugfix for game-info-page: for player-info show empty-cell if last-move is not set
+
    * tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.__construct,
        ~.createTournament),
      tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct,
