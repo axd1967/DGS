@@ -131,9 +131,7 @@ require_once 'include/form_functions.php';
                       9 => T_('Sep'), 10=> T_('Oct'), 11=> T_('Nov'), 12=> T_('Dec') );
 
       for ( $y = BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
-        $years[$y] = $y;
-
-         );
+         $years[$y] = $y;
 
       $form->add_row( array(
             'DESCRIPTION', T_('From#2'),
