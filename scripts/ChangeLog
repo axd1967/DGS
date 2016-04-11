@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-04-11 jug
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_action_status),
+     tournaments/edit_tournament.php:
+   - bugfix: non Admin-Edit tournament-directors couldn't edit any longer
+   - bugfix (copy-error): use correct T-status-list to check allow-editing of tournament-directors
+
 2016-04-10 jug
 
    * tournaments/include/tournament_status.php (TournamentStatus.check_action_status,

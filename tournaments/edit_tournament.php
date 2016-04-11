@@ -80,7 +80,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
    $td_warn_status = ($tdir->isEditAdmin()) ? $tstatus->check_edit_status( Tournament::get_edit_tournament_status() ) : null;
    $errors = $tstatus->check_edit_status(
-      TournamentRules::get_edit_tournament_status(), $ttype->allow_edit_tourney_status_td_adm_edit, $tdir );
+      Tournament::get_edit_tournament_status(), $ttype->allow_edit_tourney_status_td_adm_edit, $tdir );
    if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 

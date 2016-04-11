@@ -398,8 +398,8 @@ class TournamentStatus
       // T-Admin can do anything at any time
       if ( $allow_admin && TournamentUtils::isAdmin() )
          $allow = true;
-      elseif ( is_array($arr_status_td_adm_edit) && !is_null($t_director) )
-         $allow = ($t_director->Flags & TD_FLAG_ADMIN_EDIT) && in_array($this->tourney->Status, $arr_status_td_adm_edit);
+      elseif ( !is_null($t_director) && ($t_director->Flags & TD_FLAG_ADMIN_EDIT) && is_array($arr_status_td_adm_edit) )
+         $allow = in_array($this->tourney->Status, $arr_status_td_adm_edit);
       else
          $allow = in_array($this->tourney->Status, $arr_status);
 
