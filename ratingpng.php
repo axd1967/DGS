@@ -65,6 +65,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    $show_by_number = (bool)@$_GET['bynumber'];
    $show_win_pie = ENA_WIN_PIE && (SHOW_WIN_PIE xor ((bool)@$_GET['winpie']));
+   $show_lsq = (bool)@$_GET['lsq'];
 
 
    $starttime = mktime(0,0,0,BEGINMONTH,1,BEGINYEAR);
@@ -100,12 +101,24 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    $red = $gr->getcolor(205, 159, 156);
    $light_blue = $gr->getcolor(220, 229, 255);
    $number_color = $gr->getcolor(250, 100, 98);
+   $lsq_color = $gr->getcolor(0, 0x80, 0);
 
 
    //fetch and prepare datas
 
    get_rating_data(@$_GET["uid"]);
    $nr_points = count($ratings);
+
+   if ( $show_lsq )
+   {
+      $arr_lsq = calculate_LSQ( $show_by_number, $ratings, $time, $number );
+      $has_lsq = is_array($arr_lsq);
+      if ( $has_lsq )
+         list( $a, $b, $x0, $y0, $xLast, $yLast ) = $arr_lsq;
+   }
+   else
+      $has_lsq = false;
+
 
    //$startnumber is the number of games before the graph start
    if ( !isset($number) || count($number) < 1 )
@@ -131,7 +144,11 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    $ymax = array_reduce($ratingmax, "max",-10000);
    $ymin = array_reduce($ratingmin, "min", 10000);
-
+   if ( $has_lsq )
+   {
+      $ymax = max( $ymax, $y0, $yLast );
+      $ymin = min( $ymin, $y0, $yLast );
+   }
 
 
    //just a string sample to evaluate $marge_left
@@ -249,6 +266,9 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    //draw the curves
 
    $gr->curve($xvals, $ratings, $nr_points, $black);
+
+   if ( $has_lsq )
+      $gr->line( $gr->scaleX($x0), $gr->scaleY($y0), $gr->scaleX($xLast), $gr->scaleY($yLast), $lsq_color );
 
 
    //misc drawings
@@ -407,5 +427,44 @@ function get_rating_data($uid)
       $tmp = $row;
    } while ( $row = mysql_fetch_assoc($result) ) ;
 }//get_rating_data
+
+// formulas taken from https://de.wikipedia.org/wiki/Methode_der_kleinsten_Quadrate#Herleitung_und_Verfahren
+// \return arr( a, b, x0, xLast, y0, yLast ) for linear func(x) := a*x + b
+function calculate_LSQ( $show_by_number, $ratings, $time, $number )
+{
+   $cnt = count($ratings);
+   if ( $cnt == 0 )
+      return null;
+
+   $x_data = ( $show_by_number ) ? $number : $time;
+   $y_data = $ratings;
+   $x_mean = calculate_mean( $x_data );
+   $y_mean = calculate_mean( $y_data );
+
+   $numerator = 0;
+   $denominator = 0;
+   for ( $i=0; $i < $cnt; $i++ ) {
+      $x_diff = ( $x_data[$i] - $x_mean );
+      $numerator += $x_diff * ( $y_data[$i] - $y_mean );
+      $denominator += $x_diff * $x_diff;
+   }
+
+   // f(x) := a*x + b  (linear line)
+   $a = $numerator / $denominator;
+   $b = $y_mean - $a * $x_mean;
+
+   $x0 = $x_data[0];
+   $xL = $x_data[$cnt-1];
+   $y0 = $a * $x0 + $b;
+   $yL = $a * $xL + $b;
+   error_log("calculate_LSQ(#$cnt): $a * x + $b ; ($x0,$y0) .. ($xL,$yL)");
+
+   return array( $a, $b, $x0, $y0, $xL, $yL );
+}//calculate_LSQ
+
+function calculate_mean( $arr )
+{
+   return array_sum($arr) / count($arr);
+}//calculate_mean
 
 ?>

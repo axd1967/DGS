@@ -11,6 +11,12 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-04-12 jug
+
+   * ratingpng.php (calculate_LSQ, calculate_mean),
+     ratinggraph.php:
+   - extended rating-graph with switchable green least square line (LSQ)
+
 2016-04-11 jug
 
    * tournaments/include/tournament_visit.php (TournamentVisit.mark_tournament_visited,

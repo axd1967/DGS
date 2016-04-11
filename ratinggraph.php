@@ -105,6 +105,7 @@ require_once 'include/form_functions.php';
       $show_time = (int)(bool)@$_REQUEST['show_time'];
       $dyna= floor($NOW/(SECS_PER_HOUR/TICK_FREQUENCY));
       $winpie = (bool)@$_REQUEST['winpie'];
+      $show_lsq = (bool)@$_REQUEST['lsq'];
       if ( @$_REQUEST['use_form'] ) // NOTE: needed to overwrite db-default b/c unchecked checkbox leads to using default
          $bynumber = (bool)@$_REQUEST['bynumber'];
       else
@@ -114,6 +115,7 @@ require_once 'include/form_functions.php';
          ,($show_time ? URI_AMP.'show_time=1' : '')
          ,($winpie ? URI_AMP.'winpie=1' : '')
          ,($bynumber ? URI_AMP.'bynumber=1' : '')
+         ,($show_lsq ? URI_AMP.'lsq=1' : '')
          ,URI_AMP,"dyna=$dyna" //force caches refresh
          ,URI_AMP,"startyear=$startyear"
          ,URI_AMP,"startmonth=$startmonth"
@@ -131,6 +133,8 @@ require_once 'include/form_functions.php';
       for ( $y = BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
         $years[$y] = $y;
 
+         );
+
       $form->add_row( array(
             'DESCRIPTION', T_('From#2'),
             'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
@@ -147,6 +151,8 @@ require_once 'include/form_functions.php';
             'SUBMITBUTTON', 'submit', T_('Change interval'),
             'TEXT', MED_SPACING,
             'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber,
+            'TEXT', MED_SPACING,
+            'CHECKBOX', 'lsq', '1', T_('LSQ line'), $show_lsq,
          ));
 
       $form->echo_string(1);

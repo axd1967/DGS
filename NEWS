@@ -96,6 +96,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
    * Rating graph:
       * Added option in <home edit_profile.php>user-profile</home> to configure to show rating-graph by games,
         default is to show rating-graph by time
+      * Extended rating-graph with switchable least-square-line (LSQ)
 
    * <home new_game.php>New game</home>:
       * Added waiting-room restriction to only accept opponents that user never played before
