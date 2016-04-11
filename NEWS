@@ -12,6 +12,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added 'new'-indicator in <home tournaments/list_tournaments.php>tournaments list page</home>, that vanishes if tournament-info page is visited
          * shown in red-color <color darkred>new</color> for active tournaments (Register, Pair, Play phase)
          * shown in grey-color <color darkgrey>new</color> for inactive tournaments (Setup phase)
+      * Added button below tournament-list-table to mark all new tournaments as read
 
       * Keep rated-state of tournament-game on
          * removing tournament-participant by tournament-director or game-end-processing by T-cron

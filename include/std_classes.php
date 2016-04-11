@@ -641,6 +641,20 @@ class ListIterator
       reset( $this->Items );
    }
 
+   public function getItem( $row_idx )
+   {
+      if ( !is_numeric($row_idx) || !isset($this->Items[$row_idx]) )
+         error('invalid_args', "ListIterator.getItem.check_idx($row_idx)");
+      return $this->Items[$row_idx];
+   }
+
+   public function setItemRawValue( $row_idx, $key, $value )
+   {
+      if ( !is_numeric($row_idx) || $row_idx < 0 || $row_idx >= $this->getItemCount() )
+         error('invalid_args', "ListIterator.setItemRawValue.check_idx($row_idx)");
+      $this->Items[$row_idx][1][$key] = $value;
+   }
+
    /*! \brief Sorts internal items-list by given compare-function $cmp_func. */
    public function sortListIteratorCustom( $cmp_func )
    {

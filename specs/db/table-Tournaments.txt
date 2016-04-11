@@ -1138,11 +1138,12 @@ Description:
 Description:
    Table to store last "view" of tournament-info-page, used for NEW-counter in main-menu
 
-| Field     | Type     | Null | Key | Default             | Extra |
-+-----------+----------+------+-----+---------------------+-------+
-| uid       | int(11)  | NO   | PRI | NULL                |       |
-| tid       | int(11)  | NO   | PRI | NULL                |       |
-| VisitTime | datetime | NO   |     | 0000-00-00 00:00:00 |       |
+| Field     | Type                | Null | Key | Default             | Extra |
++-----------+---------------------+------+-----+---------------------+-------+
+| uid       | int(11)             | NO   | PRI | NULL                |       |
+| tid       | int(11)             | NO   | PRI | NULL                |       |
+| VisitTime | datetime            | NO   |     | 0000-00-00 00:00:00 |       |
+| VisitType | tinyint(3) unsigned | NO   |     | NULL                |       |
 
 ## Fields:
 
@@ -1150,4 +1151,8 @@ Description:
    - Existing DB-entry indicates that user [uid] viewed tournament-info page of T [tid]
 
 * VisitTime : date of last-visit of T-info-page
+
+* VisitType : type of visit (no default)
+   - 1 = visited T-info page
+   - 2 = marked as read (should be overwritten with 1 if visiting T-info-page)
 

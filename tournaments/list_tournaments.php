@@ -33,6 +33,7 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_visit.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentList');
 
@@ -177,7 +178,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          'TRULE.Ruleset',
          'TRULE.ShapeID', 'TRULE.ShapeSnapshot',
          'TRULE.Maintime', 'TRULE.Byotype', 'TRULE.Byotime', 'TRULE.Byoperiods',
-         'COALESCE(TV.tid,0) AS TV_tid',
+         'COALESCE(TV.VisitType,0) AS TV_VisitType',
       SQLP_FROM,
          'INNER JOIN TournamentRules AS TRULE ON TRULE.tid=T.ID',
          "LEFT JOIN TournamentVisit AS TV ON TV.uid=$my_id AND TV.tid=T.ID" ));
@@ -227,6 +228,10 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->set_found_rows( mysql_found_rows('Tournament.list_tournaments.found_rows') );
 
    $maxGamesCheck = new MaxGamesCheck();
+
+   $ttable->set_extend_table_form_function( 'tournaments_extend_table_form' ); //func
+   if ( @$_REQUEST['mark_read'] && $iterator->getItemCount() > 0 )
+      mark_new_tournaments_as_read( $iterator, $show_rows, $my_id );
 
 
    if ( $has_uid )
@@ -312,7 +317,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
             ? array( 'text' => $restrictions, 'attbs' => array( 'class' => $class, 'title' => $title ) )
             : $restrictions;
       }
-      if ( !$orow['TV_tid'] && $ttable->Is_Column_Displayed[19] )
+      if ( !$orow['TV_VisitType'] && $ttable->Is_Column_Displayed[19] )
       {
          if ( $tourney->Status == TOURNEY_STATUS_NEW )
             $row_str[19] = span('TInitFlag', T_('new#tourney'));
@@ -423,5 +428,31 @@ function build_restrictions( $tourney, $row )
 
    return array( implode(', ', $out), $class, $title );
 }//build_restrictions
+
+// callback-func for tournament-list Table-form adding form-elements below table
+function tournaments_extend_table_form( &$table, &$form )
+{
+   $result = $form->print_insert_submit_button( 'mark_read', T_('Mark All Read') );
+   return $result;
+}
+
+// mark unvisited "new" tournaments as read
+function mark_new_tournaments_as_read( &$iterator, $show_rows, $uid )
+{
+   $arr_tids = array();
+   $cnt_entries = $iterator->getItemCount();
+   for( $i=0; ($show_rows-- > 0) && $i < $cnt_entries; $i++ )
+   {
+      list( $tourney, $orow ) = $iterator->getItem( $i );
+      if ( !$orow['TV_VisitType'] ) // unvisited "new" tournament
+      {
+         $arr_tids[] = $tourney->ID;
+         $iterator->setItemRawValue( $i, 'TV_VisitType', TVTYPE_MARK_READ );
+      }
+   }
+
+   TournamentVisit::mark_tournaments_read( $uid, $arr_tids );
+   $iterator->resetListIterator();
+}//mark_new_tournaments_as_read
 
 ?>

@@ -1434,6 +1434,7 @@ CREATE TABLE `TournamentVisit` (
   `uid` int(11) NOT NULL,
   `tid` int(11) NOT NULL,
   `VisitTime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `VisitType` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY  (`uid`,`tid`),
   KEY `tid` (`tid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;

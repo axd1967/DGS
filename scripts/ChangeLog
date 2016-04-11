@@ -13,6 +13,24 @@ ChangeLog
 
 2016-04-11 jug
 
+   * tournaments/include/tournament_visit.php (TournamentVisit.mark_tournament_visited,
+       ~.mark_tournaments_read, ~.get_tournament_visit_type, ~.load_tournament_visits,
+       ~.reset_players_tournament_new_count),
+     tournaments/include/tournament_globals.php (TVTYPE_MARK_READ, TVTYPE_OPEN_INFO),
+     include/std_classes.php (ListIterator.getItem, ~.setItemRawValue),
+     scripts/updates/1.19/database_changes.mysql, specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/list_tournaments.php (tournaments_extend_table_form, mark_new_tournaments_as_read):
+   - tournament-list: added button below table to mark all new tournaments as read
+     - extended TournamentVisit-table with VisitType to differ mark-as-read from "real visit" by opening T-info-page
+   - bugfix: fix new tournament count in main-menu after visiting tournament-info-page
+-----------
+-- added visit-type (read T-info / mark-as-read) for TournamentVisit
+ALTER TABLE TournamentVisit
+   ADD VisitType tinyint unsigned NOT NULL default 0 AFTER VisitTime ;
+UPDATE TournamentVisit
+   SET VisitType = 2 ;
+-----------
+
    * gameinfo.php:
    - bugfix for game-info-page: for player-info show empty-cell if last-move is not set
 

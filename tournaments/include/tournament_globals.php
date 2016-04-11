@@ -83,6 +83,11 @@ define('TCHKTYPE_USER_EDIT', 3);
 
 define('TCHKFLAG_OLD_GAMES', 0x01); // ensure no old unprocessed T-games existing
 
+// ---------- Tournament Visit Stuff --------------------------------
+
+define('TVTYPE_MARK_READ', 1);
+define('TVTYPE_OPEN_INFO', 2);
+
 // ---------- Tournament Log Stuff --------------------------------
 
 define('TLOG_TYPE_ADMIN', 'TA');

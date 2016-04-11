@@ -176,3 +176,10 @@ CREATE TABLE GameStats (
 --    'scripts/updates/1.19/seed_game_stats.php'
 
 
+-- added visit-type (read T-info / mark-as-read) for TournamentVisit
+ALTER TABLE TournamentVisit
+   ADD VisitType tinyint unsigned NOT NULL default 0 AFTER VisitTime ;
+UPDATE TournamentVisit
+   SET VisitType = 2 ;
+
+
