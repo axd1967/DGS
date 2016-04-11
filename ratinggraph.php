@@ -131,23 +131,23 @@ require_once 'include/form_functions.php';
       for ( $y = BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
         $years[$y] = $y;
 
-      $row = array( 'DESCRIPTION', T_('From#2'),
-                   'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
-                   'SELECTBOX', 'startyear', 1, $years, $startyear, false,
-                   'OWNHTML', '&nbsp;&nbsp;',
-                   'DESCRIPTION', T_('To#2'),
-                   'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
-                   'SELECTBOX', 'endyear', 1, $years, $endyear, false,
-                   'OWNHTML', '&nbsp;&nbsp;',
-                   'HIDDEN', 'uid', $uid,
-                   'HIDDEN', 'winpie', $winpie,
-                   'HIDDEN', 'show_time', $show_time,
-                   'HIDDEN', 'use_form', 1,
-                   'SUBMITBUTTON', 'submit', T_('Change interval') );
-      array_push( $row,
+      $form->add_row( array(
+            'DESCRIPTION', T_('From#2'),
+            'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
+            'SELECTBOX', 'startyear', 1, $years, $startyear, false,
             'OWNHTML', '&nbsp;&nbsp;',
-            'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber );
-      $form->add_row( $row);
+            'DESCRIPTION', T_('To#2'),
+            'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
+            'SELECTBOX', 'endyear', 1, $years, $endyear, false,
+            'OWNHTML', '&nbsp;&nbsp;',
+            'HIDDEN', 'uid', $uid,
+            'HIDDEN', 'winpie', $winpie,
+            'HIDDEN', 'show_time', $show_time,
+            'HIDDEN', 'use_form', 1,
+            'SUBMITBUTTON', 'submit', T_('Change interval'),
+            'TEXT', MED_SPACING,
+            'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber,
+         ));
 
       $form->echo_string(1);
    }
