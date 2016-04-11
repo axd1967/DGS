@@ -66,7 +66,7 @@ class DgsRoundRobinTournament extends TournamentTemplateRoundRobin
 
       $trules = new TournamentRules();
       $trules->Size = 19;
-      $trules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
+      $trules->Handicaptype = TRULE_HANDITYPE_ALTERNATE;
 
       $tpoints = new TournamentPoints();
       $tpoints->setDefaults( TPOINTSTYPE_SIMPLE );
