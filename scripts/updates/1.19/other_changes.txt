@@ -41,7 +41,7 @@ copy /25/wmsa.gif
 # adjust english translation for
 #    'Tournament last move#header', '%#T_header', '%#TL_header', 'Penalty-Points#header'
 #    'Black time remaining#header', 'White time remaining#header',
-#    '#Running games with user#header' -> 'RUG', '#Finished games with user#header' -> 'FUG'
+#    '#Running games with user#header' -> 'RGU', '#Finished games with user#header' -> 'FGU'
 
 -----------
 # added images
