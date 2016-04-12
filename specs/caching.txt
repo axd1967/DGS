@@ -1104,6 +1104,23 @@ See "template" for new cache-group at end of this section.
    - Expire-time of cache-entry is 3 days.
 
 
+* CACHE_GRP_RATINGLOG
+   - The 'Ratinglog'-table is used to store rating-changes for users.
+     As speed-up on creating the rating-graph some of the ratinglog-fields for a user
+     will be cached for that.
+
+   - A cache-entry depends on the user-id.
+
+   - The cache-entry for user-id is invalidated, if a rated game ends and the rating-
+     changes are written into the Ratinglog-table for both players.
+
+   - The expire-time for a search-profile is 15 minutes to not blow the cache as the
+     ratinglog-data can be quite large.
+
+   - All required cache-functions for this cache-group can be found in the
+     'Ratinglog'-class.
+
+
 * new cache-group CACHE_GRP_ ...
    - motivation, description, cache-invalidation, expire-time, special-handling ?
 

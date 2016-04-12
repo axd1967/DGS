@@ -23,6 +23,7 @@ require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/rating.php';
 require_once 'include/graph.php';
+require_once 'include/db/ratinglog.php';
 
 // NOTE: always display the number of games played below the dates.
 
@@ -102,9 +103,9 @@ define('MAX_WMA_TAPS', 25); // moving average
    $number_color = $gr->getcolor(250, 100, 98);
 
    $lsq_color = $gr->getcolor(0, 0x80, 0);
-   $median3_color = $gr->getcolor(0xd0, 0, 0);
+   $median3_color = $gr->getcolor(0xa0, 0x38, 0xf8);
    $median5_color = $gr->getcolor(0, 0, 0xd0);
-   $wma_color = $gr->getcolor(0xa0, 0x38, 0xf8);
+   $wma_color = $gr->getcolor(0xd0, 0, 0);
 
 
    // fetch and prepare datas
@@ -375,13 +376,21 @@ function get_rating_data($uid)
 
    $min_row = mysql_fetch_assoc($result);
 
-   $result = db_query( 'ratingpng.find_min_max_time',
-      "SELECT UNIX_TIMESTAMP(MIN(Time)) AS min_seconds, UNIX_TIMESTAMP(MAX(Time)) AS seconds " .
-      "FROM Ratinglog WHERE uid=$uid LIMIT 1" );
-   $max_row = mysql_fetch_assoc($result);
+   $rating_logs = Ratinglog::load_cache_ratinglogs( $uid ); // ordered by Time
+   $cnt_rating_logs = count($rating_logs);
+   if ( $cnt_rating_logs < 1 )
+      exit;
+
+   $max_row = array(
+         'min_seconds' => $rating_logs[0]['seconds'],
+         'max_seconds' => $rating_logs[$cnt_rating_logs-1]['seconds'],
+      );
+
 
    // start time with first rated-game, otherwise registration-date
-   $min_row['seconds'] = ( @$max_row['min_seconds'] ) ? $max_row['min_seconds'] - SECS_PER_DAY : $min_row['reg_seconds'];
+   $min_row['seconds'] = ( @$max_row['min_seconds'] )
+      ? $max_row['min_seconds'] - SECS_PER_DAY
+      : $min_row['reg_seconds'];
 
    if ( $starttime < $min_row['seconds'] - $bound_interval )
       $starttime = $min_row['seconds'] - $bound_interval;
@@ -393,10 +402,10 @@ function get_rating_data($uid)
       $owner_row = $min_row;
    }
 
-   if ( $starttime > $max_row['seconds'] - $bound_interval )
-      $starttime = $max_row['seconds'] - $bound_interval;
-   if ( $endtime > $max_row['seconds'] + $bound_interval)
-      $endtime = $max_row['seconds'] + $bound_interval;
+   if ( $starttime > $max_row['max_seconds'] - $bound_interval )
+      $starttime = $max_row['max_seconds'] - $bound_interval;
+   if ( $endtime > $max_row['max_seconds'] + $bound_interval)
+      $endtime = $max_row['max_seconds'] + $bound_interval;
 
    if ( ($endtime - $starttime) < GRAPH_RATING_MIN_INTERVAL )
    {
@@ -405,13 +414,6 @@ function get_rating_data($uid)
       $endtime = $starttime + GRAPH_RATING_MIN_INTERVAL;
    }
 
-
-   $result = db_query( 'ratingpng.ratingdata',
-      "SELECT Rating, RatingMax, RatingMin, UNIX_TIMESTAMP(Time) AS seconds " .
-      "FROM Ratinglog WHERE uid=$uid ORDER BY Time" );
-
-   if ( @mysql_num_rows( $result ) < 1 )
-      exit;
 
    $numbercount = -1 ; //first point is Registerdate
    $first = true;
@@ -468,7 +470,7 @@ function get_rating_data($uid)
       $number[]= $numbercount;
 
       $tmp = $row;
-   } while ( $row = mysql_fetch_assoc($result) ) ;
+   } while ( $row = array_shift($rating_logs) );
 }//get_rating_data
 
 

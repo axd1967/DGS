@@ -23,6 +23,7 @@ $TranslateGroups[] = "Game";
 
 require_once 'include/globals.php';
 require_once 'include/db_classes.php';
+require_once 'include/dgs_cache.php';
 require_once 'include/std_classes.php';
 
  /*!
@@ -194,6 +195,39 @@ class Ratinglog
 
       return $iterator;
    }//load_ratinglogs
+
+   /*!
+    * \brief Loads and caches part of Ratinglog-table for given user-id.
+    * \return arr( arr( fields => val, ...), ... ) with rows ordered by Time; empty array = no entries found
+    */
+   public static function load_cache_ratinglogs( $uid )
+   {
+      $uid = (int)$uid;
+      $dbgmsg = "Ratinglog::load_cache_ratinglogs($uid)";
+      $key = "RLog.$uid";
+
+      $rating_logs = DgsCache::fetch( $dbgmsg, CACHE_GRP_RATINGLOG, $key );
+      if ( is_null($rating_logs) )
+      {
+         $result = db_query( $dbgmsg.'.find',
+               "SELECT Rating, RatingMin, RatingMax, UNIX_TIMESTAMP(Time) AS seconds " .
+               "FROM Ratinglog WHERE uid=$uid ORDER BY Time" );
+
+         $rating_logs = array();
+         while ( $row = mysql_fetch_array( $result ) )
+            $rating_logs[] = $row;
+         mysql_free_result($result);
+
+         DgsCache::store( $dbgmsg, CACHE_GRP_RATINGLOG, $key, $rating_logs, 15*SECS_PER_MIN );
+      }
+
+      return $rating_logs;
+   }//load_cache_ratinglogs
+
+   public static function delete_cache_ratinglogs( $dbgmsg, $uid )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_RATINGLOG, "RLog.$uid" );
+   }
 
 } // end of 'Ratinglog'
 ?>

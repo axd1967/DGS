@@ -13,6 +13,17 @@ ChangeLog
 
 2016-04-12 jug
 
+   * include/cache_globals.php (CACHE_GRP_RATINGLOG, MAX_CACHE_GRP, $ARR_CACHE_GROUP_CLEANUP,
+       $DGS_CACHE_GROUPS),
+     include/db/ratinglog.php (Ratinglog.load_cache_ratinglogs, ~.delete_cache_ratinglogs),
+     scripts/updates/1.19/other_changes.txt, specs/caching.txt,
+     ratingpng.php (get_rating_data):
+   - adjusted rating-graph:
+     - introduced caching of Ratinglog-entries with 15min expire to avoid continuous
+       loading of full ratinglog when tweaking around with graph-parameters
+     - optimized away additional Ratinglog-query to identify min/max times
+     - switched colors of median-3 and WMA-filter
+
    * include/graph.php (Graph.gscale, ~.curve),
      ratingpng.php (MAX_WMA_TAPS; calculate_median, build_wma_weights,
        calculate_wma, array_weighted_moving_average),
