@@ -11,6 +11,8 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+### ----- release-1_19_10-20160412 -----
+
 2016-04-12 jug
 
    * ratinggraph.php, ratingpng.php:
