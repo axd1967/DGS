@@ -67,6 +67,8 @@ function scale($x, $min, $max, $offset, $size)
 function gscale($x)
 {
    global $GSCALEMIN, $GSCALEMAX, $GSCALEOFFSET, $GSCALESIZE;
+   if ( is_null($x) )
+      return null;
    if ( $GSCALEMIN == $GSCALEMAX || $GSCALESIZE < 1 )
       return round( $GSCALEOFFSET);
    return round( $GSCALEOFFSET + (($x-$GSCALEMIN)/($GSCALEMAX-$GSCALEMIN))*$GSCALESIZE );
@@ -425,8 +427,10 @@ class Graph
    public function curve(&$pointX, &$pointY, $nr_points, $colorid)
    {
       for ( $i=1; $i<$nr_points; $i++)
-         imageline($this->im,
-            $pointX[$i-1],$pointY[$i-1],$pointX[$i],$pointY[$i],$colorid);
+      {
+         if ( !is_null($pointY[$i-1]) && !is_null($pointY[$i]) )
+            imageline($this->im, $pointX[$i-1],$pointY[$i-1],$pointX[$i],$pointY[$i],$colorid);
+      }
    }//curve
 
    public function polygon(&$points, $nr_points, $colorid)

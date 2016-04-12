@@ -96,9 +96,10 @@ require_once 'include/form_functions.php';
    echo "<h3 class=Header>" . T_('Rating graph for') . ' ' .
             user_reference( REF_LINK, 1, '', $user_row) . "</h3>\n" ;
 
-   $result = db_query( "ratinggraph.find_rating_data($uid)",
-         "SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2" );
-   if ( @mysql_num_rows($result) < 1 )
+   $rlog_row = mysql_single_fetch( "ratinggraph.find_rating_data($uid)",
+         "SELECT COUNT(*) AS X_Count FROM Ratinglog WHERE uid=$uid" );
+   $rlog_count = ($rlog_row) ? (int)@$rlog_row['X_Count'] : 0;
+   if ( $rlog_count < 1 )
       echo T_("Sorry, too few rated games to draw a graph") ,"\n";
    else
    {
@@ -109,6 +110,9 @@ require_once 'include/form_functions.php';
       $show_lsq = (bool)@$_REQUEST['lsq'];
       $show_median3 = (bool)@$_REQUEST['med3'];
       $show_median5 = (bool)@$_REQUEST['med5'];
+      $show_wma = (bool)@$_REQUEST['wma'];
+      $wma_binomial = (bool)@$_REQUEST['wma_bin']; // binomial | simple
+      $wma_taps = (int)@$_REQUEST['wma_taps'];
       if ( @$_REQUEST['use_form'] ) // NOTE: needed to overwrite db-default b/c unchecked checkbox leads to using default
          $bynumber = (bool)@$_REQUEST['bynumber'];
       else
@@ -122,6 +126,9 @@ require_once 'include/form_functions.php';
          ,($show_lsq ? URI_AMP.'lsq=1' : '')
          ,($show_median3 ? URI_AMP.'med3=1' : '')
          ,($show_median5 ? URI_AMP.'med5=1' : '')
+         ,($show_wma ? URI_AMP.'wma=1' : '')
+         ,($wma_binomial ? URI_AMP.'wma_bin=1' : '')
+         ,($wma_taps ? URI_AMP.'wma_taps='.$wma_taps : '')
          ,URI_AMP,"dyna=$dyna" //force caches refresh
          ,URI_AMP,"startyear=$startyear"
          ,URI_AMP,"startmonth=$startmonth"
@@ -164,11 +171,20 @@ require_once 'include/form_functions.php';
             'DESCRIPTION', T_('Y-Axis'),
             'CHECKBOX', 'hd', '1', T_('Hide raw data'), $hide_data,
             'TEXT', MED_SPACING,
-            'CHECKBOX', 'lsq', '1', T_('LSQ line'), $show_lsq,
+            'CHECKBOX', 'lsq', '1', textWithTitle(T_('LSQ line'), T_('Least-Square-Line')), $show_lsq,
             'TEXT', MED_SPACING,
             'CHECKBOX', 'med3', '1', T_('Median-3'), $show_median3,
             'TEXT', MED_SPACING,
             'CHECKBOX', 'med5', '1', T_('Median-5'), $show_median5,
+         ));
+      $form->add_row( array(
+            'TAB',
+            'CHECKBOX', 'wma', '1', textWithTitle(T_('WMA'), T_('Weighted Moving Average')), $show_wma,
+            'TEXT', MED_SPACING . '(' . MINI_SPACING,
+            'CHECKBOX', 'wma_bin', '1', T_('Binomial'), $wma_binomial,
+            'TEXT', SMALL_SPACING,
+            'TEXTINPUT', 'wma_taps', '4', '3', $wma_taps,
+            'TEXT', T_('taps#ratgraph') . MED_SPACING . ')',
          ));
 
       $form->echo_string(1);

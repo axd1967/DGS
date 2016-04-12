@@ -13,6 +13,18 @@ ChangeLog
 
 2016-04-12 jug
 
+   * include/graph.php (Graph.gscale, ~.curve),
+     ratingpng.php (MAX_WMA_TAPS; calculate_median, build_wma_weights,
+       calculate_wma, array_weighted_moving_average),
+     ratinggraph.php:
+   - added option in rating-graph to show weighted moving average (WMA)
+     - added WMA N-tap filter with N=2..25 with simple (linear) and binomial weights (LaPlace pyramid)
+     - restrict WMA-filter to 2..25 taps
+   - adjusted rating-graph
+     - leave away data-points at left-edge for Median & WMA filters instead of interpolating them,
+       which did not always looks good
+     - added tool-tips for LSQ & WMA options
+
    * ratingpng.php (interpolate, array_median, calculate_mean, calculate_LSQ, calculate_median),
      ratinggraph.php:
    - added option in rating-graph to show least-square-line (LSQ), median-3 & median-5 filters

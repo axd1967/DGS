@@ -31,6 +31,8 @@ define('ENA_WIN_PIE', true);
 //Default display of the win/lost/unrated pie.
 define('SHOW_WIN_PIE', false);
 
+define('MAX_WMA_TAPS', 25); // moving average
+
 
 {
    connect2mysql();
@@ -55,13 +57,15 @@ define('SHOW_WIN_PIE', false);
       $ratinglabel = create_function('$x', 'return echo_rating($x,0,0,1);' );
    }
 
-   $show_by_number = (bool)@$_GET['bynumber'];
+   $show_by_number = (bool)@$_GET['bynumber']; // x-axis (true=Games, false=Time)
    $show_win_pie = ENA_WIN_PIE && (SHOW_WIN_PIE xor ((bool)@$_GET['winpie']));
    $hide_raw_data = (bool)@$_GET['hd'];
    $show_lsq = (bool)@$_GET['lsq'];
    $show_median3 = (bool)@$_GET['med3'];
    $show_median5 = (bool)@$_GET['med5'];
-
+   $show_wma = (bool)@$_GET['wma'];
+   $wma_binomial = (bool)@$_GET['wma_bin']; // binomial | simple
+   $wma_taps = (int)@$_GET['wma_taps'];
 
    $starttime = mktime(0,0,0,BEGINMONTH,1,BEGINYEAR);
    $endtime = $NOW + GRAPH_RATING_MIN_INTERVAL;
@@ -85,7 +89,7 @@ define('SHOW_WIN_PIE', false);
    $endtime = max( $endtime, $starttime + GRAPH_RATING_MIN_INTERVAL);
 
 
-   //prepare the graph
+   // prepare the graph
 
    $SizeX = max( 200, @$_GET['size'] > 0 ? $_GET['size'] : 640 );
    $SizeY = $SizeX * 3 / 4;
@@ -100,13 +104,16 @@ define('SHOW_WIN_PIE', false);
    $lsq_color = $gr->getcolor(0, 0x80, 0);
    $median3_color = $gr->getcolor(0xd0, 0, 0);
    $median5_color = $gr->getcolor(0, 0, 0xd0);
+   $wma_color = $gr->getcolor(0xa0, 0x38, 0xf8);
 
 
-   //fetch and prepare datas
+   // fetch and prepare datas
 
    get_rating_data(@$_GET["uid"]);
    $nr_points = count($ratings);
    $x_data = ( $show_by_number ) ? $number : $time;
+
+   // graph filters
 
    if ( $show_lsq )
    {
@@ -117,6 +124,26 @@ define('SHOW_WIN_PIE', false);
    }
    else
       $has_lsq = false;
+
+   if ( $show_median3 )
+      $rating_median3 = calculate_median( $ratings, 3 );
+   if ( $show_median5 )
+      $rating_median5 = calculate_median( $ratings, 5 );
+
+   if ( $show_wma )
+   {
+      if ( $wma_taps < 2 )
+         $wma_taps = 2;
+      elseif ( $wma_taps > MAX_WMA_TAPS )
+         $wma_taps = MAX_WMA_TAPS;
+      if ( $wma_taps > $nr_points - 2 )
+         $wma_taps = $nr_points - 2;
+
+      $arr_wma_weights = build_wma_weights( $wma_binomial, $wma_taps );
+      //error_log("WMA-weights($wma_taps): ".implode(', ', $arr_wma_weights));
+
+      $rating_wma = calculate_wma( $ratings, $arr_wma_weights );
+   }//wma
 
 
    //$startnumber is the number of games before the graph start
@@ -166,13 +193,6 @@ define('SHOW_WIN_PIE', false);
 
    $gr->setgraphbox( $marge_left, $marge_top, $gr->width-$marge_right, $gr->height-$marge_bottom );
 
-   // graph filters
-
-   if ( $show_median3 )
-      $rating_median3 = calculate_median( $ratings, 3, $x_data );
-   if ( $show_median5 )
-      $rating_median5 = calculate_median( $ratings, 5, $x_data );
-
    // scale datas
 
    $gr->setgraphview( $xlims['MIN'], $ymax, $xlims['MAX'], $ymin );
@@ -189,8 +209,11 @@ define('SHOW_WIN_PIE', false);
    if ( $show_median5 )
       $rating_median5 = $gr->mapscaleY($rating_median5);
 
+   if ( $show_wma )
+      $rating_wma = $gr->mapscaleY($rating_wma);
 
-   //draw the blue array
+
+   // draw the blue array
 
    if ( $nr_points > 1 )
    {
@@ -202,15 +225,14 @@ define('SHOW_WIN_PIE', false);
    }
 
 
-
-   //vertical scaling
+   // vertical scaling
 
    $step = 100; //i.e. 1 kyu step
    $start = ceil($ymin/$step)*$step;
    $gr->gridY( $start, $step, $gr->border, $ratinglabel, $black, '', $black );
 
 
-   //horizontal scaling
+   // horizontal scaling
 
    if ( $show_by_number )
    { // the X-axis is the number of games
@@ -284,6 +306,9 @@ define('SHOW_WIN_PIE', false);
       $gr->curve($xvals, $rating_median3, $nr_points, $median3_color);
    if ( $show_median5 )
       $gr->curve($xvals, $rating_median5, $nr_points, $median5_color);
+
+   if ( $show_wma )
+      $gr->curve($xvals, $rating_wma, $nr_points, $wma_color);
 
    if ( $has_lsq )
       $gr->line( $gr->scaleX($x0), $gr->scaleY($y0), $gr->scaleX($xLast), $gr->scaleY($yLast), $lsq_color );
@@ -506,23 +531,79 @@ function calculate_LSQ( $show_by_number, $ratings, $x_data )
 }//calculate_LSQ
 
 
-function calculate_median( $ratings, $size, $x_data )
+function calculate_median( $ratings, $size )
 {
    $start = $size - 1;
-   $result = ( $size > 1 ) ? array_fill(0, $start, 0) : array();
+   $result = ( $size > 1 ) ? array_fill(0, $start, null) : array();
    $cnt = count($ratings);
 
-   for( $i=$start; $i < $cnt; $i++ )
+   for ( $i=$start; $i < $cnt; $i++ )
       $result[] = array_median( array_slice($ratings, $i - $start, $size) );
-
-   if ( $cnt >= $size + 1 ) // "edge"-handling: interpolate from first 2 entries
-   {
-      for( $i=0; $i < $start; $i++ )
-         $result[$i] = interpolate( $result[$start], $result[$start+1],
-            $x_data[$start], $x_data[$i], $x_data[$start+1] );
-   }
 
    return $result;
 }//calculate_median
+
+
+// \param $taps must be > 1
+function build_wma_weights( $binomial, $taps )
+{
+   static $PYRAMIDS = array(
+         0 => array( 1 ),
+         1 => array( 1, 1 ),
+      );
+
+   if ( $taps <= 1 )
+      return $PYRAMIDS[$taps-1];
+   if ( $taps == 2 )
+      return $PYRAMIDS[$taps-1];
+
+   if ( !$binomial ) // weights for simple filter
+      return array_fill(0, $taps, 1);
+
+   // build weights for binomial n-tap filter (LaPlace pyramid)
+   $pyramid = $PYRAMIDS[1];
+   for ( $level=2; $level < $taps; $level++ )
+   {
+      $prev_pyramid = array_merge( array(), $pyramid ); // clone previous pyramid-level
+      $pyramid = array( 1 );
+
+      // create half of new level ...
+      $half_cnt = floor( $level / 2 ) + 1;
+      for ( $i=1; $i < $half_cnt; $i++ )
+         $pyramid[] = $prev_pyramid[$i-1] + $prev_pyramid[$i];
+
+      // ... and mirror it for 2nd half
+      $mirror_start = $i-1;
+      if ( $level & 1 ) // odd level
+         $pyramid[] = $pyramid[$mirror_start];
+      while ( $mirror_start-- > 0 )
+         $pyramid[] = $pyramid[$mirror_start];
+   }
+
+   return $pyramid;
+}//build_wma_weights
+
+// calculated weighted moving average (simple MA, if weights only contain same values)
+function calculate_wma( $ratings, $weights )
+{
+   $size = count($weights);
+   $start = $size - 1;
+   $result = ( $size > 1 ) ? array_fill(0, $start, null) : array();
+   $cnt = count($ratings);
+   $w_sum = array_sum($weights);
+
+   for ( $i=$start; $i < $cnt; $i++ )
+      $result[] = array_weighted_moving_average( array_slice($ratings, $i - $start, $size), $weights, $size, $w_sum );
+
+   return $result;
+}//calculate_wma
+
+function array_weighted_moving_average( $arr, $weights, $w_cnt, $w_sum )
+{
+   $wma = 0;
+   for ( $i=0; $i < $w_cnt; $i++ )
+      $wma += $weights[$i] * $arr[$i];
+   return $wma / $w_sum;
+}//array_weighted_moving_average
 
 ?>
