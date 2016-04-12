@@ -457,7 +457,7 @@ function calculate_LSQ( $show_by_number, $ratings, $time, $number )
    $xL = $x_data[$cnt-1];
    $y0 = $a * $x0 + $b;
    $yL = $a * $xL + $b;
-   error_log("calculate_LSQ(#$cnt): $a * x + $b ; ($x0,$y0) .. ($xL,$yL)");
+   //error_log("calculate_LSQ(#$cnt): $a * x + $b ; ($x0,$y0) .. ($xL,$yL)");
 
    return array( $a, $b, $x0, $y0, $xL, $yL );
 }//calculate_LSQ
