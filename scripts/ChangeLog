@@ -13,6 +13,9 @@ ChangeLog
 
 2016-04-12 jug
 
+   * ratinggraph.php, ratingpng.php:
+   - rating-graph: removed unwanted code to draw win-pie
+
    * include/cache_globals.php (CACHE_GRP_RATINGLOG, MAX_CACHE_GRP, $ARR_CACHE_GROUP_CLEANUP,
        $DGS_CACHE_GROUPS),
      include/db/ratinglog.php (Ratinglog.load_cache_ratinglogs, ~.delete_cache_ratinglogs),

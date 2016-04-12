@@ -27,11 +27,6 @@ require_once 'include/db/ratinglog.php';
 
 // NOTE: always display the number of games played below the dates.
 
-//Display the win/lost/unrated pie.
-define('ENA_WIN_PIE', true);
-//Default display of the win/lost/unrated pie.
-define('SHOW_WIN_PIE', false);
-
 define('MAX_WMA_TAPS', 25); // moving average
 
 
@@ -59,7 +54,6 @@ define('MAX_WMA_TAPS', 25); // moving average
    }
 
    $show_by_number = (bool)@$_GET['bynumber']; // x-axis (true=Games, false=Time)
-   $show_win_pie = ENA_WIN_PIE && (SHOW_WIN_PIE xor ((bool)@$_GET['winpie']));
    $hide_raw_data = (bool)@$_GET['hd'];
    $show_lsq = (bool)@$_GET['lsq'];
    $show_median3 = (bool)@$_GET['med3'];
@@ -317,28 +311,9 @@ define('MAX_WMA_TAPS', 25); // moving average
 
    // misc drawings
 
-   if ( ENA_WIN_PIE && $show_win_pie )
-   {
-      // set pie dimensions.
-      $sx = $gr->width/6.; $sy = $sx/3.; $sz = $sx/16.;
-      // set pie position.
-      $cx = $gr->boxleft+4 +$sx/2;
-      $cy = $gr->boxtop+4 +$sy/2;
-
-      //empty portion = unrated games
-      $datas[-1] = $owner_row['Finished']-$owner_row['RatedGames'];
-      $datas[0] = $owner_row['Won'];
-      $datas[1] = $owner_row['RatedGames']-$owner_row['Won']-$owner_row['Lost'];
-      $datas[2] = $owner_row['Lost'];
-      $color[0] = 0x289828; //win
-      $color[1] = 0x3048F0; //jigo
-      $color[2] = 0xff3838; //lost
-      $gr->pie( $datas, $cx, $cy, $sx, $sy, $sz, $color);
-   }
-
    if ( @$_REQUEST['show_time'] )
-      $gr->label($gr->offsetX, 0,
-                 sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
+      $gr->label( $gr->offsetX, 0, sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black );
+
 
    $gr->send_image();
 }//main
@@ -362,10 +337,7 @@ function get_rating_data($uid)
    $bound_interval = GRAPH_RATING_MIN_INTERVAL/4;
 
    // note: Ratinglog-entries exists only for rated games
-   $query = "SELECT InitialRating AS Rating, ";
-   if ( ENA_WIN_PIE )
-      $query .= "Finished, RatedGames, Won, Lost,";
-   $query .=
+   $query = "SELECT InitialRating AS Rating, " .
       "InitialRating+200+GREATEST(1600-InitialRating,0)*2/15 AS RatingMax, " .
       "InitialRating-200-GREATEST(1600-InitialRating,0)*2/15 AS RatingMin, " .
       "UNIX_TIMESTAMP(Registerdate) AS reg_seconds " .
@@ -396,11 +368,6 @@ function get_rating_data($uid)
       $starttime = $min_row['seconds'] - $bound_interval;
    if ( $endtime < $min_row['seconds'] + $bound_interval)
       $endtime = $min_row['seconds'] + $bound_interval;
-   if ( ENA_WIN_PIE )
-   {
-      global $owner_row;
-      $owner_row = $min_row;
-   }
 
    if ( $starttime > $max_row['max_seconds'] - $bound_interval )
       $starttime = $max_row['max_seconds'] - $bound_interval;

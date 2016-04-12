@@ -105,7 +105,6 @@ require_once 'include/form_functions.php';
    {
       $show_time = (int)(bool)@$_REQUEST['show_time'];
       $dyna= floor($NOW/(SECS_PER_HOUR/TICK_FREQUENCY));
-      $winpie = (bool)@$_REQUEST['winpie'];
       $hide_data = (bool)@$_REQUEST['hd'];
       $show_lsq = (bool)@$_REQUEST['lsq'];
       $show_median3 = (bool)@$_REQUEST['med3'];
@@ -120,7 +119,6 @@ require_once 'include/form_functions.php';
 
       echo "\n<img src=\"ratingpng.php?uid=$uid"
          ,($show_time ? URI_AMP.'show_time=1' : '')
-         ,($winpie ? URI_AMP.'winpie=1' : '')
          ,($bynumber ? URI_AMP.'bynumber=1' : '')
          ,($hide_data ? URI_AMP.'hd=1' : '')
          ,($show_lsq ? URI_AMP.'lsq=1' : '')
@@ -162,7 +160,6 @@ require_once 'include/form_functions.php';
             'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber,
             // hidden vars (without form-elements)
             'HIDDEN', 'uid', $uid,
-            'HIDDEN', 'winpie', $winpie,
             'HIDDEN', 'show_time', $show_time,
             'HIDDEN', 'use_form', 1,
          ));
