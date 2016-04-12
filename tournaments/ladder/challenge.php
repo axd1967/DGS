@@ -89,7 +89,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       $is_locked = true;
       db_lock( "Tournament.ladder.challenge.vfy_challenge_confirm($tid,$my_id,r$rid)",
          // WRITE-locks
-         "Errorlog WRITE, Games WRITE, Moves WRITE, Players WRITE, TournamentGames WRITE, TournamentLadder WRITE, " .
+         "Errorlog WRITE, Games WRITE, Moves WRITE, Players WRITE, GameStats WRITE, TournamentGames WRITE, TournamentLadder WRITE, " .
          // READ-locks
          "Clock READ, Moves AS MV READ, Players AS P READ, Players AS TL_P READ, Players AS TPP READ, " .
          "TournamentGames AS TG READ, TournamentLadder AS TL READ, TournamentLadderProps AS TLP READ, " .
