@@ -13,9 +13,10 @@ ChangeLog
 
 2016-04-12 jug
 
-   * ratingpng.php (calculate_LSQ, calculate_mean),
+   * ratingpng.php (interpolate, array_median, calculate_mean, calculate_LSQ, calculate_median),
      ratinggraph.php:
-   - extended rating-graph with switchable green least square line (LSQ)
+   - added option in rating-graph to show least-square-line (LSQ), median-3 & median-5 filters
+   - added option in rating-graph to hide raw data
 
 2016-04-11 jug
 

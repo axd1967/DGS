@@ -32,14 +32,6 @@ define('ENA_WIN_PIE', true);
 define('SHOW_WIN_PIE', false);
 
 
-function interpolate($val1, $val3, $time1, $time2, $time3)
-{
-   if ( $time1 == $time3 )
-      return $val3;
-   return $val3 + ($val1-$val3)*($time2-$time3)/($time1-$time3);
-}
-
-
 {
    connect2mysql();
 
@@ -65,7 +57,10 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    $show_by_number = (bool)@$_GET['bynumber'];
    $show_win_pie = ENA_WIN_PIE && (SHOW_WIN_PIE xor ((bool)@$_GET['winpie']));
+   $hide_raw_data = (bool)@$_GET['hd'];
    $show_lsq = (bool)@$_GET['lsq'];
+   $show_median3 = (bool)@$_GET['med3'];
+   $show_median5 = (bool)@$_GET['med5'];
 
 
    $starttime = mktime(0,0,0,BEGINMONTH,1,BEGINYEAR);
@@ -101,17 +96,21 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    $red = $gr->getcolor(205, 159, 156);
    $light_blue = $gr->getcolor(220, 229, 255);
    $number_color = $gr->getcolor(250, 100, 98);
+
    $lsq_color = $gr->getcolor(0, 0x80, 0);
+   $median3_color = $gr->getcolor(0xd0, 0, 0);
+   $median5_color = $gr->getcolor(0, 0, 0xd0);
 
 
    //fetch and prepare datas
 
    get_rating_data(@$_GET["uid"]);
    $nr_points = count($ratings);
+   $x_data = ( $show_by_number ) ? $number : $time;
 
    if ( $show_lsq )
    {
-      $arr_lsq = calculate_LSQ( $show_by_number, $ratings, $time, $number );
+      $arr_lsq = calculate_LSQ( $show_by_number, $ratings, $x_data );
       $has_lsq = is_array($arr_lsq);
       if ( $has_lsq )
          list( $a, $b, $x0, $y0, $xLast, $yLast ) = $arr_lsq;
@@ -167,15 +166,28 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    $gr->setgraphbox( $marge_left, $marge_top, $gr->width-$marge_right, $gr->height-$marge_bottom );
 
-   //scale datas
+   // graph filters
+
+   if ( $show_median3 )
+      $rating_median3 = calculate_median( $ratings, 3, $x_data );
+   if ( $show_median5 )
+      $rating_median5 = calculate_median( $ratings, 5, $x_data );
+
+   // scale datas
 
    $gr->setgraphview( $xlims['MIN'], $ymax, $xlims['MAX'], $ymin );
 
+   $xvals = $gr->mapscaleX($xvals);
    $ratingmax = $gr->mapscaleY($ratingmax);
    $ratingmin = $gr->mapscaleY($ratingmin);
-   $ratings = $gr->mapscaleY($ratings);
 
-   $xvals = $gr->mapscaleX($xvals);
+   if ( !$hide_raw_data )
+      $ratings = $gr->mapscaleY($ratings);
+
+   if ( $show_median3 )
+      $rating_median3 = $gr->mapscaleY($rating_median3);
+   if ( $show_median5 )
+      $rating_median5 = $gr->mapscaleY($rating_median5);
 
 
    //draw the blue array
@@ -263,15 +275,21 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    }
 
 
-   //draw the curves
+   // draw the curves
 
-   $gr->curve($xvals, $ratings, $nr_points, $black);
+   if ( !$hide_raw_data )
+      $gr->curve($xvals, $ratings, $nr_points, $black);
+
+   if ( $show_median3 )
+      $gr->curve($xvals, $rating_median3, $nr_points, $median3_color);
+   if ( $show_median5 )
+      $gr->curve($xvals, $rating_median5, $nr_points, $median5_color);
 
    if ( $has_lsq )
       $gr->line( $gr->scaleX($x0), $gr->scaleY($y0), $gr->scaleX($xLast), $gr->scaleY($yLast), $lsq_color );
 
 
-   //misc drawings
+   // misc drawings
 
    if ( ENA_WIN_PIE && $show_win_pie )
    {
@@ -428,15 +446,40 @@ function get_rating_data($uid)
    } while ( $row = mysql_fetch_assoc($result) ) ;
 }//get_rating_data
 
+
+function interpolate( $y1, $y3, $x1, $x2, $x3 )
+{
+   if ( $x1 == $x3 )
+      return $y3;
+   return $y3 + ( $y1 - $y3 ) * ( $x2 - $x3 ) / ( $x1 - $x3 );
+}
+
+function calculate_mean( $arr )
+{
+   return array_sum($arr) / count($arr);
+}
+
+// \param $arr non-null, non-empty array with numbers to find median for
+function array_median( $arr ) {
+   sort($arr, SORT_NUMERIC);
+
+   $cnt = count($arr);
+   $mid_idx = floor( $cnt / 2 );
+   $median = $arr[$mid_idx];
+   if ( ($cnt & 1) == 0 ) // even number of items
+      $median = ( $median + $arr[$mid_idx - 1] ) / 2;
+   return $median;
+}//array_median
+
+
 // formulas taken from https://de.wikipedia.org/wiki/Methode_der_kleinsten_Quadrate#Herleitung_und_Verfahren
 // \return arr( a, b, x0, xLast, y0, yLast ) for linear func(x) := a*x + b
-function calculate_LSQ( $show_by_number, $ratings, $time, $number )
+function calculate_LSQ( $show_by_number, $ratings, $x_data )
 {
    $cnt = count($ratings);
    if ( $cnt == 0 )
       return null;
 
-   $x_data = ( $show_by_number ) ? $number : $time;
    $y_data = $ratings;
    $x_mean = calculate_mean( $x_data );
    $y_mean = calculate_mean( $y_data );
@@ -462,9 +505,24 @@ function calculate_LSQ( $show_by_number, $ratings, $time, $number )
    return array( $a, $b, $x0, $y0, $xL, $yL );
 }//calculate_LSQ
 
-function calculate_mean( $arr )
+
+function calculate_median( $ratings, $size, $x_data )
 {
-   return array_sum($arr) / count($arr);
-}//calculate_mean
+   $start = $size - 1;
+   $result = ( $size > 1 ) ? array_fill(0, $start, 0) : array();
+   $cnt = count($ratings);
+
+   for( $i=$start; $i < $cnt; $i++ )
+      $result[] = array_median( array_slice($ratings, $i - $start, $size) );
+
+   if ( $cnt >= $size + 1 ) // "edge"-handling: interpolate from first 2 entries
+   {
+      for( $i=0; $i < $start; $i++ )
+         $result[$i] = interpolate( $result[$start], $result[$start+1],
+            $x_data[$start], $x_data[$i], $x_data[$start+1] );
+   }
+
+   return $result;
+}//calculate_median
 
 ?>

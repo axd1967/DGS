@@ -105,7 +105,10 @@ require_once 'include/form_functions.php';
       $show_time = (int)(bool)@$_REQUEST['show_time'];
       $dyna= floor($NOW/(SECS_PER_HOUR/TICK_FREQUENCY));
       $winpie = (bool)@$_REQUEST['winpie'];
+      $hide_data = (bool)@$_REQUEST['hd'];
       $show_lsq = (bool)@$_REQUEST['lsq'];
+      $show_median3 = (bool)@$_REQUEST['med3'];
+      $show_median5 = (bool)@$_REQUEST['med5'];
       if ( @$_REQUEST['use_form'] ) // NOTE: needed to overwrite db-default b/c unchecked checkbox leads to using default
          $bynumber = (bool)@$_REQUEST['bynumber'];
       else
@@ -115,7 +118,10 @@ require_once 'include/form_functions.php';
          ,($show_time ? URI_AMP.'show_time=1' : '')
          ,($winpie ? URI_AMP.'winpie=1' : '')
          ,($bynumber ? URI_AMP.'bynumber=1' : '')
+         ,($hide_data ? URI_AMP.'hd=1' : '')
          ,($show_lsq ? URI_AMP.'lsq=1' : '')
+         ,($show_median3 ? URI_AMP.'med3=1' : '')
+         ,($show_median5 ? URI_AMP.'med5=1' : '')
          ,URI_AMP,"dyna=$dyna" //force caches refresh
          ,URI_AMP,"startyear=$startyear"
          ,URI_AMP,"startmonth=$startmonth"
@@ -134,23 +140,35 @@ require_once 'include/form_functions.php';
          $years[$y] = $y;
 
       $form->add_row( array(
-            'DESCRIPTION', T_('From#2'),
+            'DESCRIPTION', T_('X-Axis'),
+            // FROM
+            'TEXT', T_('From#2') . ':' . MED_SPACING,
             'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
             'SELECTBOX', 'startyear', 1, $years, $startyear, false,
-            'OWNHTML', '&nbsp;&nbsp;',
-            'DESCRIPTION', T_('To#2'),
+            // TO
+            'TEXT', sptext(T_('To#2') . ': ', 1),
             'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
             'SELECTBOX', 'endyear', 1, $years, $endyear, false,
-            'OWNHTML', '&nbsp;&nbsp;',
+            'TEXT', MED_SPACING,
+            'SUBMITBUTTON', 'submit', T_('Change interval'),
+            'TEXT', MED_SPACING,
+            'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber,
+            // hidden vars (without form-elements)
             'HIDDEN', 'uid', $uid,
             'HIDDEN', 'winpie', $winpie,
             'HIDDEN', 'show_time', $show_time,
             'HIDDEN', 'use_form', 1,
-            'SUBMITBUTTON', 'submit', T_('Change interval'),
-            'TEXT', MED_SPACING,
-            'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber,
+         ));
+
+      $form->add_row( array(
+            'DESCRIPTION', T_('Y-Axis'),
+            'CHECKBOX', 'hd', '1', T_('Hide raw data'), $hide_data,
             'TEXT', MED_SPACING,
             'CHECKBOX', 'lsq', '1', T_('LSQ line'), $show_lsq,
+            'TEXT', MED_SPACING,
+            'CHECKBOX', 'med3', '1', T_('Median-3'), $show_median3,
+            'TEXT', MED_SPACING,
+            'CHECKBOX', 'med5', '1', T_('Median-5'), $show_median5,
          ));
 
       $form->echo_string(1);
