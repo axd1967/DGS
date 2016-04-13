@@ -491,6 +491,7 @@ elseif ( $fdemo == 11 )
       3 => array( 'label' => 'Mysql-Match #3', 'descr' => 'filter to use mysql fulltext-search (no boolean-mode without checkbox) [FC_MATCH_MODE=MATCH_BOOLMODE_OFF]' ),
       4 => array( 'label' => 'Mysql-Match #4', 'descr' => 'filter to use mysql fulltext-search (with query expansion) [FC_MATCH_MODE=MATCH_QUERY_EXPANSION]' ),
       5 => array( 'label' => 'Mysql-Match #5', 'descr' => 'filter to use mysql fulltext-search on several column-fields' ),
+      6 => array( 'label' => 'Mysql-Match #6', 'descr' => 'standard filter to use mysql fulltext-search & with simple query (starting with \'=\')' ),
    );
 
    # standard filter (bool-mode checkbox)
@@ -511,6 +512,10 @@ elseif ( $fdemo == 11 )
    # filter on several column-fields
    $filter->add_filter( 5, 'MysqlMatch', 'match5a,match5b,match5c', true,
          array( FC_MATCH_MODE => MATCH_BOOLMODE_OFF )); # <-- not needed (reducing web-output)
+
+   # standard filter (bool-mode checkbox) & simple-query
+   $filter->add_filter( 6, 'MysqlMatch', 'match6', true,
+         array( FC_SIMPLE_QUERY => 'match6 LIKE #VAL' ));
 }
 
 /* -------------------- (12) Score -----------------------------------------------  */

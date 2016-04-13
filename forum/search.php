@@ -103,7 +103,8 @@ require_once 'include/filterlib_mysqlmatch.php';
    // static filters
    $ffilter = new SearchFilter();
    $ffilter->add_filter( 1, 'Selection', $arr_forum, true);
-   $ffilter->add_filter( 2, 'MysqlMatch', 'Subject,Text', true);
+   $ffilter->add_filter( 2, 'MysqlMatch', 'P.Subject,P.Text', true,
+         array( FC_SIMPLE_QUERY => '(P.Subject LIKE #VAL OR P.Text LIKE #VAL)' ));
    $ffilter->add_filter( 3, 'Text', 'PAuthor.Handle', true,
          array( FC_SIZE => 16 ));
    $ffilter->add_filter( 4, 'Selection',

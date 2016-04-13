@@ -74,6 +74,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Forum:
       * Added "quote"-link in post near "reply" (also to view the RAW-text of a forum post)
+      * Extended forum-search 'terms'-filter with substring-query if prefixed with '='
       * Added contact system-flag to hide forum posts of specific user
       * Increased max. indent level from 15 to 25 for deep forum-threads
 

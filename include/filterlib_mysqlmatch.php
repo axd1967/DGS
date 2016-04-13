@@ -32,6 +32,13 @@ require_once 'include/filter.php';
  */
 define('FC_MATCH_MODE', 'match_mode');
 
+/*!
+ * \brief for MysqlMatch-Filter: allows a simple select-query using LIKE syntax (usage if filter-value starts with '=').
+ * value: SQL-query string that fills in substring-pattern-value after the '=' from the input, e.g. "FIELD LIKE #VAL"
+ *        Example: input '=abcd' -> query-part 'field LIKE '%abcd%'
+ */
+define('FC_SIMPLE_QUERY', 'simple_query');
+
 
 define('MATCH_BOOLMODE_OFF',    'bool_mode_off'); // mysql match: boolean-mode isn't used (ctrl not shown)
 define('MATCH_BOOLMODE_SET',    'bool_mode_set'); // mysql match: boolean-mode is used implicitly (ctrl not shown)
@@ -89,6 +96,7 @@ define('MYSQL_MATCH_STOPWORDS', "a's|able|about|above|according|accordingly|acro
   *                  =MATCH_BOOLMODE_OFF (nothing special),
   *                  =MATCH_BOOLMODE_SET (use bool-mode but no checkbox),
   *                  =MATCH_QUERY_EXPANSION (using query-expansion)
+  *    FC_SIMPLE_QUERY ='' (default),  i.e. simple query not supported
   */
 class FilterMysqlMatch extends Filter
 {
@@ -96,6 +104,8 @@ class FilterMysqlMatch extends Filter
    protected $elem_boolmode;
    /*! \brief clause-part containing MATCH-command. */
    protected $match_query_part = '';
+   /*! \brief clause-part for simple query (prefix '=' with normal SQL-patterns). */
+   protected $simple_query = null;
 
    /*! \brief Constructs MysqlMatch-Filter. */
    public function __construct( $name, $dbfield, $config )
@@ -106,11 +116,22 @@ class FilterMysqlMatch extends Filter
       $this->type = 'MysqlMatch';
       $this->syntax_help = T_('MATCHINDEX#filterhelp');
 
+      $simple_query = $this->get_config(FC_SIMPLE_QUERY);
+      if ( (string)$simple_query == '' )
+         $simple_query = null;
+      $this->simple_query = $simple_query;
+
       $arr_syntax = array();
       $arr_syntax[]= 'word word';
       $match_mode = $this->get_config(FC_MATCH_MODE);
       if ( empty($match_mode) || $match_mode === MATCH_BOOLMODE_SET )
          $arr_syntax[]= '+w -w <w >w ~w (wgroup) w* "literals"';
+      if ( !is_null($this->simple_query) )
+      {
+         $this->tok_config = $this->create_TokenizerConfig();
+         $this->parser_flags |= TEXTPARSER_FORBID_RANGE | TEXTPARSER_ALLOW_START_WILD | TEXTPARSER_IMPLICIT_WILD;
+         $arr_syntax[]= '['. T_('substring#filter') . '] =fa*z';
+      }
       $this->syntax_descr = implode(', ', $arr_syntax);
 
       // setup bool-mode (check-box)
@@ -132,21 +153,33 @@ class FilterMysqlMatch extends Filter
 
       if ( $name === $this->name )
       { // parse terms
-         list( $arr_terms, $arr_stopwords ) =
-            $this->extract_match_terms( $this->value );
-         if ( is_null($arr_terms) )
-            return false; // no terms or error
-
-         // check for stopwords (but continue without error)
-         if ( count($arr_stopwords) > 0 )
+         if ( !is_null($this->simple_query) && substr($val,0,1) == '=' ) // simple query '=str*pattern'
          {
-            $this->warnmsg =
-               sprintf( T_('Can\'t search for stopwords [%s]!'),
-                        implode(', ', $arr_stopwords) );
-         }
+            $q_val = substr($val, 1);
+            if ( !$this->parse_text( $name, $q_val, $this->tok_config, $this->parser_flags ) )
+               return false;
 
-         $this->match_terms = $arr_terms;
-         $this->p_value = $this->value;
+            $this->p_flags |= PFLAG_SPECIAL_QUERY;
+            $this->value = $val; // restore original input with '='-prefix (destroyed by parsing)
+         }
+         else // mysql-match
+         {
+            list( $arr_terms, $arr_stopwords ) =
+               $this->extract_match_terms( $this->value );
+            if ( is_null($arr_terms) )
+               return false; // no terms or error
+
+            // check for stopwords (but continue without error)
+            if ( count($arr_stopwords) > 0 )
+            {
+               $this->warnmsg =
+                  sprintf( T_('Can\'t search for stopwords [%s]!'),
+                           implode(', ', $arr_stopwords) );
+            }
+
+            $this->match_terms = $arr_terms;
+            $this->p_value = $this->value;
+         }
       }
       elseif ( $name === $this->elem_boolmode )
          ; // only var set in values[elem_boolmode]
@@ -164,7 +197,7 @@ class FilterMysqlMatch extends Filter
    public function build_query()
    {
       // check
-      if ( $this->p_value == '' )
+      if ( (string)$this->p_value == '' )
          return;
 
       // build SQL
@@ -174,13 +207,21 @@ class FilterMysqlMatch extends Filter
       $query = $this->build_base_query( $this->dbfield, false, false );
       $fields = $query->get_part(SQLP_FNAMES);
 
-      // note: to get RELEVANCE use query without bool-mode-option,
-      //       see http://dev.mysql.com/doc/refman/4.1/en/fulltext-search.html#c1502
-      $this->match_query_part = "MATCH($fields) AGAINST ( '$valsql' )";
+      if ( $this->p_flags & PFLAG_SPECIAL_QUERY )
+      {
+         $this->query = $this->build_query_text();
+         $this->match_query_part = '1'; // static score
+      }
+      else
+      {
+         // note: to get RELEVANCE use query without bool-mode-option,
+         //       see http://dev.mysql.com/doc/refman/4.1/en/fulltext-search.html#c1502
+         $this->match_query_part = "MATCH($fields) AGAINST ( '$valsql' )";
 
-      $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
-      $query->add_part( $parttype, "MATCH($fields) AGAINST ( '$valsql' $sql_option )" );
-      $this->query = $query;
+         $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
+         $query->add_part( $parttype, "MATCH($fields) AGAINST ( '$valsql' $sql_option )" );
+         $this->query = $query;
+      }
    }//build_query
 
    /*! \brief Returns input-text and optional checkbox form-element below (for handling of boolean-mode). */

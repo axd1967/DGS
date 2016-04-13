@@ -1364,6 +1364,8 @@ abstract class Filter
          $query->add_part( SQLP_FNAMES, $obj );
       elseif ( $this->get_config(FC_SQL_TEMPLATE) )
          $query->add_part( SQLP_WHERETMPL, $obj ); // obj is sql-template
+      elseif ( ($this->p_flags & PFLAG_SPECIAL_QUERY) && ($simple_query = $this->get_config(FC_SIMPLE_QUERY)) )
+         $query->add_part( SQLP_WHERETMPL, $simple_query ); // sql-template from config
       else
       {
          if ( $is_clause )

@@ -49,9 +49,10 @@ define('TEXTPARSER_ALLOW_START_WILD', 0x00004000); // for text-parser: if set, a
 define('TEXTPARSER_END_INCL',         0x00008000); // for text-parser: if not set, make end-range exclusive in the search to build '>' <-> '>='
 define('TEXTPARSER_IMPLICIT_WILD',    0x00010000); // for text-parser: if set, implicit wildcards are added to start and end 'foo' -> '*foo*' (forces TEXTPARSER_FORBID_RANGE and TEXTPARSER_ALLOW_START_WILD)
 
-define('PFLAG_WILDCARD',   0x00000001); // if set, indicates that parsed value contained wildcard
-define('PFLAG_EXCL_START', 0x00000002); // if set, indicates that parsed start-value should use exclusive SQL-comparator
-define('PFLAG_EXCL_END',   0x00000004); // if set, indicates that parsed end-value should use exclusive SQL-comparator
+define('PFLAG_WILDCARD',      0x00000001); // if set, indicates that parsed value contained wildcard
+define('PFLAG_EXCL_START',    0x00000002); // if set, indicates that parsed start-value should use exclusive SQL-comparator
+define('PFLAG_EXCL_END',      0x00000004); // if set, indicates that parsed end-value should use exclusive SQL-comparator
+define('PFLAG_SPECIAL_QUERY', 0x00000008); // if set, indicates that special query-template to be used (is filter specific)
 
 
 
