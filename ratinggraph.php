@@ -155,7 +155,7 @@ require_once 'include/form_functions.php';
             'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
             'SELECTBOX', 'endyear', 1, $years, $endyear, false,
             'TEXT', MED_SPACING,
-            'SUBMITBUTTON', 'submit', T_('Change interval'),
+            'SUBMITBUTTON', 'submit', T_('Show rating graph'),
             'TEXT', MED_SPACING,
             'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber,
             // hidden vars (without form-elements)
@@ -166,9 +166,9 @@ require_once 'include/form_functions.php';
 
       $form->add_row( array(
             'DESCRIPTION', T_('Y-Axis'),
-            'CHECKBOX', 'hd', '1', T_('Hide raw data'), $hide_data,
+            'CHECKBOX', 'hd', '1', T_('Hide rating line'), $hide_data,
             'TEXT', MED_SPACING,
-            'CHECKBOX', 'lsq', '1', textWithTitle(T_('LSQ line'), T_('Least-Square-Line')), $show_lsq,
+            'CHECKBOX', 'lsq', '1', T_('Regression line'), $show_lsq,
             'TEXT', MED_SPACING,
             'CHECKBOX', 'med3', '1', T_('Median-3'), $show_median3,
             'TEXT', MED_SPACING,

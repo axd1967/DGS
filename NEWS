@@ -97,7 +97,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added option in <home edit_profile.php>user-profile</home> to configure to show rating-graph by games,
         default is to show rating-graph by time
       * Added option to hide raw data
-      * Added option to show least-square-line (LSQ), median-3 & median-5 filters
+      * Added option to show regression line, median-3 & median-5 filters
       * Added option to show weighted moving average (WMA) linear & binomial N-tap filter with N=2..25
 
    * <home new_game.php>New game</home>:
