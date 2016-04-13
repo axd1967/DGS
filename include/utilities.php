@@ -389,4 +389,31 @@ function signum( $x )
    return ($x < 0) ? -1 : ($x == 0 ? 0 : 1);
 }
 
+function interpolate( $y1, $y3, $x1, $x2, $x3 )
+{
+   if ( $x1 == $x3 )
+      return $y3;
+   return $y3 + ( $y1 - $y3 ) * ( $x2 - $x3 ) / ( $x1 - $x3 );
+}
+
+function calculate_mean( $arr )
+{
+   return array_sum($arr) / count($arr);
+}
+
+/*!
+ * \brief Returns median of number array.
+ * \param $arr non-null, non-empty array with numbers to find median for
+ */
+function array_median( $arr ) {
+   sort($arr, SORT_NUMERIC);
+
+   $cnt = count($arr);
+   $mid_idx = floor( $cnt / 2 );
+   $median = $arr[$mid_idx];
+   if ( ($cnt & 1) == 0 ) // even number of items
+      $median = ( $median + $arr[$mid_idx - 1] ) / 2;
+   return $median;
+}//array_median
+
 ?>

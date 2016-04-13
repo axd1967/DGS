@@ -56,8 +56,6 @@ define('MAX_WMA_TAPS', 25); // moving average
    $show_by_number = (bool)@$_GET['bynumber']; // x-axis (true=Games, false=Time)
    $hide_raw_data = (bool)@$_GET['hd'];
    $show_lsq = (bool)@$_GET['lsq'];
-   $show_median3 = (bool)@$_GET['med3'];
-   $show_median5 = (bool)@$_GET['med5'];
    $show_wma = (bool)@$_GET['wma'];
    $wma_binomial = (bool)@$_GET['wma_bin']; // binomial | simple
    $wma_taps = (int)@$_GET['wma_taps'];
@@ -97,8 +95,6 @@ define('MAX_WMA_TAPS', 25); // moving average
    $number_color = $gr->getcolor(250, 100, 98);
 
    $lsq_color = $gr->getcolor(0, 0x80, 0);
-   $median3_color = $gr->getcolor(0xa0, 0x38, 0xf8);
-   $median5_color = $gr->getcolor(0, 0, 0xd0);
    $wma_color = $gr->getcolor(0xd0, 0, 0);
 
 
@@ -119,11 +115,6 @@ define('MAX_WMA_TAPS', 25); // moving average
    }
    else
       $has_lsq = false;
-
-   if ( $show_median3 )
-      $rating_median3 = calculate_median( $ratings, 3 );
-   if ( $show_median5 )
-      $rating_median5 = calculate_median( $ratings, 5 );
 
    if ( $show_wma )
    {
@@ -198,11 +189,6 @@ define('MAX_WMA_TAPS', 25); // moving average
 
    if ( !$hide_raw_data )
       $ratings = $gr->mapscaleY($ratings);
-
-   if ( $show_median3 )
-      $rating_median3 = $gr->mapscaleY($rating_median3);
-   if ( $show_median5 )
-      $rating_median5 = $gr->mapscaleY($rating_median5);
 
    if ( $show_wma )
       $rating_wma = $gr->mapscaleY($rating_wma);
@@ -296,11 +282,6 @@ define('MAX_WMA_TAPS', 25); // moving average
 
    if ( !$hide_raw_data )
       $gr->curve($xvals, $ratings, $nr_points, $black);
-
-   if ( $show_median3 )
-      $gr->curve($xvals, $rating_median3, $nr_points, $median3_color);
-   if ( $show_median5 )
-      $gr->curve($xvals, $rating_median5, $nr_points, $median5_color);
 
    if ( $show_wma )
       $gr->curve($xvals, $rating_wma, $nr_points, $wma_color);
@@ -441,30 +422,6 @@ function get_rating_data($uid)
 }//get_rating_data
 
 
-function interpolate( $y1, $y3, $x1, $x2, $x3 )
-{
-   if ( $x1 == $x3 )
-      return $y3;
-   return $y3 + ( $y1 - $y3 ) * ( $x2 - $x3 ) / ( $x1 - $x3 );
-}
-
-function calculate_mean( $arr )
-{
-   return array_sum($arr) / count($arr);
-}
-
-// \param $arr non-null, non-empty array with numbers to find median for
-function array_median( $arr ) {
-   sort($arr, SORT_NUMERIC);
-
-   $cnt = count($arr);
-   $mid_idx = floor( $cnt / 2 );
-   $median = $arr[$mid_idx];
-   if ( ($cnt & 1) == 0 ) // even number of items
-      $median = ( $median + $arr[$mid_idx - 1] ) / 2;
-   return $median;
-}//array_median
-
 
 // formulas taken from https://de.wikipedia.org/wiki/Methode_der_kleinsten_Quadrate#Herleitung_und_Verfahren
 // \return arr( a, b, x0, xLast, y0, yLast ) for linear func(x) := a*x + b
@@ -498,19 +455,6 @@ function calculate_LSQ( $show_by_number, $ratings, $x_data )
 
    return array( $a, $b, $x0, $y0, $xL, $yL );
 }//calculate_LSQ
-
-
-function calculate_median( $ratings, $size )
-{
-   $start = $size - 1;
-   $result = ( $size > 1 ) ? array_fill(0, $start, null) : array();
-   $cnt = count($ratings);
-
-   for ( $i=$start; $i < $cnt; $i++ )
-      $result[] = array_median( array_slice($ratings, $i - $start, $size) );
-
-   return $result;
-}//calculate_median
 
 
 // \param $taps must be > 1

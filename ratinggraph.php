@@ -107,8 +107,6 @@ require_once 'include/form_functions.php';
       $dyna= floor($NOW/(SECS_PER_HOUR/TICK_FREQUENCY));
       $hide_data = (bool)@$_REQUEST['hd'];
       $show_lsq = (bool)@$_REQUEST['lsq'];
-      $show_median3 = (bool)@$_REQUEST['med3'];
-      $show_median5 = (bool)@$_REQUEST['med5'];
       $show_wma = (bool)@$_REQUEST['wma'];
       $wma_binomial = (bool)@$_REQUEST['wma_bin']; // binomial | simple
       $wma_taps = (int)@$_REQUEST['wma_taps'];
@@ -122,8 +120,6 @@ require_once 'include/form_functions.php';
          ,($bynumber ? URI_AMP.'bynumber=1' : '')
          ,($hide_data ? URI_AMP.'hd=1' : '')
          ,($show_lsq ? URI_AMP.'lsq=1' : '')
-         ,($show_median3 ? URI_AMP.'med3=1' : '')
-         ,($show_median5 ? URI_AMP.'med5=1' : '')
          ,($show_wma ? URI_AMP.'wma=1' : '')
          ,($wma_binomial ? URI_AMP.'wma_bin=1' : '')
          ,($wma_taps ? URI_AMP.'wma_taps='.$wma_taps : '')
@@ -169,13 +165,7 @@ require_once 'include/form_functions.php';
             'CHECKBOX', 'hd', '1', T_('Hide rating line'), $hide_data,
             'TEXT', MED_SPACING,
             'CHECKBOX', 'lsq', '1', T_('Regression line'), $show_lsq,
-            'TEXT', MED_SPACING,
-            'CHECKBOX', 'med3', '1', T_('Median-3'), $show_median3,
-            'TEXT', MED_SPACING,
-            'CHECKBOX', 'med5', '1', T_('Median-5'), $show_median5,
-         ));
-      $form->add_row( array(
-            'TAB',
+            'TEXT', SMALL_SPACING.SMALL_SPACING,
             'CHECKBOX', 'wma', '1', textWithTitle(T_('WMA'), T_('Weighted Moving Average')), $show_wma,
             'TEXT', MED_SPACING . '(' . MINI_SPACING,
             'CHECKBOX', 'wma_bin', '1', T_('Binomial'), $wma_binomial,

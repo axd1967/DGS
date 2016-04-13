@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-04-13 jug
+
+   * include/utilities.php (interpolate, calculate_mean, array_median),
+     ratinggraph.php, ratingpng.php:
+   - removed Median-filters from rating-graph
+   - cleanup: refactored some useful methods from ratingpng.php to utilities
+
 ### ----- release-1_19_10-20160412 -----
 
 2016-04-12 jug
