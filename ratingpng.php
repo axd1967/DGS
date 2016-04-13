@@ -27,8 +27,6 @@ require_once 'include/db/ratinglog.php';
 
 // NOTE: always display the number of games played below the dates.
 
-define('MAX_WMA_TAPS', 50); // moving average
-
 
 {
    connect2mysql();
@@ -328,17 +326,13 @@ function get_rating_data($uid)
       exit;
 
    $min_row = mysql_fetch_assoc($result);
+   $max_row = mysql_single_fetch( 'ratingpng.find_min_max_time',
+      "SELECT UNIX_TIMESTAMP(MIN(Time)) AS min_seconds, UNIX_TIMESTAMP(MAX(Time)) AS max_seconds " .
+      "FROM Ratinglog WHERE uid=$uid LIMIT 1" );
 
-   $rating_logs = Ratinglog::load_cache_ratinglogs( $uid ); // ordered by Time
-   $cnt_rating_logs = count($rating_logs);
+   list( $rlog_cached, $cnt_rating_logs, $rlog_result ) = Ratinglog::load_cache_ratinglogs( $uid, 3000 ); // ordered by Time
    if ( $cnt_rating_logs < 1 )
       exit;
-
-   $max_row = array(
-         'min_seconds' => $rating_logs[0]['seconds'],
-         'max_seconds' => $rating_logs[$cnt_rating_logs-1]['seconds'],
-      );
-
 
    // start time with first rated-game, otherwise registration-date
    $min_row['seconds'] = ( @$max_row['min_seconds'] )
@@ -418,7 +412,10 @@ function get_rating_data($uid)
       $number[]= $numbercount;
 
       $tmp = $row;
-   } while ( $row = array_shift($rating_logs) );
+   } while ( $row = ( $rlog_cached ? array_shift($rlog_result) : mysql_fetch_assoc($rlog_result) ) );
+
+   if ( !$rlog_cached )
+      mysql_free_result($rlog_result);
 }//get_rating_data
 
 

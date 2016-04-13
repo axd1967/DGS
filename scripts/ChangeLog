@@ -13,6 +13,12 @@ ChangeLog
 
 2016-04-13 jug
 
+   * include/db/ratinglog.php (Ratinglog.load_cache_ratinglogs),
+     include/globals.php (MAX_WMA_TAPS),
+     ratinggraph.php, ratingpng.php:
+   - do not cache the rating-log for the rating-graph if there are more than 3000 entries
+     as building the array-structure to cache takes too much memory for such users
+
    * opponents.php:
    - exclude opponents from multi-player-games on opponents-page
 

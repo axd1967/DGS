@@ -215,6 +215,9 @@ define('RATING_NONE',  'NONE'); // no rating set
 define('RATING_INIT',  'INIT'); // rating set, but can be changed (no rated games yet)
 define('RATING_RATED', 'RATED'); // rating established (rated game exists)
 
+// rating-graph
+define('MAX_WMA_TAPS', 50); // moving average
+
 // ---------- User stuff ------------------------------------------
 
 // Contacts.SystemFlags (bitmask for database): 16bit

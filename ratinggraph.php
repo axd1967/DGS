@@ -117,6 +117,7 @@ require_once 'include/form_functions.php';
       // defaults
       if ( $wma_taps < 2 )
          $wma_taps = max( 5, (int)(5*$rlog_count/100) );
+      $wma_taps = min( MAX_WMA_TAPS, $wma_taps );
 
       echo "\n<img src=\"ratingpng.php?uid=$uid"
          ,($show_time ? URI_AMP.'show_time=1' : '')

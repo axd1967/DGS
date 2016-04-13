@@ -198,30 +198,43 @@ class Ratinglog
 
    /*!
     * \brief Loads and caches part of Ratinglog-table for given user-id.
-    * \return arr( arr( fields => val, ...), ... ) with rows ordered by Time; empty array = no entries found
+    * \param $max_cache_count if row-count exceeds given $max_cache_count caching will not be done
+    * \return arr( is-cached, entries-count, RESULT ) with data ordered by Time:
+    *       RESULT is array of row-arr( Rating/RatingMin/RatingMax/seconds => val ) if is-cached == true; otherwise
+    *       RESULT is db-result from db_query()-call and client must iterator and close result by itself
+    * \note conditional caching needed, because LIVE-server memory is not enough to cover large rating-row for some users.
     */
-   public static function load_cache_ratinglogs( $uid )
+   public static function load_cache_ratinglogs( $uid, $max_cache_count )
    {
       $uid = (int)$uid;
       $dbgmsg = "Ratinglog::load_cache_ratinglogs($uid)";
       $key = "RLog.$uid";
 
-      $rating_logs = DgsCache::fetch( $dbgmsg, CACHE_GRP_RATINGLOG, $key );
-      if ( is_null($rating_logs) )
+      $data_result = DgsCache::fetch( $dbgmsg, CACHE_GRP_RATINGLOG, $key );
+      if ( is_null($data_result) )
       {
          $result = db_query( $dbgmsg.'.find',
-               "SELECT Rating, RatingMin, RatingMax, UNIX_TIMESTAMP(Time) AS seconds " .
+               "SELECT SQL_CALC_FOUND_ROWS Rating, RatingMin, RatingMax, UNIX_TIMESTAMP(Time) AS seconds " .
                "FROM Ratinglog WHERE uid=$uid ORDER BY Time" );
 
-         $rating_logs = array();
-         while ( $row = mysql_fetch_array( $result ) )
-            $rating_logs[] = $row;
-         mysql_free_result($result);
+         $cnt_rows = mysql_found_rows( $dbgmsg.'.row_count' );
+         if ( $cnt_rows > $max_cache_count )
+         {
+            $data_result = array( false, $cnt_rows, $result );
+         }
+         else
+         {
+            $rating_logs = array();
+            while ( $row = mysql_fetch_array( $result ) )
+               $rating_logs[] = $row;
+            mysql_free_result($result);
 
-         DgsCache::store( $dbgmsg, CACHE_GRP_RATINGLOG, $key, $rating_logs, 15*SECS_PER_MIN );
+            $data_result = array( true, $cnt_rows, $rating_logs );
+            DgsCache::store( $dbgmsg, CACHE_GRP_RATINGLOG, $key, $data_result, 15*SECS_PER_MIN );
+         }
       }
 
-      return $rating_logs;
+      return $data_result;
    }//load_cache_ratinglogs
 
    public static function delete_cache_ratinglogs( $dbgmsg, $uid )
