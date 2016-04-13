@@ -80,7 +80,7 @@ define('CACHE_GRP_TPOOLS', 34);     // 1KB/tourney/user * 1h -> 20 MB ?
 define('CACHE_GRP_COND_MOVES', 35); // 1KB/user/game * 1h -> 10 MB ?
 define('CACHE_GRP_TVISIT', 36); // 1KB/user * 7d -> 20 MB ?
 define('CACHE_GRP_CONT_FP_HIDE', 37); // 0.5KB/user * 3d -> 10 MB ?
-define('CACHE_GRP_RATINGLOG', 38);  // ?KB/user * 15min -> ? MB
+define('CACHE_GRP_RATINGLOG', 38);  // 300KB-1MB/user * 15min -> 20 MB
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
 define('MAX_CACHE_GRP', 38);
 
