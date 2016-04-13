@@ -107,13 +107,16 @@ require_once 'include/form_functions.php';
       $dyna= floor($NOW/(SECS_PER_HOUR/TICK_FREQUENCY));
       $hide_data = (bool)@$_REQUEST['hd'];
       $show_lsq = (bool)@$_REQUEST['lsq'];
-      $show_wma = (bool)@$_REQUEST['wma'];
-      $wma_binomial = (bool)@$_REQUEST['wma_bin']; // binomial | simple
+      $show_wma = (bool)@$_REQUEST['wma']; // weighted moving average
       $wma_taps = (int)@$_REQUEST['wma_taps'];
       if ( @$_REQUEST['use_form'] ) // NOTE: needed to overwrite db-default b/c unchecked checkbox leads to using default
          $bynumber = (bool)@$_REQUEST['bynumber'];
       else
          $bynumber = (bool)get_request_arg('bynumber', ($player_row['UserFlags'] & USERFLAG_RATINGGRAPH_BY_GAMES) );
+
+      // defaults
+      if ( $wma_taps < 2 )
+         $wma_taps = 5;
 
       echo "\n<img src=\"ratingpng.php?uid=$uid"
          ,($show_time ? URI_AMP.'show_time=1' : '')
@@ -121,7 +124,6 @@ require_once 'include/form_functions.php';
          ,($hide_data ? URI_AMP.'hd=1' : '')
          ,($show_lsq ? URI_AMP.'lsq=1' : '')
          ,($show_wma ? URI_AMP.'wma=1' : '')
-         ,($wma_binomial ? URI_AMP.'wma_bin=1' : '')
          ,($wma_taps ? URI_AMP.'wma_taps='.$wma_taps : '')
          ,URI_AMP,"dyna=$dyna" //force caches refresh
          ,URI_AMP,"startyear=$startyear"
@@ -166,12 +168,10 @@ require_once 'include/form_functions.php';
             'TEXT', MED_SPACING,
             'CHECKBOX', 'lsq', '1', T_('Regression line'), $show_lsq,
             'TEXT', SMALL_SPACING.SMALL_SPACING,
-            'CHECKBOX', 'wma', '1', textWithTitle(T_('WMA'), T_('Weighted Moving Average')), $show_wma,
-            'TEXT', MED_SPACING . '(' . MINI_SPACING,
-            'CHECKBOX', 'wma_bin', '1', T_('Binomial'), $wma_binomial,
-            'TEXT', SMALL_SPACING,
-            'TEXTINPUT', 'wma_taps', '4', '3', $wma_taps,
-            'TEXT', T_('taps#ratgraph') . MED_SPACING . ')',
+            'CHECKBOX', 'wma', '1', T_('Moving Average with'), $show_wma,
+            'TEXT', MED_SPACING,
+            'TEXTINPUT', 'wma_taps', '3', '3', $wma_taps,
+            'TEXT', T_('taps#ratgraph'),
          ));
 
       $form->echo_string(1);

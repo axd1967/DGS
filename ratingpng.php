@@ -54,10 +54,9 @@ define('MAX_WMA_TAPS', 25); // moving average
    }
 
    $show_by_number = (bool)@$_GET['bynumber']; // x-axis (true=Games, false=Time)
-   $hide_raw_data = (bool)@$_GET['hd'];
+   $hide_rating_data = (bool)@$_GET['hd'];
    $show_lsq = (bool)@$_GET['lsq'];
-   $show_wma = (bool)@$_GET['wma'];
-   $wma_binomial = (bool)@$_GET['wma_bin']; // binomial | simple
+   $show_wma = (bool)@$_GET['wma']; // weighted moving average
    $wma_taps = (int)@$_GET['wma_taps'];
 
    $starttime = mktime(0,0,0,BEGINMONTH,1,BEGINYEAR);
@@ -125,10 +124,11 @@ define('MAX_WMA_TAPS', 25); // moving average
       if ( $wma_taps > $nr_points - 2 )
          $wma_taps = $nr_points - 2;
 
-      $arr_wma_weights = build_wma_weights( $wma_binomial, $wma_taps );
+      // NOTE: keep weighted-code (perhaps needed later)
+      $wma_simple = true;
+      //$arr_wma_weights = build_wma_weights( false, $wma_taps );
       //error_log("WMA-weights($wma_taps): ".implode(', ', $arr_wma_weights));
-
-      $rating_wma = calculate_wma( $ratings, $arr_wma_weights );
+      $rating_wma = calculate_wma( $ratings, ($wma_simple ? $wma_taps : $arr_wma_weights) );
    }//wma
 
 
@@ -187,7 +187,7 @@ define('MAX_WMA_TAPS', 25); // moving average
    $ratingmax = $gr->mapscaleY($ratingmax);
    $ratingmin = $gr->mapscaleY($ratingmin);
 
-   if ( !$hide_raw_data )
+   if ( !$hide_rating_data )
       $ratings = $gr->mapscaleY($ratings);
 
    if ( $show_wma )
@@ -280,7 +280,7 @@ define('MAX_WMA_TAPS', 25); // moving average
 
    // draw the curves
 
-   if ( !$hide_raw_data )
+   if ( !$hide_rating_data )
       $gr->curve($xvals, $ratings, $nr_points, $black);
 
    if ( $show_wma )
@@ -423,7 +423,7 @@ function get_rating_data($uid)
 
 
 
-// formulas taken from https://de.wikipedia.org/wiki/Methode_der_kleinsten_Quadrate#Herleitung_und_Verfahren
+// regression-line formulas taken from https://de.wikipedia.org/wiki/Methode_der_kleinsten_Quadrate#Herleitung_und_Verfahren
 // \return arr( a, b, x0, xLast, y0, yLast ) for linear func(x) := a*x + b
 function calculate_LSQ( $show_by_number, $ratings, $x_data )
 {
@@ -458,6 +458,7 @@ function calculate_LSQ( $show_by_number, $ratings, $x_data )
 
 
 // \param $taps must be > 1
+// NOTE: keep it even though $binomial is not used for rating-graph
 function build_wma_weights( $binomial, $taps )
 {
    static $PYRAMIDS = array(
@@ -496,17 +497,38 @@ function build_wma_weights( $binomial, $taps )
    return $pyramid;
 }//build_wma_weights
 
-// calculated weighted moving average (simple MA, if weights only contain same values)
+// calculated weighted moving average (simple MA, if $weights only contain same values or $weights is number)
+// \param $weights integer = simple moving average; otherwise array with weights;  there must be at least 2 entries
 function calculate_wma( $ratings, $weights )
 {
-   $size = count($weights);
+   if ( is_array($weights) )
+   {
+      $size = count($weights);
+      $simple_wma = ( count(array_count_values($weights)) == 1 ); // simple if all weights are equal
+   }
+   else
+   {
+      $size = (int)$weights;
+      $simple_wma = true;
+   }
+   if ( $size < 2 )
+      error('invalid_args', "calculate_wma.check_size($size)");
+
    $start = $size - 1;
    $result = ( $size > 1 ) ? array_fill(0, $start, null) : array();
    $cnt = count($ratings);
-   $w_sum = array_sum($weights);
 
-   for ( $i=$start; $i < $cnt; $i++ )
-      $result[] = array_weighted_moving_average( array_slice($ratings, $i - $start, $size), $weights, $size, $w_sum );
+   if ( $simple_wma ) // simple moving average
+   {
+      for ( $i=$start; $i < $cnt; $i++ )
+         $result[] = calculate_mean( array_slice($ratings, $i - $start, $size), $size );
+   }
+   else // weighted moving average
+   {
+      $w_sum = array_sum($weights);
+      for ( $i=$start; $i < $cnt; $i++ )
+         $result[] = array_weighted_moving_average( array_slice($ratings, $i - $start, $size), $weights, $size, $w_sum );
+   }
 
    return $result;
 }//calculate_wma

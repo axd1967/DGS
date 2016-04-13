@@ -96,9 +96,9 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
    * Rating graph:
       * Added option in <home edit_profile.php>user-profile</home> to configure to show rating-graph by games,
         default is to show rating-graph by time
-      * Added option to hide raw data
+      * Added option to hide rating line
       * Added option to show regression line
-      * Added option to show weighted moving average (WMA) linear & binomial N-tap filter with N=2..25
+      * Added option to show simple moving average N-tap filter with N=2..25
 
    * <home new_game.php>New game</home>:
       * Added waiting-room restriction to only accept opponents that user never played before

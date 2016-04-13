@@ -13,6 +13,11 @@ ChangeLog
 
 2016-04-13 jug
 
+   * ratingpng.php (calculate_wma), ratinggraph.php:
+   - removed "binomial" WMA-option on rating-graph only keeping simple moving average
+     - added optimized calculation for simple moving-average
+     - use static 5 as default taps for WMA
+
    * include/utilities.php (interpolate, calculate_mean, array_median),
      ratinggraph.php, ratingpng.php:
    - removed Median-filters from rating-graph
