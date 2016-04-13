@@ -13,6 +13,9 @@ ChangeLog
 
 2016-04-13 jug
 
+   * opponents.php:
+   - exclude opponents from multi-player-games on opponents-page
+
    * include/filterlib_mysqlmatch.php (FC_SIMPLE_QUERY; class FilterMysqlMatch, ~.__construct, ~.build_query),
      include/filter_parser.php (PFLAG_SPECIAL_QUERY),
      include/filter.php (Filter.build_base_query),

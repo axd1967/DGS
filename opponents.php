@@ -251,7 +251,7 @@ define('FSTATVAL_FIN', 2);
    $usform->set_area( 1 );
    $usform->set_layout( FLAYOUT_AREACONF, 1,
       array(
-         'title' => T_('Restrictions on games with opponent'),
+         'title' => T_('Restrictions on games with opponent (without MP-games)'),
          FAC_TABLE => 'id=gameFilter',
       ) );
    $usform->add_row( array(
@@ -263,10 +263,9 @@ define('FSTATVAL_FIN', 2);
          'FILTER',      $usfilter, 2 ));
    $usform->add_row( array(
          'DESCRIPTION', T_('Status'),
-         'FILTER',      $usfilter, 4, ));
-   $usform->add_row( array(
-         'TAB',
-         'TEXT', span('smaller', sprintf('(%s; %s)', T_('full stats only for finished games'), T_('without MP-games')) )) );
+         'FILTER',      $usfilter, 4,
+         'TEXT',        span('smaller', T_('full stats only for finished games'), '(%s)'),
+         ));
    $usform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
@@ -304,6 +303,7 @@ define('FSTATVAL_FIN', 2);
       'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU',
       'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
    $uqsql->add_part( SQLP_FROM, 'Players AS P' );
+   $uqsql->add_part( SQLP_WHERE, "G.GameType='".GAMETYPE_GO."'" );
    if ( !$opp )
    {
       $uqsql->add_part( SQLP_FIELDS,

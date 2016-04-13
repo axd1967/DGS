@@ -88,8 +88,10 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * <home userinfo.php>User info page</home>, <home users.php>Users list</home>, <home opponents.php>Opponents list</home>, Waiting room info page:
       * Added number of started and finished games with specific opponent
+
       * On <home opponents.php>Opponents list page</home> show table-icon linked to running and finished games
         only if user has such games with opponent
+      * Excluded opponents from multi-player-games on <home opponents.php>Opponents list page</home>
 
    * User profile:
       * Added <home edit_email.php>email-notification</home> option to collect notification-entries by last-notified time
