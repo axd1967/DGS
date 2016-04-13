@@ -463,7 +463,7 @@ class SearchFilter
                      $qvalue = $this->get_saved_arg( $fname, $use_prefix_field ); // string | array
 
                   // reset to default, if no value and in init-state
-                  if ( $qvalue == '' && !$this->is_init && !$need_clear )
+                  if ( (string)$qvalue == '' && !$this->is_init && !$need_clear )
                      $qvalue = null;
 
                   if ( is_array($qvalue) && !$filter->get_config(FC_MULTIPLE) )
@@ -720,7 +720,7 @@ class SearchFilter
             $fquery->merge( $merge_qsql );
 
          $groupname = $filter->get_config(FC_GROUP_SQL_OR);
-         if ( $groupname == '' )
+         if ( empty($groupname) )
          { // collect queries without OR-grouping
             $arr_query[]= $fquery;
          }
@@ -1024,7 +1024,7 @@ class SearchFilter
 
          $filter = $this->get_filter($id);
          $qstr = $filter->get_url_parts( $this->Prefix, $arr_parts );
-         if ( $qstr != '' )
+         if ( (string)$qstr != '' )
             $arr_url[]= $qstr; // qstr may contain >1 URL-parts
       }
 
@@ -1257,7 +1257,7 @@ abstract class Filter
 
       // init config before reading it
       $name = $this->get_config(FC_FNAME);
-      $this->name = ( $name != '') ? $name : PFX_FILTER . $id;
+      $this->name = ( empty($name) ) ? PFX_FILTER . $id : $name;
       $this->elem_names = array( $this->name );
       $this->read_defaults( $this->get_config(FC_DEFAULT) );
 
@@ -1317,7 +1317,7 @@ abstract class Filter
    protected function create_TokenizerConfig()
    {
       $qtype = $this->get_config(FC_QUOTETYPE);
-      if ( $qtype == '' )
+      if ( (string)$qtype == '' )
          $qtype = null;
       $tokconf = createTokenizerConfig( $qtype ); // defined in filter_functions.php
       return $tokconf;
@@ -1407,7 +1407,7 @@ abstract class Filter
    /*! \brief Adds additional non-empty element-name (without prefix); used for multi-element-filters. */
    protected function add_element_name( $name )
    {
-      if ( $name != '' )
+      if ( $name )
          $this->elem_names[]= $name;
    }
 
@@ -1532,7 +1532,7 @@ abstract class Filter
     * \note name may be prefixed with PFX_FILTER if no FC_FNAME set
     */
    public function get_value( $name = '' ) {
-      if ( $name == '' || $name === $this->name || $name === $this->id )
+      if ( empty($name) || $name === $this->name || $name === $this->id )
          return $this->value;
       else
          return @$this->values[$name];
@@ -1540,7 +1540,7 @@ abstract class Filter
 
    /*! \brief Returns true, if value empty or null. */
    public function is_empty() {
-      return (is_null($this->value) || $this->value == '');
+      return ( is_null($this->value) || (string)$this->value == '' );
    }
 
 
@@ -1593,11 +1593,11 @@ abstract class Filter
       if ( isset($this->syntax_descr) && !is_null($this->syntax_descr) )
       {
          $addinfo = $this->get_syntax_hint(FCV_SYNHINT_ADDINFO, " (%s)" );
-         if ( $this->syntax_descr == '' && $addinfo == '' )
+         if ( (string)$this->syntax_descr == '' && (string)$addinfo == '' )
             return '';
 
          $syntax = T_('Syntax#filter') . $this->get_syntax_help() . $addinfo;
-         if ( $this->syntax_descr != '' )
+         if ( (string)$this->syntax_descr != '' )
             $syntax .= ': ' . $this->syntax_descr;
          return $syntax;
       }
@@ -1619,12 +1619,9 @@ abstract class Filter
    public function get_syntax_help()
    {
       $help = $this->get_config(FC_SYNTAX_HELP);
-      if ( $help == '' )
+      if ( (string)$help == '' )
          $help = $this->syntax_help;
-      if ( $help != '' )
-         return "[$help]";
-      else
-         return '';
+      return ( (string)$help != '' ) ? "[$help]" : '';
    }//get_syntax_help
 
    /*!
@@ -1724,7 +1721,7 @@ abstract class Filter
     */
    protected function init_parse( $val, $name = '' )
    {
-      if ( $name == '' || $name === $this->name || $name == $this->id )
+      if ( empty($name) || $name === $this->name || $name == $this->id )
       {
          $this->value = $val;
          $this->errormsg = '';
@@ -1737,7 +1734,7 @@ abstract class Filter
          $this->query = NULL;
          $this->match_terms = array();
       }
-      elseif ( $name != '' ) // multi-element-filter
+      elseif ( $name ) // multi-element-filter
       {
          $this->values[$name] = $val;
       }
@@ -1927,7 +1924,7 @@ abstract class Filter
       if ( $size )
          $elem .= " size=\"{$size}\"";
       $elem .= " value=" . attb_quote($value);
-      if ( $title != '' )
+      if ( (string)$title != '' )
          $elem .= " title=" . attb_quote($title);
       $elem .= ">";
       return $elem;
@@ -2710,7 +2707,7 @@ class FilterRelativeDate extends Filter
       if ( $name === $this->name )
       {
          $v = preg_replace( "/\\s+/", "", $val); // remove all spaces
-         if ( $v == '' )
+         if ( (string)$v == '' )
             return true;
 
          // note: expecting elem_tu parsed first (reached by overloading get_element_names-method)
@@ -2757,7 +2754,7 @@ class FilterRelativeDate extends Filter
       elseif ( $name === $this->elem_tu )
       {
          // set default (days) or else first list-item
-         if ( $val == '' )
+         if ( (string)$val == '' )
             $this->values[$this->elem_tu] =
                ( $this->get_config(FC_TIME_UNITS) & FRDTU_DAY ) ? FRDTU_DAY : $this->time_units[0];
       }
@@ -2774,7 +2771,7 @@ class FilterRelativeDate extends Filter
    public function build_query()
    {
       // check for parsed-value
-      if ( $this->p_value == '' )
+      if ( (string)$this->p_value == '' )
          return;
 
       if ( $this->values[$this->elem_tu] == FRDTU_ABS )
@@ -3287,7 +3284,7 @@ class FilterScore extends Filter
          return;
       if ( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
-         if ( $this->p_value == '' && $this->p_start == '' && $this->p_end == '' )
+         if ( (string)$this->p_value == '' && (string)$this->p_start == '' && (string)$this->p_end == '' )
          {
             // use default to search for scoring without time + resignation
             $this->p_flags |= PFLAG_EXCL_START | PFLAG_EXCL_END;
@@ -3432,7 +3429,7 @@ class FilterCheckboxArray extends Filter
       $this->check_forbid_sql_template( 1 );
 
       $this->choices = $this->get_config(FC_MULTIPLE);
-      if ( $this->choices == '' )
+      if ( (string)$this->choices == '' )
          error('invalid_filter', "FilterCheckboxArray.construct.miss_FC_MULTIPLE({$this->id})");
       if ( !is_array($this->choices) )
          error('invalid_filter', "FilterCheckboxArray.construct.expect_array_FC_MULTIPLE({$this->id})");
