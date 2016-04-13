@@ -132,6 +132,13 @@ define('FC_START_WILD', 'start_wild');
 define('FC_SUBSTRING', 'substring');
 
 /*!
+ * \brief for MysqlMatch-Filter: allows a simple select-query using LIKE syntax (usage if filter-value starts with '=').
+ * value: SQL-query string that fills in substring-pattern-value after the '=' from the input, e.g. "FIELD LIKE #VAL"
+ *        Example: input '=abcd' -> query-part 'field LIKE '%abcd%'
+ */
+define('FC_SIMPLE_QUERY', 'simple_query');
+
+/*!
  * \brief for RelativeDate-Filter: selection of time-units to be shown in selectbox,
  *        values can be OR'ed together (e.g. FRDTU_ABS | FRDTU_DHM ).
  * values:  FRDTU_ABS  - also allow absolute dates like in Date-Filter, \see FilterDate

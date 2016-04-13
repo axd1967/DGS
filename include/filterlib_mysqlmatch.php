@@ -32,13 +32,6 @@ require_once 'include/filter.php';
  */
 define('FC_MATCH_MODE', 'match_mode');
 
-/*!
- * \brief for MysqlMatch-Filter: allows a simple select-query using LIKE syntax (usage if filter-value starts with '=').
- * value: SQL-query string that fills in substring-pattern-value after the '=' from the input, e.g. "FIELD LIKE #VAL"
- *        Example: input '=abcd' -> query-part 'field LIKE '%abcd%'
- */
-define('FC_SIMPLE_QUERY', 'simple_query');
-
 
 define('MATCH_BOOLMODE_OFF',    'bool_mode_off'); // mysql match: boolean-mode isn't used (ctrl not shown)
 define('MATCH_BOOLMODE_SET',    'bool_mode_set'); // mysql match: boolean-mode is used implicitly (ctrl not shown)
