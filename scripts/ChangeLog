@@ -14,9 +14,12 @@ ChangeLog
 2016-04-13 jug
 
    * ratingpng.php (calculate_wma), ratinggraph.php:
-   - removed "binomial" WMA-option on rating-graph only keeping simple moving average
+   - changed rating-graph:
+     - removed "binomial" WMA-option on rating-graph only keeping simple moving average
+     - centered moving-average on x-axis
+     - use default of 5% of existing rated games as tap setting, but at least 5
+     - increased max taps 25 -> 50
      - added optimized calculation for simple moving-average
-     - use static 5 as default taps for WMA
 
    * include/utilities.php (interpolate, calculate_mean, array_median),
      ratinggraph.php, ratingpng.php:

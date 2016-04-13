@@ -116,7 +116,7 @@ require_once 'include/form_functions.php';
 
       // defaults
       if ( $wma_taps < 2 )
-         $wma_taps = 5;
+         $wma_taps = max( 5, (int)(5*$rlog_count/100) );
 
       echo "\n<img src=\"ratingpng.php?uid=$uid"
          ,($show_time ? URI_AMP.'show_time=1' : '')
@@ -153,7 +153,7 @@ require_once 'include/form_functions.php';
             'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
             'SELECTBOX', 'endyear', 1, $years, $endyear, false,
             'TEXT', MED_SPACING,
-            'SUBMITBUTTON', 'submit', T_('Show rating graph'),
+            'SUBMITBUTTON', 'submit', T_('Update rating graph'),
             'TEXT', MED_SPACING,
             'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber,
             // hidden vars (without form-elements)

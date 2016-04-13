@@ -27,7 +27,7 @@ require_once 'include/db/ratinglog.php';
 
 // NOTE: always display the number of games played below the dates.
 
-define('MAX_WMA_TAPS', 25); // moving average
+define('MAX_WMA_TAPS', 50); // moving average
 
 
 {
@@ -515,7 +515,7 @@ function calculate_wma( $ratings, $weights )
       error('invalid_args', "calculate_wma.check_size($size)");
 
    $start = $size - 1;
-   $result = ( $size > 1 ) ? array_fill(0, $start, null) : array();
+   $result = ( $size > 1 ) ? array_fill(0, round($start/2), null) : array();
    $cnt = count($ratings);
 
    if ( $simple_wma ) // simple moving average
@@ -529,6 +529,10 @@ function calculate_wma( $ratings, $weights )
       for ( $i=$start; $i < $cnt; $i++ )
          $result[] = array_weighted_moving_average( array_slice($ratings, $i - $start, $size), $weights, $size, $w_sum );
    }
+
+   $rcnt = $cnt - count($result);
+   for ( $i=0; $i < $rcnt; $i++ )
+      $result[] = null;
 
    return $result;
 }//calculate_wma

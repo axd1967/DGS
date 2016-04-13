@@ -98,7 +98,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
         default is to show rating-graph by time
       * Added option to hide rating line
       * Added option to show regression line
-      * Added option to show simple moving average N-tap filter with N=2..25
+      * Added option to show simple moving average N-tap filter with N=2..50 and default with 5% of existing data points
 
    * <home new_game.php>New game</home>:
       * Added waiting-room restriction to only accept opponents that user never played before
