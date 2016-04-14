@@ -226,6 +226,7 @@ Description:
      annulled games can not be deleted (needed for tournament-game-admin)
    - 0x0010 = AttachedSgf: indicates that there at least one SGF is attached to game
    - 0x0020 = NoResult: indicates game-result was NO-RESULT (set by game-admin)
+   - 0x0040 = SecretMsg: one of the game-messages contain a secret message ("<m>...</m>")
 
 * Score : score of game for finished game
    - 0 = jigo, or no-result (=void, then additionally GAMEFLAGS_NO_RESULT set in Games.Flags)

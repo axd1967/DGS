@@ -29,6 +29,7 @@ require_once 'DeprecatedGameSetupTest.php';
 require_once 'EntityDataTest.php';
 require_once 'EntityTest.php';
 require_once 'GameAddTimeTest.php';
+require_once 'GameCommentHelperTest.php';
 require_once 'GameSettingsTest.php';
 require_once 'GameSetupTest.php';
 require_once 'GameSgfParserTest.php';
@@ -62,6 +63,7 @@ class AllTests
             'EntityDataTest',
             'EntityTest',
             'GameAddTimeTest',
+            'GameCommentHelperTest',
             'GameSettingsTest',
             'GameSetupTest',
             'GameSgfParserTest',

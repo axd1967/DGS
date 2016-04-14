@@ -311,6 +311,8 @@ class Games
          $arr[] = 'Ko';
       if ( $flags & GAMEFLAGS_HIDDEN_MSG )
          $arr[] = 'HiddenMsg';
+      if ( $flags & GAMEFLAGS_SECRET_MSG )
+         $arr[] = 'SecretMsg';
       if ( $flags & GAMEFLAGS_ADMIN_RESULT )
          $arr[] = 'AdmResult';
       if ( $flags & GAMEFLAGS_TG_DETACHED )

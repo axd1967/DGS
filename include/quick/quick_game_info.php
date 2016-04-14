@@ -117,6 +117,8 @@ class QuickHandlerGameInfo extends QuickHandler
       $out = array();
       if ( $flags & GAMEFLAGS_HIDDEN_MSG )
          $out[] = 'HIDDENMSG';
+      if ( $flags & GAMEFLAGS_SECRET_MSG )
+         $out[] = 'SECRETMSG';
       if ( $flags & GAMEFLAGS_ADMIN_RESULT )
          $out[] = 'ADMRESULT';
       if ( $flags & GAMEFLAGS_TG_DETACHED )

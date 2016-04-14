@@ -185,7 +185,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    //Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
    $gfilter->add_filter( 1, 'Numeric', 'G.ID', true, array( FC_SIZE => 8 ) );
    if ( $finished && !$all ) //FU
-      $gfilter->add_filter(41, 'Boolean', 'G.Flags>0 AND (G.Flags & '.GAMEFLAGS_HIDDEN_MSG.')', true );
+      $gfilter->add_filter(41, 'Boolean', 'G.Flags>0 AND (G.Flags & ('.GAMEFLAGS_HIDDEN_MSG.'|'.GAMEFLAGS_SECRET_MSG.')', true );
    $gfilter->add_filter(47, 'Boolean', 'G.Flags>0 AND (G.Flags & '.GAMEFLAGS_ATTACHED_SGF.')', true,
       array( FC_FNAME => 'sgfs' ) );
    if ( ALLOW_TOURNAMENTS )
@@ -824,8 +824,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
                   $row_arr[38] = ( $userRatingDiff > 0 ? '+' : '' ) . sprintf( "%0.2f", $userRatingDiff / 100 );
             }
 
-            if ( $gtable->Is_Column_Displayed[41] && ($Flags & GAMEFLAGS_HIDDEN_MSG) )
-               $row_arr[41] = echo_image_gamecomment($ID);
+            if ( $gtable->Is_Column_Displayed[41] && ($Flags & (GAMEFLAGS_HIDDEN_MSG|GAMEFLAGS_SECRET_MSG)) )
+               $row_arr[41] = echo_image_gamecomment($ID, ($Flags & GAMEFLAGS_HIDDEN_MSG), ($Flags & GAMEFLAGS_SECRET_MSG) );
          }
          else //RU
          {

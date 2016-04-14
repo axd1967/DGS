@@ -788,7 +788,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
          if ( $preview )
          {
-            $preview_msg = make_html_safe( $message, 'gameh' );
+            $preview_msg = make_html_safe( $message, 'gamehs' );
             $preview_msg = MarkupHandlerGoban::replace_igoban_tags( $preview_msg );
             $TheBoard->draw_move_message( $preview_msg, T_('Preview').':' );
          }
@@ -841,8 +841,11 @@ $GLOBALS['ThePage'] = new Page('Game');
                         'target' => FRIENDLY_SHORT_NAME.'_game_comments',
                         'class' => 'NoPrint' ));
    }
-   if ( $Status == GAME_STATUS_FINISHED && ($Flags & GAMEFLAGS_HIDDEN_MSG) )
-      echo MED_SPACING . echo_image_gamecomment( $gid );
+   if ( $Status == GAME_STATUS_FINISHED && ($Flags & (GAMEFLAGS_HIDDEN_MSG|GAMEFLAGS_SECRET_MSG) ) )
+   {
+      echo MED_SPACING . echo_image_gamecomment( $gid,
+            ($Flags & GAMEFLAGS_HIDDEN_MSG), $my_mpgame && ($Flags & GAMEFLAGS_SECRET_MSG) );
+   }
    if ( $enable_game_viewer ) //TODO remove/replace later
    {
       $cmd = ($show_game_tools) ? 'off' : 'on';

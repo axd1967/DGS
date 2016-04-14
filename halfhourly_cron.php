@@ -21,6 +21,7 @@ require_once 'include/std_functions.php';
 require_once 'include/std_classes.php';
 require_once 'include/mail_functions.php';
 require_once 'include/board.php';
+require_once 'include/game_comments.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -264,8 +265,9 @@ if ( !$is_down )
                   if ( !$TheBoard->load_from_db($game_row, 0, BOARDOPT_MARK_DEAD|BOARDOPT_LOAD_LAST_MSG|BOARDOPT_STOP_ON_FIX) )
                      error('internal_error', "halfhourly_cron.game.load_from_db($gid,$uid)");
 
-                  // remove hidden tags, strip away <c>-tags but keeping surrounded text
-                  $movemsg = remove_hidden_game_tags( $TheBoard->movemsg );
+                  // remove hidden & secret tags, strip away <c>-tags but keeping surrounded text
+                  $movemsg = GameCommentHelper::remove_hidden_game_tags( $TheBoard->movemsg );
+                  $movemsg = GameCommentHelper::remove_secret_game_tags( $movemsg );
                   $movemsg = trim( preg_replace( "'(<c(omment)?\\s*>(.*?)</c(omment)?\\s*>)'is", "\\3\n", $movemsg ) );
                   $movemsg = mail_strip_html($movemsg);
                   $msg .= $TheBoard->draw_ascii_board($movemsg) . "\n";

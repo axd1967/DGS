@@ -65,6 +65,8 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
    Minor changes:
 
    * Markup tags and Images:
+      * &lt;mysecret>text&lt;/mysecret> or &lt;m>text&lt;/m> : show text only to author during game,
+        show it to opponents only after the game finished, and never show it to observers
       * &lt;feature id> : showing link to corresponding feature
       * &lt;bgcolor col> : showing text with background-color
       * http(s)://URL : create auto-link without using DGS-tagging &lt;...>

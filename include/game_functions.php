@@ -2477,6 +2477,9 @@ class GameNotify
          : '';
       $obs_info_text = $info_text;
 
+      if ( $this->game_flags & GAMEFLAGS_SECRET_MSG )
+         $info_text .= "<p><b>Info:</b> The game has secret comments!";
+
       if ( $action_by == ACTBY_ADMIN && $this->game_no_result )
          $info_text .= "<p><b>Info:</b> The game was changed to unrated, " .
             "because it was ended with NO-RESULT by a game admin!";

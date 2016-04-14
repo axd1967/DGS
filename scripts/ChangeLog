@@ -11,6 +11,33 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-04-15 jug
+
+   * include/game_comments.php (class GameCommentHelper, ~.__construct, ~.filter_comment,
+       ~.game_tag_filter, ~.remove_hidden_game_tags, ~.remove_secret_game_tags),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.convertGameFlags),
+     include/game_actions.php (GameActionHelper.set_game_move_message),
+     include/std_functions.php ($html_code_closed; make_html_safe),
+     include/game_functions.php (GameNotify.get_text_game_result),
+     include/globals.php (CSS_VERSION, GAMEFLAGS_SECRET_MSG),
+     include/gui_functions.php (echo_image_gamecomment),
+     include/db/games.php (Games.buildFlags),
+     scripts/tests/GameCommentHelperTest.php, scripts/tests/AllTests.php,
+     specs/db/table-Games.txt, specs/quick_suite.txt, skins/dragon/screen.css,
+     halfhourly_cron.php, show_games.php, game.php:
+   - added game-tag <m>text</m> or <mysecret>text</mysecret> for private game-comments
+     even after game finished
+     - text surrounded by <m>text</m> in game-comments will be only visible to author,
+       be revealed to all opponents after the game finished, and never be visible to observers
+     - display secret-text in darkred color in web-interface
+     - set GAMEFLAGS_SECRET_MSG on game if player submits game-comment with secret message-text
+     - include SECRETMSG in quick-suite game-handler on 'info'-command 'flags'-field
+     - show game-comments icon on games-list also if there are secret-messages
+       with tooltip showing the difference to hidden comments
+     - simplified GameCommentHelper::filter_comment()-code for std-game & MP-games
+     - refactored methods game_tag_filter(), remove_hidden_game_tags() into GameCommentHelper-class
+     - include info about existence of secret-messages in game-result message for players only
+
 2016-04-14 jug
 
    * tournaments/edit_tournament.php, tournaments/edit_rules.php:

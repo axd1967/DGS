@@ -366,16 +366,19 @@ function echo_image_tournament_info( $tid, $tourney_title='', $with_sep=false, $
 }//echo_image_tournament_info
 
 /*!
- * \brief Returns image indicating that game have hidden game-comments for given game-id.
+ * \brief Returns image indicating that game have hidden or secret game-comments for given game-id.
  * \param $gid maybe 0 for shape-info
- * \param $hidden_comments true (for default text), or text to be used
+ * \param $hidden_comments true = game has hidden comments
+ * \param $secret_comments true = game has secret comments
  */
-function echo_image_gamecomment( $gid, $hidden_comments=true )
+function echo_image_gamecomment( $gid, $hidden_comments=true, $secret_comments=false )
 {
    global $base_path;
    $arr = array();
    if ( $hidden_comments )
-      $arr[] = ($hidden_comments === true) ? T_('Game has hidden comments') : $hidden_comments;
+      $arr[] = T_('Game has hidden comments');
+   if ( $secret_comments )
+      $arr[] = T_('Game has secret comments');
    return image( $base_path.'images/game_comment.gif', implode(', ', $arr), null, 'class="InTextImage"');
 }
 

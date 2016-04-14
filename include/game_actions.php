@@ -272,7 +272,7 @@ class GameActionHelper
 
    /*!
     * \brief Strips away empty comments from message, replace move-tag and
-    *    set game-flags if there are embedded hidden messages.
+    *    set game-flags if there are embedded hidden or secret messages.
     */
    public function set_game_move_message( $message_raw )
    {
@@ -285,8 +285,13 @@ class GameActionHelper
 
       $this->message = replace_move_tag( $this->message_raw, $this->gid );
 
-      if ( $this->message && preg_match( "#</?h(idden)?>#is", $this->message) )
-         $this->game_row['Flags'] |= GAMEFLAGS_HIDDEN_MSG;
+      if ( $this->message )
+      {
+         if ( preg_match( "#</?h(idden)?>#is", $this->message) )
+            $this->game_row['Flags'] |= GAMEFLAGS_HIDDEN_MSG;
+         if ( preg_match( "#</?m(ysecret)?>#is", $this->message) )
+            $this->game_row['Flags'] |= GAMEFLAGS_SECRET_MSG;
+      }
    }//prepare_game_move_message
 
 

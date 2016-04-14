@@ -1725,7 +1725,7 @@ global $html_code_closed; //PHP5
 $html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|strike|color|bgcolor|';
 $html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'];
 $html_code_closed['msg']  = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
-$html_code_closed['game'] = '|h|hidden|c|comment'.$html_code_closed['msg'];
+$html_code_closed['game'] = '|h|hidden|c|comment|m|mysecret'.$html_code_closed['msg'];
 $html_code_closed['faq']  = $html_code_closed['msg']; //minimum closed check
 
 // ** no '|' at ends:
@@ -2125,59 +2125,64 @@ $html_safe_preg = array(
  *  false: no tags at all, except the marked terms
  *  true:  same as 'msg'
  *  'cell', 'line', 'msg', 'game' or 'faq': see $html_code[]
- *  'game': format public comment tags (<c> + <comment>): <c>..</c> -> <span class=GameTagC>..</span>,
- *          remove hidden comments
- *  'gameh': format public (like 'game' but keep hidden comments),
- *           format hidden comment tags (<h> + <hidden>): <h>..</h> -> <span class=GameTagH>..</span>
+ *  'game':   SHOW public (<c>), HIDE hidden (<h>), HIDE secret (<m>) comments
+ *  'gameh':  SHOW public (<c>), SHOW hidden (<h>), HIDE secret (<m>) comments
+ *  'gamehs': SHOW public (<c>), SHOW hidden (<h>), SHOW secret (<m>) comments
+ *
  * $mark_terms: see parse_html_safe().
  **/
 function make_html_safe( $msg, $some_html=false, $mark_terms='')
 {
+   static $GAME_MODES = array( 'gameh' => 1, 'gamehs' => 2 );
+
    if ( $some_html )
    {
       // make sure the <, > replacements: ALLOWED_LT, ALLOWED_GT are removed from the string
       $msg= reverse_allowed( $msg);
 
-      switch ( (string)$some_html )
-      {
-         case 'gameh':
-            $gameh = 1 ;
-            $some_html = 'game';
-            break;
-
-         default:
-            $some_html = 'msg'; //historical default for $some_html == true
-         case 'msg':
-         case 'cell':
-         case 'game':
-         case 'faq':
-            $gameh = 0 ;
-            break;
-      }
+      $game_mode = (int)@$GAME_MODES[$some_html];
+      if ( $game_mode ) // gameh, gamehs
+         $some_html = 'game';
+      else if ( !preg_match("/^(cell|faq|game|msg)$/", $some_html) )
+         $some_html = 'msg'; // historical default for $some_html == true
 
       // regular (and extended) allowed html tags check
       $msg = parse_html_safe( $msg, $some_html, $mark_terms) ;
-
 
       // formats legal html code
       if ( $some_html == 'game' )
       {
          $tmp = "<\\1>"; // "<\\1>"=show tag, ""=hide tag, "\\0"=html error
-         if ( $gameh ) // show hidden sgf comments
+
+         if ( $game_mode == 0 || $game_mode == 1 ) // remove secret comments
+         {
+            $msg = trim(preg_replace(
+               '%'.ALLOWED_LT.'m(ysecret)? *'.ALLOWED_GT.'(.*?)'.ALLOWED_LT.'/m(ysecret)? *'.ALLOWED_GT.'%is',
+               '', $msg));
+         }
+         if ( $game_mode == 0 ) // remove hidden comments
+         {
+            $msg = trim(preg_replace(
+               '%'.ALLOWED_LT.'h(idden)? *'.ALLOWED_GT.'(.*?)'.ALLOWED_LT.'/h(idden)? *'.ALLOWED_GT.'%is',
+               '', $msg));
+         }
+
+         if ( $game_mode == 2 ) // show secret comments
+         {
+            $msg = preg_replace('%'.ALLOWED_LT.'(m(ysecret)?) *'.ALLOWED_GT.'%i',
+                     ALLOWED_LT."span class=GameTagM".ALLOWED_GT.$tmp, $msg);
+            $msg = preg_replace('%'.ALLOWED_LT.'(/m(ysecret)?) *'.ALLOWED_GT.'%i',
+                     $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
+         }
+         if ( $game_mode == 1 || $game_mode == 2 ) // show hidden comments
          {
             $msg = preg_replace('%'.ALLOWED_LT.'(h(idden)?) *'.ALLOWED_GT.'%i',
                      ALLOWED_LT."span class=GameTagH".ALLOWED_GT.$tmp, $msg);
             $msg = preg_replace('%'.ALLOWED_LT.'(/h(idden)?) *'.ALLOWED_GT.'%i',
                      $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
          }
-         else // hide hidden sgf comments
-         {
-            $msg = trim(preg_replace(
-                  '%'.ALLOWED_LT.'h(idden)? *'.ALLOWED_GT.'(.*?)'.ALLOWED_LT.'/h(idden)? *'.ALLOWED_GT.'%is',
-                  '', $msg));
-         }
 
-
+         // format public <c> comments
          $msg = preg_replace('%'.ALLOWED_LT.'(c(omment)?) *'.ALLOWED_GT.'%i',
                   ALLOWED_LT.'span class=GameTagC'.ALLOWED_GT.$tmp, $msg);
          $msg = preg_replace('%'.ALLOWED_LT.'(/c(omment)?) *'.ALLOWED_GT.'%i',
@@ -2233,46 +2238,6 @@ function textarea_safe( $msg, $charenc=false)
    $msg = preg_replace( '/(&amp;)(?=#[0-9]+;)/is', '&', $msg);
    return $msg;
 }
-
-// removes hidden comment tags and included text
-function remove_hidden_game_tags( $msg )
-{
-   return trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg));
-}
-
-// keeps and trims the parts readable by an observer, removing private comments (the text outside of <c> and <h> tags)
-// param $includeTags if false also removes the <c>/<h>-tags itself keeping only the surrounded text
-//
-// NOTE: $includeTags==false MUST NOT be used to format HTML, because then style-applying is impossible with the tags gone
-function game_tag_filter( $msg, $includeTags=true )
-{
-   if ( $includeTags )
-   {
-      $idx_c = 1;
-      $idx_h = 5;
-   }
-   else
-   {
-      $idx_c = 3;
-      $idx_h = 7;
-   }
-
-   $nr_matches = preg_match_all(
-         "%(<c(omment)? *>(.*?)</c(omment)? *>)".
-         "|(<h(idden)? *>(.*?)</h(idden)? *>)%is"
-         , $msg, $matches );
-   $str = '';
-   for ($i=0; $i<$nr_matches; $i++)
-   {
-      $msg = trim($matches[$idx_c][$i]);
-      if ( (string)$msg == '' )
-         $msg = trim($matches[$idx_h][$i]);
-      if ( (string)$msg != '' )
-         $str .= "\n" . $msg ;
-   }
-   return trim($str);
-}
-
 
 function yesno( $yes)
 {
