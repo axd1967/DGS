@@ -11,6 +11,12 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-04-14 jug
+
+   * tournaments/edit_tournament.php, tournaments/edit_rules.php:
+   - bugfix: tournament-admin could not edit admin-edit-director-allowed manager-pages any longer
+     if not a director himself
+
 2016-04-13 jug
 
    * include/db/ratinglog.php (Ratinglog.load_cache_ratinglogs),
@@ -22,7 +28,8 @@ ChangeLog
    * opponents.php:
    - exclude opponents from multi-player-games on opponents-page
 
-   * include/filterlib_mysqlmatch.php (FC_SIMPLE_QUERY; class FilterMysqlMatch, ~.__construct, ~.build_query),
+   * include/filterlib_mysqlmatch.php (FC_SIMPLE_QUERY; class FilterMysqlMatch, ~.__construct,
+       ~.build_query),
      include/filter_parser.php (PFLAG_SPECIAL_QUERY),
      include/filter.php (Filter.build_base_query),
      code_examples/filter_example2.php:

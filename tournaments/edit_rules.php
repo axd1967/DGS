@@ -65,6 +65,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
+   $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_rules.edit_tournament($tid,$my_id)");
@@ -73,10 +74,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.edit_rules', $tid );
    $trule->TourneyType = $tourney->Type; // for parsing rules
 
-   $td_warn_status = ($tdir->isEditAdmin()) ? $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() ) : null;
+   $td_warn_status = ( !$is_admin && $tdir->isEditAdmin() )
+      ? $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() )
+      : null;
    $errors = $tstatus->check_edit_status(
       TournamentRules::get_edit_tournament_status(), $ttype->allow_edit_tourney_status_td_adm_edit, $tdir );
-   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form (notes)

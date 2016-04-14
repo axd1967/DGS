@@ -78,7 +78,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $arr_scopes = Tournament::getScopeText();
    $tdir = TournamentCache::is_cache_tournament_director( 'Tournament.edit_tournament.find_tdir', $tid, $my_id );
 
-   $td_warn_status = ($tdir->isEditAdmin()) ? $tstatus->check_edit_status( Tournament::get_edit_tournament_status() ) : null;
+   $td_warn_status = ( !$is_admin && $tdir->isEditAdmin() )
+      ? $tstatus->check_edit_status( Tournament::get_edit_tournament_status() )
+      : null;
    $errors = $tstatus->check_edit_status(
       Tournament::get_edit_tournament_status(), $ttype->allow_edit_tourney_status_td_adm_edit, $tdir );
    if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
