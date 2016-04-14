@@ -179,7 +179,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
    $tform->add_empty_row();
    $tform->add_row( array(
-         'DESCRIPTION', T_('Start time#tourney'),
+         'DESCRIPTION', T_('Start time'),
          'TEXTINPUT',   'start_time', 20, 20, $vars['start_time'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE )), ));
    $tform->add_row( array(
@@ -313,7 +313,7 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
       // determine edits
       if ( $old_vals['owner'] != $vars['owner'] ) $edits[] = T_('Owner#tourney');
       if ( $old_vals['scope'] != $tney->Scope ) $edits[] = T_('Scope#tourney');
-      if ( $old_vals['start_time'] != $tney->StartTime ) $edits[] = T_('Start time#tourney');
+      if ( $old_vals['start_time'] != $tney->StartTime ) $edits[] = T_('Start time');
       if ( $old_vals['title'] != $tney->Title ) $edits[] = T_('Title');
       if ( $old_vals['descr'] != $tney->Description ) $edits[] = T_('Description');
    }

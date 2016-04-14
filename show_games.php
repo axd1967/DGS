@@ -416,7 +416,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 10: >  FU+FA [Score/Flags] (Score)
  * 11: >  FU [User-Score AS X_Score] (Win-graphic) -> fname=won
  * 12:    Weekendclock
- * 13:    FU+FA [Games.Lastchanged] (End date), OB+RU+RA [Games.Lastchanged] (Last move)
+ * 13:    FU+FA [Games.Lastchanged] (End time), OB+RU+RA [Games.Lastchanged] (Last move)
  * 14:    [Rated AS X_Rated] (Rated) -> fname=rated
  * 15: >  RU [oppLastaccess] (Opponents-LastAccess)
  * 16: >  FU+RU [Rating2 AS oppRating] (Oppent-current-Rating)
@@ -574,7 +574,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    }
 
-   $gtable->add_tablehead(49, T_('Start Time'), 'Date', 0, 'Starttime-');
+   $gtable->add_tablehead(49, T_('Start time'), 'Date', 0, 'Starttime-');
 
    // col 13 must be static for RESTRICT_SHOW_GAMES_ALL
    $table_mode13 = ($restrict_games) ? TABLE_NO_HIDE : 0;
@@ -583,8 +583,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
    else if ( $finished ) //FU+FA ?UNION
    {
-      $restrict_gametext = T_('End date#header');
-      $gtable->add_tablehead(13, T_('End date#header'), 'Date', $table_mode13, 'Lastchanged-');
+      $restrict_gametext = T_('End time#header');
+      $gtable->add_tablehead(13, T_('End time#header'), 'Date', $table_mode13, 'Lastchanged-');
    }
    else if ( $running ) //RU+RA ?UNION
    {

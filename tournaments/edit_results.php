@@ -254,11 +254,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
             'TEXTINPUT',   'rating', 16, 16, $vars['rating'],
             'TEXT',        ( is_valid_rating($vars['rating']) ? ' = ' . echo_rating($vars['rating'], true) : '' ), ));
       $trform->add_row( array(
-            'DESCRIPTION', T_('Start time#tourney'),
+            'DESCRIPTION', T_('Start time'),
             'TEXTINPUT',   'start_time', 20, 20, $vars['start_time'],
             'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE2 )), ));
       $trform->add_row( array(
-            'DESCRIPTION', T_('End time#tourney'),
+            'DESCRIPTION', T_('End time'),
             'TEXTINPUT',   'end_time', 20, 20, $vars['end_time'],
             'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE2 )), ));
       $trform->add_row( array(
@@ -560,8 +560,8 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
       if ( $old_vals['rid'] != $tresult->rid ) $edits[] = T_('Tournament Participant');
       if ( $old_vals['round'] != $tresult->Round ) $edits[] = T_('Result Round#tourney');
       if ( $old_vals['rating'] != $tresult->Rating ) $edits[] = T_('Result Rating#tourney');
-      if ( $old_vals['start_time'] != $tresult->StartTime ) $edits[] = T_('Start time#tourney');
-      if ( $old_vals['end_time'] != $tresult->EndTime ) $edits[] = T_('End time#tourney');
+      if ( $old_vals['start_time'] != $tresult->StartTime ) $edits[] = T_('Start time');
+      if ( $old_vals['end_time'] != $tresult->EndTime ) $edits[] = T_('End time');
       if ( $old_vals['result'] != $tresult->Result ) $edits[] = T_('Result#tresult');
       if ( $old_vals['rank'] != $tresult->Rank ) $edits[] = T_('Rank#tresult');
       if ( $old_vals['comment'] != $tresult->Comment ) $edits[] = T_('Comment');
