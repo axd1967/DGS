@@ -872,6 +872,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
    $CategoryHandiType = get_category_handicaptype( $Handicaptype );
    $my_htype = $game_setup->get_user_view_handicaptype( $my_id );
    $is_fairkomi = ( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI );
+   $is_tstyle_tourney = ( $tablestyle == GSET_TOURNAMENT_LADDER || $tablestyle == GSET_TOURNAMENT_ROUNDROBIN );
    $restricted_text = T_('Restricted#wroom') . ': ';
 
    // handle shape-games
@@ -948,10 +949,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
 
    if ( $tablestyle == GSET_WAITINGROOM )
    {
-      $itable->add_scaption(T_('Info'));
-      $itable->add_sinfo(
-            (( $GameType == GAMETYPE_GO ) ? T_('Number of games') : T_('Number of game-players')),
-            $nrGames );
+      $itable->add_scaption(T_('Players info'));
       $itable->add_sinfo(
             T_('Player'),
             user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle) .
@@ -960,22 +958,28 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
             echo_image_opp_games( $my_id, $other_handle, /*fin*/true ) );
 
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
-      $itable->add_sinfo( T_('Country'), getCountryFlagImage($other_country) );
    }
    elseif ( $tablestyle == GSET_MSG_INVITE )
    {
       $itable->add_scaption(T_('Players info'));
       $itable->add_sinfo( T_('My Rating'), echo_rating($my_rating,true,$my_id) );
       $itable->add_sinfo( T_('Opponent Rating'), echo_rating($other_rating,true,$other_id) );
+   }// elseif ( $tablestyle == GSET_TOURNAMENT_LADDER )
+
+   if ( $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_MSG_INVITE )
+   {
+      $itable->add_sinfo( T_('Country'), getCountryFlagImage($other_country) );
       $itable->add_sinfo( T_('Games with opponent'), sprintf( T_('%s running, %s finished'),
             (int)@$game_row['X_GOPP_Running'], (int)@$game_row['X_GOPP_Finished'] ) );
-
-      $itable->add_scaption(T_('Game info'));
    }
-   elseif ( $tablestyle == GSET_TOURNAMENT_LADDER )
-      $itable->add_scaption(T_('Game info'));
 
-   if ( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER) ) // invite & dispute, w-room
+   $itable->add_scaption(T_('Game info'));
+   if ( $tablestyle == GSET_WAITINGROOM )
+      $itable->add_sinfo(
+            (( $GameType == GAMETYPE_GO ) ? T_('Number of games') : T_('Number of game-players')),
+            $nrGames );
+
+   if ( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $is_tstyle_tourney ) )
       $itable->add_sinfo( T_('Shape Game'),
             ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ));
 
@@ -1189,10 +1193,6 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
    {
       $gs_calc = new GameSettingsCalculator( $game_setup, $my_rating, $other_rating, $calculated );
       $gs_calc->calculate_settings( $my_id );
-
-      if ( $tablestyle == GSET_WAITINGROOM && !$is_my_game )
-         $itable->add_sinfo( T_('Games with opponent'), sprintf( T_('%s running, %s finished'),
-               (int)@$game_row['X_GOPP_Running'], (int)@$game_row['X_GOPP_Finished'] ) );
 
       // determine color
       if ( $gs_calc->calc_color == GSC_COL_DOUBLE )

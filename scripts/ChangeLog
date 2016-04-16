@@ -13,6 +13,14 @@ ChangeLog
 
 2016-04-16 jug
 
+   * include/message_functions.php (game_info_table):
+   - cleanup GUI: use same info sections for waiting-room-offer than for invitation/dispute
+     - waiting-room-info:
+       - changed/added sections as for invitation
+       - moved 'number of games' into game-info-section
+       - moved 'games with opponent' into players-info-section
+     - invitation: added opponents country
+
    * include/message_functions.php (game_info_table),
      waiting_room.php:
    - added country of opponent for waiting-room info-page of game-offer
