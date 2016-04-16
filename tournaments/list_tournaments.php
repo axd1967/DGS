@@ -382,7 +382,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $menu_array = array();
    $menu_array[T_('All tournaments')] = 'tournaments/list_tournaments.php';
    $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
-   $menu_array[T_('Directoring tournaments')] = "tournaments/list_tournaments.php?tdir=$my_id";
+   $menu_array[T_('Managing tournaments')] = "tournaments/list_tournaments.php?tdir=$my_id";
    $create_tourney = TournamentUtils::check_create_tournament();
    if ( $create_tourney )
    {

@@ -151,7 +151,7 @@ function itemL($text, $link='', $working=true, $last=false)
       { $item_level++;
          item(T_('All tournaments'), "tournaments/list_tournaments.php", true);
          item(T_('My tournaments'), "tournaments/list_tournaments.php?uid=$id", true);
-         item(T_('Directoring tournaments'), "tournaments/list_tournaments.php?tdir=$id", true);
+         item(T_('Managing tournaments'), "tournaments/list_tournaments.php?tdir=$id", true);
          if ( TournamentUtils::check_create_tournament() )
             item(T_('Create new tournament'), "tournaments/wizard.php", true);
          item(T_('View tournament'), "tournaments/view_tournament.php", false, true);
