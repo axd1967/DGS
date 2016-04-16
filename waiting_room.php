@@ -375,11 +375,13 @@ function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
 {
    global $player_row;
    static $ARR_COPY_FIELDS = array(
-      'WRP_ID' => 'other_id',
-      'WRP_Handle' => 'other_handle',
-      'WRP_Name' => 'other_name',
-      'WRP_Rating2' => 'other_rating',
-      'WRP_RatingStatus' => 'other_ratingstatus', );
+         'WRP_ID' => 'other_id',
+         'WRP_Handle' => 'other_handle',
+         'WRP_Name' => 'other_name',
+         'WRP_Rating2' => 'other_rating',
+         'WRP_RatingStatus' => 'other_ratingstatus',
+         'WRP_Country' => 'other_country',
+      );
 
    $wro = new WaitingroomOffer( $game_row );
    $is_my_game = $wro->is_my_game();

@@ -35,6 +35,7 @@ require_once 'include/dgs_cache.php';
 require_once 'include/classlib_goban.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/classlib_user.php';
+require_once 'include/countries.php';
 
 
 // game-settings form-/table-style defs
@@ -855,7 +856,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
 
    // $game_row containing:
    // - for GSET_WAITINGROOM: Waitingroom.*; calculated, goodrated, haverating; WaitingroomJoined.JoinedCount;
-   //      X_GOPP_Running/Finished
+   //      X_GOPP_Running/Finished; other_country
    // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus,
@@ -959,6 +960,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
             echo_image_opp_games( $my_id, $other_handle, /*fin*/true ) );
 
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
+      $itable->add_sinfo( T_('Country'), getCountryFlagImage($other_country) );
    }
    elseif ( $tablestyle == GSET_MSG_INVITE )
    {
