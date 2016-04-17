@@ -223,7 +223,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
          $row['Running'] );
       $itable2->add_sinfo( anchor( $fin_link, T_('Finished games')) . $other_info_finished_games,
          $row['Finished'] . MED_SPACING . '/ '
-            . span('smaller', sprintf( '(%s)', anchor( $fin_link_timeout, T_('Timeouts'), T_('Games lost by timeout')))) );
+            . span('smaller', sprintf( '(%s)', anchor( $fin_link_timeout, T_('Games lost by timeout')))) );
       $itable2->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
       $itable2->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
       $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
