@@ -116,8 +116,6 @@ class GameCommentHelper
    public function filter_comment( $text, $move_nr, $move_stone, $viewmode, $html )
    {
       $text = trim($text);
-      if ( (string)$text == '' )
-         return '';
 
       if ( $this->is_mpgame ) // MPG
       {
@@ -135,6 +133,10 @@ class GameCommentHelper
          $is_player = ( $viewmode == BLACK || $viewmode == WHITE );
          $is_move_player = $is_player && ( $viewmode == $move_stone );
       }
+
+      // NOTE: this->mpg_user/mpg_move_color must be set BEFORE returning!
+      if ( (string)$text == '' )
+         return '';
 
       if ( $is_player )
       {

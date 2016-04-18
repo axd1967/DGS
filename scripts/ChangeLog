@@ -11,6 +11,12 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-04-18 jug
+
+   * include/game_comments.php (GameCommentHelper.filter_comment):
+   - bugfix: player-names in MP-game SGF-download was wrong, due to early return
+     from filter_comment() before $this->mpg_user/mpg_move_color was set
+
 2016-04-16 jug
 
    * include/message_functions.php (game_info_table):
