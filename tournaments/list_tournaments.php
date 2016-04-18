@@ -57,6 +57,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $page = "list_tournaments.php?";
 
    $show_notes = ( @$_REQUEST['notes'] ) ? 1 : 0;
+   $uid = (int)@$_REQUEST['uid'];
+   if ( $uid < GUESTS_ID_MAX )
+      $uid = 0;
 
 
    // config for filters
@@ -376,7 +379,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       echo anchor( $baseURL.'notes=0', T_('Hide tournament notes') ), "\n";
    }
    else
-      echo "<br><br>\n", anchor( $baseURL.'notes=1', T_('Show tournament notes') ), "\n";
+      echo "<br><br>\n", anchor( $baseURL.'notes=1'.URI_AMP."uid=$uid", T_('Show tournament notes') ), "\n";
 
 
    $menu_array = array();
