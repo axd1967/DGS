@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
+require_once 'include/admin_functions.php';
 
 {
    connect2mysql();
@@ -91,11 +92,12 @@ require_once 'include/form_functions.php';
       ADMOPT_DENY_TOURNEY_CREATE    => array( 'fl_admopt6', 'DENY_TNEY_CREATE', T_('Deny tournament creation') ),
       ADMOPT_DENY_TOURNEY_REGISTER  => array( 'fl_admopt7', 'DENY_TNEY_REG',  T_('Deny tournament registration') ),
       ADMOPT_HIDE_BIO               => array( 'fl_admopt8', 'HIDE_BIO',       T_('Hide bio and user picture') ),
-      ADMOPT_FGROUP_ADMIN           => array( 'fl_admopt09', 'FGR_ADMIN',     T_('View ADMIN-forums') ),
+      ADMOPT_FGROUP_ADMIN           => array( 'fl_admopt9', 'FGR_ADMIN',      T_('View ADMIN-forums') ),
       ADMOPT_FGROUP_DEV             => array( 'fl_admopt10', 'FGR_DEV',       T_('View DEV-forums') ),
       ADMOPT_FORUM_NO_POST          => array( 'fl_admopt11', 'FORUM_NO_POST', T_('Deny new & edit of forum posts') ),
       ADMOPT_FORUM_MOD_POST         => array( 'fl_admopt12', 'FORUM_MOD_POST', T_('Moderate all new & edited forum posts') ),
       ADMOPT_ALLOW_TOURNEY_CREATE   => array( 'fl_admopt13', 'ALLOW_TNEY_CREATE', T_('Allow tournament creation') ),
+      ADMOPT_CANDIDATE_USER_DEL     => array( 'fl_admopt14', 'CAND_USER_DEL', T_('Candidate for user-account-deletion') ),
    );
 
    // set field-values to change
@@ -350,6 +352,11 @@ function update_user( $uid, $user, $fv )
       "SELECT ID,$user_fields FROM Players WHERE Handle='".mysql_addslashes($user)."' LIMIT 1" );
    if ( $row === false )
       return sprintf( 'Found no user with handle [%s]', $user );
+
+   // check for user-deletion
+   $chk_arr = @$arr_mask_admopts[ADMOPT_CANDIDATE_USER_DEL];
+   if ( is_array($chk_arr) && $fv[$chk_arr[0]] && $uid > GUESTS_ID_MAX )
+      return Admin::check_user_account_deletion( $uid );
 
    $arrdiff = array();
 

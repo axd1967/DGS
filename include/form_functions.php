@@ -702,9 +702,11 @@ class Form
 
          while ( $current_arg < count($args) )
          {
-            //40 allow 10*(TEXT,TD,TEXTAREA,TD) in the row
-            if ( $element_counter >= 40 )
+            if ( $element_counter >= 48 ) // NOTE: 48 = allow 12*(TEXT,TD,TEXTAREA,TD) in the row
+            {
+               error('internal_error', "Form.create_form_string.chk_elem_cnt({$this->name},$element_counter)");
                exit;
+            }
 
             $element_name = $args[ $current_arg ];
             $current_arg++;

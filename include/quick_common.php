@@ -54,6 +54,7 @@ define('ADMOPT_DENY_EDIT_BIO',         0x0004);
 define('ADMOPT_ALLOW_TOURNEY_CREATE',  0x0008); // allow: tournament creation
 //define('', 0x0010); // for re-use
 //define('', 0x0020); // for re-use
+define('ADMOPT_CANDIDATE_USER_DEL',    0x0040); // candidate for account-deletion
 define('ADMOPT_HIDE_BIO',              0x0080); // hide user bio
 define('ADMOPT_FGROUP_ADMIN',          0x0100); // user can see ADMIN-forums
 define('ADMOPT_FGROUP_DEV',            0x0200); // user can see DEV-forums

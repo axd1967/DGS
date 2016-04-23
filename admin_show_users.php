@@ -71,6 +71,7 @@ require_once 'include/table_columns.php';
       ADMOPT_FORUM_NO_POST          => array( 'FORUM_NO_POST', T_('Deny new & edit of forum posts') ),
       ADMOPT_FORUM_MOD_POST         => array( 'FORUM_MOD_POST', T_('Moderate all new & edited forum posts') ),
       ADMOPT_ALLOW_TOURNEY_CREATE   => array( 'ALLOW_TNEY_CREATE', T_('Allow creation of tournaments') ),
+      //ADMOPT_CANDIDATE_USER_DEL - is just an admin-flag, which should not be shown (potentially long list)
    );
 
    // fields to load

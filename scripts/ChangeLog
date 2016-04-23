@@ -11,6 +11,18 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-04-23 jug
+
+   * include/admin_functions.php (class Admin, ~.check_user_account_deletion),
+     include/form_functions.php (Form.create_form_string),
+     include/quick_common.php (ADMOPT_CANDIDATE_USER_DEL),
+     admin_show_users.php,
+     admin_users.php (update_user):
+   - added admin-option flag to mark user-account as candidate for deletion
+     - added check to prevent account-deletion if user has important data-entries
+   - bugfix Form-class: allow higher amount of row-elements for admin-users-page;
+     added better warning than an "exit"
+
 2016-04-18 jug
 
    * include/game_comments.php (GameCommentHelper.filter_comment):
