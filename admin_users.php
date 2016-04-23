@@ -356,7 +356,11 @@ function update_user( $uid, $user, $fv )
    // check for user-deletion
    $chk_arr = @$arr_mask_admopts[ADMOPT_CANDIDATE_USER_DEL];
    if ( is_array($chk_arr) && $fv[$chk_arr[0]] && $uid > GUESTS_ID_MAX )
-      return Admin::check_user_account_deletion( $uid );
+   {
+      $err = Admin::check_user_account_deletion( $uid );
+      if ( $err )
+         return $err;
+   }
 
    $arrdiff = array();
 
