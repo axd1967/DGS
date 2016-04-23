@@ -151,6 +151,11 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
    while ( $row = mysql_fetch_assoc( $result ) )
    {
       $arow_str = array();
+      $adm_levels = build_admin_flags( $ARR_ADMLEVELS, @$row['Adminlevel']+0 );
+      $adm_opts   = build_admin_flags( $ARR_ADMOPTS, @$row['AdminOptions']+0 );
+      if ( $adm_levels == NO_VALUE && $adm_opts == NO_VALUE )
+         continue;
+
       if ( $atable->Is_Column_Displayed[1] )
       {
          if ( $show_edit_user )
@@ -164,9 +169,9 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
       if ( $atable->Is_Column_Displayed[2] )
          $arow_str[2] = ($row['X_Lastaccess'] > 0 ? date(DATE_FMT2, $row['X_Lastaccess']) : NULL );
       if ( $with_adminlevel && $atable->Is_Column_Displayed[3] )
-         $arow_str[3] = span('Flags', build_admin_flags( $ARR_ADMLEVELS, @$row['Adminlevel']+0 ) );
+         $arow_str[3] = span('Flags', $adm_levels);
       if ( $atable->Is_Column_Displayed[4] )
-         $arow_str[4] = span('Flags', build_admin_flags( $ARR_ADMOPTS, @$row['AdminOptions']+0 ) );
+         $arow_str[4] = span('Flags', $adm_opts);
       if ( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = @$row['AdminNote'];
       $atable->add_row( $arow_str );
@@ -174,7 +179,7 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
    mysql_free_result($result);
 
    return $atable;
-}
+}//create_table
 
 /*
  * \brief Builds list of textual values for bit-based value
@@ -193,7 +198,7 @@ function build_admin_flags( $arr_desc, $value )
    }
    return (count($arrout) > 0)
       ? preg_replace( "/,(<br>|\s+)$/", '', implode('', $arrout) )
-      : '---';
+      : NO_VALUE;
 }
 
 ?>
