@@ -5611,7 +5611,7 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
    if ( $same_opp == 0 )
       return T_('always#same_opp');
    elseif( $same_opp == SAMEOPP_ONLY_NEW )
-      return T_('accept only, if never played before#same_opp');
+      return T_('accept only if never played before#same_opp');
 
    if ( $same_opp < SAMEOPP_TOTAL_STARTED )
    {
