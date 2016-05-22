@@ -462,6 +462,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $reg_user_str = TournamentGuiHelper::getLinkTextRegistration($tid, $old_status);
    $menu_array[$reg_user_str] = "tournaments/register.php?tid=$tid";
 
+   if ( $tourney->Type == TOURNEY_TYPE_LADDER && $tourney->Status != TOURNEY_STATUS_PAIR && $rid > 0 )
+      $menu_array[T_('Withdraw from Ladder')] = "tournaments/ladder/withdraw.php?tid=$tid";
+
    end_page(@$menu_array);
 }//main
 

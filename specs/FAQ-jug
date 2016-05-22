@@ -2,6 +2,9 @@ FAQ-DGS: [ 1=big-changes, 2=new-topic/new-refs-involved, 3=edit, 4=edit-but-coul
 Version: $Id: FAQ-DGS,v 1.2 2013/08/09 21:14:19 jug Exp jug $
 ==========================================================================
 
+New_Issues:   set prio + sort into sections
+- 7 DOC:  [faq] improve sleep-time description?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47174#47174;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47174#47208
+
 Open_Tasks_Stack:
 #---------------
 - 3 DOC:  [site] new icons FAQ-entry: medals, more?, no-result, ...

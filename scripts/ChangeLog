@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-05-22 jug
+
+   * tournaments/register.php:
+   - added link to withdraw from ladder on edit-registration-page as well
+
 2016-04-23 jug
 
    * include/admin_functions.php (class Admin, ~.check_user_account_deletion),
