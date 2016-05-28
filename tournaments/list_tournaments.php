@@ -60,6 +60,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $uid = (int)@$_REQUEST['uid'];
    if ( $uid < GUESTS_ID_MAX )
       $uid = 0;
+   $tdir_uid = (int)@$_REQUEST['tdir'];
+   if ( $tdir_uid < GUESTS_ID_MAX )
+      $tdir_uid = 0;
 
 
    // config for filters
@@ -91,28 +94,11 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENTS );
-   $tsfilter = new SearchFilter( 's' );
    $tfilter = new SearchFilter( '', $search_profile );
    //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
    $ttable = new Table( 'tournament', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $ttable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
-
-   // static filters
-   $tdir_uid = (int)@$_REQUEST['tdir'];
-   $tsfilter->add_filter( 1, 'Text', 'TP.uid', true, array(
-            FC_FNAME => 'uid',
-            FC_QUERYSQL => new QuerySQL(
-               SQLP_FIELDS, 'TP.Status AS TP_Status',
-               SQLP_FROM,  'INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID' ) ));
-   $tsfilter->add_filter( 2, 'Text', 'TD.uid', true, array(
-            FC_FNAME => 'tdir',
-            FC_QUERYSQL => new QuerySQL(
-               SQLP_FROM,  'LEFT JOIN TournamentDirector AS TD ON TD.tid=T.ID',
-               SQLP_WHERE, "(T.Owner_ID=$tdir_uid OR TD.tid IS NOT NULL)" ) ));
-   $tsfilter->init();
-   $has_uid = (bool)( $tsfilter->get_filter_value(1) );
-   $has_tdir = (bool)( $tsfilter->get_filter_value(2) );
 
    // table filters
    $tfilter->add_filter( 1, 'Numeric', 'T.ID', true);
@@ -134,14 +120,15 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->register_filter( $tfilter );
    $ttable->add_or_del_column();
 
-   // attach external URL-parameters from static filter
-   $ttable->add_external_parameters( $tsfilter->get_req_params(), true );
-
+   // attach external URL-parameters for static filter (my tournament, managing tournament)
+   $rp = new RequestParameters();
+   if ( $uid )
+      $rp->add_entry( 'uid', $uid );
+   if ( $tdir_uid )
+      $rp->add_entry( 'tdir', $tdir_uid );
    if ( $show_notes )
-   {
-      $rp = new RequestParameters( array( 'notes' => $show_notes ) );
-      $ttable->add_external_parameters( $rp, true );
-   }
+      $rp->add_entry( 'notes', $show_notes );
+   $ttable->add_external_parameters( $rp, true );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ttable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'T.ID-');
@@ -151,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead( 5, T_('Title#header'), '', TABLE_NO_HIDE, 'Title+');
    $ttable->add_tablehead(19, '', 'Image', TABLE_NO_HIDE|TABLE_NO_SORT, 'TV.tid+');
    $ttable->add_tablehead(11, new TableHead( T_('Registration Status#T_header'), T_('Registration Status#tourney')),
-      'Enum', ($has_uid ? TABLE_NO_HIDE : 0), 'TP_Status+');
+      'Enum', ($uid ? TABLE_NO_HIDE : 0), 'TP_Status+');
    $ttable->add_tablehead(13, T_('Size#header'), 'Number', 0, 'TRULE.Size-');
    $ttable->add_tablehead(14, T_('Rated#header'), 'YesNo', TABLE_NO_SORT);
    $ttable->add_tablehead(15, T_('Ruleset#header'), 'Enum', TABLE_NO_SORT);
@@ -171,9 +158,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->set_default_sort( 2, 1 ); //on ID
 
    // build SQL-query (for tournament-table)
-   $query_tsfilter = $tsfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
    $tqsql = $ttable->get_query(); // clause-parts for filter
-   $tqsql->merge( $query_tsfilter );
    $tqsql->merge( new QuerySQL(
       SQLP_FIELDS,
          'TRULE.Size',
@@ -202,10 +187,13 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          SQLP_FIELDS, 'TPR.MaxParticipants',
          SQLP_FROM,   'INNER JOIN TournamentProperties AS TPR ON TPR.tid=T.ID' ));
    }
-   if ( !$has_uid )
+   // clause-parts for static filter
+   $tqsql->add_part( SQLP_FIELDS, 'TP.Status AS TP_Status' );
+   $tqsql->add_part( SQLP_FROM, ($uid ? 'INNER' : 'LEFT') . " JOIN TournamentParticipant AS TP ON TP.tid=T.ID AND TP.uid=$my_id" );
+   if ( $tdir_uid )
    {
-      $tqsql->add_part( SQLP_FIELDS, 'TP.Status AS TP_Status' );
-      $tqsql->add_part( SQLP_FROM, "LEFT JOIN TournamentParticipant AS TP ON TP.tid=T.ID AND TP.uid=$my_id" );
+      $tqsql->add_part( SQLP_FROM,  "LEFT JOIN TournamentDirector AS TD ON TD.tid=T.ID AND TD.uid=$my_id" );
+      $tqsql->add_part( SQLP_WHERE, "(T.Owner_ID=$tdir_uid OR TD.tid IS NOT NULL)" );
    }
 
 
@@ -237,9 +225,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       mark_new_tournaments_as_read( $iterator, $show_rows, $my_id );
 
 
-   if ( $has_uid )
+   if ( $uid )
       $title = T_('My tournaments as participant');
-   elseif ( $has_tdir )
+   elseif ( $tdir_uid )
       $title = T_('My tournaments as tournament director');
    else
       $title = T_('Tournaments');
@@ -255,7 +243,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
       if ( $ttable->Is_Column_Displayed[ 1] )
       {
-         $tlink = ( $has_tdir )
+         $tlink = ( $tdir_uid )
             ? $base_path."tournaments/manage_tournament.php?tid=$ID"
             : $base_path."tournaments/view_tournament.php?tid=$ID";
          $row_str[ 1] = button_TD_anchor( $tlink, $ID );
@@ -344,7 +332,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $reg_notes[] = $text . ' = ' . TournamentParticipant::getStatusText($tpstat, false, true);
       $notes[] = $reg_notes;
    }
-   if ( $ttable->is_column_displayed(18) && !$has_tdir ) // restrictions
+   if ( $ttable->is_column_displayed(18) ) // restrictions
    {
       $notes[] = array( sprintf('<b>%s</b> (%s):', T_('Tournament Registration Restrictions'), T_('background colors') ),
             span('TJoinErr',  T_('Error')   . ' = ' . T_('Tournament can not be joined.')),
@@ -373,13 +361,17 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       . $ttable->current_sort_string(1)
       . $ttable->current_filter_string(1)
       . $ttable->current_from_string(1);
+   if ( $uid )
+      $baseURL .= "uid=$uid".URI_AMP;
+   if ( $tdir_uid )
+      $baseURL .= "tdir=$tdir_uid".URI_AMP;
    if ( $show_notes )
    {
       echo_notes( 'tournamentnotes', T_('Tournament notes'), $notes );
       echo anchor( $baseURL.'notes=0', T_('Hide tournament notes') ), "\n";
    }
    else
-      echo "<br><br>\n", anchor( $baseURL.'notes=1'.URI_AMP."uid=$uid", T_('Show tournament notes') ), "\n";
+      echo "<br><br>\n", anchor( $baseURL.'notes=1', T_('Show tournament notes') ), "\n";
 
 
    $menu_array = array();
