@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-07-24 jug
+
+   * user_info.php:
+   - fix bug: use link 'vacation days left' to edit vacation on user-info page only for own info
+
 2016-05-28 jug
 
    * tournaments/list_tournaments.php:

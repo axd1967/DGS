@@ -199,7 +199,8 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable1->add_sinfo( T_('Last quick access'), $lastquickaccess );
       $itable1->add_sinfo( T_('Last move'),   $lastmove );
 
-      $itable1->add_sinfo( anchor( "edit_vacation.php", T_('Vacation days left') ),
+      $str_vac_days = T_('Vacation days left');
+      $itable1->add_sinfo( ($my_info) ? anchor( "edit_vacation.php", $str_vac_days ) : $str_vac_days,
          TimeFormat::echo_day(floor($row["VacationDays"])) );
       if ( $row['OnVacation'] > 0 )
       {
