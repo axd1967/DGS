@@ -13,6 +13,9 @@ ChangeLog
 
 2016-08-14 jug
 
+   * include/globals.php (CSS_VERSION), skins/dragon/screen.css:
+   - use vertical top-alignment in table of game-comments-page
+
    * include/message_functions.php (MessageListBuilder.message_list_body, ~.message_list_query):
    - bugfix: changed link on answer and answered message-icon to previous/next message
 

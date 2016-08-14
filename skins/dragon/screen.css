@@ -2685,6 +2685,10 @@ table#commentTable td.Move {
    color: black;
 }
 
+table#commentTable tr td {
+   vertical-align: top;
+}
+
 table#commentTable img.InTextStone {
    vertical-align: middle;
 }
