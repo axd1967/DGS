@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-08-14 jug
+
+   * include/message_functions.php (MessageListBuilder.message_list_body, ~.message_list_query):
+   - bugfix: changed link on answer and answered message-icon to previous/next message
+
 2016-07-24 jug
 
    * user_info.php:

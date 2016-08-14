@@ -2122,6 +2122,7 @@ class MessageListBuilder
          $mid = $row["mid"];
          $oid = $row['other_ID'];
          $is_bulk = ( $row['Flags'] & MSGFLAG_BULK );
+         $reply_mid = $row['ReplyTo'];
 
          $folder_nr = $row['folder'];
          $deleted = ( $folder_nr == FOLDER_DESTROYED );
@@ -2145,9 +2146,22 @@ class MessageListBuilder
          $subject = make_html_safe( $row['Subject'], SUBJECT_HTML, $rx_term);
          $mrow_strings[ 3] = anchor( $msg_url, $subject );
 
+         // link on message-icon
          $flowval = $row['flow'];
          list($ico,$alt) = $msg_icones[$flowval];
-         $mrow_strings[ 8] = anchor( $msg_url, image( $ico, $alt, $tits[$flowval] ));
+         $ico_title = $tits[$flowval];
+         $msg_ico_url = $msg_url;
+         if ( ($flowval & FLOW_ANSWER) && !($flowval & FLOW_ANSWERED) && $reply_mid > 0 )
+         {
+            $msg_ico_url = 'message.php?mode=ShowMessage'.URI_AMP."mid=$reply_mid$url_terms";
+            $ico_title = T_('Previous message');
+         }
+         elseif ( ($flowval & FLOW_ANSWERED) && !($flowval & FLOW_ANSWER) && $mid > 0)
+         {
+            $msg_ico_url = "list_messages.php?find_answers=$mid$url_terms";
+            $ico_title = T_('Next messages');
+         }
+         $mrow_strings[ 8] = anchor( $msg_ico_url, image( $ico, $alt, $ico_title ));
 
          $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
 
@@ -2260,7 +2274,7 @@ class MessageListBuilder
        **/
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
-         'M.Type', 'M.Flags', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID',
+         'M.Type', 'M.Flags', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID', 'M.ReplyTo',
          'UNIX_TIMESTAMP(M.Time) AS Time',
          "IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
              "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
