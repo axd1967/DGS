@@ -306,9 +306,9 @@ define('ACT_MARK_READ', 'mark_read');
             ( $orow['MaxParticipants'] > 0 ) ? $orow['MaxParticipants'] : NO_VALUE );
       if ( $ttable->Is_Column_Displayed[18] )
       {
-         list( $restrictions, $class, $title ) = build_restrictions( $tourney, $orow );
+         list( $restrictions, $class ) = build_restrictions( $tourney, $orow );
          $row_str[18] = ( $class )
-            ? array( 'text' => $restrictions, 'attbs' => array( 'class' => $class, 'title' => $title ) )
+            ? array( 'text' => $restrictions, 'attbs' => array( 'class' => $class ) )
             : $restrictions;
       }
       if ( !$orow['TV_VisitType'] && $ttable->Is_Column_Displayed[19] )
@@ -407,24 +407,15 @@ function build_restrictions( $tourney, $row )
    }
 
    if ( @$types['E'] )
-   {
       $class = 'TJoinErr';
-      $title = T_('Error');
-   }
    elseif ( @$types['W'] )
-   {
       $class = 'TJoinWarn';
-      $title = T_('Warning');
-   }
-   elseif ( @$types['W'] )
-   {
+   elseif ( @$types['I'] )
       $class = 'TJoinInv';
-      $title = T_('Invite');
-   }
    else
-      $class = $title = '';
+      $class = '';
 
-   return array( implode(', ', $out), $class, $title );
+   return array( implode(', ', $out), $class );
 }//build_restrictions
 
 // callback-func for tournament-list Table-form adding form-elements below table

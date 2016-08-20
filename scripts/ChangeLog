@@ -13,6 +13,10 @@ ChangeLog
 
 2016-08-20 jug
 
+   * tournaments/list_tournaments.php (build_restrictions):
+   - tournament-list-page: removed confusing hover-text on restrictions-column
+   - bugfix: fixed color-class for Invite-restrictions
+
    * include/message_functions.php (game_info_table),
      tournaments/view_tournament.php (echo_tournament_rules):
    - bugfix: show handicap- & komi-adjustment on game-info only for handicap-types conventional & proper
