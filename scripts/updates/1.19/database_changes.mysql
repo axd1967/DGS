@@ -183,3 +183,8 @@ UPDATE TournamentVisit
    SET VisitType = 2 ;
 
 
+-- cleanup: removed unused table-column
+ALTER TABLE TournamentParticipant
+   DROP COLUMN Notes ;
+
+

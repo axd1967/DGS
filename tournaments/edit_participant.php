@@ -71,7 +71,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
        custom_rating,ratingtype           : customized rating + rating-type for conversion
        del_rating=1                       : remove TP-Rating if set
        start_round                        : start round (if needed)
-       admin_message, admin_notes         : AdminMessage, Notes
+       admin_message                      : AdminMessage
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -515,9 +515,6 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             $tpform->add_row( array(
                   'DESCRIPTION', T_('Preview'),
                   'TEXT', make_html_safe($tp->AdminMessage, true), ));
-         $tpform->add_row( array(
-               'DESCRIPTION', T_('Admin Notes'),
-               'TEXTAREA',    'admin_notes', 70, 5, $tp->Notes ));
 
          $tpform->add_row( array(
                'DESCRIPTION', T_('Unsaved edits'),
@@ -620,7 +617,6 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
       '_has_custom_rating' => false,
       'start_round'        => $tp->StartRound,
       'admin_message'      => $tp->AdminMessage,
-      'admin_notes'        => $tp->Notes,
    );
    $old_rating = $tp->Rating;
 
@@ -676,11 +672,9 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
    if ( $is_posted || @$_REQUEST['tp_ack_apply'] )
    {
       $tp->AdminMessage = trim($vars['admin_message']);
-      $tp->Notes = trim($vars['admin_notes']);
 
       // determine edits
       if ( $old_vals['admin_message'] != $tp->AdminMessage ) $edits[] = T_('Admin Message');
-      if ( $old_vals['admin_notes'] != $tp->Notes ) $edits[] = T_('Admin Notes');
    }
 
    return array( $vars, array_unique($edits), $errors );
