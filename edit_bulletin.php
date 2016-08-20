@@ -280,7 +280,7 @@ function check_bulletin_input( &$bulletin, $my_id )
    if ( ($bulletin->Flags & BULLETIN_FLAG_ADMIN_CREATED)
          || $bulletin->Status == BULLETIN_STATUS_NEW || $bulletin->Status == BULLETIN_STATUS_REJECTED )
       $bulletin->Status = BULLETIN_STATUS_PENDING;
-   elseif ( $bulletin->ID > 0 && $bulletin->Status == BULLETIN_STATUS_SHOW )
+   elseif ( $bulletin->ID > 0 && $bulletin->Status == BULLETIN_STATUS_SHOW && !$bulletin->allowGroupUserEdit() )
       $bulletin->Status = BULLETIN_STATUS_PENDING;
 
    // check/correct gid

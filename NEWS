@@ -138,6 +138,9 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
       * Canadian byo-yomi: 90 days main-time, 30 days byo-yomi / 200 moves
       * Fischer time: 90 days main-time, 30 days extra-time
 
+   * Bulletins:
+      * Allowed editing of specific bulletin-types (tournament-news, private-message, ads) without pending admin-approval
+
    * Quick-Suite (alternative interface "quick_do.php"):
       * Extended game-handler to set standard handicap placement
       * Extended message-handler to set 'own_started_games' for invitations to support restrictions by bots

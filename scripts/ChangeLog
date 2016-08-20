@@ -13,6 +13,12 @@ ChangeLog
 
 2016-08-20 jug
 
+   * include/db/bulletin.php (Bulletin.allowGroupUserEdit),
+     edit_bulletin.php (check_bulletin_input):
+   - bugfix: allow editing of certain bulletin-types also for non-admins
+     - avoid status-change from SHOW to PENDING thereby hiding bulletin on editing for bulletin-types
+       tournament-specific news, private-messages, advertisements
+
    * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
        ~.to_string, ~.build_log_string, ~.fillEntityData, ~.new_from_row),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.build_diff_tournament_participant),

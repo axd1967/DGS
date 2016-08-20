@@ -354,6 +354,13 @@ class Bulletin
       return false;
    }//skipCategory
 
+   /*! \brief Returns true if (non-admin) user is allowed to edit bulletin without changing to PENDING status. */
+   public function allowGroupUserEdit()
+   {
+      return ( $this->Category == BULLETIN_CAT_TOURNAMENT_NEWS || $this->Category == BULLETIN_CAT_PRIVATE_MSG
+            || $this->Category == BULLETIN_CAT_SPAM );
+   }//allowUserEdit
+
 
    // ------------ static functions ----------------------------
 
