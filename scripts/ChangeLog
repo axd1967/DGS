@@ -11,6 +11,8 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+### ----- release-1_19_11-20160820 -----
+
 2016-08-20 jug
 
    * include/db/bulletin.php (Bulletin.allowGroupUserEdit),
