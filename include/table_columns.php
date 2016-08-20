@@ -712,7 +712,7 @@ class Table
                $syntax = $filter->get_syntax_description();
                $tableHead = $this->Tableheads[$id]['Description'];
                $arr_err[]=
-                  "<strong>{$tableHead->description}:</strong> "
+                  "<strong>" . $tableHead->getHeaderName() . ":</strong> "
                   . '<em>' . T_('Error#filter') . ': ' . $filter->errormsg() . '</em>'
                   . ( ($syntax != '') ? "; $syntax" : '');
             }
@@ -728,7 +728,7 @@ class Table
                $filter = $this->Filters->get_filter($id);
                $tableHead = $this->Tableheads[$id]['Description'];
                $arr_warn[]=
-                  "<strong>{$tableHead->description}:</strong> "
+                  "<strong>" . $tableHead->getHeaderName() . ":</strong> "
                   . '<em>' . T_('Warning#filter') . ': ' . $filter->warnmsg() . '</em>';
             }
             $warnmessages = implode( '<br>', $arr_warn );

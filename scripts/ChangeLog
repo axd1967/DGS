@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2016-08-20 jug
+
+   * include/table_columns.php (Table.make_filter_row):
+   - bugfix: use correct table-head description for filter-errors & filter-warnings on Table
+
 2016-08-14 jug
 
    * include/globals.php (CSS_VERSION), skins/dragon/screen.css:
