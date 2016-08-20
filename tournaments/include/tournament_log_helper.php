@@ -541,6 +541,8 @@ class TournamentLogHelper
          $msg[] = sprintf(self::$DIFF_FMT, 'PoolSize', $old_trnd->PoolSize, $new_trnd->PoolSize );
       if ( $old_trnd->Pools != $new_trnd->Pools )
          $msg[] = sprintf(self::$DIFF_FMT, 'Pools', $old_trnd->Pools, $new_trnd->Pools );
+      if ( $old_trnd->PoolWinnerRanks != $new_trnd->PoolWinnerRanks )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PoolWinnerRanks', $old_trnd->PoolWinnerRanks, $new_trnd->PoolWinnerRanks );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Data', TLOG_ACT_CHANGE, 0,
          sprintf( "Change of [%s] for Round-Pools %s/#%s: %s",

@@ -99,7 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    // check + parse edit-form (notes)
    $old_tround = clone $tround;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $reg_count );
-   $errors = array_merge( $errors, $input_errors );
+   $errors = array_merge( $errors, $input_errors, $tround->check_round_properties() );
 
    $adjust_pool = '';
    if ( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
@@ -211,6 +211,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    $tform->add_empty_row();
    $tform->add_row( array(
+         'DESCRIPTION', T_('Pool Winner Ranks'),
+         'TEXTINPUT',   'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], ));
+
+   $tform->add_empty_row();
+   $tform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
          'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
 
@@ -300,6 +305,7 @@ function parse_edit_form( &$trd )
       'pool_count'   => $trd->Pools,
       'addpool'      => 0,
       'delpool'      => 0,
+      'poolwinner_ranks' => $trd->PoolWinnerRanks,
    );
 
    // copy to determine edit-changes
@@ -336,9 +342,20 @@ function parse_edit_form( &$trd )
       if ( $vars['addpool'] && $vars['delpool'] )
          $errors[] = T_('Adding and deleting pool are mutual exclusive actions: Choose only one.');
 
+      $new_value = $vars['poolwinner_ranks'];
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= $trd->MaxPoolSize )
+         $trd->PoolWinnerRanks = $new_value;
+      else
+      {
+         $min_poolwinner_ranks = ( $trd->Status == TROUND_STATUS_INIT ) ? 0 : 1;
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Pool Winner Ranks'),
+            build_range_text( $min_poolwinner_ranks, $trd->MaxPoolSize ) );
+      }
+
       // determine edits
       if ( $old_vals['pool_size'] != $trd->PoolSize ) $edits[] = T_('Pool Size');
       if ( $old_vals['pool_count'] != $trd->Pools ) $edits[] = T_('Pool Count');
+      if ( $old_vals['poolwinner_ranks'] != $trd->PoolWinnerRanks ) $edits[] = T_('Pool Winner Ranks');
    }
 
    return array( $vars, array_unique($edits), $errors );

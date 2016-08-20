@@ -245,11 +245,14 @@ function parse_edit_form( &$trd, $t_limits )
             $t_limits->getLimitRangeText(TLIMITS_TRD_MAX_POOLCOUNT) ); // check for general MAX, but show specific max
 
       $new_value = $vars['poolwinner_ranks'];
-      if ( isNumber($new_value, /*neg*/false, /*empty*/false) )
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= $trd->MaxPoolSize )
          $trd->PoolWinnerRanks = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for pool winner ranks in range %s and smaller max. pool size [%s].'),
-            build_range_text( 1, $t_limits->getMaxLimit(TLIMITS_TRD_MAX_POOLSIZE)), $trd->MaxPoolSize );
+      {
+         $min_poolwinner_ranks = ( $trd->Status == TROUND_STATUS_INIT ) ? 0 : 1;
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Pool Winner Ranks'),
+            build_range_text( $min_poolwinner_ranks, $trd->MaxPoolSize ) );
+      }
 
       // determine edits
       if ( $old_vals['min_pool_size'] != $trd->MinPoolSize ) $edits[] = T_('Pool Size');

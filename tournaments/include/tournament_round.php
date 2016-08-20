@@ -170,11 +170,10 @@ class TournamentRound
       if ( $this->MinPoolSize > $this->MaxPoolSize )
          $errors[] = T_('Tournament Round min. pool size must be smaller than max. pool size.');
 
-      // NOTE: to enforce that pools of next-round get smaller, pool winner ranks must be < max-pool-size,
-      //       otherwise all pool-players could proceed and the tournament will not end or will be prolonged.
-      if ( $this->PoolWinnerRanks < 1 || $this->PoolWinnerRanks >= $this->MaxPoolSize )
-         $errors[] = sprintf( T_('Tournament Round pool winner ranks must be in range %s and smaller max. pool size [%s].'),
-            build_range_text(1, TROUND_MAX_POOLSIZE), $this->MaxPoolSize );
+      $min_poolwinner_ranks = ( $this->Status == TROUND_STATUS_INIT ) ? 0 : 1;
+      if ( $this->PoolWinnerRanks < $min_poolwinner_ranks || $this->PoolWinnerRanks > $this->MaxPoolSize )
+         $errors[] = sprintf( T_('Tournament Round pool winner ranks must be in range %s.'),
+            build_range_text($min_poolwinner_ranks, $this->MaxPoolSize ) );
 
       if ( $this->MaxPoolCount < 0 || $this->MaxPoolCount > TROUND_MAX_POOLCOUNT )
          $errors[] = sprintf( T_('Tournament Round max. pool count must be in range %s.'),
@@ -205,8 +204,11 @@ class TournamentRound
       $arr_props[] = array( 'text' => span('bold', make_html_safe($max_games_text, 'line')) );
 
       // general conditions
-      $arr_props[] = sprintf( T_('For the current round, the players with ranks %s are pool winners.'),
-         '1..' . $this->PoolWinnerRanks );
+      if ( $this->PoolWinnerRanks > 0 )
+         $arr_props[] = sprintf( T_('For the current round, the players with ranks %s are pool winners.'),
+            '1..' . $this->PoolWinnerRanks );
+      else
+         $arr_props[] = T_('For the current round, the pool winners settings is not configured yet.');
 
       return array( sprintf( T_('Configuration of the current tournament round #%s'), $this->Round )
             . ':', $arr_props );

@@ -497,6 +497,8 @@ Description:
    - minimum pool-count is implicitly = 1
 
 * PoolWinnerRanks : what top ranks make pool winners to either proceed to next round or win the tournament
+   - 0 = setting will be configured later; value 0 is allowed for round-robin tournament
+     on round-INIT status, but must be >0 later when defining pools
 
 * Pools : number of pools actually used for tournament-round
 

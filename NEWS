@@ -50,6 +50,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
       * Replaced user-removal with user-withdrawal from ladder-tournament, if user too long absent from server
       * Removed automatic crowning of king of the hill in ladder properties
+      * Added user-withdrawal on edit-registration-page of user as well
 
       * Added column on tournament-ladder-view with theoretical ladder-rank if sorted by user rating
 
@@ -61,6 +62,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Round-Robin-Tournament:
       * Added manual handicap-type 'Alternate' for balanced color distribution in pool-games
+      * Allow editing of pool-winner-ranks on define-pools-page as well
 
    Minor changes:
 

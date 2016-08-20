@@ -13,6 +13,22 @@ ChangeLog
 
 2016-08-20 jug
 
+   * tournaments/include/tournament_round.php (TournamentRound.check_round_properties, ~.build_notes_props),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_define_tournament_pools),
+     specs/db/table-Tournaments.txt,
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form),
+     tournaments/roundrobin/define_pools.php (parse_edit_form):
+   - bugfix: for round-robin-tournaments allow late-changing of tournament-round property pool-winner-ranks
+     - bug: number of pool-winners could only be configured before starting registration
+       and defining the pools
+       - fix #1: added editing of pool-winners-ranks also on define-pool-page, because it might be
+         that the pool-suggestions shown there makes it clearer how many pool-winners make sense
+       - fix #2: due to 2nd edit of pool-winners-rank allow omitting it on 1st configuration
+         on edit-round-properties-page, which is stored as PoolWinnerRanks=0 which is
+         shown as setting-not-configured-yet on tournament-info-page
+   - extend maximum allowed value for pool-winner-ranks to max-pool-size to allow tournament-director
+     to choose if next-round pools shrinks or all players can continue
+
    * include/table_columns.php (Table.register_filter),
      tournaments/list_tournaments.php (ACT_MARK_READ):
    - bugfix: mark 'new' tournaments as read on tournaments-list-page was not working on 2nd table-page
