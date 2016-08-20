@@ -314,7 +314,7 @@ class TournamentHelper
          if ( $penalty_limit > 0 )
          {
             $tp = TournamentParticipant::load_tournament_participant( $tgame->tid, $loser_uid );
-            if ( $tp && $tp->PenaltyPoints > $penalty_limit )
+            if ( $tp && $tp->PenaltyPoints >= $penalty_limit )
                $withdraw_tp = $tp;
          }
       }

@@ -13,6 +13,9 @@ ChangeLog
 
 2016-08-20 jug
 
+   * tournaments/include/tournament_helper.php (TournamentHelper.handle_timeout_loss_for_participant):
+   - bugfix: for ladder-tournaments withdraw participant if configured PenaltyLimit on timeouts is reached
+
    * tournaments/list_tournaments.php (build_restrictions):
    - tournament-list-page: removed confusing hover-text on restrictions-column
    - bugfix: fixed color-class for Invite-restrictions
