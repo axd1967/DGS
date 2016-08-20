@@ -385,12 +385,15 @@ function echo_tournament_rules( $tourney, $trule )
       ( $trule->needsCalculatedHandicap() ? T_('calculated stones') : sprintf( T_('%s stones'), $trule->Handicap) )
       . ', ' .
       ( $trule->needsCalculatedKomi() ? T_('calculated komi') : sprintf( T_('%s points komi'), $trule->Komi) ));
-   if ( count($adj_handi) )
-      $itable->add_sinfo( T_('Handicap adjustment'), implode(', ', $adj_handi) );
-   if ( count($adj_komi) )
-      $itable->add_sinfo( T_('Komi adjustment'), implode(', ', $adj_komi) );
    if ( ENABLE_STDHANDICAP )
       $itable->add_sinfo( T_('Standard placement'), yesno($trule->StdHandicap) );
+   if ( is_htype_calculated($trule->convert_trule_handicaptype_to_stdhtype($trule->Handicaptype)) )
+   {
+      if ( count($adj_handi) )
+         $itable->add_sinfo( T_('Handicap adjustment'), implode(', ', $adj_handi) );
+      if ( count($adj_komi) )
+         $itable->add_sinfo( T_('Komi adjustment'), implode(', ', $adj_komi) );
+   }
    $itable->add_sinfo( T_('Main time'), TimeFormat::echo_time($trule->Maintime)
          . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)') : '' ));
    if ( $trule->Byotime > 0 )

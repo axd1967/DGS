@@ -13,6 +13,12 @@ ChangeLog
 
 2016-08-20 jug
 
+   * include/message_functions.php (game_info_table),
+     tournaments/view_tournament.php (echo_tournament_rules):
+   - bugfix: show handicap- & komi-adjustment on game-info only for handicap-types conventional & proper
+     - adjusted game-info for waiting-room-info, invitations and tournament-info-page
+     - placed standard-handicap-info above handicap-/komi-adjustments
+
    * tournaments/include/tournament_pool.php (TournamentPool.exists_tournament_pool),
      tournaments/roundrobin/define_pools.php:
    - bugfix: for round-robin-tournament do allow editing pool-parameters if there are unassigned users

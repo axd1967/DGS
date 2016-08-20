@@ -1107,23 +1107,27 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       }//case CAT_HTYPE_FAIR_KOMI
    }//switch $CategoryHandiType
 
-   if ( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
-   {
-      $adj_handi_str = GameSettings::build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap );
-      if ( (string)$adj_handi_str != '' )
-         $itable->add_sinfo( T_('Handicap adjustment'), $adj_handi_str );
-   }
-
    if ( ENABLE_STDHANDICAP && !$is_fairkomi )
       $itable->add_sinfo( T_('Standard placement'), yesno( $StdHandicap) );
 
-   if ( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment
+   if ( is_htype_calculated($Handicaptype) ) // Ajustments only for CONV | PROPER
    {
-      if ( !$is_fairkomi )
+      if ( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
       {
-         $adj_komi_str = GameSettings::build_adjust_komi( $AdjKomi, $JigoMode );
-         if ( (string)$adj_komi_str != '' )
-            $itable->add_sinfo( T_('Komi adjustment'), $adj_komi_str );
+         $adj_handi_str = GameSettings::build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap );
+         if ( (string)$adj_handi_str != '' )
+            $itable->add_sinfo( T_('Handicap adjustment'), $adj_handi_str );
+      }
+
+
+      if ( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment
+      {
+         if ( !$is_fairkomi )
+         {
+            $adj_komi_str = GameSettings::build_adjust_komi( $AdjKomi, $JigoMode );
+            if ( (string)$adj_komi_str != '' )
+               $itable->add_sinfo( T_('Komi adjustment'), $adj_komi_str );
+         }
       }
    }
 
