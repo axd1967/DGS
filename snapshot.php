@@ -54,14 +54,14 @@ $GLOBALS['ThePage'] = new Page('Docs');
    section( 'current', T_('Snapshots of the source code'));
    centered_container();
 
-   //add_link_page_link('snapshot/DragonGoServer-cvs.tar.gz', 'DragonGoServer-cvs.tar.gz',
-      //T_('The latest version of the source code, directly from the cvs'));
+   add_link_page_link('https://sourceforge.net/p/dragongoserver/dgs-main/ci/release-1_19_11-20160820/tree/', 'DragonGoServer-stable v1.19.11 (git clone)',
+      sprintf( T_('The code this server is running (version %s)'), '1.19.11'));
 
    add_link_page_link('snapshot/DragonGoServer-stable-20140327.tar.gz', 'DragonGoServer-stable-20140327.tar.gz',
-      sprintf( T_('The code this server is running (version %s)'), '1.0.17'));
+      sprintf( T_('The version %s'), '1.0.17'));
 
    add_link_page_link('snapshot/DragonGoServer-stable-20130811.tar.gz', 'DragonGoServer-stable-20130811.tar.gz',
-      sprintf( T_('The previous version %s'), '1.0.16'));
+      sprintf( T_('The version %s'), '1.0.16'));
 
    add_link_page_link('snapshot/DragonGoServer-stable-20120610.tar.gz', 'DragonGoServer-stable-20120610.tar.gz',
       sprintf( T_('The version %s'), '1.0.15'));
@@ -88,13 +88,17 @@ $GLOBALS['ThePage'] = new Page('Docs');
 
    if ( $handle = @opendir('snapshot/archive') )
    {
+      $files = array();
       while ( false !== ($file = readdir($handle)) )
       {
          if ( $file[0] != "." )
-            add_link_page_link("snapshot/archive/$file", $file);
+            $files[] = $file;
       }
-
       closedir($handle);
+
+      asort($files);
+      foreach( $files as $file )
+         add_link_page_link("snapshot/archive/$file", $file);
    }
 
    add_link_page_link();
