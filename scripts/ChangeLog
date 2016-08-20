@@ -13,6 +13,14 @@ ChangeLog
 
 2016-08-20 jug
 
+   * include/table_columns.php (Table.register_filter),
+     tournaments/list_tournaments.php (ACT_MARK_READ):
+   - bugfix: mark 'new' tournaments as read on tournaments-list-page was not working on 2nd table-page
+     cause: Table.register_filter() resets the table-from-row if filter-values changed and
+     they changed implicitly due to a submit after the initial state, which fills in default-values.
+     Because other submits may need the reset of from-row, bug was fixed by preventing
+     reset of Table-from-row only on mark-read form-action.
+
    * include/table_columns.php (Table.make_filter_row):
    - bugfix: use correct table-head description for filter-errors & filter-warnings on Table
 

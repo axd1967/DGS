@@ -37,6 +37,8 @@ require_once 'tournaments/include/tournament_visit.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentList');
 
+define('ACT_MARK_READ', 'mark_read');
+
 
 {
    connect2mysql();
@@ -117,7 +119,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $rx_term = implode('|', $filter_title->get_rx_terms() );
 
    // init table
-   $ttable->register_filter( $tfilter );
+   $is_act_mark_read = (bool)@$_REQUEST[ACT_MARK_READ];
+   $ttable->register_filter( $tfilter, !$is_act_mark_read );
    $ttable->add_or_del_column();
 
    // attach external URL-parameters for static filter (my tournament, managing tournament)
@@ -221,7 +224,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $maxGamesCheck = new MaxGamesCheck();
 
    $ttable->set_extend_table_form_function( 'tournaments_extend_table_form' ); //func
-   if ( @$_REQUEST['mark_read'] && $iterator->getItemCount() > 0 )
+   if ( $is_act_mark_read && $iterator->getItemCount() > 0 )
       mark_new_tournaments_as_read( $iterator, $show_rows, $my_id );
 
 
@@ -427,7 +430,7 @@ function build_restrictions( $tourney, $row )
 // callback-func for tournament-list Table-form adding form-elements below table
 function tournaments_extend_table_form( &$table, &$form )
 {
-   $result = $form->print_insert_submit_button( 'mark_read', T_('Mark All Read') );
+   $result = $form->print_insert_submit_button( ACT_MARK_READ, T_('Mark All Read') );
    return $result;
 }
 

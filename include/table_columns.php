@@ -1660,9 +1660,11 @@ class Table
    /*!
     * \brief Attaches SearchFilter to this table.
     * \param $searchfilter SearchFilter-object to attach to table.
+    * \param $allow_reset_from_row true (default) = allow to reset from_row (e.g. on changed filters);
+    *       false = preserve from_row
     * \param $config array with configuration for table used with filters, \see $ConfigFilters
     */
-   public function register_filter( &$searchfilter, $config = null )
+   public function register_filter( &$searchfilter, $allow_reset_from_row=true, $config = null )
    {
       $this->Filters = &$searchfilter;
       $this->UseFilters = true;
@@ -1673,7 +1675,7 @@ class Table
       }
 
       // reset from-row if filters have changed
-      if ( $this->UseFilters && $this->Filters->has_filters_changed() )
+      if ( $allow_reset_from_row && $this->UseFilters && $this->Filters->has_filters_changed() )
          $this->From_Row = 0;
    }//register_filter
 
