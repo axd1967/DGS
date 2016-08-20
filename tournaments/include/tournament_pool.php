@@ -234,16 +234,21 @@ class TournamentPool
       return $tpool;
    }
 
-   /*! \brief Checks, if TournamentPool-entry exists in db; false if no entry found. */
-   public static function exists_tournament_pool( $tid, $round, $pool=0, $uid=null )
+   /*!
+    * \brief Checks, if TournamentPool-entry exists in db; false if no entry found.
+    * \param $pool -2 = check for all pools; -1 = all "real" pools (Pool>0); 0 = special pool #0 for unassigned users
+    */
+   public static function exists_tournament_pool( $tid, $round, $pool=-2, $uid=null )
    {
       $tid = (int)$tid;
       $round = (int)$round;
       $pool = (int)$pool;
 
       $query = "SELECT 1 FROM TournamentPool WHERE tid=$tid AND Round=$round";
-      if ( $pool > 0 )
+      if ( $pool >= 0 )
          $query .= " AND Pool=$pool";
+      elseif ( $pool == -1 )
+         $query .= " AND Pool>0";
       if ( !is_null($uid) && is_numeric($uid) )
          $query .= " AND uid=$uid";
 

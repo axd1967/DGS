@@ -13,6 +13,11 @@ ChangeLog
 
 2016-08-20 jug
 
+   * tournaments/include/tournament_pool.php (TournamentPool.exists_tournament_pool),
+     tournaments/roundrobin/define_pools.php:
+   - bugfix: for round-robin-tournament do allow editing pool-parameters if there are unassigned users
+     in special pool #0
+
    * tournaments/include/tournament_round.php (TournamentRound.check_round_properties, ~.build_notes_props),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_define_tournament_pools),
      specs/db/table-Tournaments.txt,

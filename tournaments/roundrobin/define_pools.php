@@ -127,7 +127,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       }
       else
       {
-         if ( TournamentPool::exists_tournament_pool($tid, $round) )
+         if ( TournamentPool::exists_tournament_pool($tid, $round, -1) )
             $errors[] = T_('Pool parameters can only be directly changed if all pools have been removed!');
       }
    }
