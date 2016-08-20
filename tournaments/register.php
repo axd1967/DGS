@@ -396,7 +396,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       if ( (string)$tp->AdminMessage != '' )
          $tpform->add_row( array(
             'DESCRIPTION', T_('Admin Message'),
-            'TEXT', make_html_safe($tp->AdminMessage, true), ));
+            'TEXT', span('TUserStatus', make_html_safe($tp->AdminMessage, true)), ));
 
       $tpform->add_row( array(
             'DESCRIPTION', T_('Unsaved edits'),
