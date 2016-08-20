@@ -2,7 +2,1757 @@
 Release [2014-10-29] - DGS 1.19.x - tag [release-1_19_0-20141029] on (later) branch [DGS-stable-20141029]
 
 # History:
-2014-10-29: release 1.19.0 (from DGS-MAIN master)
+2014-10-29 00:21-00:51 release 1.19.0 (from DGS-MAIN master) - major upgrade
+2014-10-31 21:20-21:30 release 1.19.1 - update
+2015-01-04 17:40-17:50 release 1.19.2 - update
+2015-01-06 16:15-16:17 release 1.19.3 - update
+2015-01-11 12:15-12:20 release 1.19.4 - update
+2015-01-12 18:20-18:25 release 1.19.5 - update
+2015-04-12 13:30-14:00 release 1.19.6 - update
+2015-05-14 17:07       release 1.19.7 - update
+2015-05-14 21:38                      - hotfix, 1 change
+2015-05-14 22:20                      - hotfix, 2 changes
+2015-05-27 22:45                      - hotfix, 3 changes
+2015-07-12 18:30-18:40 release 1.19.8 - update
+2015-07-12 21:55                      - hotfix, 3 changes
+2015-09-13 23:05       release 1.19.9 - update
+2015-09-14 00:38                      - hotfix, 1 change
+2016-04-12 22:00-22:20 release 1.19.10 - update
+2016-04-13 16:30                       - hotfix, 8 changes
+2016-04-13 18:00                       - hotfix, 8 changes
+2016-04-14 11:55                       - hotfix, 9 changes
+2016-04-15 00:55                       - hotfix, 11 changes
+2016-04-18 22:35                       - hotfix, 14 changes
+2016-08-20 19:29-19:38 release 1.19.11 - update, 18 changes
 
 ==================================================================
+
+### ----- release-1_19_11-20160820 -----
+
+2016-08-20 jug
+
+   * include/db/bulletin.php (Bulletin.allowGroupUserEdit),
+     edit_bulletin.php (check_bulletin_input):
+   - bugfix: allow editing of certain bulletin-types also for non-admins
+     - avoid status-change from SHOW to PENDING thereby hiding bulletin on editing for bulletin-types
+       tournament-specific news, private-messages, advertisements
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
+       ~.to_string, ~.build_log_string, ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.build_diff_tournament_participant),
+     scripts/updates/1.19/database_changes.mysql, specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/register.php (parse_edit_form, build_participant_notes),
+     tournaments/edit_participant.php (parse_edit_form, send_register_notification),
+     tournaments/list_participants.php, tournaments/register.php:
+   - cleanup:
+     - removed barely used table-column TournamentParticipant.UserMessage for user-questions,
+       use private-messages instead
+     - removed unused table-column TournamentParticipant.Notes for director-notes
+     - renamed TournamentParticipant.AdminMessage to DirectorMessage and adjusted texts accordingly
+-----------
+-- cleanup: removed unused or barely used table-column
+ALTER TABLE TournamentParticipant
+   DROP COLUMN Notes ;
+
+-- cleanup: removed barely used table-column
+ALTER TABLE TournamentParticipant
+   DROP COLUMN UserMessage ;
+
+-- cleanup: rename to use clearer field name
+ALTER TABLE TournamentParticipant
+   CHANGE AdminMessage DirectorMessage text NOT NULL ;
+-----------
+
+   * tournaments/include/tournament_director.php (TournamentDirector.buildAdminEditWarnings),
+     include/globals.php (CSS_VERSION), skins/dragon/screen.css:
+   - use clearer text to be able to ignore warnings by tournament-directors with admin-edit-rights
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.handle_timeout_loss_for_participant):
+   - bugfix: for ladder-tournaments withdraw participant if configured PenaltyLimit on timeouts is reached
+
+   * tournaments/list_tournaments.php (build_restrictions):
+   - tournament-list-page: removed confusing hover-text on restrictions-column
+   - bugfix: fixed color-class for Invite-restrictions
+
+   * include/message_functions.php (game_info_table),
+     tournaments/view_tournament.php (echo_tournament_rules):
+   - bugfix: show handicap- & komi-adjustment on game-info only for handicap-types conventional & proper
+     - adjusted game-info for waiting-room-info, invitations and tournament-info-page
+     - placed standard-handicap-info above handicap-/komi-adjustments
+
+   * tournaments/include/tournament_pool.php (TournamentPool.exists_tournament_pool),
+     tournaments/roundrobin/define_pools.php:
+   - bugfix: for round-robin-tournament do allow editing pool-parameters if there are unassigned users
+     in special pool #0
+
+   * tournaments/include/tournament_round.php (TournamentRound.check_round_properties, ~.build_notes_props),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_define_tournament_pools),
+     specs/db/table-Tournaments.txt,
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form),
+     tournaments/roundrobin/define_pools.php (parse_edit_form):
+   - bugfix: for round-robin-tournaments allow late-changing of tournament-round property pool-winner-ranks
+     - bug: number of pool-winners could only be configured before starting registration
+       and defining the pools
+       - fix #1: added editing of pool-winners-ranks also on define-pool-page, because it might be
+         that the pool-suggestions shown there makes it clearer how many pool-winners make sense
+       - fix #2: due to 2nd edit of pool-winners-rank allow omitting it on 1st configuration
+         on edit-round-properties-page, which is stored as PoolWinnerRanks=0 which is
+         shown as setting-not-configured-yet on tournament-info-page
+   - extend maximum allowed value for pool-winner-ranks to max-pool-size to allow tournament-director
+     to choose if next-round pools shrinks or all players can continue
+
+   * include/table_columns.php (Table.register_filter),
+     tournaments/list_tournaments.php (ACT_MARK_READ):
+   - bugfix: mark 'new' tournaments as read on tournaments-list-page was not working on 2nd table-page
+     cause: Table.register_filter() resets the table-from-row if filter-values changed and
+     they changed implicitly due to a submit after the initial state, which fills in default-values.
+     Because other submits may need the reset of from-row, bug was fixed by preventing
+     reset of Table-from-row only on mark-read form-action.
+
+   * include/table_columns.php (Table.make_filter_row):
+   - bugfix: use correct table-head description for filter-errors & filter-warnings on Table
+
+2016-08-14 jug
+
+   * include/globals.php (CSS_VERSION), skins/dragon/screen.css:
+   - use vertical top-alignment in table of game-comments-page
+
+   * include/message_functions.php (MessageListBuilder.message_list_body, ~.message_list_query):
+   - bugfix: changed link on answer and answered message-icon to previous/next message
+
+2016-07-24 jug
+
+   * user_info.php:
+   - fix bug: use link 'vacation days left' to edit vacation on user-info page only for own info
+
+2016-05-28 jug
+
+   * tournaments/list_tournaments.php:
+   - fix bug: show tournament-notes on tournament-list-page correctly for my or managing tournaments view
+     by replacing static filters with static queries
+
+2016-05-22 jug
+
+   * tournaments/register.php:
+   - added link to withdraw from ladder on edit-registration-page as well
+
+2016-04-23 jug
+
+   * include/admin_functions.php (class Admin, ~.check_user_account_deletion),
+     include/form_functions.php (Form.create_form_string),
+     include/quick_common.php (ADMOPT_CANDIDATE_USER_DEL),
+     admin_show_users.php (create_table, build_admin_flags),
+     admin_users.php (update_user):
+   - added admin-option flag to mark user-account as candidate for deletion
+     - added check to prevent account-deletion if user has important data-entries
+     - do not show with only ADMOPT_CANDIDATE_USER_DEL-flag set on admin-users-list
+   - bugfix Form-class: allow higher amount of row-elements for admin-users-page;
+     added better warning than an "exit"
+
+2016-04-18 jug
+
+   * include/game_comments.php (GameCommentHelper.filter_comment):
+   - bugfix: player-names in MP-game SGF-download was wrong, due to early return
+     from filter_comment() before $this->mpg_user/mpg_move_color was set
+
+2016-04-16 jug
+
+   * include/message_functions.php (game_info_table):
+   - cleanup GUI: use same info sections for waiting-room-offer than for invitation/dispute
+     - waiting-room-info:
+       - changed/added sections as for invitation
+       - moved 'number of games' into game-info-section
+       - moved 'games with opponent' into players-info-section
+     - invitation: added opponents country
+
+   * include/message_functions.php (game_info_table),
+     waiting_room.php:
+   - added country of opponent for waiting-room info-page of game-offer
+
+2016-04-15 jug
+
+   * include/game_comments.php (class GameCommentHelper, ~.__construct, ~.filter_comment,
+       ~.game_tag_filter, ~.remove_hidden_game_tags, ~.remove_secret_game_tags),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.convertGameFlags),
+     include/game_actions.php (GameActionHelper.set_game_move_message),
+     include/std_functions.php ($html_code_closed; make_html_safe),
+     include/game_functions.php (GameNotify.get_text_game_result),
+     include/globals.php (CSS_VERSION, GAMEFLAGS_SECRET_MSG),
+     include/gui_functions.php (echo_image_gamecomment),
+     include/db/games.php (Games.buildFlags),
+     scripts/tests/GameCommentHelperTest.php, scripts/tests/AllTests.php,
+     specs/db/table-Games.txt, specs/quick_suite.txt, skins/dragon/screen.css,
+     halfhourly_cron.php, show_games.php, game.php:
+   - added game-tag <m>text</m> or <mysecret>text</mysecret> for private game-comments
+     even after game finished
+     - text surrounded by <m>text</m> in game-comments will be only visible to author,
+       be revealed to all opponents after the game finished, and never be visible to observers
+     - display secret-text in darkred color in web-interface
+     - set GAMEFLAGS_SECRET_MSG on game if player submits game-comment with secret message-text
+     - include SECRETMSG in quick-suite game-handler on 'info'-command 'flags'-field
+     - show game-comments icon on games-list also if there are secret-messages
+       with tooltip showing the difference to hidden comments
+     - simplified GameCommentHelper::filter_comment()-code for std-game & MP-games
+     - refactored methods game_tag_filter(), remove_hidden_game_tags() into GameCommentHelper-class
+     - include info about existence of secret-messages in game-result message for players only
+
+2016-04-14 jug
+
+   * tournaments/edit_tournament.php, tournaments/edit_rules.php:
+   - bugfix: tournament-admin could not edit admin-edit-director-allowed manager-pages any longer
+     if not a director himself
+
+2016-04-13 jug
+
+   * include/db/ratinglog.php (Ratinglog.load_cache_ratinglogs),
+     include/globals.php (MAX_WMA_TAPS),
+     ratinggraph.php, ratingpng.php:
+   - do not cache the rating-log for the rating-graph if there are more than 3000 entries
+     as building the array-structure to cache takes too much memory for such users
+
+   * opponents.php:
+   - exclude opponents from multi-player-games on opponents-page
+
+   * include/filterlib_mysqlmatch.php (FC_SIMPLE_QUERY; class FilterMysqlMatch, ~.__construct,
+       ~.build_query),
+     include/filter_parser.php (PFLAG_SPECIAL_QUERY),
+     include/filter.php (Filter.build_base_query),
+     code_examples/filter_example2.php:
+   - extended mysql-match-filter with simple substring-query to allow more search flexibility
+     - added FC_SIMPLE_QUERY for mysql-match-filter to specify alternative SQL-query-template
+       for input-values starting with '='
+     - enabled forum-search with extended simple-query on 'Search terms'-field matching
+       on posts Subject & Text fields
+
+   * ratingpng.php (calculate_wma), ratinggraph.php:
+   - changed rating-graph:
+     - removed "binomial" WMA-option on rating-graph only keeping simple moving average
+     - centered moving-average on x-axis
+     - use default of 5% of existing rated games as tap setting, but at least 5
+     - increased max taps 25 -> 50
+     - added optimized calculation for simple moving-average
+
+   * include/utilities.php (interpolate, calculate_mean, array_median),
+     ratinggraph.php, ratingpng.php:
+   - removed Median-filters from rating-graph
+   - cleanup: refactored some useful methods from ratingpng.php to utilities
+
+### ----- release-1_19_10-20160412 -----
+
+2016-04-12 jug
+
+   * ratinggraph.php, ratingpng.php:
+   - rating-graph: removed unwanted code to draw win-pie
+
+   * include/cache_globals.php (CACHE_GRP_RATINGLOG, MAX_CACHE_GRP, $ARR_CACHE_GROUP_CLEANUP,
+       $DGS_CACHE_GROUPS),
+     include/db/ratinglog.php (Ratinglog.load_cache_ratinglogs, ~.delete_cache_ratinglogs),
+     scripts/updates/1.19/other_changes.txt, specs/caching.txt,
+     ratingpng.php (get_rating_data):
+   - adjusted rating-graph:
+     - introduced caching of Ratinglog-entries with 15min expire to avoid continuous
+       loading of full ratinglog when tweaking around with graph-parameters
+     - optimized away additional Ratinglog-query to identify min/max times
+     - switched colors of median-3 and WMA-filter
+
+   * include/graph.php (Graph.gscale, ~.curve),
+     ratingpng.php (MAX_WMA_TAPS; calculate_median, build_wma_weights,
+       calculate_wma, array_weighted_moving_average),
+     ratinggraph.php:
+   - added option in rating-graph to show weighted moving average (WMA)
+     - added WMA N-tap filter with N=2..25 with simple (linear) and binomial weights (LaPlace pyramid)
+     - restrict WMA-filter to 2..25 taps
+   - adjusted rating-graph
+     - leave away data-points at left-edge for Median & WMA filters instead of interpolating them,
+       which did not always looks good
+     - added tool-tips for LSQ & WMA options
+
+   * ratingpng.php (interpolate, array_median, calculate_mean, calculate_LSQ, calculate_median),
+     ratinggraph.php:
+   - added option in rating-graph to show least-square-line (LSQ), median-3 & median-5 filters
+   - added option in rating-graph to hide raw data
+
+2016-04-11 jug
+
+   * tournaments/include/tournament_visit.php (TournamentVisit.mark_tournament_visited,
+       ~.mark_tournaments_read, ~.get_tournament_visit_type, ~.load_tournament_visits,
+       ~.reset_players_tournament_new_count),
+     tournaments/include/tournament_globals.php (TVTYPE_MARK_READ, TVTYPE_OPEN_INFO),
+     include/std_classes.php (ListIterator.getItem, ~.setItemRawValue),
+     scripts/updates/1.19/database_changes.mysql, specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/list_tournaments.php (tournaments_extend_table_form, mark_new_tournaments_as_read):
+   - tournament-list: added button below table to mark all new tournaments as read
+     - extended TournamentVisit-table with VisitType to differ mark-as-read from "real visit" by opening T-info-page
+   - bugfix: fix new tournament count in main-menu after visiting tournament-info-page
+-----------
+-- added visit-type (read T-info / mark-as-read) for TournamentVisit
+ALTER TABLE TournamentVisit
+   ADD VisitType tinyint unsigned NOT NULL default 0 AFTER VisitTime ;
+UPDATE TournamentVisit
+   SET VisitType = 2 ;
+-----------
+
+   * gameinfo.php:
+   - bugfix for game-info-page: for player-info show empty-cell if last-move is not set
+
+   * tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.__construct,
+       ~.createTournament),
+     tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct,
+       ~.createTournament):
+   - increased limits for private & public round-robin tournaments: max-TP 3-64, pools 1-8, rounds 1-3
+   - adjusted creation-defaults for private & public round-robin-tournaments: pool-min-TP=2, HTYPE_ALTERNATE
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_action_status),
+     tournaments/edit_tournament.php:
+   - bugfix: non Admin-Edit tournament-directors couldn't edit any longer
+   - bugfix (copy-error): use correct T-status-list to check allow-editing of tournament-directors
+
+2016-04-10 jug
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_action_status,
+       ~.check_edit_status, ~.check_view_status),
+     tournaments/include/tournament_director.php (TournamentDirector.isEditAdmin, ~.getFlagsText,
+       ~.buildAdminEditWarnings),
+     tournaments/include/tournament_helper.php (TournamentHelper.build_tournament_join_restrictions),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.__construct),
+     tournaments/include/tournament_template.php (class TournamentTemplate),
+     tournaments/include/tournament_globals.php (TD_FLAG_ADMIN_EDIT),
+     include/std_functions.php (buildErrorListString),
+     specs/db/table-Tournaments.txt, skins/dragon/screen.css,
+     tournaments/edit_director.php, tournaments/edit_rules.php,
+     tournaments/edit_tournament.php, tournaments/register.php:
+   - allow tournament-directors with special rights to edit certain tournament-data
+     on other tournament-status than normally allowed
+     - added tournament-director flag ADMIN_EDIT that can be enabled to allow editing of tournament-data
+     - allow ADMIN_EDIT-tournament-directors to edit tournament-info & tournament-rules
+       on tournament-status NEW, REGISTER
+       - additionally for ladder-tournaments editing also allowed on PLAY status
+     - show nasty-red/teal-formatted extra-warning if editing allowed for ADMIN_EDIT-tournament-directors
+
+   * message.php, new_game.php:
+   - cleanup: unify error-text for showing list of errors
+
+   * include/game_functions.php (GameHelper.count_games_with_opponent, echo_accept_same_opponent),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.fill_wroom_object),
+     include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),
+     include/wroom_control.php (WaitingroomControl.build_waiting_room_query),
+     include/message_functions.php (game_info_table),
+     specs/quick_suite.txt, message.php, waiting_room.php (add_old_game_form):
+   - show number of running & finished games with opponent on waiting-room-info & invitation
+     for web-site & quick-suite
+     - added 'opp_finished_games' in quick-suite handler for message-invitation & waiting-room
+     - cleanup: replaced GameHelper::count_started_games() with count_games_with_opponent()
+
+   * include/game_functions.php (SAMEOPP_ONLY_NEW, SAMEOPP_TOTAL_STARTED;
+       append_form_add_waiting_room_game, echo_accept_same_opponent),
+     include/wroom_control.php (WaitingroomControl.build_waiting_room_query, ~.join_waitingroom_game),
+     include/message_functions.php (game_info_table, echo_game_restrictions),
+     specs/db/table-Waitingroom.txt:
+   - added option in accept-same-order restriction to only accept offers if opponent never played
+     before with user
+     - used Waitingroom.SameOpponent = -127 for new option
+     - cleanup: replaced SOT[n] -> SOS[n] for same-offer Started games
+     - cleanup: optimization to not write WaitingroomJoined-table for SAMEOPP_TOTAL_STARTED-options
+
+   * include/game_functions.php (GameHelper.delete_running_game, ~.delete_finished_unrated_game,
+       ~.update_players_start_game, ~.update_players_end_game, ~.count_started_games),
+     include/classlib_user.php (User.load_game_stats_for_users, ~.load_different_opponents_for_all_games),
+     include/wroom_control.php (WaitingroomControl.build_waiting_room_query, ~.join_waitingroom_game),
+     include/quick/quick_user.php (class QuickHandlerUser, ~.parseURL, ~.prepare, ~.process),
+     include/gui_functions.php (span, textWithTitle),
+     include/message_functions.php (game_info_table),
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/table-Games.txt, specs/db/dragon-ddl.sql, specs/quick_suite.txt,
+     scripts/index.php, opponents.php, userinfo.php, users.php:
+   - added GameStats-table to track running & finished non-MP games between two players
+     - show number of different opponents of all games & ratio on user-info-page & invitation-game-info
+     - show number of started / finished games with opponent on user-info/users/opponents-page
+     - added new numbers also in quick-suite user-handler for 'info'-command
+     - added consistency-script to fix GameStats-table for specific user
+     - added seed-script to initially fill GameStats-table for all existing games
+     - adjust GameStats-entry on starting, deleting, finishing standard game
+     - opponents-page: for all-games restriction show table-icon linking to running & finished games
+       only if user has such games with opponent
+     - cleanup: replaced less efficient nested COUNT-query with GameStats-query to count started-games
+       for invitations & waiting-room
+   - cleanup opponents-page: build db-query for detail-info only if needed
+-----------
+-- added table to store game-stats about players in games
+CREATE TABLE GameStats (
+  uid int NOT NULL,
+  oid int NOT NULL,
+  Running smallint unsigned NOT NULL default 0,
+  Finished mediumint unsigned NOT NULL default 0,
+  UNIQUE KEY uid_oid (uid,oid),
+  KEY oid (oid)
+) ENGINE=MyISAM ;
+
+-- execute fix-script (with do_it=1) with server-down to seed empty GameStats-table for all existing games
+--    'scripts/updates/1.19/seed_game_stats.php'
+-----------
+
+2016-04-09 jug
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table),
+     tournaments/ladder/view.php, tournaments/list_participants.php, features/list_votes.php,
+     opponents.php, users.php, waiting_room.php:
+   - added more descriptive tooltips for abbreviated headers in table-list pages:
+     feature-votes, opponents, users, tournament-participants, waiting-room, ladder-view, round-robin pool-view
+
+2016-03-02 jug
+
+   * tournaments/edit_properties.php:
+   - changed min-registration-time for tournaments for updates: 7d -> 3d
+
+2016-02-04 jug
+
+   * game_comments.php:
+   - always show player column on game-comments-page to indicate author of comment (not only for MPG)
+
+2016-01-16 jug
+
+   * show_games.php:
+   - added game start-time column on game-lists for all views
+
+2015-09-19 jug
+
+   * include/sgf_builder.php (SgfBuilder.build_sgf, ~.build_sgf_moves, ~.add_game_notes, ~.build_sgf_end):
+   - fix bug for SGF-download: put private-game-notes of player in same C[] SGF-property as last-move
+     comment instead of non-SGF-compliant 2nd C-prop
+     - append game-notes for unfinished games in last-move comment
+     - append game-notes for finished games after RESULT-info in extra SGF-node
+
+   * sgf.php:
+   - fix bug for SGF-download: include private-game-notes for players in MPG by correcting
+     identification of MP-game-player
+
+2015-09-14 jug
+
+   * tournaments/include/tournament_rules.php (TournamentRules.getHandicaptypeText),
+     include/globals.php (DGS_VERSION):
+   - clearer description for tournament-rule handicap-type ALTERNATE used on tournament-info-page
+
+### ----- release-1_19_9-20150913 -----
+
+2015-09-13 jug
+
+   * tournaments/include/tournament_rules.php (TRULE_HANDITYPE_ALTERNATE; class TournamentRules,
+       ~.convertEditForm_to_TournamentRules, ~.create_tournament_games, ~.prepare_create_game_row,
+       ~.getHandicaptypeText, ~.convert_trule_handicaptype_to_stdhtype),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.start_tournament_round_games,
+       ~.start_games_for_specificed_pools, ~.determine_htype_alternate_start_color, ~.create_pairing_games),
+     include/game_functions.php (HTYPE_ALTERNATE; GameSetup.MAP_GAME_SETUP;
+       GameSetupBuilder.build_url_cat_htype_manual; get_category_handicaptype),
+     tournaments/include/tournament_pool_classes.php (PoolTables.reorder_pool_users_by_tp_id,
+       ~._compare_user_tp_id),
+     include/make_game.php (make_invite_game_setup_from_url, accept_invite_game),
+     include/wroom_control.php (WaitingroomControl.join_waitingroom_game),
+     include/game_texts.php (GameTexts.get_manual_handicap_types),
+     include/message_functions.php (game_settings_form),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt:
+   - add handicap-type to "alternate" colors for round-robin-tournaments
+     - new handicap-type to get balanced black/white game-distribution for tournament-participants
+     - alternating colors only for round-robin-tournaments, forbid for invitations and waiting-room
+     - start each pool with random start-color, then continue alternating color filling up pool
+-----------
+-- added handicap-type to alternate color for round-robin-tournaments
+ALTER TABLE TournamentRules
+   MODIFY Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE','ALTERNATE') NOT NULL default 'CONV' ;
+-----------
+
+2015-09-12 jug
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.__construct,
+       ~.fillEntityData, ~.check_ladder_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_crown_king),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_ladder_props),
+     tournaments/include/tournament_ladder.php (TournamentLadder),
+     scripts/updates/1.19/database_changes.mysql, specs/db/dragon-ddl.sql,
+     specs/db/table-Tournaments.txt, specs/Notifications-EVAL.txt, NEWS,
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/admin.php, tournaments/cron_tournaments.php:
+   - (T016.d) removed automatic crowning of king-of-the-hill for ladder-tournaments
+     - still allow manual crowning by T-director
+     - commented out tournament-cron hourly processing
+-----------
+-- remove automatic crowning of king for ladder-tournaments
+ALTER TABLE TournamentLadderProps
+   DROP COLUMN CrownKingHours,
+   DROP COLUMN CrownKingStart ;
+-----------
+
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     tournaments/ladder/challenge.php (add_form_user_info):
+   - clearer show user being on vacation on ladder-tournament challenge
+
+2015-08-26 jug
+
+   * include/game_functions.php (GameHelper.determine_finished_game_hero_uid):
+   - bugfix: game counts towards hero% if rating-diff >= 1k, was only '>' before
+
+2015-08-13 jug
+
+   * include/db/waitingroom.php (Waitingroom.build_query_sql),
+     waiting_room.php:
+   - added user-online column in waiting-room for view with other offers
+
+2015-08-12 jug
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     show_games.php:
+   - added user-online column on my/user-running-games page showing state of user
+     being online or on vacation
+
+2015-08-09 jug
+
+   * include/globals.php (CSS_VERSION), skins/dragon/screen.css,
+     game.php (draw_game_info, draw_game_tools):
+   - JS-game-viewer:
+     - moved game-info box back to original position
+     - change order of tools-tabs Analyse 1st & Notes 2nd
+     - moved message-box into Analyse-tab with fixed width
+     - restored game-info-box with formatting color/user/rank/prisoners & ruleset/rated/handicap/komi
+       into one line
+
+   * include/globals.php (JS_VERSION),
+     js/game-editor.js:
+   - game-viewer: disable saving-notes with JavaScript due to encoding problems till after utf8-migration
+
+   * game.php (build_comment_tools):
+   - fix bug for JS-game-viewer: tool "go to my previous move" only possible for own games
+
+2015-08-02 jug
+
+   * include/make_translationfiles.php (TRANSL_GROUP_ALL; translations_query),
+     translate.php:
+   - fix bug on translate-page:
+     removed skipping same translation-entries due to occurence in multiple translation-groups.
+     Translation-entries that appear in multiple translation-groups would occur by translation-SQL-query
+     multiple times. The multiple entries had been removed in loop, which lead to pages contain less entry
+     than a page should show, and also the total translation-entry-count was including the double entries,
+     which was very confusing for translators.
+     New approach now is to join with the group-tables only if texts from a specific group are selected.
+
+2015-08-01 jug
+
+   * include/quick/quick_game_info.php (QuickHandlerGameInfo.fill_game_info),
+     include/gamelist_control.php (GameListControl.build_games_query),
+     scripts/updates/1.19/database_changes.mysql,
+     scripts/updates/1.19/other_changes.txt,
+     specs/quick_suite.txt,
+     show_games.php:
+   - added Black-/White-remaining-time on show-games-page and in quick-do suite for
+     game-info & game-list handlers for observing, observed and all running games view
+-----------
+-- hide Black/White-remaining-time for observing/observed/running-all view per default
+UPDATE ConfigPages SET
+   ColumnsGamesObserved2=ColumnsGamesObserved2 & ~0x300,
+   ColumnsGamesObservedAll2=ColumnsGamesObservedAll2 & ~0x300,
+   ColumnsGamesRunningAll2=ColumnsGamesRunningAll2 & ~0x300 ;
+-----------
+
+2015-07-27 jug
+
+   * features/lib_votes.php (Feature.update_count_feature_new),
+     features/edit_feature.php:
+   - bugfixes for re-calc of new-feature-count on changing feature-status
+     - fix bug: re-calc new-feature-count for all users on changing feature-status,
+       because +/-1 on count may be wrong if users already voted
+     - fix bug: method of call on re-calc of new-features-count for specific user
+
+2015-07-26 jug
+
+   * include/game_functions.php (GameHelper.update_game_notes),
+     include/globals.php (CSS_VERSION, JS_VERSION, QUICK_VERSION),
+     js/game-editor.js (DGS.GamePageEditor.makeDocReady),
+     skins/dragon/screen.css, specs/quick_suite.txt,
+     game.php (draw_game_tools):
+   - fix bugs: show and save private game-notes only to game-players & fix showing errors
+     - bugfix: for JS-game-viewer hiding game-notes for non game-players
+     - bugfix: for quick-do-suite prevent saving of game-notes to non game-players
+     - bugfix: fade-out error-box for JS-game-viewer on mouse-click as well
+     - bugfix: add auto-overflow on bigger content and scroll to left-top for error-box of JS-game-viewer
+
+2015-07-25 jug
+
+   * forum/forum_functions.php (class DisplayForum.forum_message_box, ~.draw_post),
+     include/classlib_goban.php (class MarkupHandlerGoban),
+     include/config.php (ALLOW_GO_DIAGRAMS [removed]),
+     include/std_functions.php (start_html),
+     include/GoDiagram.php [removed],
+     js/goeditor.js [removed],
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/dragon-ddl.sql, scripts/data_export.php,
+     forum/post.php, forum/read.php, forum/search.php:
+   - cleanup: removed old JavaScript-based go-editor along with used GoDiagrams-table
+-----------
+-- cleanup: removed old JavaScript-based go-editor along with used GoDiagrams-table
+DROP TABLE GoDiagrams ;
+-----------
+
+   * include/std_functions.php (start_html),
+     include/globals (CSS_VERSION),
+     js/game-editor.js (DGS.GamePageEditor.makeDocReady),
+     js/jquery-1.11.3.min.js,
+     js/jquery-1.9.1.min.js [REMOVED],
+     js/jquery-ui-1.11.4.custom.min.js,
+     js/jquery-ui-1.10.3.custom.min.js [REMOVED],
+     skins/dragon/screen.css:
+   - updated jquery & jquery-ui & jquery-ui CSS
+     - updated jquery 1.9.1 -> 1.11.3
+     - updated jquery-ui 1.10.3 -> 1.11.4, removed ui-draggable/resizable, added ui-sortable for portlets
+
+   * game.php (draw_board_info):
+   - corrected and simplified text for board-info about adding time on game-page
+
+2015-07-19 jug
+
+   * include/std_functions.php (end_page),
+     include/globals.php (DGS_VERSION),
+     translate.php:
+   - removed Translate-link "page" for translators to select texts of translation-group of current page
+
+### ----- release-1_19_8-20150712 -----
+
+2015-07-12 jug
+
+   * translate.php:
+   - fix bug: missed new page-visit filter-option-value for paging on translate-page
+   - fix bug: correctly handle URL-args (tpage & pvisit) in the 3 different forms
+     on translate-page especially on submitting changes
+
+   * tournaments/include/tournament_pool.php (TournamentPool.get_cmp_rank):
+   - (T026) on round-robin tournament pool-view keep "withdrawn"-players at their "original" rank
+     instead of ordered to pool-bottom
+
+2015-07-04 jug
+
+   * include/db/contribution.php (class Contribution, ~.__construct, ~.setCategory, ~.to_string,
+       ~.persist, ~.insert, ~.update, ~.delete, ~.fillEntityData, ~.build_query_sql, ~.new_from_row,
+       ~.load_contribution, ~.load_contributions, ~.getCategoryText),
+     include/form_functions.php (Form.has_rows),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Players.txt, specs/db/dragon-ddl.sql,
+     skins/dragon/screen.css,
+     people.php (add_contributor_link, add_contributor),
+     admin_contrib.php (parse_edit_form),
+     admin.php, userinfo.php:
+   - (S070.2) replace static "contributors" on people-page with server-specific user-contributions list
+     - added editor for admins to add, edit, remove user contributions
+     - save user-contributions in new db-table Contribution with category and comment
+     - people-page: show user-contributions from db-table with comments in black-color
+     - people-page: removed statically configured developer-users
+       has to be re-added in specific DEV/LIVE-server
+     - user-info-page: added admin-link to manage user contributions for user
+-----------
+-- added table to store info about server-specific contributions
+CREATE TABLE Contribution (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  Category enum('FOUNDER','DEV_MAIN','DEV_RECRUIT','DEV_CLIENT','OTHER') NOT NULL,
+  Comment varchar(255) NOT NULL default '',
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Updated datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (ID)
+) ENGINE=MyISAM ;
+-----------
+
+   * include/std_functions.php (NOTIFYFLAG_LAST_NOTIFIED),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Players.txt, specs/db/dragon-ddl.sql,
+     edit_email.php (parse_edit_form, handle_save_mail),
+     halfhourly_cron.php:
+   - (S071) add email-notification option to collect notification-entries by last-notified time
+     - default on edit-email-page for collecting notification-entries is last-access
+     - add note to send email-verification if email is unverified
+     - always set last-notified-time for user after sending email-notification
+-----------
+-- adjust email-notification to collect entries by last-access or last-notified time
+ALTER TABLE Players
+   ADD LastNotified datetime NOT NULL default '0000-00-00 00:00:00' AFTER NotifyFlags ;
+
+-- initialize last-notified with 1 day before last-access, or register-date if unset
+UPDATE Players
+   SET LastNotified = IF(Lastaccess=0, Registerdate, Lastaccess - INTERVAL 1 DAY) ;
+-----------
+
+   * halfhourly_cron.php:
+   - (A17) half-hourly-cron: log number of email-notifications sent and duration into error-log
+
+2015-06-29 jug
+
+   * people.php, docs.php:
+   - (S070.1) overworked people-page: change section-order to give easy access for support, forum-help,
+     faq-help, translators, then info about other contributors & credits
+
+   * include/translation_functions.php (get_language_description_translated),
+     userinfo.php:
+   - fix bug #2: on user-info-page show translated language of user instead of English-language-name
+     using function not effected by T_($var)-warning
+
+2015-06-28 jug
+
+   * include/make_translationfiles.php (TRLFILT_...; translations_query),
+     translate.php:
+   - cleanup: for translate-page used constants and clearer var-names for filtering & searching
+     on original or translated texts
+     - on translate-page changed order of text/show-filter orienting on Avic's proposal
+       http://www.dragongoserver.net/forum/read.php?forum=7&thread=44830#44838
+   - corrected and amended readme for translators (typos, native texts, warnings)
+
+   * userinfo.php:
+   - fix bug: on user-info-page show translated language of user instead of English-language-name
+
+   * include/make_translationfiles.php (translations_query),
+     include/connect2mysql.php ($page_translations),
+     include/std_functions.php (end_page, end_html),
+     include/translation_functions.php (T_),
+     translate.php:
+   - added filter on translate-page to only show original texts from translators last page-visit
+     collected in APC-memory-cache
+     - on page-visits by a translator or developer collect all original texts to translate
+       in T_(..)-function and store them in APC-memory-cache in end_html()-function
+     - added checkbox on translate-page to filter on texts collected on previous page-visit
+
+   * tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_pair_uid,
+       ~.load_tournament_game_by_challenger_uid),
+     include/board.php (Board.load_from_db),
+     include/make_game.php (create_game),
+     tournaments/ladder/challenge.php:
+   - fix bug: for ladder-tournament prevent start of 2 games with same user by using table-locking
+     on confirming ladder-challenge
+     - table-lock needed to use dedicated table-aliases for READ-locks
+     - table GamePlayers for multi-player-games need no lock as it's not support for tournaments
+     - on verifying challenge check latest tournament-game only that is not DONE yet
+
+   * scripts/tournament_consistency.php (fix_tournament_RegisteredTP, fix_tournament_participant_game_count,
+       fix_tournament_ladder_challenge_count, fix_tournament_participant_last_moved):
+   - fix bug: clear caches after fix-run of tournament-consistency-script
+
+2015-06-27 jug
+
+   * include/make_translationfiles.php (translations_query),
+     translate.php:
+   - added search on translate-page for translated text with same text as original text
+
+2015-05-24 jug
+
+   * include/admin_faq_functions.php (class AdminFAQ, ~.get_faq_group_id, ~.get_faq_entry_row,
+       ~.save_new_faq_entry, ~.move_faq_entry_same_level, ~.move_faq_entry_to_new_category,
+       ~.toggle_hidden_faq_entry, ~.toggle_translatable_faq_entry, ~.delete_faq_entry,
+       ~.update_faq_entry):
+   - write FAQ-log on toggling hidden-flag for FAQ/Intro/Link-entry
+   - cleanup: added more arg-checks/casting/mysql-escaping to prevent SQL-injection
+
+   * include/admin_faq_functions.php (AdminFAQ.save_new_faq_entry, ~.update_faq_entry),
+     include/globals.php (CSS_VERSION, HELPFLAG_OPS_ONLY, HELPFLAG_HIDDEN),
+     include/faq_functions.php (faq_item_html),
+     scripts/updates/1.19/database_changes.mysql, specs/db/dragon-ddl.sql,
+     skins/dragon/screen.css,
+     admin_faq.php, admin_show_faqlog.php, faq.php, introduction.php, links.php:
+   - added flag for FAQ-entries to show entries only to executives & translators
+     - show entries in FAQ with prefix "[OPS-only]"
+     - added flags in FAQ-log for changes on hidden/ops-only flag
+     - cleanup: renamed FLAG_HELP_HIDDEN -> HELPFLAG_HIDDEN
+-----------
+-- added Flags in FAQ-log
+ALTER TABLE FAQlog
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER Type ;
+-----------
+
+2015-05-19 jug
+
+   * include/faq_functions.php (faq_item_html),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     admin_faq.php, faq.php,
+     introduction.php (load_intro),
+     links.php (load_links):
+   - always show hidden FAQ/intro/link entries for FAQ-editors to better support writing entries
+     with references to other entries
+     - mark hidden FAQ/intro/link entries on faq-/introduction-/links-page for FAQ-editors
+
+2015-05-17 jug
+
+   * include/admin_faq_functions.php (AdminFAQ.save_new_faq_entry, ~.toggle_hidden_faq_entry),
+     include/globals.php (FLAG_HELP_HIDDEN),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/Text-elements.txt, specs/db/dragon-ddl.sql,
+     admin_faq.php, faq.php, introduction.php, links.php:
+   - replaced Hidden-field for FAQ/Intro/Links with Flags-field to prepare for more selective flags
+-----------
+-- replacing Hidden-field for FAQ/Intro/Links with Flags-field
+ALTER TABLE FAQ
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+ALTER TABLE Intro
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+ALTER TABLE Links
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+
+UPDATE FAQ
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+UPDATE Intro
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+UPDATE Links
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+
+ALTER TABLE FAQ
+   ADD KEY Flags (Flags) ;
+ALTER TABLE Intro
+   ADD KEY Flags (Flags) ;
+ALTER TABLE Links
+   ADD KEY Flags (Flags) ;
+
+ALTER TABLE FAQ
+   DROP COLUMN Hidden ;
+ALTER TABLE Intro
+   DROP COLUMN Hidden ;
+ALTER TABLE Links
+   DROP COLUMN Hidden ;
+-----------
+
+   * show_games.php:
+   - fix bug: wrong query with ambiguous column searching for fair-komi games in games-list
+
+2015-05-16 jug
+
+   * scripts/analyze-weblogs/parse-errorlog-dbcon-errors.pl:
+   - added script to analyze db-connection-errors written in web-error-log
+
+2015-05-14 jug
+
+   * game_comments.php:
+   - added link to corresponding game & move on move-number of game-comments-page
+
+   * game.php (build_last_move_title):
+   - fix bug: show correct author of game-move message also for all previous moves
+
+### ----- release-1_19_7-20150514 -----
+
+   * include/std_functions.php (get_language_text),
+     userinfo.php:
+   - show language-setting with full encoding on user-info-page
+
+   * include/table_columns.php (Table.add_row_one_col):
+   - fix bug: show round-robin pool-title if first table-column is hidden
+     by adding column-data on Table-row with one column in 1st non-hidden column
+
+   * include/board.php (Board.move_marks),
+     game.php:
+   - fix bug: game-move-numbering on game-board-preview was not showing the number on the last-move
+     after user chooses the next-move
+     - show one more move-number on choosing next-move
+
+   * show_games.php:
+   - added tooltips for long column headers for all views of games-list-page:
+     all-running, all-finished, all-observed, observing games,
+     my/user-running, my/user-finished games
+
+   * include/std_functions.php (make_dragon_main_menu):
+   - added more tooltips on the links in the main-menu:
+     status, send message, users, contacts, games
+
+   * include/classlib_userconfig.php (BOARDFLAG_MOVEMSG_ABOVE_BOARD),
+     include/board.php (Board.draw_board),
+     edit_profile.php (parse_edit_form):
+   - added option in user-profile to change position of game-move message above or below the game-board
+
+   * include/board.php (Board.draw_board, ~.draw_move_message),
+     include/globals.php (CSS_VERSION),
+     game.php (build_last_move_title),
+     skins/dragon/screen.css:
+   - adjusted message-boxes on game-page
+     - added title for game-message with player of last-move
+     - added title for preview of own game-message response
+     - changed appearance of game-message with simpler border and light-blue background
+
+   * include/gui_functions.php (echo_image_hero_badge):
+   - adjusted texts for 'badge of honor' to avoid different translations of words in other contexts
+
+### ----- release-1_19_6-20150412 -----
+
+2015-04-11 jug
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_start_withdraw_user_from_tournament_ladder),
+     tournaments/include/tournament_ladder.php (TournamentLadder.start_withdrawal_from_ladder,
+       ~.process_user_absence),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     specs/db/table-Tournaments.txt,
+     tournaments/ladder/edit_props.php:
+   - replaced user-removal with user-withdrawal from ladder-tournament,
+     if user too long absent from server
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.__construct,
+       ~.fillEntityData, ~.check_ladder_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_ladder_props),
+     tournaments/include/tournament_globals.php,
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/view.php (echo_timeout_info),
+     tournaments/manage_tournament.php (make_links_ttype_specific):
+   - added ladder-properties to configure penalty timeout and limit
+-----------
+-- added configuration for penalty timeout and limit
+ALTER TABLE TournamentLadderProps
+   ADD PenaltyTimeout smallint unsigned NOT NULL default '0' AFTER GameEndTimeoutLoss,
+   ADD PenaltyLimit smallint unsigned NOT NULL default '0' AFTER PenaltyTimeout ;
+-----------
+
+   * tournaments/manage_tournament.php:
+   - bugfix: enforce showing 'Round'-column on tournament-participant-list from link
+     on manage-tournament-page
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
+       ~.to_string, ~.build_result_info, ~.build_log_string, ~.fillEntityData, ~.new_from_row,
+       ~.update_participant_flags_with_penalty),
+     tournaments/include/tournament_ladder.php (class TournamentLadder, ~.schedule_withdrawal_from_ladder,
+       ~.start_withdrawal_from_ladder, ~._update_ladder_set_withdraw_flag, ~.new_from_row,
+       ~.load_cache_tournament_ladder),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end,
+       ~.process_tournament_ladder_timeout),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_start_withdraw_user_from_tournament_ladder),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.process_tournament_round_robin_game_end),
+     tournaments/include/tournament_helper.php (TournamentHelper.handle_timeout_loss_for_participant),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     tournaments/include/tournament_globals.php (TP_PENALTY_TIMEOUT, TP_PENALTY_LIMIT),
+     include/game_actions.php (GameActionHelper.update_game),
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/ladder/view.php (echo_timeout_info),
+     tournaments/ladder/admin.php, tournaments/list_participants.php:
+   - added timeout-handling for ladder-tournaments starting withdrawal on 100 timeout-received
+     penalty-points reach a limit of 500
+     - motivation: second step to discourage losing on timeouts but allowing a few timeouts
+       and a way to recover by playing
+     - added TournamentParticipant.PenaltyPoints increasing by 100 on losing on timeout,
+       negative penalty-points are ignored
+     - making a move decreases tournament-participants penalty-points by 1 point
+     - ladder-view: extended timeout-information with own penalty-points and penalty-limit for withdrawal
+     - tournament-participant-list: added column for tournament-directors only with penalty-points
+-----------
+-- added timeout-handling based on penalty-points
+ALTER TABLE TournamentParticipant
+   ADD PenaltyPoints mediumint NOT NULL default '0' AFTER Lost ;
+-----------
+
+2015-04-07 jug
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.new_from_row,
+       ~.load_cache_tournament_ladder),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.process_tournament_round_robin_game_end),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_helper.php (TournamentHelper.update_timeout_loss_for_participant),
+     tournaments/include/tournament_participant.php (TournamentParticipant.update_participant_flags,
+       ~.getFlagsText),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.verify_challenge),
+     tournaments/include/tournament_globals.php (TP_FLAG_TIMEOUT_LOSS),
+     include/game_actions.php (GameActionHelper.update_game),
+     specs/db/table-Tournaments.txt,
+     tournaments/ladder/view.php (build_action_row_str, build_admin_hold_flags),
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/view_tournament.php:
+   - block new incoming challenges for tournament-ladder-participant after losing on timeout
+     - motivation: first step to replace hard user-removal on timeout-handling,
+       avoid that timed-out users is targeted for easy leapfrogging by preventing new incoming challenges
+     - introduced user-specific TIMEOUT_LOSS-flag stored in TournamentParticipant.Flags,
+       set on timeout-loss, cleared on user performing a move-action on game of tournament,
+       update also for round-robin-tournaments to keep it consistent
+     - ladder-view: show info about own timeout-loss-state if TIMEOUT_LOSS-flag set
+     - ladder-view: show "Challenge timeout lock" in Actions-column,
+       if challenging is not allowed due to timeout-loss
+     - ladder-edit: show HOLD-withdraw-flag 'HOLD[TO]' in Actions-column for tournament-director
+     - ladder-admin: added toggle on TIMEOUT_LOSS-flag of user for tournament by tournament-director
+
+2015-04-06 jug
+
+   * message.php:
+   - bugfix: trim subject and body to prevent sending empty message
+
+   * include/std_functions.php (get_user_cache_language),
+     statisticspng.php, statratingspng.php:
+   - bugfix: use language-specific caching files for statistics-graphs as they contain translated texts
+
+   * include/game_functions.php (GameHelper._delete_base_game_tables):
+   - bugfix: avoid potential race-condition by locking tables on deleting games-related tables
+     as DGS does not have real transactions
+
+   * tournaments/ladder/admin.php:
+   - ladder-admin: show number of open and unprocessed tournament-games for ladder-user to edit
+
+   * tournaments/include/tournament_games.php (TournamentGames.count_user_running_games):
+   - bugfix: fix SQL-query counting ALL running tournament-games requiring UNION-ALL
+     instead of UNION-DISTINCT
+
+   * tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration,
+       ~.check_tournament_games_for_rejoin),
+     tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_PAIR),
+     tournaments/include/tournament_games.php (TournamentGames.count_user_running_games),
+     tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/include/tournament_globals.php (TCHKFLAG_OLD_GAMES),
+     tournaments/edit_participant.php, tournaments/register.php:
+   - bugfix on tournament-registration: to avoid wrong challenge-counts prevent re-joining of user
+     if there are open unprocessed tournament-games
+
+   * tournaments/edit_properties.php (parse_edit_form):
+   - bugfix on tournament-configuration: added min-check on register-end-time,
+     should be at least 7 days in the future
+
+   * tournaments/ladder/view.php (build_action_row_str):
+   - ladder-view: show HOLD-flag-state "Withdrawal initiated" also for ladder-observers
+     and participants with higher rank
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.check_ladder_properties,
+       ~.build_notes_props),
+     tournaments/include/tournament_globals.php (TLADDER_MAX_CHALLENGES),
+     tournaments/include/types/dgs_ladder.php (DgsLadderTournament.__construct),
+     specs/db/table-Tournaments.txt,
+     tournaments/ladder/view.php:
+   - forbid ladder with unlimited max. outgoing challenges
+     - reduced limit for max. outgoing challenges from 50 to 20
+     - reduced default for max. outgoing challenges for DGS-scoped ladder from 10 to 5
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.__construct, ~.build_log_string,
+       ~.fillEntityData, ~.schedule_withdrawal_from_ladder, ~.revoke_withdrawal_from_ladder,
+       ~.remove_user_from_ladder, ~.new_from_row, ~._add_participant_to_ladder_with_new_rank,
+       ~.seed_ladder, ~._process_game_end, ~.notify_user_removal),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_withdraw_user_from_tournament_ladder,
+       ~.log_revoke_withdrawal_from_tournament_ladder),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props,
+       ~.verify_challenge),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_initiated_withdrawals),
+     tournaments/include/tournament_games.php (TournamentGames.count_user_running_games),
+     tournaments/include/tournament_globals.php (TL_FLAG_HOLD_WITHDRAW),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     skins/dragon/screen.css,
+     tournaments/ladder/admin.php (add_form_edit_user),
+     tournaments/ladder/view.php (build_action_row_str),
+     tournaments/ladder/withdraw.php (build_withdrawal_state, build_withdrawal_notes),
+     tournaments/cron_tournaments.php:
+   - Delay withdrawal from ladder till all running tournament games are finished
+     - Introduced user-specific HOLD_WITHDRAW-flag with TournamentLadder.Flags to prevent incoming
+       and outgoing ladder-challenges.
+     - Withdrawal from ladder by user will schedule removal from tournament by setting HOLD_WITHDRAW-flag.
+     - User will be removed immediately if there are no running or unprocessed tournament games left.
+     - User with initiated withdrawal will be automatically removed from active ladders
+       on tournament PLAY-status by tournament-cron after all running tournament games of user
+       are finished and processed.
+     - Delayed withdrawing avoids disadvantage (by non-counting games) and advantage (by auto-winning
+       games) of opponents in running tournament games by former annulling of games due to user removal
+       by withdrawing.
+     - Withdrawal request can only be revoked by a tournament-director.
+     - ladder-withdraw:
+       - show current withdrawal-state of user and running tournament-games
+       - allow withdrawing only if not already initiated
+       - emphasized important withdrawal notes
+     - ladder-view:
+       - show info about own withdrawal-state with "Challenging on-hold"
+       - show "Withdrawal initiated" in Actions-column, if challenging is not allowed due to withdrawal
+         of other ladder-user
+     - ladder-edit: show HOLD-withdraw-flag 'HOLD[WD]' in Actions-column for tournament-director
+     - ladder-admin:
+       - added toggle on withdrawal of user from ladder by tournament-director
+       - add info-text, if confirmation required on actions
+     - adjusted all info-texts and notes about ladder-withdrawal in contrast to hard user-removal
+       by annulling tournament-games, which is still possible by ladder-action,
+       enfored by tournament-director or by inactivity-handling.
+     - shortened and cleaned up notification-message on ladder-withdrawal omitting info about detached
+       and running tournament-games
+     - cleanup: count running tournament-games including INIT-status and using TP.ID instead of uid
+-----------
+-- added ON-HOLD flag to allow graceful withdrawal from ladder
+ALTER TABLE TournamentLadder
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER uid ;
+-----------
+
+2015-04-01 jug
+
+   * list_messages.php:
+   - bugfix: fix reset to first page on following moving message into new target folder
+
+2015-03-20 jug
+
+   * include/quick/quick_user.php (QuickHandlerUser.process),
+     specs/quick_suite.txt:
+   - quick-handler user-info: return number of "hits" only for own user
+
+2015-03-16 jug
+
+   * include/quick/quick_user.php (QuickHandlerUser.process),
+     include/globals.php (QUICK_VERSION),
+     specs/quick_suite.txt:
+   - quick-handler user-info: return number of "moves" only for own user
+
+2015-03-07 jug
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
+       ~.make_single_pool_table),
+     include/time_functions.php (TIMEFMT_ADD_HOUR; TimeFormat._echo_time),
+     tournaments/ladder/view.php:
+   - right-align time-diff columns rank-kept/last-access/last-tournament-move on ladder-view
+     and round-robin-pool-view
+   - added time-format to also show zero-hours in time
+
+   * scripts/tournament_consistency.php:
+   - added checkbox to choose to fix tournament-last-move, disabled per default
+
+   * include/filter_functions.php (sql_replace_wildcards):
+   - fix bug: escaping of SQL-wildcards ('_%') was not counting wildcards, which lead in the filters
+     in using '='-operation instead of 'LIKE' to match the escaped SQL-wildcards
+     - filtering on user with '_' in user-handle was not working
+
+   * include/contacts.php (Contact.update_contact, ~.delete_contact,
+       ~.load_cache_contact_uids_by_systemflag, ~.delete_cache_contact_fp_hide),
+     include/cache_globals.php (CACHE_GRP_CONT_FP_HIDE, MAX_CACHE_GRP, $ARR_CACHE_GROUP_NAMES,
+       $ARR_CACHE_GROUP_CLEANUP),
+     include/config.php ($DGS_CACHE_GROUPS),
+     scripts/updates/1.19/other_changes.txt, specs/caching.txt,
+     forum/read.php, forum/search.php:
+   - added caching to store forum-post hide-list to avoid reload on forum-search and forum-read page
+     - invalidate cache on creating, updating and deleting contact-entry for user
+
+   * include/contacts.php (Contact.load_contact_uids_by_systemflag, ~.getContactSystemFlags),
+     include/globals.php (CSS_VERSION, CSYSFLAG_F_HIDE_POSTS),
+     forum/forum_functions.php (class DisplayForum, ~.set_hide_post_users, ~.draw_post),
+     forum/read.php, forum/search.php,
+     skins/dragon/screen.css,
+     edit_contact.php:
+   - added contact system-flag to hide forum posts of specific user
+     - hide post on forum-search and forum-read page
+     - hide only text-body of post
+     - show hidden text on red-ish background
+     - show info that post is hidden and to display it using the reply-link
+     - hiding posts of admin-users is not allowed
+
+2015-02-28 jug
+
+   * include/quick/quick_user.php (QuickHandlerUser.process),
+     include/globals.php (QUICK_VERSION),
+     specs/quick_suite.txt:
+   - quick-handler: added number of web-site-hits and game-moves for user-info command
+
+2015-01-24 jug
+
+   * include/classlib_user.php (User.calculate_hero_ratio, ~.determine_games_next_hero_level),
+     include/db/waitingroom.php (Waitingroom.build_query_sql),
+     include/gui_functions.php,
+     opponents.php, users.php:
+   - bugfix: correct check on including min. number of finished games (20)
+     to determine hero-percentage of user
+
+   * forum/read.php:
+   - append quoted text directly behind author for quote-"reply" in forum-threads
+
+2015-01-18 jug
+
+   * include/std_functions.php ($html_safe_preg):
+   - added auto-links for simple "http[s]://" without using DGS-tagging <..>
+
+2015-01-17 jug
+
+   * include/std_functions.php (start_html, make_dragon_tools, end_page, is_logged_in),
+     include/quick_common.php (get_base_page),
+     translate.php (build_translation_page_group_info):
+   - add Translate-link "this" in bottom-bar for translators to select untranslated text
+     of translation group for current page
+
+   * include/globals.php (DGS_VERSION),
+     templates.php (echo_save_template):
+   - bugfix: saving special HTML-characters like '&' in templates by HTML-escaping them
+
+2015-01-12 jug
+
+### ----- release-1_19_5-20150112 -----
+
+   * show_games.php:
+   - show tournament-game-role on tournament-game-lists only for ladder-type-tournaments
+
+   * include/game_functions.php (GameHelper.delete_running_game, ~.delete_finished_unrated_game),
+     include/quick/quick_game.php (QuickHandlerGame.prepare),
+     include/db/games.php (Games.detach_games),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Tournaments.txt, specs/db/table-Games.txt,
+     admin_game.php (parse_edit_form, draw_game_admin_form),
+     confirm.php, game.php, gameinfo.php, show_games.php:
+   - set Games.tid=0 on annulling (=detaching) tournament-game
+     - removed annulled games from tournament-games-list
+     - allowed adding time for annulled tournament-games
+     - annulled tournament-game can not be deleted
+     - game-info-page: show annulled tournament-game with game-flags & link to former tournament
+     - show-games-page: show tournament-data only for non-detached tournament-games
+     - show-games-page: for game-admin/tournament-admin/developer-admin show small 'A'
+       in info-column for annulled tournament-games
+-----------
+-- set Games.tid=0 for annulled tournament-games
+UPDATE Games
+   SET tid=0 WHERE tid > 0 AND (Flags & 8) ;
+-----------
+
+2015-01-11 jug
+
+   * tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.__construct),
+     tournaments/include/tournament_template.php (class TournamentTemplate),
+     tournaments/game_admin.php (parse_edit_form, draw_game_end):
+   - allow tournament-game annulling only for ladder-tournament-types
+
+   * include/game_functions.php (GameFinalizer.finish_game, ~.should_reject_win_by_timeout),
+     include/rating.php (update_rating2),
+     specs/tournaments.txt:
+   - make tournament-game unrated like non-tournament-game if too few moves,
+     or on opponent reject-win-on-timeout
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games),
+     tournaments/include/tournament_ladder.php:
+   - bugfix: don't show detached tournament-games on ladder-view
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.get_tournament_ladder_notes_user_removed),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tournament_game_end),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder),
+     include/game_functions.php (GameFinalizer.finish_game; GameNotify.get_text_game_result),
+     include/db/games.php (Games.detach_games),
+     include/globals.php (DGS_VERSION),
+     specs/tournaments.txt,
+     tournaments/game_admin.php (draw_game_end),
+     admin_game.php (draw_game_admin_form):
+   - keep rated-state of game for tournament
+     - on removing tournament-participant by tournament-director or game-end-processing by T-cron
+     - on withdrawal from tournament by tournament-participant
+     - on annulling (=detaching) tournament-game by tournament-director
+     - on setting forfeit-game-result by game-admin or tournament-director
+
+### ----- release-1_19_4-20150111 -----
+
+2015-01-10 jug
+
+   * tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),
+     include/message_functions.php (interpret_time_limit_forms),
+     include/game_functions.php (GameSetupChecker.check_time),
+     include/error_functions.php (DgsErrors.need_db_errorlog),
+     include/make_game.php (make_invite_game_setup_from_url),
+     include/error_codes.php (ErrorCode.init),
+     tournaments/edit_rules.php,
+     new_game.php:
+   - restricted time-limits to more reasonable numbers
+     - Japanese byo-yomi: 90d main-time, 30d byo-yomi * 200 periods
+     - Canadian byo-yomi: 90d main-time, 30d byo-yomi / 200 moves
+     - Fischer time: 90d main-time, 30d extra-time
+   - limit time-settings to max-values if parsed from older game-setup
+
+   * waiting_room.php,
+     scripts/updates/1.19/database_changes.mysql:
+   - added creation-date for waiting-room entries as hidden column per default
+   - hide user-related columns and unhide created-column for view with own game-offers
+-----------
+-- hide creation-date for waiting-room entries
+UPDATE ConfigPages
+   SET ColumnsWaitingroom=ColumnsWaitingroom & ~0x200000 ;
+-----------
+
+   * include/table_columns.php (Table.make_tablehead, ~.make_add_column_form,
+         ~._compare_removed_column_names;
+       class TableHead, ~.__construct, ~.getHeaderHtml, ~.getHeaderTitle, ~.getHeaderName;
+       class TableHeadImage, ~.__construct, ~.getHeaderHtml),
+     tournaments/include/tournament_pool_classes.php (PoolSummary.__construct, ~.init_pool_table),
+     tournaments/ladder/view.php,
+     tournaments/list_news.php, tournaments/list_participants.php, tournaments/list_tournaments.php,
+     features/list_votes.php,
+     list_bulletins.php, list_contacts.php, list_shapes.php, list_surveys.php,
+     opponents.php, show_games.php, status.php, users.php, waiting_room.php:
+   - added description in hover-text and full-name in add-column selectbox
+     for abbreviated header-text in table-lists
+     - refactored image-rendering for TableHead() into class TableHeadImage()
+     - added full description for abbreviated headers in hover-text also for sorting-links
+     - show abbreviated headers with full header-description in add-column-selectbox with '(..)'
+     - sorted header-names in add-column selectbox alphabetically ignoring leading '(' and '#'
+     - show empty string for user without tournament-last-move on ladder-view
+
+   * tournaments/ladder/view.php:
+   - aligned running and finished table-icons with link to tournament-games on ladder-view
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder,
+       ~.compute_user_rating_pos_tournament_ladder),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.19/other_changes.txt,
+     skins/dragon/screen.css,
+     tournaments/ladder/view.php:
+   - added column on ladder-view with theoretical ladder-rank if sorted by user rating
+
+   * tournaments/include/tournament_pool.php (TournamentPool.load_tournament_pools,
+       ~.new_tournament_pool_from_cache_row),
+     tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
+       ~.make_single_pool_table),
+     tournaments/include/tournament_ladder.php (TournamentLadder.load_cache_tournament_ladder),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_pools),
+     scripts/updates/1.19/other_changes.txt,
+     tournaments/roundrobin/view_pools.php, tournaments/ladder/view.php, tournaments/view_tournament.php:
+   - added users last-moved date for tournament-games on ladder-view and pool-view
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table),
+     scripts/updates/1.19/other_changes.txt,
+     tournaments/ladder/view.php:
+   - adjusted header-texts to allow for shorter translation to keep table-width in check
+     on ladder-view/pool-view
+
+   * tournaments/include/tournament_pool_classes.php (PoolTables.fill_games):
+   - order all users in round-robin-tournaments by user-rating/ID in unplayed pools
+
+### ----- release-1_19_3-20150106 -----
+
+2015-01-06 jug
+
+   * include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),
+     include/globals.php (QUICK_VERSION),
+     specs/quick_suite.txt:
+   - add own number of started games in quick-message-handler for an invitation
+     in field 'own_started_games'
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
+       ~.make_single_pool_table),
+     include/gui_functions.php (echo_image_table, echo_image_opp_games),
+     scripts/updates/1.19/other_changes.txt,
+     tournaments/list_participants.php, tournaments/ladder/view.php,
+     images/gamestable-fin.gif, images/gamestable-run.gif:
+   - added different table-icons for link to list with running and finished games
+     - use running/finished table-icons for opponents-page, ladder-view, pool-view,
+       tournament-participants-list
+     - added link & icon to finished tournament-games on tournament-participants-list and pool-view
+
+   * ratinggraph.php:
+   - bugfix: rating-graph shown by-games enabled in profile was always used, even when unchecked in form
+
+2015-01-04 jug
+
+   * scripts/tournament_consistency.php (fix_tournament_participant_last_moved):
+   - bugfix: only count tournament-participants without last-move for given tournament-IDs
+     and not on REGISTER-phase
+
+### ----- release-1_19_2-20150104 -----
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.find_tournament_ladder_pos_for_user_rating,
+       ~.add_participant_to_ladder_by_rating):
+   - bugfix: fix finding correct insert-position for ladder-tournament with RATING-join-order
+     - don't insert strongest player at top-position without having played a game
+
+2015-01-03 jug
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
+       ~.to_string, ~.build_log_string, ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_ladder.php (TournamentLadder.load_cache_tournament_ladder),
+     include/game_actions.php (GameActionHelper.update_game),
+     scripts/tournament_consistency.php (fix_tournament_participant_last_moved, collect_tp_last_move),
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/edit_participant.php, tournaments/list_participants.php,
+     tournaments/register.php, tournaments/view_tournament.php:
+   - set TournamentParticipant.Lastmoved if moved in tournament-game
+     - show tournament-last-moved on pages view-tournament, registration,
+       edit-participant, list-participants
+     - extended tournament-consistency-script to init unset TP.Lastmoved
+-----------
+-- set TournamentParticipant.Lastmoved if moved in tournament-game
+ALTER TABLE TournamentParticipant
+   ADD Lastmoved datetime NOT NULL default '0000-00-00 00:00:00' ;
+
+-- execute fix-script (with do_it=1) to init TP.Lastmoved for some participants as good as existing data allows
+--    'scripts/tournament_consistency.php'
+-----------
+
+   * include/quick/quick_game.php (class QuickHandlerGame, ~.prepareMoves),
+     include/sgf_parser.php  (get_handicap_pattern),
+     specs/quick_suite.txt, NEWS:
+   - extended quick-game-handler set_handicap-command to allow to use standard handicap placement
+     with argument 'move=std'
+
+### ----- release-1_19_1-20141231 -----
+
+2014-12-31 jug
+
+   * tournaments/include/tournament.php (Tournament.buildMaintenanceLockText),
+     tournaments/ladder/view.php:
+   - bugfix: on ladder-view show not only admin/td-work-lock but all lock-types in maintenance-lock-text
+
+   * scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Messages.txt, specs/db/dragon-ddl.sql,
+     search_messages.php (build_qsql_games), NEWS:
+   - extended message-search with selection to find all, accepted, declined, pending invitations
+     - added index on Messages.Game_ID to optimize search for invitation messages
+-----------
+-- added index to optimize search for pending invitations
+ALTER TABLE Messages
+   ADD KEY Game_ID (Game_ID) ;
+-----------
+
+2014-12-26 jug
+
+   * include/std_functions.php (USERFLAG_RATINGGRAPH_BY_GAMES),
+     edit_profile.php, ratinggraph.php, NEWS:
+   - added customizable setting in user-profile to show rating-graph by-games,
+     default is disabled i.e. show by-time
+
+   * opponents.php:
+   - bugfix: exclude invitations and MPGs for 'All games'-filter on opponents-page
+
+   * include/classlib_goban.php (MarkupHandlerGoban.parse_igoban):
+   - bugfix: displaying text with bad igoban-tag must not redirect to error-page by throwing error()
+
+   * tournaments/edit_participant.php:
+   - bugfix: copy user-rating to tournament-rating for COPY_CUSTOM-rating-use-mode
+     also on inviting participant by tournament-director
+
+   * tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration):
+   - bugfix: allow inviting by tournament-director of user violating tournament-registration-checks
+     by not returning warning as errors
+
+2014-12-18 jug
+
+   * edit_bio.php:
+   - added special URL-argument 'ri' to pre-fill new bio-entry with rank-info for other Go-servers
+     to assist in poll to improve rank-converter
+
+2014-11-23 jug
+
+   * tournaments/include/tournament_properties.php (TournamentProperties.__construct, ~.build_seed_order):
+   - changed default of RatingUseMode from TPROP_RUMODE_COPY_CUSTOM -> TPROP_RUMODE_CURR_FIX
+
+   * include/classlib_user.php (User.determine_games_next_hero_level),
+     include/quick/quick_user.php (QuickHandlerUser.process),
+     include/globals.php (DGS_VERSION, QUICK_VERSION),
+     specs/quick_suite.txt,
+     userinfo.php (build_hero_info):
+   - show number of games needed to reach next hero-badge-level on user-info-page
+     - only shown for own user-info
+     - omitted if already reached golden-hero-badge
+     - show that rating and min. number of finished games are needed to get hero-badge
+     - show also for quick-suite user-info-handler
+
+   * include/gui_functions.php (span):
+   - bugfix: span() needed basic-safe encoding for title-attribute
+
+   * include/classlib_userconfig.php (BOARDFLAG_SUBMIT_MOVE_STAY_GAME),
+     include/globals.php (CSS_VERSION),
+     specs/db/table-Players.txt,
+     skins/dragon/screen.css,
+     edit_profile.php (parse_edit_form),
+     game.php (draw_message_box),
+     confirm.php:
+   - added button on game-page to submit-move & reload page with same game
+     - button to submit & stay on same game can be enabled with new game-page-setting in user-profile
+     - moved 'Message'-box description from left-side to above text-area input-box
+     - extended move-message width: 70 -> 80
+
+### ----- release-1_19_0-20141029 -----
+
+2014-10-27 jug
+
+   * tournaments/include/tournament_result_control.php (class TournamentResultControl,
+       ~.build_tournament_result_table, ~.make_table_tournament_results),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_results):
+   - fix bug: tournament-result-TOP10-list on view-tournament-page showed wrong counts
+     due to wrong parsing of caching entries
+     - table-header shows number of shown entries
+     - table-footer shows total found entries
+
+2014-10-26 jug
+
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css, edit_profile.php,
+     images/button0.gif, images/button1.gif, images/button2.gif, images/button3.gif,
+     images/button4.gif, images/button5.gif, images/button6.gif, images/button7.gif,
+     images/button8.png, images/button9.png, images/button10.png:
+   - increased width of ID-buttons by 13 pixels for game-IDs >= 1.000.000
+
+   * include/db/bulletin.php (class Bulletin, ~.__construct, ~.setTargetRatingMin, ~.setTargetRatingMax,
+       ~.fillEntityData, ~.new_from_row, ~.build_view_query_sql, ~.get_target_types_with_user_rating),
+     include/gui_bulletin.php (GuiBulletin.getTargetTypeTextsWithUserRating, ~.hasTargetRatingRange,
+       ~.build_view_bulletin, ~.build_target_rating_range),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.notify_directors_last_game_finished),
+     include/rating.php (getRatingArray),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/table-Bulletins.txt, specs/db/dragon-ddl.sql, skins/dragon/screen.css,
+     admin_rating.php (notify_fix_running_games),
+     admin_bulletin.php (parse_edit_form),
+     edit_bulletin.php (parse_edit_form)
+     list_bulletins.php, view_bulletin.php:
+   - added target user rating-range for bulletins with target-type all-users and tournament-participants
+     - allow adding bulletin target user rating-range only for admins
+     - normal users can edit admin-created-bulletins with rating-range
+     - mark target-type on bulletin-list-page if bulletin has target-user rating-range
+     - show target user rating-range on viewing single bulletin if set
+   - show user-list-handles and target user rating-range on bulletin-user-edit
+   - always show target-type on bulletin-user-edit
+   - only allow setting target-types tournament-director and tournament-participants on bulletin-user-edit
+-----------
+-- added target user rating-range for bulletins
+ALTER TABLE Bulletin
+   ADD TargetRatingMax smallint NOT NULL default '9999' AFTER TargetType,
+   ADD TargetRatingMin smallint NOT NULL default '-9999' AFTER TargetType ;
+-----------
+
+2014-10-23 jug
+
+   * edit_rating.php:
+   - decreased rank-diff to grant rating-change 6k -> 5k
+
+2014-10-22 jug
+
+   * include/game_functions.php (NGO_LASTMOVED_OLD_FIRST, NGO_LASTMOVED_NEW_FIRST;
+       NextGameOrder.get_next_game_orders_selection, ~.build_status_games_query, ~.get_next_game_order),
+     scripts/updates/1.19/database_changes.mysql, specs/db/table-Players.txt, specs/db/dragon-ddl.sql,
+     confirm.php (jump_to_next_game), status.php, NEWS:
+   - added sort-order for status-games ordered by last moved (newest first)
+     - renamed NGO_LASTMOVED to NGO_LASTMOVED_OLD_FIRST
+     - added NGO_LASTMOVED_NEW_FIRST
+     - extended & replaced 'Last move' with 'Last Move (old first)' which is also the default
+-----------
+-- added sort-order 'Last moved (new first)' for status-games-page
+ALTER TABLE Players
+   MODIFY NextGameOrder enum('LASTMOVED','LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED_OF' ;
+UPDATE Players
+   SET NextGameOrder = 'LASTMOVED_OF' WHERE NextGameOrder = 'LASTMOVED' ;
+ALTER TABLE Players
+   MODIFY NextGameOrder enum('LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED_OF' ;
+-----------
+
+   * tournaments/edit_properties.php (parse_edit_form),
+     include/classlib_user.php (User.matchRating),
+     include/rating.php (read_rating),
+     specs/db/table-Tournaments.txt:
+   - added more details about min/max-limit of matching a rating-range
+     - allow to parse DGS-rank with percentage-part into DGS-rating
+
+   * tournaments/include/tournament_round_status.php (TournamentRoundStatus.check_conditions_round_status_PLAY),
+     tournaments/include/tournament_pool_classes.php (PoolSummary.make_table_pool_summary),
+     tournaments/roundrobin/edit_pairing.php:
+   - fix bug: for single-pooled round-robin-tournament only show mandatory final-step "ALL"-choice
+     to start tournament-games
+     - added note about mandatory final step using "ALL"-choice to start-games on edit-game-pairing-page
+       and tournament-round-status-page to let system implicitly change tournament-round-status
+       from PAIR to PLAY after all games could have been checked
+
+2014-10-21 jug
+
+   * tournaments/roundrobin/define_pools.php (make_suggestions_table):
+   - fix bugs for define-pool-page: show errors on pool-count & min-pool-size
+     - show error for define-pool on pool-count & min-pool-size only for user-choice
+       instead of all suggestions
+     - show error for define-pool if user-capacity of pool-size/count choice is not enough
+       to satisfy count of registered participants
+     - preserve original T-director choice for making suggestions on defining-pool parameters
+
+2014-10-20 jug
+
+   * include/make_game.php (make_invite_game_setup_from_url),
+     include/message_functions.php (game_settings_form),
+     new_game.php (handle_add_game):
+   - prevent conventional- and proper handicap-type for shape-games
+     - use manual handicap-type nigiri as default for shape-games invitations and waiting-room
+     - disable conventional- and proper handicap-type radio-buttons for shape-games
+
+2014-10-19 jug
+
+   * include/board.php (Board.get_last_move_mark_type, ~.draw_board),
+     scripts/updates/1.19/other_changes.txt,
+     21/bms.gif, 21/wms.gif, 25/bms.gif, 25/wms.gif:
+   - added special last-move-marker
+
+   * include/globals.php (DGS_VERSION),
+     scripts/updates/<VERSION>/database_changes.mysql,
+     scripts/updates/<VERSION>/other_changes.txt,
+     scripts/updates/<VERSION>/release.txt,
+     scripts/updates/<VERSION>/ChangeLog,
+     scripts/updates/1.0.15/fix_game_comments.php,
+     scripts/updates/1.0.15/fix_message_thread.php,
+     scripts/updates/1.0.16/fix_default_max_handi.php,
+     scripts/updates/1.0.16/fix_game_invitations.php,
+     scripts/updates/1.0.16/fix_new_game_expert_view.php,
+     scripts/updates/1.0.18/fix_hero_ratio.php,
+     scripts/index.php, specs/caching.txt, NEWS:
+   - changed server versioning scheme: ARCHITECTURE.MAJOR.MINOR -> 1.19.0
+     - moved and adjusted files 'scripts/updates/FILE<VERSION>' into 'scripts/updates/<VERSION>/FILE'
+       for old versions 1.0.13, 1.0.14, 1.0.15, 1.0.16, 1.0.17, 1.0.18, 1.0.19 (-> 1.19]
+     - adjusted scripts and documentation matching new version-specific directories
+       - renamed 'database_changes_<VERSION>.mysql' -> '<VERSION>/database_changes.mysql'
+       - renamed 'other_changes_<VERSION>.txt' -> '<VERSION>/other_changes.txt'
+       - renamed 'roadmap_<VERSION>.txt' -> '<VERSION>/release.txt'
+       - renamed 'ChangeLog_<VERSION>' -> '<VERSION>/ChangeLog'
+       - renamed 'fix_<SCRIPT>-<VERSION>.php' -> '<VERSION>/fix_<SCRIPT>.php'
+
+   * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.check_tournament_participant_max_games),
+     tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.__construct),
+     tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct):
+   - increase number of max. games per participant in pool for public/private round-robin-tournaments
+     - increased number of max. games per participant from 15 to 18 to allow 10 TPs max
+       with DOUBLE-round-robin
+     - tournament-admin can overwrite max. games per participant, but then also need to change T-status
+
+   * tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.createTournament):
+   - changed default-title for newly create private-round-robin tournament
+     to "user's private mini-tournament (size)"
+
+   * tournaments/include/tournament_rules.php (TournamentRules.update, ~.delete):
+   - fix bug: wrong id used for cache-invalidation of TournamentRules-entries
+
+2014-10-13 jug
+
+   * tournaments/include/tournament_template.php (TournamentTemplate.create_default_tournament_director),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder._createTournament),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament):
+   - tournament-wizard: add default tournament-director with game-end privilege on creating new tournament
+
+   * tournaments/view_tournament.php:
+   - mark only active tournaments as visited, because they would reappear as "new"
+     after tournament closed or deleted
+
+   * tournaments/list_tournaments.php:
+   - tournament-list: only mark NEW and active tournaments as "new",
+     because visits are removed for closed and deleted tournaments
+
+   * tournaments/include/tournament_visit.php (class TournamentVisit, ~.mark_tournament_visited,
+       ~.has_visited_tournament, ~.load_tournament_visits, ~.delete_cache_tournament_visits,
+       ~.cleanup_tournament_visits, ~.reset_players_tournament_new_count),
+     tournaments/include/tournament.php (Tournament.is_active_tournament),
+     include/cache_globals.php (CACHE_GRP_TVISIT, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/std_functions.php (make_dragon_main_menu, is_logged_in, count_tourney_new),
+     include/globals.php (DAYS_RESET_COUNT_TOURNEY_NEW),
+     include/dgs_cache.php (DgsCache.cleanup_cache),
+     include/config.php  ($DGS_CACHE_GROUPS),
+     scripts/updates/database_changes_1_0_19.mysql, scripts/updates/other_changes_1_0_19.txt,
+     scripts/player_consistency.php, scripts/data_export.php, skins/dragon/screen.css,
+     specs/db/table-Tournaments.txt, specs/db/table-Players.txt,
+     specs/db/dragon-ddl.sql, specs/caching.txt,
+     tournaments/cron_tournaments.php (run_once_daily),
+     tournaments/list_tournaments.php, tournaments/view_tournament.php,
+     tournaments/edit_status.php, NEWS:
+   - main-menu: added counter for (un-visited) NEW tournaments
+     - list-tournament: added column with "new" as indicator of (un-visited) NEW tournaments
+       in red-font (for active tournaments) and in grey-font (for inactive tournaments)
+     - view-tournament: mark tournament as visited removing "new" indicator from tournament-list
+       and reset counter
+     - enforce reload of new-tournament-counter if tournament-status changes from active
+       to inactive or vice versa
+     - auto-refresh of counter in users main-menu after 2 weeks of inactivity on last-access
+     - delete old tournament-visits for finished tournaments in tournaments-cron
+   - cleanup cache: added parameter to enforce cache-cleanup for DgsCache
+-----------
+-- added table to store tournament-visits for NEW-counter in main-menu
+CREATE TABLE TournamentVisit (
+  uid int NOT NULL,
+  tid int NOT NULL,
+  VisitTime datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (uid,tid),
+  KEY (tid)
+) ENGINE=MyISAM ;
+
+-- initial fill tournament-participants that joined active tournaments
+INSERT IGNORE INTO TournamentVisit (uid,tid,VisitTime)
+   SELECT TP.uid, TP.tid, TP.Created
+   FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid
+   WHERE T.Status in ('REG','PAIR','PLAY') ;
+
+-- added counter for new tournaments
+ALTER TABLE Players
+   ADD CountTourneyNew smallint NOT NULL default '-1' AFTER CountBulletinNew ;
+-----------
+
+2014-10-12 jug
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.build_tournament_join_restrictions),
+     tournaments/list_tournaments.php, NEWS:
+   - list-tournaments: replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
+
+2014-10-08 jug
+
+   * include/std_functions.php ($html_code, $html_safe_preg; feature_reference):
+   - added DGS-tag <feature id> to reference DGS-feature
+
+2014-10-06 jug
+
+   * include/rank_converter.php (RankConverter.buildForm),
+     include/rating.php (convert_to_rating),
+     include/globals.php (MAX_ABS_RATING),
+     tournaments/edit_participant.php (parse_edit_form),
+     tournaments/edit_results.php (parse_edit_form),
+     tournaments/register.php (parse_edit_form),
+     admin_rating.php, edit_rating.php:
+   - fixed bug for max-rating of 10dan allowed to register in tournaments and for rank-converter
+     - MAX_START_RATING to set initial rating, or
+     - MAX_ABS_RATING for entering existing rating of users
+
+   * include/classlib_userconfig.php (ConfigBoard.set_wood_color),
+     include/std_functions.php ($woodbgcolors),
+     js/goeditor.js (woodbgcolors),
+     specs/db/table-Players.txt, images/smallwood16.gif, edit_profile.php,:
+   - added white-wood-background for game-board-display
+
+2014-10-05 jug
+
+   * include/config.php (ALLOW_QUOTING),
+     forum/forum_functions.php (DisplayForum.draw_post),
+     forum/read.php:
+   - re-enabled ALLOW_QUOTING to get access to a forum post's RAW-text
+     - enabled ALLOW_QUOTING in 'include/config.php' to show 'quote'-link right
+       to 'reply'-link on each forum-post
+     - simplified quote-pre-amble to only contain quoted user
+
+   * include/message_functions.php (game_info_table),
+     waiting_room.php :
+   - for waiting-room added link to finished games with opponent
+     - added column for waiting-room-list with table-icon linked to finished games with opponent
+     - added table-icon linked to finished games with opponent on viewing single waiting-room-entry
+
+   * snapshot.php:
+   - translation-data export must also contain FAQ/Links/Intro-table-data
+
+   * show_games.php:
+   - changed order of current-rating-columns by moving current-rating right after user-id
+     - for all kind of users: user, opponent, black, white user
+     - for all views: my/user finished games, my/user running games, all finished games,
+       all observed games, my observing games, all running games
+
+   * include/std_functions.php ($html_code_closed, $html_code, $html_safe_preg):
+   - added DGS-tag <bgcolor col>...</bgcolor> to mark text with background-color
+
+   * forum/forum_functions.php (FORUM_MAX_INDENT):
+   - increased forum-max-indent level from 15 to 25 as recent discussion went very deep
+
+   * include/std_functions.php ($html_code_closed, $html_code, $html_safe_preg, ticket_reference),
+     include/config.php (TICKET_REF), INSTALL:
+   - added DGS-tag <ticket issue> to reference issues in external ticket-system
+     - external URL to ticket-system can be configured with global config 'TICKET_REF'
+
+   * tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.createTournament):
+   - changed default-title for newly create public-round-robin tournament to
+     "user's mini-tournament (size)"
+
+   * scripts/README.developers:
+   - added site-policy regarding the use of JavaScript on DGS,
+     inspired by https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/6/
+
+2014-09-14 jug
+
+   * include/sgf_builder.php (SgfBuilder.build_filename_sgf),
+     specs/quick_suite.txt:
+   - added file-pattern formatting for SGF-download:
+     $M = moves-count, $H0 = handicap (with 0), $T = game-type
+
+2014-08-05 jug
+
+   * include/gui_bulletin.php (GuiBulletin.build_view_bulletin):
+   - show publish-time of bulletin with weekday and timezone
+
+   * game.php:
+   - show territory-markers for all users for game on SCORE|SCORE2-status
+     if last move was scoring-step POSX_SCORE
+
+   * include/wroom_control.php (WaitingroomControl.build_waiting_room_query, ~.join_waitingroom_game):
+   - bugfix: fixed missing check of waiting-room accept-same-opponent-restriction
+     for total-count of joined games
+     - sync'ed SQL-clause-parts
 

@@ -26,8 +26,8 @@ require_once 'include/connect2mysql.php';
 // $is_maintenance is not changed (can be used to indicate maintenance-mode)
 global $is_down, $is_down_message, $is_maintenance; //PHP5
 $is_down = false;
-$is_down_message = "Sorry, the Dragon Go Server is down for a short upgrade (starting [31-Dec-2014 20:20 GMT]).<br>\n"
-                 . "Please retry in 30 minutes.<br><br>\n"
+$is_down_message = "Sorry, the Dragon Go Server is down for an upgrade (starting [12-Apr-2016 20:00 GMT]).<br>\n"
+                 . "Please retry in 1-2 hours minutes.<br><br>\n"
                  . "Don't worry: the clocks are frozen until the server restarts."
                  ;
                  /*
