@@ -14,6 +14,8 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
          * shown in grey-color <color darkgrey>new</color> for inactive tournaments (Setup phase)
       * Added button below tournament-list-table to mark all new tournaments as read
 
+      * Tournament Registration page: removed barely used user-message (use private messages instead)
+
       * Keep rated-state of tournament-game on
          * removing tournament-participant by tournament-director or game-end-processing by T-cron
          * withdrawal from tournament by tournament-participant

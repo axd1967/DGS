@@ -1236,8 +1236,6 @@ CREATE TABLE IF NOT EXISTS `TournamentParticipant` (
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` varchar(54) NOT NULL default '',
   `Comment` varchar(60) NOT NULL default '',
-  `Notes` text NOT NULL,
-  `UserMessage` text NOT NULL,
   `AdminMessage` text NOT NULL,
   `Finished` mediumint(8) unsigned NOT NULL default '0',
   `Won` mediumint(8) unsigned NOT NULL default '0',

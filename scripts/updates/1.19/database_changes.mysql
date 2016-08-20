@@ -187,4 +187,8 @@ UPDATE TournamentVisit
 ALTER TABLE TournamentParticipant
    DROP COLUMN Notes ;
 
+-- cleanup: removed barely used table-column
+ALTER TABLE TournamentParticipant
+   DROP COLUMN UserMessage ;
+
 

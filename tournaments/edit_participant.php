@@ -505,10 +505,6 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
                'TEXT',        $tp->Comment, ));
 
          $tpform->add_row( array(
-               'DESCRIPTION', T_('User Message#tourney'),
-               'TEXT', make_html_safe( $tp->UserMessage, true ) ));
-
-         $tpform->add_row( array(
                'DESCRIPTION', T_('Admin Message'),
                'TEXTAREA',    'admin_message', 70, 5, $tp->AdminMessage ));
          if ( @$_REQUEST['tp_preview'] )
@@ -725,8 +721,7 @@ function send_register_notification( $type, $tp, $my_id )
    send_message( "tournament.edit_participant.$type($tid,$uid,$my_id)",
       trim( sprintf( $body, "<tourney $tid>", "<user $my_id>" ) . "\n\n" .
             ( $body2 ? "$body2\n\n" : '' ) .
-            "$sep<b>" . T_('Last user message#tourney') . ":</b>\n" . $tp->UserMessage . "\n" .
-            "$sep<b>" . T_('Last admin message#tourney') . ":</b>\n" . $tp->AdminMessage ),
+            "$sep<b>" . T_('Admin Message') . ":</b>\n" . $tp->AdminMessage ),
       sprintf( $subj, $tid ),
       $uid, '', /*notify*/true,
       0/*sys-msg*/, MSGTYPE_NORMAL );

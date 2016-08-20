@@ -16,14 +16,21 @@ ChangeLog
    * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
        ~.to_string, ~.build_log_string, ~.fillEntityData, ~.new_from_row),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.build_diff_tournament_participant),
-     scripts/updates/1.19/database_changes.mysql, specs/db/table-Tournaments.txt,
-     tournaments/edit_participant.php (parse_edit_form),
+     scripts/updates/1.19/database_changes.mysql, specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/register.php (parse_edit_form, build_participant_notes),
+     tournaments/edit_participant.php (parse_edit_form, send_register_notification),
      tournaments/list_participants.php:
+   - cleanup: removed barely used table-column TournamentParticipant.UserMessage for user-questions,
+     use private-messages instead
    - cleanup: removed unused table-column TournamentParticipant.Notes for director-notes
 -----------
 -- cleanup: removed unused or barely used table-column
 ALTER TABLE TournamentParticipant
    DROP COLUMN Notes ;
+
+-- cleanup: removed barely used table-column
+ALTER TABLE TournamentParticipant
+   DROP COLUMN UserMessage ;
 -----------
 
    * tournaments/include/tournament_director.php (TournamentDirector.buildAdminEditWarnings),

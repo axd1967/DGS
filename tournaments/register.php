@@ -147,8 +147,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $need_apply_status = true;
    elseif ( $tp->hasRating() && (int)$old_rating != (int)$tp->Rating && (int)$tp->User->Rating != (int)$tp->Rating )
       $need_apply_status = true;
-   if ( $need_apply_status && strlen($tp->UserMessage) < 10 )
-      $errors[] = T_('Missing reason in user-message for your application (also see notes below).#tourney');
 
    list( $lock_errors, $lock_warnings ) = $tourney->checkRegistrationLocks( $reg_check_type );
    if ( count($lock_errors) )
@@ -385,14 +383,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             'DESCRIPTION', T_('Public User Comment#tourney'),
             'TEXTINPUT',   'comment', 60, 60, $tp->Comment,
             'TEXT', T_('shown in tournament-participants list'), ));
-      $tpform->add_row( array(
-            'DESCRIPTION', T_('User Message#tourney'),
-            'TEXTAREA',    'user_message', 70, 5, $tp->UserMessage,
-            'TEXT', T_('use only if needed (see notes below)'), ));
-      if ( @$_REQUEST['tp_preview'] )
-         $tpform->add_row( array(
-               'DESCRIPTION', T_('Preview'),
-               'TEXT', make_html_safe( $tp->UserMessage, true ) ));
       if ( (string)$tp->AdminMessage != '' )
          $tpform->add_row( array(
             'DESCRIPTION', T_('Admin Message'),
@@ -482,7 +472,6 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
       '_has_custom_rating' => false,
       'start_round'        => $tp->StartRound,
       'comment'            => $tp->Comment,
-      'user_message'       => $tp->UserMessage,
    );
    $old_rating = $tp->Rating;
 
@@ -532,11 +521,9 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
    if ( $is_posted || @$_REQUEST['tp_ack_invite'] || @$_REQUEST['tp_edit_invite'] )
    {
       $tp->Comment = trim(get_request_arg('comment'));
-      $tp->UserMessage = trim(get_request_arg('user_message'));
 
       // determine edits
       if ( $old_vals['comment'] != $tp->Comment ) $edits[] = T_('Comment');
-      if ( $old_vals['user_message'] != $tp->UserMessage ) $edits[] = T_('User Message');
    }
 
    return array( $vars, array_unique($edits), $errors );
@@ -560,7 +547,6 @@ function build_participant_notes( $deny_reason=null, $intro=true )
       $notes[] = T_('You will need a customized rating if you don\'t have a DGS-rating yet or if you don\'t want to start with your current DGS-rating.#tourney');
       $notes[] = T_('Customized rating and round can only be modified freely while in registration phase.#tourney');
       $notes[] = T_('If you enter a customized rating or a non-default starting-round, your application needs to be verified by a tournament director.#tourney');
-      $notes[] = T_('To accelerate the registration process please add your reasoning for the changes in the user-message box.#tourney');
       $notes[] = null; // empty line
    }
 

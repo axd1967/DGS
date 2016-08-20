@@ -173,7 +173,6 @@ Description:
 | Lastchanged   | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
 | ChangedBy     | varchar(54)                       | NO   |     |                     |                |
 | Comment       | varchar(60)                       | NO   |     |                     |                |
-| UserMessage   | text                              | NO   |     | NULL                |                |
 | AdminMessage  | text                              | NO   |     | NULL                |                |
 | Finished      | mediumint(8) unsigned             | NO   |     | 0                   |                |
 | Won           | mediumint(8) unsigned             | NO   |     | 0                   |                |
@@ -257,8 +256,6 @@ Description:
 * ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 
 * Comment : public comment from user
-
-* UserMessage : private message from user to TD
 
 * AdminMessage : private message from TD to user
 
