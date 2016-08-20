@@ -203,7 +203,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
       if ( $allow_edit_tourney && $tptable->Is_Column_Displayed[14] )
       {
          $msgs = array();
-         if ( (string)$tp->AdminMessage != '' ) $msgs[] = T_('AdmMsg#tmsg');
+         if ( (string)$tp->DirectorMessage != '' ) $msgs[] = T_('DirMsg#tmsg');
          $row_str[14] = implode(', ', $msgs);
       }
       if ( $tptable->Is_Column_Displayed[15] )

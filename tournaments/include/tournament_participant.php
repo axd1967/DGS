@@ -49,7 +49,7 @@ $ENTITY_TOURNAMENT_PARTICIPANT = new Entity( 'TournamentParticipant',
       FTYPE_CHBY,
       FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'StartRound', 'NextRound', 'Finished', 'Won', 'Lost', 'PenaltyPoints',
       FTYPE_FLOAT, 'Rating',
-      FTYPE_TEXT, 'Comment', 'AdminMessage',
+      FTYPE_TEXT, 'Comment', 'DirectorMessage',
       FTYPE_DATE, 'Created', 'Lastchanged', 'Lastmoved',
       FTYPE_ENUM, 'Status'
    );
@@ -70,7 +70,7 @@ class TournamentParticipant
    public $Lastchanged;
    public $ChangedBy;
    public $Comment;
-   public $AdminMessage;
+   public $DirectorMessage;
    public $Finished;
    public $Won;
    public $Lost;
@@ -84,7 +84,7 @@ class TournamentParticipant
    /*! \brief Constructs TournamentParticipant-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $uid=0, $user=NULL, $status=null, $flags=0,
          $rating=NULL, $start_round=1, $next_round=0, $created=0, $lastchanged=0, $changed_by='',
-         $comment='', $admin_message='', $finished=0, $won=0, $lost=0, $penalty_points=0, $lastmoved=0 )
+         $comment='', $director_message='', $finished=0, $won=0, $lost=0, $penalty_points=0, $lastmoved=0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -98,7 +98,7 @@ class TournamentParticipant
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
       $this->Comment = $comment;
-      $this->AdminMessage = $admin_message;
+      $this->DirectorMessage = $director_message;
       $this->Finished = (int)$finished;
       $this->Won = (int)$won;
       $this->Lost = (int)$lost;
@@ -158,7 +158,7 @@ class TournamentParticipant
             . ", Lastchanged=[{$this->Lastchanged}]"
             . ", ChangedBy=[{$this->ChangedBy}]"
             . ", Comment=[{$this->Comment}]"
-            . ", AdminMessage=[{$this->AdminMessage}]"
+            . ", DirectorMessage=[{$this->DirectorMessage}]"
             . ", Finished=[{$this->Finished}]"
             . ", Won=[{$this->Won}]"
             . ", Lost=[{$this->Lost}]"
@@ -199,8 +199,8 @@ class TournamentParticipant
          $out[] = "NextRound=[{$this->NextRound}]";
       if ( (string)$this->Comment != '' )
          $out[] = "Comment=[{$this->Comment}]";
-      if ( (string)$this->AdminMessage != '' )
-         $out[] = "AdmMsg=[{$this->AdminMessage}]";
+      if ( (string)$this->DirectorMessage != '' )
+         $out[] = "DirMsg=[{$this->DirectorMessage}]";
       if ( $this->Finished + $this->Won + $this->Lost > 0 )
          $out[] = "Fin/Won/Lost=[{$this->Finished}/{$this->Won}/{$this->Lost}]";
       $out[] = "PenaltyPoints=[{$this->PenaltyPoints}]";
@@ -340,7 +340,7 @@ class TournamentParticipant
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'Comment', $this->Comment );
-      $data->set_value( 'AdminMessage', $this->AdminMessage );
+      $data->set_value( 'DirectorMessage', $this->DirectorMessage );
       $data->set_value( 'Finished', $this->Finished );
       $data->set_value( 'Won', $this->Won );
       $data->set_value( 'Lost', $this->Lost );
@@ -474,7 +474,7 @@ class TournamentParticipant
             @$row['X_Lastchanged'],
             @$row['ChangedBy'],
             @$row['Comment'],
-            @$row['AdminMessage'],
+            @$row['DirectorMessage'],
             @$row['Finished'],
             @$row['Won'],
             @$row['Lost'],

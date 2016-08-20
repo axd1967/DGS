@@ -383,10 +383,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             'DESCRIPTION', T_('Public User Comment#tourney'),
             'TEXTINPUT',   'comment', 60, 60, $tp->Comment,
             'TEXT', T_('shown in tournament-participants list'), ));
-      if ( (string)$tp->AdminMessage != '' )
+      if ( (string)$tp->DirectorMessage != '' )
          $tpform->add_row( array(
-            'DESCRIPTION', T_('Admin Message'),
-            'TEXT', span('TUserStatus', make_html_safe($tp->AdminMessage, true)), ));
+            'DESCRIPTION', T_('Tournament Director Message'),
+            'TEXT', span('TUserStatus', make_html_safe($tp->DirectorMessage, true)), ));
 
       $tpform->add_row( array(
             'DESCRIPTION', T_('Unsaved edits'),

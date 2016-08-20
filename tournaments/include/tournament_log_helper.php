@@ -150,8 +150,8 @@ class TournamentLogHelper
          $msg[] = sprintf(self::$DIFF_FMT, 'NextRound', $old_tp->NextRound, $new_tp->NextRound );
       if ( $old_tp->Comment != $new_tp->Comment )
          $msg[] = sprintf(self::$DIFF_FMT, 'Comment', $old_tp->Comment, $new_tp->Comment );
-      if ( $old_tp->AdminMessage != $new_tp->AdminMessage )
-         $msg[] = sprintf(self::$DIFF_FMT, 'AdmMsg', $old_tp->AdminMessage, $new_tp->AdminMessage );
+      if ( $old_tp->DirectorMessage != $new_tp->DirectorMessage )
+         $msg[] = sprintf(self::$DIFF_FMT, 'DirMsg', $old_tp->DirectorMessage, $new_tp->DirectorMessage );
 
       return implode('; ', $msg);
    }//build_diff_tournament_participant

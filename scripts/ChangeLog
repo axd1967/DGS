@@ -16,13 +16,15 @@ ChangeLog
    * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
        ~.to_string, ~.build_log_string, ~.fillEntityData, ~.new_from_row),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.build_diff_tournament_participant),
-     scripts/updates/1.19/database_changes.mysql, specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     scripts/updates/1.19/database_changes.mysql, specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
      tournaments/register.php (parse_edit_form, build_participant_notes),
      tournaments/edit_participant.php (parse_edit_form, send_register_notification),
-     tournaments/list_participants.php:
-   - cleanup: removed barely used table-column TournamentParticipant.UserMessage for user-questions,
-     use private-messages instead
-   - cleanup: removed unused table-column TournamentParticipant.Notes for director-notes
+     tournaments/list_participants.php, tournaments/register.php:
+   - cleanup:
+     - removed barely used table-column TournamentParticipant.UserMessage for user-questions,
+       use private-messages instead
+     - removed unused table-column TournamentParticipant.Notes for director-notes
+     - renamed TournamentParticipant.AdminMessage to DirectorMessage and adjusted texts accordingly
 -----------
 -- cleanup: removed unused or barely used table-column
 ALTER TABLE TournamentParticipant
@@ -31,6 +33,10 @@ ALTER TABLE TournamentParticipant
 -- cleanup: removed barely used table-column
 ALTER TABLE TournamentParticipant
    DROP COLUMN UserMessage ;
+
+-- cleanup: rename to use clearer field name
+ALTER TABLE TournamentParticipant
+   CHANGE AdminMessage DirectorMessage text NOT NULL ;
 -----------
 
    * tournaments/include/tournament_director.php (TournamentDirector.buildAdminEditWarnings),

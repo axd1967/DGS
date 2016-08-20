@@ -71,7 +71,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
        custom_rating,ratingtype           : customized rating + rating-type for conversion
        del_rating=1                       : remove TP-Rating if set
        start_round                        : start round (if needed)
-       admin_message                      : AdminMessage
+       director_message                   : DirectorMessage
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -505,12 +505,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
                'TEXT',        $tp->Comment, ));
 
          $tpform->add_row( array(
-               'DESCRIPTION', T_('Admin Message'),
-               'TEXTAREA',    'admin_message', 70, 5, $tp->AdminMessage ));
+               'DESCRIPTION', T_('Tournament Director Message'),
+               'TEXTAREA',    'director_message', 70, 5, $tp->DirectorMessage ));
          if ( @$_REQUEST['tp_preview'] )
             $tpform->add_row( array(
                   'DESCRIPTION', T_('Preview'),
-                  'TEXT', make_html_safe($tp->AdminMessage, true), ));
+                  'TEXT', span('TUserStatus', make_html_safe($tp->DirectorMessage, true)), ));
 
          $tpform->add_row( array(
                'DESCRIPTION', T_('Unsaved edits'),
@@ -612,7 +612,7 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
       'custom_rating'      => '', // no default
       '_has_custom_rating' => false,
       'start_round'        => $tp->StartRound,
-      'admin_message'      => $tp->AdminMessage,
+      'director_message'   => $tp->DirectorMessage,
    );
    $old_rating = $tp->Rating;
 
@@ -667,10 +667,10 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
 
    if ( $is_posted || @$_REQUEST['tp_ack_apply'] )
    {
-      $tp->AdminMessage = trim($vars['admin_message']);
+      $tp->DirectorMessage = trim($vars['director_message']);
 
       // determine edits
-      if ( $old_vals['admin_message'] != $tp->AdminMessage ) $edits[] = T_('Admin Message');
+      if ( $old_vals['director_message'] != $tp->DirectorMessage ) $edits[] = T_('Tournament Director Message');
    }
 
    return array( $vars, array_unique($edits), $errors );
@@ -721,7 +721,7 @@ function send_register_notification( $type, $tp, $my_id )
    send_message( "tournament.edit_participant.$type($tid,$uid,$my_id)",
       trim( sprintf( $body, "<tourney $tid>", "<user $my_id>" ) . "\n\n" .
             ( $body2 ? "$body2\n\n" : '' ) .
-            "$sep<b>" . T_('Admin Message') . ":</b>\n" . $tp->AdminMessage ),
+            "$sep<b>" . T_('Tournament Director Message') . ":</b>\n" . $tp->DirectorMessage ),
       sprintf( $subj, $tid ),
       $uid, '', /*notify*/true,
       0/*sys-msg*/, MSGTYPE_NORMAL );

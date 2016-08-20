@@ -191,4 +191,8 @@ ALTER TABLE TournamentParticipant
 ALTER TABLE TournamentParticipant
    DROP COLUMN UserMessage ;
 
+-- cleanup: rename to use clearer field name
+ALTER TABLE TournamentParticipant
+   CHANGE AdminMessage DirectorMessage text NOT NULL ;
+
 
