@@ -13,6 +13,10 @@ ChangeLog
 
 2016-08-20 jug
 
+   * tournaments/include/tournament_director.php (TournamentDirector.buildAdminEditWarnings),
+     include/globals.php (CSS_VERSION), skins/dragon/screen.css:
+   - use clearer text to be able to ignore warnings by tournament-directors with admin-edit-rights
+
    * tournaments/include/tournament_helper.php (TournamentHelper.handle_timeout_loss_for_participant):
    - bugfix: for ladder-tournaments withdraw participant if configured PenaltyLimit on timeouts is reached
 

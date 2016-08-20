@@ -3099,7 +3099,7 @@ span.AdminTournament {
    background: red;
 }
 span.TDWarning {
-   color: red;
+   color: #c00000;
 }
 
 span.EditNote {

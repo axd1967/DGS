@@ -348,7 +348,7 @@ class TournamentDirector
    public static function buildAdminEditWarnings( $warnings, $colspan=0 )
    {
       return buildErrorListString(
-            sprintf( T_('There are some warnings for you as director with \'%s\'-rights'),
+            sprintf( T_("As director with \'%s\'-rights you can ignore the following warnings,<br>\nbut be wary of the consequences"),
                   self::getFlagsText(TD_FLAG_ADMIN_EDIT) ),
             $warnings, $colspan, true, 'WarnMsg', 'TDWarning' );
    }
