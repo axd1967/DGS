@@ -72,6 +72,509 @@ ToDo_FAQ_1_0_16:
 - 1 DOC:  [faq] fill new section: "Dragon administration"
 - 1 DOC:  [specs]: Rated-tourney, but TG.score changed by TD -> Rating-system uses game-result and not TG-result
 
+ToDo_FAQ_1_0_16_FROM_TODO_CLEANUP_RELEASED: Done + ToDoc (Stable-Branch; REL 1.0.16):
+- 1 BUG:  [quick] quick-status didn't show game-prio: http://www.dragongoserver.net/forum/read.php?forum=2&thread=35618
+- 1 ADM:  [rating] contact user with rating-off: 75273 onepiece48, see /home/jug/DGS-fixes/onepiece48-rating-reset-2013-01-29
+- 1 TXT:  [tourney] adjusted TT-text for tourney
+- 1 DEV:  [adm] sql_game_export.php + bugfix
+- 1 DEV:  [user] rating-graph start-time on 1st rated game (else reg-date)
+- 1 ADM:  [site] full-stable-release 11-Jan-2013 + install + set-rel-tag;; upd snapshot (code-data, transl-data, image-data)
+---------------------- ^^^ bug-fix 08-Mar-2013 branch [DGS-stable-20120610]
+- 2 DEV:  [newgame] restore 'new-game' link and other stuff !? ;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=35882#36053 (DONE on LIVE-server 16-Apr-2013)
+---------------------- ^^^ bug-fix 16-Apr-2013 branch [DGS-stable-20120610]
+- 1 ADM:  [site] check server-time, restart NTP !? http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2503375 -> NTP restarted
+- 1 BUG:  [game] MPG-show hidden-msg is wrong on game (last-move-mpg <-> current player mismatch): http://www.dragongoserver.net/forum/read.php?forum=4&thread=33186#36390
+---------------------- ^^^ bug-fix 26-May-2013 branch [DGS-stable-20120610]
+- 1 BUG:  [quick] LIVE-fix: answer/investigate mdobbins scoring-step: http://www.dragongoserver.net/forum/read.php?forum=10&thread=36227#36227 ;; inform Marc http://www.dragongoserver.net/forum/read.php?forum=8&thread=35949#36466
+- 1 ADM:  [site] full-stable-release from 16-Jun-2013;; upd snapshot (code-data)
+---------------------- ^^^ bug-fix 12-Jun-2013 branch [DGS-stable-20120610]
+- 1 ADM:  [dev] increase copyright -> 2013 (head only)
+- 7 TXT:  [msg] clarify "... wrote" in deletion/finalizing message: http://www.dragongoserver.net/forum/read.php?forum=4&thread=35719
+- 3 BUG:  [quick] quick-status does not use order-URL-arg for QST-caching: http://www.dragongoserver.net/forum/read.php?forum=2&thread=35618 -> not fixed (expire is only 1min)
+- 1 BUG:  [wroom] (B10) existing load-profile, search with filter -> Info-link will use profile-values and not filter-values ;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=35416#35519 ;; need option to disable load-profile-default
+- 2 BUG:  [game] weekend-clock-icon always shown on weekend (independent from WkClock-setting): http://www.dragongoserver.net/forum/read.php?forum=2&thread=35525
+- 4 SPEC: [game][mpg] (E) (F009) (M16) delete MP-game: a) on SETUP (only by game-master)?, if no GP on reserved-flag!?, b) RUNNING (asking others?, everyone within 10-12 moves, #players*2/12) -> only by game-admin -> feat-vote;; http://www.dragongoserver.net/features/vote_feature.php?fid=9
+- 2 DEV:  [transl] add full page-navi
+- 2 DEV:  [transl] add sub-page to check for already translated terms: select TT.Text, T.Text from TranslationTexts as TT inner join Translations as T on T.Original_ID=TT.ID and T.Language_ID=4 and TT.Type<>'FAQ' and TT.Text like '%shape%'; => added selectbox to search only for translated-texts
+- 4 DEV:  [game] merge new-game-simple/expert into new-game (remove new-game-simple view); migrate profiles with expert-form (merge with std-view);; scripts/updates/fix_merge_new_game_expert_view-1_0_16.php
+- 4 DEV:  [game] default max-handicap: http://www.dragongoserver.net/forum/read.php?forum=5&thread=34914#34985 (GUI unclear) ;; default-formula http://www.dragongoserver.net/forum/read.php?forum=5&thread=34914#34991 ;; migration-script, see written specs;; use last formula from http://www.dragongoserver.net/forum/read.php?forum=5&thread=34914#35577
+- 1 BUG:  [game] mark_territory()-bug: scoring-bug/answer: http://www.dragongoserver.net/forum/read.php?forum=10&thread=35861 (see mail-templ)
+- 3 BUG:  [user] open new-game from invite-template with fair-komi: must open new-game fair-komi-view
+- 5 SPEC: [quick] message-obj TO-SPECIFY: list, msg-filters (folders, need_reply): filter.type=INVITATION, filter.folder=1,2, filter.need_reply=0|1|"";; http://www.dragongoserver.net/forum/read.php?forum=10&thread=36003
+- 5 SPEC: [quick] quick-stuff requested: http://www.dragongoserver.net/forum/read.php?forum=10&thread=35975#35978;; SPECS http://www.dragongoserver.net/forum/read.php?forum=10&thread=36003
+- 2 BUG:  [forum] the tree-overview links are wrong while writing a reply; missing thread_id+forum_id -> don't understand -> not reproducable
+- 2 CHK:  [site] (B10) profile-saved table-order is wrong, probably b/c of bugfix with table-col-sort-rem-col-bug;; check set_sort() enforcing table-col NO_HIDE -> fixed already
+- 2 BUG:  [msg] move normal-msg manually into Reply-folder, then reply it: orig-msg should be moved to Main-folder;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=35164#35169
+- 5 DBG:  [msg][quick] check not invalidated msg-cache for QST: http://www.dragongoserver.net/forum/read.php?forum=10&thread=34445;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=35164#35172 -> code-review showed nothing (need more details)
+- 5 SPEC: [tourney] config how to allow T-creation, public/priv/dgs in local-config for all T-types -> handle in code need_admin_create_tourney in specific ttype
+- 7 SPEC: [tourney] ladder: (T006) add option TournamentLadderProps.DetermineChallenger (GAME_START|GAME_END): "Challenger is determined as player with lower ladder-position at game-start|game-end.";; http://www.online-go.com/forums/thread.php?threadID=2160;; determined as 1st game-end-process-step
+- 7 DEV:  [tourney] GEN: (T006.3) write T-log for actions by TD: edit-reg, invite, chg T-Rating/T-Round, remove
+- 7 DEV:  [tourney] GEN: (T006.2) write T-log for actions by user (reg): register, edit-my-reg, apply, ack-invite, reject-invite, remove
+- 7 DEV:  [tourney] GEN: (T006.6) write T-log for actions: edit-T, add/edit T-News, edit T-Props, edit T-Rules
+- 3 DEV:  [game] game-page: show who's the player to move
+- 7 DEV:  [tourney] TL: (T006.8) write T-log for actions by user: retreat-from-ladder, challenge
+- 7 DEV:  [tourney] TL: (T006.5a) write T-log for actions by cron: ladder crown-king, remove-user -> NOT-DONE (crown-king is insert in TResult, remove-user happens indirectly on game-end)
+- 7 DEV:  [tourney] TL: (T006.5b) write T-log for actions by cron: game-end-handling (ttype-specific)
+- 7 DEV:  [tourney] TL: (T006.4) write T-log for admin-ladder actions, join-T
+- 7 DEV:  [tourney] TL: (T006.7) write T-log for actions by TD: seed-ladder, remove user, chg-Rank, edit TL-Props
+- 2 SPEC: [newgame] DONE: Area-Scoring: (S4) view game-score for chosen ruleset in scoring-step, and the changed scoring-result when the board stones' are changed;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=24899 -> DONE-item, but not in DGS1.0.15
+- 2 SPEC: [game] (S4) (F001) enable/fix "TODO-area": area-ruleset: deactivate for now (with server-config) till clarified -> area-scoring enabled;; mark as LIVE: http://www.dragongoserver.net/features/vote_feature.php?fid=1
+- 1 SPEC: [game] area-scoring: (S4) calculation: use H-1 for compensation, http://www.dragongoserver.net/forum/read.php?forum=4&thread=25182#25631;; http://senseis.xmp.net/?EquivalenceScoring -> yes, to keep B+W moves equal
+- 1 DEV:  [game] (S4) area-scoring: scoring-box added: http://www.dragongoserver.net/forum/read.php?forum=4&thread=24899
+- 7 DEV:  [cleanup] cleanup: replace is_a() -> instanceof
+- 7 DEV:  [cleanup] cleanup: use better class-def (priv/public/static/etc); use __construct() as Class() deprecated PHP5.3.3; lot of other cleanup -> see ChangeLog
+- 1 DEV:  [newgame] re-added new-game-link in waiting-room
+- 4 DEV:  [cleanup] default max-handicap: avoid redundancy (invite, new-game, t-rule)
+- 1 BUG:  [game] game-quick-handler: can resign for opponent :-( if not my move
+- 7 DEV:  [cleanup] refactor game/confirm-pages/quick_do/quick_play-suite using same code (not copied code) + some minor testing
+- 8 DEV:  [consistency][game] (S56.h) ADMIN: adjust consistency-scripts for MPGs: player-consistency;; fix P.Finished for deleted MPGs -> fix player-consistency-script
+- 9 DEV:  [tourney][adm] ladder/round-robin: (T007) T-consistency-script for ladders
+- 8 SPEC: [tourney] Matrix: check 'specs/tournaments.txt' for new/missed stories
+- 1 CHK:  [site] checking if flush() works for output if used without gz-output-handler on page-start/end to capture page !? if so -> possible ob_implicit_flush(true) -> added page-flag
+- 2 DEV:  [site] adjust all flush()-stuff used in scripts to use page-flags, because other way does not seem to work
+- 2 DEV:  [tourney] RoundRobin: block register on max-TP for apply/register/invite/remove TP !? -> yes (+ say so on reg-page) -> done already
+- 2 SPEC: [tourney] RoundRobin (S30.2): (A2) set TPool.Rank at round-end (determine "winners" of round X): semi-automatic
+- 3 DEV:  [tourney] RoundRobin (S30.2b): add PoolWinnerRanks tround-property to determine pool-winners
+- 2 BUG:  [quick] answer/investigate mdobbins scoring-step: http://www.dragongoserver.net/forum/read.php?forum=10&thread=36227#36227
+- 2 SPEC: [tourney] RoundRobin (S32): (A2) pool-rank-editor: load TP-next-rounders to show for rank-counts
+- 2 SPEC: [tourney] RoundRobin (S03): (A2) "setting" players = choose StartRound > 1;; check, that there are enough TPs, taking care of users with TPs.StartRound > 1 -> use TP.NextRound
+- 2 SPEC: [tourney] RoundRobin (S35): (A2) use TP-next-rounders instead of Start-round: TP.StartRound -> TP.NextRound
+- 1 ADM:  [site] dgs2git[1h]: analyze todos
+- 2 ADM:  [site] dgs2git[20h]: learn git in general; http://git-scm.com/book; git@sf: git clone ssh://juga@git.code.sf.net/p/dragongoserver/git-test dgs-git-test
+- 1 DEV:  [cleanup][site] replace code-style: func() <-> "keyword (..)" e.g. "if ()", "if () {"
+- 1 DEV:  [cleanup][site] replace code-style: TAB 3->4 -> NOT-done (too much work to adjust proper layout)
+- 1 ADM:  [site] dgs2git[1h]: prep new PC for cvs2git-conversion (install packages)
+- 2 ADM:  [site] dgs2git[12h]: convert repo; learn about php-dir-structure; http://sourceforge.net/p/forge/site-support/1195/ ;; git-repo dgs: http://sourceforge.net/p/dragongoserver/code/ ;; DOC: http://sourceforge.net/apps/trac/sourceforge/wiki/Git ;; config cvs2git for migration + run migration + testing
+- 3 ADM:  [site] dgs2git[0.5h]: migrate repo: new main-dir-structure -> no server-sub-dir, no moving of dirs (to preserve orig-links)
+- 3 ADM:  [site] dgs2git[1h]: migrate local checkout DGS-HEAD
+- 3 WAIT: [site] dgs2git[2h]: Configure SF-gitweb: WAIT: http://sourceforge.net/p/forge/site-support/4177/ ;; http://repo.or.cz/w/alt-git.git?a=blob_plain;f=gitweb/README ;; http://dragongoserver.git.sourceforge.net/ ;; https://sourceforge.net/p/forge/documentation/GitWeb/;; adjust docs.php: http://sourceforge.net/p/dragongoserver/cvs/ ;; http://sourceforge.net/p/dragongoserver/dgs.git ;; http://sourceforge.net/p/dragongoserver/dgs.git/commit_browser -> PROJECT.git.sourceforget.net is OLD code-browser => so nothing to configure
+- 1 ADM:  [site] dgs2git[2h]: Q: SF-support about GIT-commit-user-SF-link: http://sourceforge.net/p/forge/site-support/4175/
+- 3 DOC:  [site] dgs2git[3h]: fix repo: remove 'start'-tag; cleanup
+- 5 ADM:  [site] dgs2git[1h]: migrate .cvsignore files, adding images; re-apply ~/DGS-GIT.diff
+- 3 ADM:  [site] dgs2git[0.5h]: migrate repo: rename tags/branches; or perhaps delete if not needed!?
+- 5 ADM:  [site] dgs2git[1h]: adjust sources: check ~/dgs2git/FILES-dgs2git (83 entries), adjust original texts
+- 3 ADM:  [site] dgs2git[1h]: adjust snapshot.php L30-50; how to create tar from GIT with/without images
+- 3 ADM:  [site] dgs2git[0.5h]: adjust INSTALL; README.developers L15,499, etc
+- 4 ADM:  [site] dgs2git[4h]: migrate SF checkouts
+- 6 ADM:  [site] dgs2git[0h]: adjust SF project-info -> no changes needed
+- 6 ADM:  [site] dgs2git[0h]: adjust cvs-links on SLs (DGS main page + sub-pages) -> none, just use new GIT-browser from now on
+- 4 ADM:  [site] dgs2git[2h]: add CVS-hook to avoid commits WITHOUT blocking commit in CVSROOT, or mark as read-only; asked SF-support how to set to read-only: http://sourceforge.net/p/forge/site-support/4176/ ;; used cvs_acls commit-script
+- 6 DOC:  [site] dgs2git[0h]: adjust original FAQ-entries + forum-entries on (a) SF, on (b) LIVE-server -> done
+- 3 DOC:  [site] dgs2git[2h]: rules how to use dgs-main/work, config git-user, commit-guideline
+- 3 DOC:  [site] dgs2git[2h]: document cvs2git-migration, write doc in scripts/updates/-dir ;; need files from wisp-PC ;; document dgs-main/work with permissions and DGS-project groups Workers/Integrators;; read-only CVS + how-to-revoke
+- 9 ADM:  [site] dgs2git[0.5h]: announce change on LIVE-server + report (sum tracked time) + info
+- 9 ADM:  [site] dgs2git[2h]: add CVS-hook commit_prep-script fix needed -> write SF-ticket: https://sourceforge.net/p/forge/site-support/4241/
+- 2 SPEC: [quick] Bulletin: info-cmd: http://www.dragongoserver.net/forum/read.php?forum=10&thread=36444#36450
+- 1 DBG:  [game] scoring/seki wrong: http://www.dragongoserver.net/forum/read.php?forum=10&thread=36461#36461;; http://dragongoserver.sourceforge.net/game.php?gid=491224 -> no change
+- 2 SPEC: [tourney] RoundRobin (S04.d): (A7) Finish one round: (round-status) PLAY >> DONE; which is precondition to set next-round AND to allow T-status: PLAY >> PAIR (next-round), or PLAY >> CLOSED (last round)
+- 1 DOC:  [site] add note about support-for-install on LIVE-server + mention hidden dev-forum
+- 1 DISC: [tourney] answer ladder/round-robin prio: http://www.dragongoserver.net/forum/read.php?forum=4&thread=36219#36497 -> ok (16-Jun-2013) -> re-scheduled tasks for 1.0.16-release
+- 2 SPEC: [site] add version in top-bar as tooltip: http://www.dragongoserver.net/forum/read.php?forum=4&thread=35136#35843 -> TO-state: moved to bottom-bar (left-side)
+- 2 DEV:  [tourney][cleanup] refactor RR/Ladder-stuff from THelper into own-helper-classes
+- 6 BUG:  [forum] don't show "No. X" on revision-history
+- 2 DEV:  [tourney] fix/do tourney/TODOs urgent for release 1.0.16, #8 TODO-tasks, see T-TODO.diff; caching-stuff/count-TPs-stuff
+- 3 DEV:  [cleanup][site] replace code-style: func() <-> "keyword (..)" e.g. "if ()", "if () {" -> redo for comments "//keyword("
+- 1 ASK:  [site] ask Erik: DynDNS potential problem with DGS-NS: http://www.heise.de/newsticker/meldung/Dyn-schraenkt-kostenlose-DynDNS-Accounts-weiter-ein-1863537.html -> no problem as Erik uses DynDNS-Pro
+- 1 ASK:  [game] (S4) area-scoring: ask RobertJasiek about: "H-1" / even-/odd-sized boards / seki-count ? -> answered -> added TODO to discuss in DGS-forums
+- 2 DISC: [user] change night-time: http://www.dragongoserver.net/forum/read.php?forum=2&thread=34827#34832 -> not-done, only FAQ
+- 2 CHK:  [game] MPG, change col-handi: somehow switches assignment of B/W-colors on conventional/proper-handicap-PREVIEW;; see also http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2523864 -> not a bug (nigiri CAN change colors, so it's normal and ok that colors are switched)
+- 2 DEV:  [game] MPG, change col-handi: change text "Update" -> "Save parameters"!?;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2523978
+- 2 CHK:  [game] (S4) Area-Scoring: "H-1" (no?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=25182#25631 <-> http://www.dragongoserver.net/forum/read.php?forum=4&thread=32466#32549 -> use "H" (full compensation; asked RobertJasiek)
+- 2 CHK:  [game] (S4) Area-Scoring: (S11.1) one-point-diff for one playing first on odd-sized boards <-> even-sized ??;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=32466#32549 -> keep same
+- 3 CHK:  [game] (S4) seki-count for Area-Scoring: be able to mark (or disabled to mark): http://www.dragongoserver.net/forum/read.php?forum=4&thread=25182#25439
+- 2 CHK:  [game] (S4) fix area-scoring: http://www.dragongoserver.net/forum/read.php?forum=4&thread=32466 ;; counting / showing add/sub stones;; example
+- 1 DEV:  [site] add user_init_error on all pages checking for un-init'ed objects: http://www.dragongoserver.net/forum/read.php?forum=2&thread=36254#36273 + DOC in readme-devs;; do NOT use 'load_config*_or_default' if update is possible of that db-table on the particular page
+- 1 ADM:  [site] cleanup live-server: remove CVS-dirs
+- 2 DEV:  [site] add tooltip on main-menu items: http://www.dragongoserver.net/forum/read.php?forum=4&thread=36220#36523
+- 7 DBG:  [site] cleanup: remove PHP-warning if enabling E_STRICT on PHP-ini error_reporting: (a) deprecated-stuff, (b) class/static-stuff, (c) others -> seems to be done in code
+- 2 WAIT: [game] (S4) area-scoring ask in forums for discussion (talked to RobertJasiek): add DGS-CHINESE (no pass-stones, seki-count (not enforced), H compensation, no white-last-enforce, bent-four in corner (play-out), area-scoring, komi 7.5 (not 6.5));; http://www.dragongoserver.net/forum/read.php?forum=4&thread=32466#36522 -> seems no one objected [23 .. 28-Jun-2013]
+- 2 CHK:  [merge][doc] merge axd: http://www.dragongoserver.net/forum/read.php?forum=10&thread=36440#36457
+- 3 DOC:  [site] fix INSTALL-doc about creating + importing translations (make-known-langs by script-call + import/replace): http://www.dragongoserver.net/forum/read.php?forum=10&thread=36440#36440
+- 2 DEV:  [game] (S4) area-scoring (talked to RobertJasiek): add DGS-CHINESE with komi 7.5 as default, full H compensation
+- 2 BUG:  [site] fix unit-tests
+- 3 DOC:  [site] doc includepath in php.ini in CLI-php-config for phpunit (older version); newer versions use phpunit --includepath ...
+- 4 SPEC: [game] adjust-handicap/komi only for conv+proper handicap-type; add note "not for manual" or "only for conv/prop"; chg t-info for non-conv/proper-htypes (adj-handi)
+- 2 DOC:  [review] INSTALL-file "step to review", see: https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/1/#5388/8985
+- 4 BUG:  [msg] fix bug (but how?) on reply-message select NO-folder then press "Move to folder" leads to an error: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2533229
+- 1 BUG:  [game] fix get_game_settings(grow) does not have all that stuff -> must parse GameSetup
+- 7 BUG:  [adm] handle rating-change's "reset" of: running Games.B/W_Start_Rating, running MPG-B/W_Start_Rating; show list of opponent-Handles for messages;; handle tourney-games/MPG-games/std-games;; add CHECK-button, that checks for running-objects (MPG/normal/FK/tourneys/invitations?)
+- 2 CHK:  [merge] merge-request axd: http://www.dragongoserver.net/forum/read.php?forum=10&thread=36610#36610
+- 2 CHK:  [merge] merge-request axd: http://www.dragongoserver.net/forum/read.php?forum=10&thread=36610#36610;; work/axd-sfdev/review
+- 2 BUG:  [game] invite/dispute: not showing opp/=curr state of invitation !?;; perhaps from B/W-color-htype-fix !?;; check also quick-suite msg-inv-info/wroom-info => refactor w/ new GS-table [branch: j/gamesetup]
+- 4 SPEC: [feature] allow feature-voting also for unrated-finished games (not only rated-finished games): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2537533
+- 4 TST:  [game] re-design game-invitation: test migration-script
+- 4 ADM:  [site] update-SF
+- 1 CHK:  [review] merge-req: https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/4
+- 1 BUG:  [tourney] can not add T-director (w/o checkbox enabled): http://www.dragongoserver.net/forum/read.php?forum=4&thread=36649#36675
+- 1 ADM:  [adm] cleanup spam-accounts ca. 1140 users, see ~/DGS-fixes/spam-accounts-2013-07-24/CMDs -> 1131 users deleted
+- 1 SPEC: [adm] log IP on registering !!
+- 2 SPEC: [user] reg-user: change form-keys to disturb registration-bots (use generated key-names depending on changing component like week w/o preventing switch-data-loss)
+- 2 SPEC: [cleanup] optimized msg-search for status-page, using MsgCorrespondent.uid-index as indicated by mysql-slow-log
+- 5 DOC:  [doc] adjust 'disallow' -> use simple 'not allowed' / prevent / or other;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=36649#36711
+- 3 DEV:  [mpg] added game-master on status-page for MP-games
+- 2 BUG:  [mpg] show wr-entry for reserved slots for game-master must link to MY-wroom-games while for observers it must link to normal wroom-games
+- 2 DEV:  [error] adjust error-codes/attributes for db-writing/id-showing
+- 2 SPEC: [user] reg-user: need mail-activation to verify mail (user-flag);; http://www.dragongoserver.net/forum/read.php?forum=2&thread=36701#36708
+- 2 SPEC: [site] replace sourceforget CVS->GIT browser, e.g. NEWS
+- 2 DEV:  [cleanup] replace deprecated PHP ereg*-functions
+- 2 CHK:  [cleanup] replace incompatible PHP 4.x > 5.x stuff: http://www.php.net/manual/en/migration5.php -> checked, nothing todo
+- 2 CHK:  [cleanup] replace incompatible PHP 5.0 > 5.1 stuff: http://www.php.net/manual/en/migration51.php -> checked, nothing to do
+- 2 CHK:  [cleanup] replace incompatible PHP 5.1 > 5.2 stuff: http://www.php.net/manual/en/migration52.php -> checked, nothing to do
+- 2 CHK:  [game] why is error 'no_initial_rating' occuring?  see live-server errorlog -> disable rating-checkbox if initiating user is unrated with reason
+- 2 BUG:  [newgame] do NOT show rated-checkbox for shape-game or MPGs (as that cannot be changed anyway)
+- 2 SPEC: [invite] re-do impossible-change for invites/disputes with unrated-user -> test dispute-diff rated <-> not-rated (implicitly Rated=0) -> show errors if unrated-user creates game-settings-conflict
+- 2 BUG:  [wroom] waiting-room-list does not restrict on Rated=Y for player without rating; + game-info-table
+- 3 SPEC: [user] update Players.LastAccess=max(Last-web-access,last-quick-access);; http://www.dragongoserver.net/forum/read.php?forum=2&thread=36760#36762
+- 5 SPEC: [newgame] show max-handi-default + on changed board-size w/ JS;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=36649#36729
+- 2 SPEC: [user] mark account if mail is verified or not
+- 2 SPEC: [user] email-change with verification-msg
+- 2 SPEC: [user] show that open verification-email-change needs attention: show on which page? status? -> do not show, user is responsible to do something with sent mail-verification
+- 2 CHK:  [user] verifying email-change with one address invalidates other verifications? -> NO, leave it to user to cleanup old open verifications
+- 2 SPEC: [user] make server-config SEND_ACTIVATION_MAIL=true if activation needed;; doc in INSTALL (to create admin-nick);; e.g. for SF.net or local-server !?
+- 2 SPEC: [user] edit-mail-page: sent mail-verify if saving unverified mail (without email-change)
+- 4 ADM:  [site] update-SF
+- 1 ADM:  [site] prep rel 1.0.16 + do release 17:00-18:25 on 11-Aug-2013
+- 8 DEV:  [adm] fix Players-consistency: Running totally off, etc.
+- 5 ADM:  [adm] [tourney] activate tourney-cron
+- 9 CHK:  [tourney] reserve 30 entries for older-tourneys on live-server -> no, start from scratch
+---------------------- ^^^ server-upgrade 11-Aug-2013 branch [main]
+- 1 BUG:  [user] Players.LastMove is > Lastaccess/LastQuickAccess !? ;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=36760#36806;; bug is use of GREATEST(..)
+- 3 BUG:  [site] nowrap-bottom-bar: http://www.dragongoserver.net/forum/read.php?forum=4&thread=36649#36808
+---------------------- ^^^ bug-fix 11-Aug-2013 branch [main] per tar-file
+- 1 BUG:  [game] sgf-download of finished games needing GameScore-access is broken (priv-property-access): http://www.dragongoserver.net/forum/read.php?forum=2&thread=36837
+---------------------- ^^^ bug-fix 13-Aug-2013 branch [main]
+- 3 TXT:  [tourney] adjusted texts: rank-archive period -> rank archiving period
+- 5 ADM:  [tourney] start test-ladder: unrated, 9x9, chinese, 14d+1d -> ask in T-forums -> started [15-Aug-2013 11:00 CEST]
+- 3 TXT:  [tourney] adjusted texts: TP-status: apply/register/invite -> applied/registered/invited
+---------------------- ^^^ bug-fix 15-Aug-2013 14:40 branch [main]
+- 3 SPEC: [tourney] t-log-page: add bottom-links to return to tournament -> T-info + T-manage
+- 3 SPEC: [tourney] TRR/TL: add user-online column with user-is-online + on-vacation
+- 3 SPEC: [site] add on-vacation in all pages with user-online column (in that col)
+- 5 SPEC: [user] prevent user-reg for spam-account following pattern /^(\w+)\d{3,}/ with $1 using consecutive letters e.g. fghij
+- 3 BUG:  [tourney] sort TP-list on T-rating doesn't work: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#36873
+- 1 DOC:  [tourney] started DGS-ladder 9x9 REG-phase [15-Aug-2013 11:00] => talk about T-games (on ladder-list, refs, #games-in/out, arbitration, challenge+confirm/cancel); ladder-columns (hide some); T-ref on game-page/game-info-page;; game-end delayed processing;; resign early;; improvements -> forum
+---------------------- ^^^ bug-fix 16-Aug-2013 18:30 branch [main]
+- 5 CHK:  [tourney] ladder-theoretical-pos determination ordered by rating -> optimize for all ladder-users (currently it's a loop over all users per user): O(n^2) -> wrong, it's not needed as it's only calculated for ONE (the current) user
+- 3 SPEC: [tourney] ladder: added ladder-summary on view-ladder with count of games for TG_STATUS_PLAY+SCORE
+---------------------- ^^^ bug-fix 16-Aug-2013 21:30 branch [main]
+- 2 BUG:  [game] shape-game-lists show no flags anymore; was cleanup-problem
+---------------------- ^^^ bug-fix 16-Aug-2013 22:30 branch [main]
+- 2 TXT:  [tourney] corrected text for ladder-summary
+---------------------- ^^^ bug-fix 16-Aug-2013 22:45 branch [main]
+- 6 BUG:  [game] new-game-simple-view save as profile-template wrong !?  http://www.dragongoserver.net/forum/read.php?forum=2&thread=36217;; check after def-handi-fix-scripts-run -> closed case
+- 2 BUG:  [tourney] tournament-log: tid-URL-arg not forwarded
+- 1 BUG:  [tourney] something wrong with cron: not processing finishe TGames;; PHP Fatal error:  Call to private method TournamentLadderProps::calc_game_end_action() from context 'TournamentLadderHelper' in tournaments/include/tournament_ladder_helper.php on line 81
+---------------------- ^^^ bug-fix 17-Aug-2013 20:25 branch [main]
+- 2 BUG:  [tourney] on register/edit-TP: PHP Warning:  Missing argument 3 for TournamentLadder::add_user_to_ladder(), called in /home/www/gowww/html/tournaments/include/tournament_template_ladder.php on line 149 and defined in /home/www/gowww/html/tournaments/include/tournament_ladder.php on line 554, referer: http://www.dragongoserver.net/tournaments/register.php?tid=1
+- 2 BUG:  [tourney] PHP Notice:  Undefined variable: tlog_type in tournaments/include/tournament_ladder.php on line 595, referer: http://www.dragongoserver.net/tournaments/register.php?tid=1
+---------------------- ^^^ bug-fix 17-Aug-2013 21:17 branch [main] chg#16
+- 1 BUG:  [tourney] ladder start-rank +/i rank in change-column not correctly updated
+- 2 BUG:  [tourney] ladder: why is "rematch wait.." shown to observers -> should only be shown to "blocked" opponent!
+---------------------- ^^^ bug-fix 17-Aug-2013 22:45 branch [main] chg#18
+- 6 BUG:  [site] undo rename send_user_reference() back to send_reference() as needed in regex for $html_safe_reg
+---------------------- ^^^ bug-fix 18-Aug-2013 01:05 branch [main] chg#19
+- 1 BUG:  [tourney] view-ladder rematch-wait also shown to other players: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#36965
+- 1 BUG:  [tourney] view-ladder rematch-wait used clock-ticks are not changed, b/c T-cron-clock is used with Ticks always =0 !?
+- 5 SPEC: [game] sgf-download-option to control file-name-format (nodate=1): http://www.dragongoserver.net/forum/read.php?forum=4&thread=36938#36952
+- 4 BUG:  [tourney] game-info-page: TG-role for non-players makes no sense ? -> add user or color !?
+- 4 SPEC: [merge][review] forum-navigation-on-reply by axd: https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/5/ -> merged
+---------------------- ^^^ bug-fix 20-Aug-2013 00:20 branch [main] chg#24
+- 5 BUG:  [site] fixed goodies-listing
+- 5 SPEC: [site] added greasemonkey-script to download SGF without date
+---------------------- ^^^ bug-fix 20-Aug-2013 00:10 branch [main] chg#26
+- 1 BUG:  [user] registration MUST show error for missing email !! -> delete user [eutiamo]
+---------------------- ^^^ bug-fix 24-Aug-2013 18:39 branch [main] chg#27
+- 3 SPEC: [tourney] ladder: mark own challenges for easier spotting: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2559632; done
+---------------------- ^^^ bug-fix 25-Aug-2013 17:33 branch [main] chg#28
+- 3 SPEC: [tourney] public/private ladder: restrict max-chall-in/out more
+- 3 BUG:  [user] admin-rating wrong replace-text
+---------------------- ^^^ bug-fix 26-Aug-2013 18:05 branch [main] chg#29
+- 3 BUG:  [tourney] remove rated-check for edit-tournament-rules
+- 3 BUG:  [tourney] add TP-existence-check for edit-tournament-rules checking for all TP-having rating
+- 2 CHK:  [user] email-validation wrong (said not verified/not-logged-in) !?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=37009#37009 -> not check, done
+---------------------- ^^^ bug-fix 26-Aug-2013 18:05 branch [main] chg#31
+- 2 DISC: [user] answer Q: HTTPS usage: http://www.dragongoserver.net/forum/read.php?forum=2&thread=21812#37145 -> answered
+- 1 BUG:  [user] finished-games inconsistency: was MPG-wrong-count-bug: http://www.dragongoserver.net/forum/read.php?forum=2&thread=37136#37136 -> fixed for leu-user
+- 1 BUG:  [site][SECURITY] vulnerability error.php arguments: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2566577
+- 3 BUG:  [tourney] better early close db-connection on ladder-view/pool-view to free db-connection
+- 3 SPEC: [tourney] ladder: add 2nd link to finished-games by player on ladder-view: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#37120
+- 2 SPEC: [tourney] sgf-download include tournament-info ? <-> specs
+- 2 SPEC: [tourney] my-tournament-list: add view-ladder/pool icon: easier view-ladder reachability: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2566158
+- 6 SPEC: [tourney] early-close db-connection on ladder-view: login-too-max-conns: http://www.dragongoserver.net/forum/read.php?forum=2&thread=37166#37166
+---------------------- ^^^ bug-fix 09-Sep-2013 11:30 branch [main] chg#38
+- 7 SPEC: [newgame] JavaScript-switching on "require-rating" if selecting rating-range + other double-selections as well for new-game/invite: http://www.dragongoserver.net/forum/read.php?forum=4&thread=37223#37237
+- 5 ADM:  [user] run player-consistency-script for other users with MPGs: http://www.dragongoserver.net/forum/read.php?forum=2&thread=37136#37136 -> done
+- 1 BUG:  [tourney] ladder: finished detached game still remains in rematch-WAIT-state instead of being removed: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#37100
+- 1 BUG:  [tourney] rematch-wait not working; re-challenge not prohibited: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#37169 -> not a bug, but a feature !? -> original challenger is not same challenger, but b/c leap-frogged challenger now was the old defender! -> prevent re-match even if not former challenger (but had a game as defender): http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#37170;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#37244;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=37266#37268
+- 1 BUG:  [tourney] ladder: ladder-action DF_BELOW wrong on direct neighbours
+- 3 SPEC: [site] count-err-log too-many-connections (log user, referrer, etc)
+- 2 SPEC: [tourney] ladder: showing ladder-rank on game-info-page!? http://www.dragongoserver.net/forum/read.php?forum=11&thread=37118#37118
+- 2 SPEC: [tourney] ladder: adding current ladder-rank in game-challenge-notification: http://www.dragongoserver.net/forum/read.php?forum=11&thread=37118#37119
+- 7 CHK:  [site] from web-err-log: PHP Notice:  date_default_timezone_set(): Timezone ID 'China/Beijing' is invalid in /home/www/gowww/html/include/quick_common.php on line 75, referer: http://www.dragongoserver.net/game.php?gid=815931
+- 3 SPEC: [tourney] ladder: show theoretical position ordered by rating (if TLP existing) on ladder-view: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#37226
+---------------------- ^^^ bug-fix 16-Sep-2013 03:28 branch [main] chg#48
+- 1 BUG:  [tourney] tourney-consistency: TP.Fin/Won/Lost-count-fix is wrong (check tid=19, for uid=5318)
+- 1 CHK:  [game] 14-Sep-2013: last-ticks/clocks are wrong for lots of games: http://www.dragongoserver.net/forum/read.php?forum=2&thread=37261 -> checked, nothing wrong; user must have been on-vacation
+- 3 SPEC: [game] add players last-access/moved in game-info-page
+- 3 SPEC: [tourney] change some of the texts for ladder-props: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2555064
+- 1 CHK:  [tourney] ladder: add ladder-props for "challenges loses by timeout": add "move challenger below defender";; perhaps "move loser below winner" (instead) !? -> not needed (would make only sense with determine-challenger-at-game-start)
+- 1 CHK:  [tourney] ladder: free challenges on detaching games on retreat or admin-user-removal !? -> already done (TG.status='score' + delayed processing freeing challenges)
+- 2 BUG:  [tourney] fixed tourney-consistency-todo TP.Finished/Won/Lost: do not count detached games, correct Finished-count
+- 2 DEV:  [tourney] check consistency-todo for ladder: ./tournaments/include/tournament_ladder.php:969
+---------------------- ^^^ bug-fix 18-Sep-2013 01:23 branch [main] chg#53
+- 2 DEV:  [markup] <move X> tag, only in game-move-message on preview+save; replace with <game gid,X> on-the-fly: http://www.dragongoserver.net/forum/read.php?forum=4&thread=37283#37298
+- 2 BUG:  [game] <game X,S> was showing 1st move instead of shape-setup
+---------------------- ^^^ bug-fix 18-Sep-2013 21:20 branch [main] chg#55
+- 1 BUG:  [game] CRITICAL: (B11) game-scoring totally wrong for game 825557; SGF-download weird (score-mode) + game-result-info: http://www.dragongoserver.net/forum/read.php?forum=2&thread=37304#37304;; write test-script for http://localhost/dev/game.php?gid=646048 -> bug-fixed, SGF-download not fixed yet
+---------------------- ^^^ bug-fix 21-Sep-2013 01:35 branch [main] chg#56
+- 3 BUG:  [game] game-page board does not show last-move-marker for shape-game: http://www.dragongoserver.net/forum/read.php?forum=2&thread=37304#37317 ;; http://localhost/dev/game.php?gid=646051
+- 1 BUG:  [game] game-page board does not capture stones for shape-game: http://www.dragongoserver.net/forum/read.php?forum=2&thread=37304#37317 ;; http://localhost/dev/game.php?gid=646051 -> yes, problem is, that prisoners must be Moves-entries (and prisoners in the time-frame 18-Sep-2013 and 21-Sep-2013 with the last-fix were NOT captured :( ;; http://www.dragongoserver.net/show_games.php?rsf1=&rsf18=&rsf19=&rsf21=&rsf22=&rsf44=6&rsf43=0&rsf6=&rsf7=&rsf8=&rsf9=&rated=0&rsf13=20130918-&rsf13tu=1&profact_sp=0&search_f=Search&maxrows=30&add=0&sort1=13&rsf_init=1&rsf_act=4c00923f39e1&rsf_hc=149116770&uid=all ;; bad games: http://www.dragongoserver.net/game.php?gid=824817 http://www.dragongoserver.net/game.php?gid=813254 http://www.dragongoserver.net/game.php?gid=827973 -> data-fixed
+---------------------- ^^^ bug-fix 21-Sep-2013 12:30 branch [main] chg#57
+- 1 DISC: [tourney][game] answer Q about komi 7 for 9x9 unfair: http://www.dragongoserver.net/forum/read.php?forum=11&thread=37332#37332 -> answered
+- 1 BUG:  [tourney] tourney-info page shows wrong-link to tournament-data if not link not allowed
+- 1 ADM:  [tourney] start 13x13 + 19x19 ladders
+---------------------- ^^^ bug-fix 26-Sep-2013 20:00 branch [main] chg#58
+- 1 DISC: [tourney] Q from Zengarden does tournament-performance affect the normal DGS-rating -> NEW thread !!! -> serious flaw for all the weaker-players ranked down(?) -> not TOO serious as rat-diff is small
+- 3 SPEC: [user] provide rating-change prediction between 2 players: http://www.dragongoserver.net/forum/read.php?forum=11&thread=37361#37468 -> rating_changes.php
+---------------------- ^^^ bug-fix 05-Oct-2013 23:30 branch [main] chg#59
+- 1 TXT:  [tourney] ladder: use clearer text for rating-join-order
+---------------------- ^^^ bug-fix 06-Oct-2013 01:54 branch [main] chg#60
+- 5 SPEC: [user] user-info-page: add table-icons after running/finished games (name-field) linked to 'Show my run/fin games with this opponent': http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2589201
+- 5 SPEC: [user] view-rating-changes: more compact view for min/max: http://www.dragongoserver.net/forum/read.php?forum=4&thread=37506#37513
+- 3 SPEC: [tourney] ladder: show 'all finished/running games' on ladder-view
+- 3 BUG:  [tourney] ladder: don't allow retreat on T-CLOSED-status
+---------------------- ^^^ bug-fix 10-Oct-2013 15:27 branch [main] chg#64
+- 5 BUG:  [user] user-info-page: add table-icons after running/finished games (name-field) linked to 'Show my run/fin games with this opponent': http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2589201 -> forgot check
+---------------------- ^^^ bug-fix 10-Oct-2013 16:22 branch [main] chg#65
+- 3 DEV:  [tourney] ladder T-log: allow to search for more
+- 3 DEV:  [tourney] add T-started/ended on T-info page
+- 3 SPEC: [game] show players-countries on game-page -> game-info-page: http://www.dragongoserver.net/forum/read.php?forum=4&thread=37565#37565
+---------------------- ^^^ bug-fix 22-Oct-2013 15:50 branch [main] chg#68
+- 5 BUG:  [tourney] showing T-log: wordwrap can split <span MarkTerm>
+- 3 SPEC: [user] show nighttime in own-timezone, add tooltip with nighttime in user-timezone: http://www.dragongoserver.net/forum/read.php?forum=4&thread=37588#37590
+---------------------- ^^^ bug-fix 06-Nov-2013 17:45 branch [main] chg#70
+- 5 TXT:  [game] game-info-page: text-change 'players' -> 'players information'
+- 5 BUG:  [game] game-page: navigating in game with captures does not update B/W-prisoners to viewed-move (but always shows prisoners of last-move)
+- 7 SPEC: [tourney] ladder: redirect newly registered user to view-ladder on success if tourney in Play-phase !? -> no for now
+- 3 SPEC: [tourney] ladder: show 'already in X challenges' for observers of ladder !? -> no for now
+- 3 CHK:  [user] flag of venezuela changed slightly: http://www.dragongoserver.net/forum/read.php?forum=4&thread=37643#37643
+- 3 SPEC: [site] add timezone on page-time & quota-expire-time: http://www.dragongoserver.net/forum/read.php?forum=4&thread=37691
+- 3 CHK:  [adm] flag of venezuela changed slightly: http://www.dragongoserver.net/forum/read.php?forum=4&thread=37643#37643;; TODO: remove flags/ve-old.gif from live-server -> removed old
+---------------------- ^^^ bug-fix 24-Nov-2013 17:32 branch [main] chg#74
+- 3 DEV:  [site] use date-const, prep JS-game-editor, reformatted/smaller/removed start-rating of game-info-box on game-page, format-translated-date, hosted-by-text
+---------------------- ^^^ bug-fix 01-Dec-2013 17:00 branch [main] chg#77
+- 2 SPEC: [site] add translation-stats
+---------------------- ^^^ bug-fix 07-Dec-2013 07:30 branch [main] chg#78
+- 2 BUG:  [game] after JS-game-editor: game-info-box on game-page after game is finished is wrong now: 1. line player+rank, 2. only prisoners -> should be: only one line: player+rank+prisoners
+- 3 BUG:  [game] (B11) show scoring-info-box also for finished games on "pass|score"-move !?, e.g. http://www.dragongoserver.net/game.php?gid=825557;; show scoring-info-box as long as G-Status='SCORE/SCORE2' ? e.g. moves around 360: http://www.dragongoserver.net/game.php?gid=849441
+- 2 WAIT: [tourney] answer Q about retreating-from-ladder handled as resignation to be unfair: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36844#36844 -> don't wait
+- 4 DISC: [tourney] answer Q about timeout-handling: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36945#37208 -> not done
+- 3 WAIT: [tourney] answer Q about timeout-no-result-treating: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36945#37203 -> keep for archive
+- 2 BUG:  [feature] overview wrong select: FV.Points<>0 -> FV.Points is not null, but handle myPoints potentially==null
+---------------------- ^^^ bug-fix 09-Dec-2013 23:40 branch [main] chg#81
+- 1 SPEC: [game] (F024) game-info-thumbnail add last-move-marker: original but adjusted to remove last-move-marker;; http://www.dragongoserver.net/features/vote_feature.php?fid=24;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=37670#37748;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2624859;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2539046
+---------------------- ^^^ bug-fix 11-Dec-2013 00:10 branch [main] chg#82
+- 1 SPEC: [site] use JS_VERSION to auto-reload latest JS-scripts
+---------------------- ^^^ bug-fix 11-Dec-2013 00:25 branch [main] chg#83
+- 1 SPEC: [site] use JS_VERSION to auto-reload latest JS-scripts alike for all DGS-specific JS-scripts
+- 4 SPEC: [game] (F024) game-info-thumbnail size-adjustment: http://www.dragongoserver.net/features/vote_feature.php?fid=24;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=37670#37748;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2624859;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2539046 -> done
+---------------------- ^^^ bug-fix 11-Dec-2013 22:03 branch [main] chg#85
+- 9 ADM:  [site] update snapshot-page;; update translations;; see ROADMAP-file;; check NEWS for commented out lines in older releases; prep for new version
+L 1 CHK:  [area-scoring] calculation: use H-1 for compensation, http://www.dragongoserver.net/forum/read.php?forum=4&thread=25182#25631
+- 2 CHK:  [site] JavaScript-frameworks: jQuery? node.js? mocha (test-framework)? -> jquery used
+---------------------- ^^^ bug-fix 11-Dec-2013 22:03 branch [main] chg#86
+- 3 DOC:  [tourney] 7x7 ladder: change komi !? http://www.dragongoserver.net/forum/read.php?forum=11&thread=37471#38024 -> done
+
+ToDo_FAQ_1_0_17_FROM_TODO_CLEANUP_RELEASED: Done + ToDoc (REL 1.0.17): (L=later, x=announced-in-forum, N=not-done-posted, ?=clarify)
+- 7 DEV:  [cleanup][dev] update jQuery -> 1.9, !?  -> use eidogo-code (in-work)
+- 7 SPEC: [gview] game-viewer first to get load of server (only browsing moves w/o move-msgs)
+- 6 CHK:  [gedit] check eidogo for re-usability: http://www.dragongoserver.net/forum/read.php?forum=4&thread=33700#33974
+- 4 DEV:  [gedit] (E09.4) PLAY-tab: show prisoners for B/W
+- 4 DEV:  [gedit] (E09.7) PLAY-tab: first-move-handling B|W-stone, esp. after SETUP for shape-game
+- 6 SPEC: [gedit] (E19) add game-editor without JS: identify stories & features, 2nd page (or combine with JS-page) !? -> not done, or already done with goban_editor.php
+- 9 SPEC: [game] add JavaScript to move back/forward in game
+- 3 IDEA: [game] Game: Navigation: go to move clicked at (with Javascript), maybe in navigate-mode -> done
+- 1 DOC:  [gview] game-viewer (V01): add dev-notes for JS: version, style, conventions, libs, etc.
+- 1 SPEC: [gview] game-viewer (V04): allow to navigate over PASS-moves
+- 1 SPEC: [gview] game-viewer (V05.a): allow to navigate over SCORE-moves
+- 1 BUG:  [gview] game-viewer: white-prisoners are not shown
+- 6 SPEC: [gview] game-viewer (V10): add action-icon to jump to previous moves I haven't seen (esp. for MPGs) -> jump to my prev-move
+- 2 SPEC: [gview] game-viewer (V02.b): show star in Notes-tab on note-changes
+- 2 SPEC: [gview] game-viewer (V02): save private game-notes using AJAX; perhaps using quick_do.php
+- 3 DEV:  [gview] game-viewer: remove prefix in 'prefix#id' for jquery-selectors, b/c it's slower
+- 6 SPEC: [gview] game-viewer (V13): prettify tool-box: a) ANA-tab, b) PLAY-tab
+- 8 CHK:  [tourney] GEN: check T-rule to do "conventional/proper with reduced handicap, but even game for players with same rank" -> checked
+- 2 DEV:  [tourney] TRR: add pools-games integrity check in rank-summary on edit-pairing-page
+- 2 DEV:  [tourney] TRR: add link on T-manage-page to TPs for NextRound=current-round
+- 2 DEV:  [tourney] TRR: show "StartRound; NextRound" on tournament-participant-list in round-column if values are different
+- 2 DEV:  [tourney] TRR: show pool-summary also if tournament/round-status prevents edit - added pools-games integrity check on showing pool-summary with fix-directions
+- 2 DEV:  [tourney] RoundRobin: fix/do tourney/TODOs (before starting with Matrix-type-tourney; needed for TRR); see ~/TOURNEY -> done
+- 2 SPEC: [tourney] TRR: allow Add-Round only if previous TRound-status=DONE and only for T-admin; perhaps then T-stat can be changed between PAIR <-> PLAY if no add-round done (i.e. CurrRound.status==DONE and Max-RND=all-done)
+- 4 SPEC: [tourney] RoundRobin (S04.e): (A7) Finish one round: PLAY >> DONE; which is precondition to allow T-status: PLAY >> CLOSED (last round) -> noted
+- 4 DEV:  [tourney] Matrix: RoundRobin (T013) (S04.d): tournament-round-lifecycle: (A7) Finish one round: PLAY >> DONE is precondition for T-status-changes: (1) PLAY >> PAIR (next-round), or (2) PLAY >> CLOSED (last round) -> noted
+- 1 SPEC: [tourney] RoundRobin: create RR-backlog: prio basic stories for next earliest release!! -> done for now
+- 1 SPEC: [tourney] TRR: added start-next-round: mark next-rounders TP.NextRnd, set T-stat=PAIR, add new round, set new round for curr-round
+- 2 SPEC: [tourney] TRR: (S04.g): multi-RND: finalize T-round (copy TPOOL -> TP.NextRound); add check on Set-T-Round
+- 2 SPEC: [tourney] TRR (S04.f.b): multi-RND: set next-round for (b) admin (allow from any previous round); (a) not allowed for TD (implicit switch on start-next-round)
+- 6 DBG:  [tourney] RoundRobin (S26): multi-RND: allow edit for def/create/edit/pair only for current T-round (not for previous rounds) !!;; maybe except for T-Admin !? -> implicit-done b/c prev-rounds are on DONE-status
+- 2 SPEC: [tourney] RoundRobin (S31): multi-RND: (A7) start next round at round-end
+- 1 TST:  [tourney] TRR: test start-next-round + checks -> tested + fixed
+- 2 SPEC: [tourney] TRR: (T015.b) view-pools: view allowed for (a) TDs/T-Admin, (b) TPs/users on certain T-status only and dep on role; see view-ladder
+- 2 SPEC: [tourney] TRR: (T015.a) view-pools: add way to select round to show for multi-RND
+- 5 BUG:  [tourney] GEN: manage-T: admin-T-game: edit for invalid (empty) game-id should lead back to manage-T-page (not error); perhaps show error what's wrong -> no, keep it like that for now
+- 4 CHK:  [tourney] TRR/TMX/TL: (T10.b) over-think look + content of T-info !? -> keep for now like it is
+- 2 SPEC: [tourney] TL: add shortcut-link for view-ladder to jump to my own position in ladder
+- 5 SPEC: [tourney] GEN: TP-edit-reg/TD-edit-reg: add more text explaining user-msg/adm-msg
+- 6 SPEC: [tourney] TL: ladder-view header 'Challenges' -> 'Incoming/Outgoing Challenges' !?;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=36823#36981;;  || and/or: show tooltip on running-games about challenges-out;; + add new col 'Challenges Out' (see http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2597502 )
+- 2 BUG:  [tourney] allow add-time-to-game for detached ladder-game: http://www.dragongoserver.net/forum/read.php?forum=4&thread=38359#38359
+- 2 SPEC: [tourney] TRR: multi-RND: perhaps check on TProps.MinTPs and TRnd.MinPoolSize is needed or deadlock can appear later on next-round-switch when players are missing;; perhaps check-min-TPs must be calc'ed differently for higher rounds !? -> not an issue, b/c start-next-round implemented as separate action with dedicated checks involving different min-checks
+- 2 SPEC: [tourney] TRR: (T006.11) collect stories: scan all TRR-pages for writing T-log
+- 2 SPEC: [tourney] TRR: (T017) write stories for Points-config -> done
+- 3 SPEC: [tourney] TRR: (T017) compare no-result-stories with VOID-stories for TL/TRR -> done, merged stories
+- 6 SPEC: [game] TRR: admin-game: allow unrated-switch also for T-game + warning to inform/include TD in that decision
+- 3 DEV:  [tourney] TRR: (T006.13) write T-log for actions by TAdm edit_rounds: add-round, remove-round, set-current-round
+- 3 DEV:  [tourney] TRR: (T006.14) write T-log for actions by TD edit_rounds: start-next-round (incl. success-values steps)
+- 3 DEV:  [tourney] TRR: (T006.15) write T-log for actions by TD edit_round_props: change TRound (some fields)
+- 3 DEV:  [tourney] TRR: (T006.17) write T-log for actions by TD edit_pools: assign-pool, re-assign-pool, detach-from-pool
+- 3 DEV:  [tourney] TRR: (T006.18) write T-log for actions by TD define_pools: change TRound (some fields)
+- 3 DEV:  [tourney] TRR: (T006.19) write T-log for actions by TD create_pools: seed pools, del-pools, add-miss-users-default-pool
+- 3 DEV:  [tourney] TRR: (T006.20a.1) write T-log for actions by TD edit_ranks: set-pool-winners, clear-pool-winners, set-rank, remove-rank
+- 3 DEV:  [tourney] TRR: (T006.20b.1) write T-log for actions by TD edit_ranks: fill-ranks, fill-pool-winners, set-rank-single-user
+- 3 DEV:  [tourney] TRR: (T017.c) (T006.12) write T-log for actions by cron: TRR-game-end-handling (ttype-specific)
+- 7 DEV:  [tourney] TRR: (T018.b) (T006.16) write T-log for actions by TD edit_pairings: pair (=create TGs)
+- 3 DEV:  [tourney] GEN: reduce translation-texts for tournaments by using more sprintf-constructs of already existing texts
+- 4 SPEC: [tourney] TRR: (T017.1a) Points-config: (a) edit-page for TournamentPoints (must be int-vals), add on T-mng;; (b) db-persistence;; (d) GUI: types=SIMPLE/HAHN, perhaps use groups of fields for respective type;; (e) T-log write;; (g) dgs-cache for loading T-Points
+- 4 SPEC: [tourney] TRR: (T017.1c) Points-config: (c) std-values on T-creation (win/loss/jigo/bye/no-result=2/0/1/2/1)
+- 4 SPEC: [tourney] GEN: cleanup: reducing number by ca. 20 of specific T_() translation-texts by re-using more of already existing text-parts
+- 4 SPEC: [tourney] TRR: (T017.1f) Points-config: (f) preview with examples (need calc-result in PoolGame.calc_result / adjustment of TPoolClasses.fill_games)
+- 4 SPEC: [tourney] TRR: (T017.13) view-pools: adjust view of pool-matrix to use TournamentPoints-config
+- 2 ADM:  [site] change copyright -> 2014
+- 3 BUG:  [tourney] GEN: edit_rules: edits=[Shape] for tid=34 if just "preview" w/o field-changes -> no bug, just wrong db-data from previous impl.
+- 3 BUG:  [tourney] TRR: edit_pools: re-assign unassigned users using edit-fields does not work -> no bug, works just fine
+- 2 SPEC: [tourney] TRR: (T017) Points-config: create TPoints-entry on T-creation
+- 4 SPEC: [tourney] TRR: (T017.1a.2) Points-config: edit-points: add custom-fields for example-preview
+- 3 SPEC: [tourney] TRR: pool-matrix view-pool -> add table-icon with link to running games (like in ladder);; not for finished games (as they can be in different rounds)
+- 2 SPEC: [tourney] TRR: (T017) Points-config: renamed bye -> forfeit
+- 4 SPEC: [tourney] TRR: (T017.5) Points-config: tournament-game-admin: add "win by Forfeit(=Bye)"
+- 4 SPEC: [tourney] TL: (T017.4c.a) game-end-processing of "forfeit" for ladder: (a) treat like timeout (at first); later: special options (re-do with adding extra-action for winner AND loser-on-timeout) !?
+- 4 SPEC: [tourney] TRR: (T017.3) Points-config: tournament-game-admin: show preview of point-score for B/W-player in table-form -> no, TD should use edit-points preview to know
+- 4 SPEC: [tourney] TRR: (T017.12b) view-pools: choose view in pool matrix for: (b) forfeit(=bye) [dashed black border + points]
+- 2 DEV:  [tourney] TL: show_games: always show TG-role, not only for ladders (optimize away join with tournament-table)
+- 3 SPEC: [tourney] TRR: T-game-admin simple "bulk"-update, show edit-icon-link on pages for TD-only: T-games-list for TG-admin of single game;; extended title on games-list for tournament
+- 3 SPEC: [tourney] TRR: (T017.18) adjust FilterScore to include "forfeit"; add DB-changes for Search-Profiles-changes of score-filter
+- 4 SPEC: [tourney] TRR: (T017.16) admin-game, set B/W won by forfeit (only for T-games -> nope, normal games ok too): G.Score=+-3000 + G.Rated=unrated + G.Flags=set-by-admin
+- 4 SPEC: [tourney] TRR: game-adm: add comment to forfeit: "make game unrated"
+- 8 SPEC: [tourney] GEN + TL: change RETREAT -> WITHDRAW
+- 2 DEV:  [game] cleanup: change Games.Flags from SET() to smallint for easier handling
+- 1 CHK:  [tourney] TRR: (T017.6a) Points-config: Q: is it possible to annul non-T-game? -> NO, as "annulling" is a tournament-thingie ="detaching" FROM tournament;; definition = "no effect on T anymore"
+- 2 CHK:  [tourney] TL: withdrawing from TL (=annulling = detaching games): spec use-cases for TL; what is needed?;; TG.Flags=2 (=detached = annulled), G.Flags=TGDetached, Rated=N !? -> yes, detached T-games are ignored in TL-game-end-processing already
+- 2 CHK:  [tourney] TRR: withdrawing from TL (=annulling = detaching games): spec use-cases for TL; what is needed?;; TG.Flags=2 (=detached = annulled), G.Flags=TGDetached, Rated=N !? -> yes, no extra-action in TRR-game-end-processing required as point-calc is done on viewing-pools ignoring detached games
+- 5 SPEC: [tourney] TL: (T017.9a) (T004.2a) annulled-game: adjust TGend-processing: 1. ladder -> already done (detached game=annulled leads to LADDER-no-action)
+- 5 SPEC: [tourney] TRR: (T017.9b) (T004.2b) annulled-game: adjust TGend-processing: 2. TRR -> already done (no special treatment for detached game=annulled needed, b/c point-calc is handling it auto)
+- 5 SPEC: [tourney] GEN: (T004.2d.2) detached (=annulled): 3b.2. adjust all pages reading/counting/processing TG-list with TODO-status into account for ladder/round-robin-tourney -> already done, b/c annulled=detached
+- 4 SPEC: [tourney] TRR: (T017.6b) Points-config: tournament-game-admin: add game-annulled == detached from T for TRR (no effect on tournament);; add in example-preview on edit-points;; TG.Score=0, TG.Status=SCORE(from-PLAY), TG.Flags|=detached, G.Flags|=detached, G.Rated=N(if G.Status!=FINISHED)
+- 6 SPEC: [tourney] TRR: (T017.2) Points-config: tournament-game-admin: change input-layout (jigo=draw) as separate radio-option
+- 4 SPEC: [tourney] TRR: (T017.12c) view-pools: choose view in pool matrix for: (c) game-annulled [(yellow or) orange back]
+- 5 SPEC: [tourney] TRR: (T017.9b) (T004.2b) void-result: adjust TGend-processing: 2. TRR (TG.Status=SCORE -> new TODO-status, create TD-bulletin to inform w/ link to TG-admin) -> no
+- 4 SPEC: [tourney] TL: (T017.4b) game-end-processing of "no-result": no rematch-wait to allow replay, but no effect otherwise
+- 4 SPEC: [tourney] TRR: (T017.4) Points-config: tournament-game-admin: add "no-result" game-ending
+- 4 SPEC: [tourney] TRR: (T017.12a) view-pools: choose view in pool matrix for: (a) no-result [grey-back + points]
+- 4 SPEC: [tourney] TRR: (S65.a) admin-game: set no-result = G.Flags=NoResult + G.Score=jigo (even if no Jigo allowed, mention that) + G.Rated=unrated;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=28472#28498
+- 5 SPEC: [tourney] GEN: (T017.9) (S65) (T004.1b) process TG-end with no-result game-end (set by game-admin): set TG.Score=0=Jigo (intermediate result, esp if Jigo forbidden), TG.Flags=NO_RESULT-Result, TG.Status=SCORE;; (b) process no-result as defined in T-Points for TRR
+- 5 SPEC: [tourney] TL: (T017.9a) (T004.2a) void-result: adjust TGend-processing: 1. ladder (no win/no loss, so no-game-action, normal game-end)
+- 5 SPEC: [game] (T004.6b) (T017.10) (S65) adjust gameinfo-page: show no-result / jigo / forfeit of TG.Flags (no forfeit for G.Flags, but no-result)
+- 5 SPEC: [quick] (T004.6b) (T017.10b) (S65) adjust quick-suite game-/gameinfo: show no-result / jigo / forfeit of TG.Flags (no forfeit for G.Flags, but no-result);; adjust quick-specs
+- 5 SPEC: [game] (T004.7) (S65) show no-/void-result in game-lists: Score-column (red question-mark-icon); adjusted filter-score
+- 3 CHK:  [tourney] GEN: game-no-result -> check TOURNEY-forfeit-changes; check all usages of Score=0 -> done
+- 8 SPEC: [tourney] TRR: (T017.7) tournament-game-admin extra-actions: maybe restricted to game-admin/TD: (a) end-game with TG-result (map No-Result/Annulled->Jigo, map Forfeit(=Bye)->Resign?) !?, (b) make unrated (if rated), (c) detach T-game (allowing add-time); maybe only if game-annulled !? -> no, don't mix game-admin with TG-admin, except for "detaching" (=G-annulling)
+- 5 SPEC: [game] (T004.6a) (T017.10) (S65) adjust game-page: show no-result / jigo / forfeit of TG.Flags (no forfeit for G.Flags, but no-result) !?;; don't load TG-stuff (extra query bad)
+- 5 SPEC: [tourney] GEN: (T017.11) (T004.8) adjust T-game-lists to show no-result (=void): Score-column 'Void';; for TG-only games-list: on TG-Status show VOID-flags 'V' !?
+- 4 SPEC: [tourney] TL: (T017.4b.2) add ladder-notes about game-end-processing of "no-result" / "annulling" (=detached) / "forfeit"
+- 1 BUG:  [tourney] TL: (T020.a) use clearer text for withdrawing about "detaching" games: http://www.dragongoserver.net/forum/read.php?forum=11&thread=37361#37437
+- 1 SPEC: [tourney] GEN: (S65.b) admin-game: add BIG warning if T-game administrated
+- 4 SPEC: [tourney] TRR: (T017.14) view-pools: adjust pool-notes for TPoints (simple/Hahn), forfeit, no-result, annulled (=detached?)
+- 2 SPEC: [tourney] GEN/TL/TRR: (T020.b) change "detach" -> "annulled" !?;; perhaps only for GUI (keep it as "detached" in db) !? -> changed some texts
+- 2 SPEC: [tourney] GEN/TL/TRR: (T020.c) added "annul" to TG-status-filter on show-games
+- 3 SPEC: [tourney] TL: (T016.b.1) track sequently-wins (+jigo) for ladder-users;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=38363#38453 + ff
+- 3 SPEC: [tourney] TL: (T016.b.2) fix-script to track seq-wins (+jigo) for ladders
+- 1 BUG:  [site] CRON: from web-errorlog (happened a lot): PHP Warning:  preg_replace(): No ending delimiter ''' found in /home/www/gowww/html/halfhourly_cron.php on line 263 -> fixed regex
+- 3 SPEC: [tourney] GEN (T016.a): re-design T-results-table to match all types (ladders/round-robin) for stories (T016.*) with T-winners/champions/finalists/etc;; add note/result/comment
+- 3 SPEC: [tourney] GEN (T016.d): add list-tournament-results-page with navigation;; add filtering (my results);; restrict T-view T-results to TOP-20
+- 2 BUG:  [tourney] T-list: don't show Ts on NEW-status for users;; added "Open"-Ts as default for T-list
+- 3 SPEC: [tourney] TRR (T016.c.1): add edit-results-page: only on T-stat PLAY;; normally set T-result after final round (or intermediate round, though not checked)
+- 3 SPEC: [tourney] TRR (T016.c.2): edit-results: add new T-results-entry, edit existing, remove entry;; add actions-col in TR-list;; add link to edit-page on T-Mngr/TR-list;; write T-log for edit-actions
+- 3 SPEC: [tourney] TRR (T016.c.3): edit-results: cleanup ifs on $_REQUEST
+- 9 SPEC: [tourney][consistency] TL: check consistency-script for ladders
+- 3 CHK:  [tourney] GEN: T-cron must not run if admin-lock or TD-lock set -> checked, done correctly using set/release-tlock(adm/td)
+- 3 SPEC: [tourney] GEN (T016.e): choose good "ordering" for T-results: for TL/TRR: Type A, Round D, Result D, Rank D, EndTime A;;
+- 3 SPEC: [tourney] GEN (T016.f): adjust indexing of T-results
+- 2 SPEC: [tourney] TRR: edit-ranks set/fill-pool-winners must be less restrictive: allow "overwrite" by TD for weird pool-results (e.g. lots of annulled games) leading to 1x1 and other users all rank=2, so whole pool would go to next-round -> need more leniency on setting pool-winners; probably best to allow "overwriting" auto-fill;; revise checks on pool-winners -> already done with TPOOL.Rank=0 (clear ranks), now refactored to be named "withdraw pool-user" for clearer purpose, texts adjusted
+- 2 BUG:  [tourney] TRR: edit-ranks: also allow clear-rank-action (=withdraw-user) if TPOOL.Rank unset (=-100)
+- 2 BUG:  [tourney] TRR: edit-ranks-check: pool may have NO winner if all games are annulled -> revise check: (e) allow no pool-winners for one pool (also for all pools); but warnings about: (a) pool X has no pool-winners, (b) all players of pool X are pool-winners, (c) warn that there's no pool with a pool-winner;; (d) check, that next-round-set only possible if there's at least two NR-players
+- 7 SPEC: [tourney] TRR (T016.c.3): edit-results: fill T-winners (add T-Result from TP.NextRnd > CurrRnd);; TP.NextRnd > CurrRnd needed?
+- 4 SPEC: [tourney] TRR: (S29) handle T-stat-chg PLAY/*->CLOSED: check for tournament-results (maybe warnings?);; maybe check for TPs with higher rounds w/o participated yet;; maybe check for last round with >1 pool? (perhaps ok): (a) warn about missing T-results for last round, (b) warn about TPs with higher start/next-round w/o participating yet, (c) warn about #pools >1 in final round, (d) error if not all T-rounds.Status==DONE
+- 6 DEV:  [tourney] added tournament-title in tooltip on tournament-icon
+- 5 SPEC: [tourney] TRR: unlock T-ext by T-director (expire after 3 hours)
+- 5 SPEC: [tourney] TRR (T018.a) (S04.b.2a): (A4) Pairing-editor: (a) finish unfinished/stopped Pairing (check existing TGs);; (b) allow pairing only for certain pools;; (c) test T-log writing
+- 5 SPEC: [site] CSS-cleanup, use more span() instead of span-HTML
+- 5 BUG:  [game] fix wrong usage of query-part of game-consistency
+- 5 SPEC: [tourney][site] (S64) dgs-cache: TPOOL::load_tournament_pools(tid,Round); 1h, DEL-on-upd-TP/P(tid,*) !?;; new caching;; (c) [perhaps later] overwork first to not load FULL pool as default but "my" pool(s);; (a) load-TPools, (b) count-TPools -> only for (a) on view-pools for now
+- 6 TST:  [tourney] TRR: (T006.20a.2) testing write T-log for actions by TD edit_ranks: set-pool-winners, clear-pool-winners, set-rank, remove-rank
+- 6 TST:  [tourney] TRR: (T006.20b.2) testing write T-log for actions by TD edit_ranks: fill-ranks, fill-pool-winners, set-rank-single-user
+- 8 DOC:  [site] adjust NEWS-file w/ stuff since 1.0.17-start-dev
+- 8 ADM:  [site] update-SF 27-Mar-2014 13:45
+- 4 TST:  [tourney] TRR: (T017) Points-config: create TPoints-entry on T-creation
+- 1 ADM:  [site] prep rel 1.0.17 + do release 15:00-15:30 on 27-Mar-2014
+- 6 TST:  [tourney] TRR: (T006.19) testing write T-log for actions by TD create_pools: seed pools, del-pools, add-miss-users-default-pool
+---------------------- ^^^ server-upgrade 27-Mar-2014 branch [main]
+- 3 BUG:  [tourney] refactor "sequently wins" -> "consecutive wins"; best... -> Max.: http://www.dragongoserver.net/forum/read.php?forum=4&thread=38363#38682;; "Consecutive Wins", "Max CW"
+- 3 SPEC: [tourney] GEN: T-games-list: add T-admin-background on edit-icon
+- 3 SPEC: [tourney] TRR: view-pools: "round-sum"-text: switch "finished" <-> "running" (running first)
+- 4 SPEC: [tourney] TRR: view-pools: add link to all-run-games
+- 7 BUG:  [tourney] t-rule-editor: max-handi has 21 as default instead of "default"
+- 5 BUG:  [game] game-admin on non-T-game has no T-rule and throws error in #436 non-obj->func() to determine jigo-behaviour for non-T-game
+- 5 BUG:  [tourney] TRR: round-robin properties: "you may only withdraw on status ..." is nonsense -> handle/write about "withdrawing"
+- 3 SPEC: [tourney] TRR: show points-config on T-info (as reg-info)
+- 3 SPEC: [tourney] TRR: define-pools: show #games-per-pool in pool-suggestions, show #games-per pool-user !?
+- 3 SPEC: [tourney] TRR/TL: T-info: show #games per user
+- 1 BUG:  [tourney] parseDate: critical bug, parsing secs
+- 5 BUG:  [tourney] registration: when to allow higher start-rounds? tourney->Rounds is not suitable to check!!: (a) add config TProps.MinRatingCustomRound/MaxCustomRound (rat=-9999 not set, for ladder); (b) edit-props add config; (c) edit-reg (allow higher rounds
+- 5 SPEC: [tourney] TRR: warn about TPs in higher start-rounds on T-status-chg REG->PAIR
+- 5 DBG:  [tourney] TRR: edit-result: is it possible to clear result-rating? -> no bug, T-result always needs result-rating
+- 8 SPEC: [tourney] TRR: view-pools: last-order-criterium (not tie-breaker though) could be rating
+- 6 SPEC: [tourney] TRR: withdraw/block user from higher round participation (for withdraw-request or abusal); perhaps use TP.Status=BLOCKED !? or better with flags?: (a) withdraw in running round (TD marks pool-rank as WITHDRAWN and handle games as annulled or forfeit; already done);; (b) withdraw from higher rounds (StartRound > current-round)? HOW? -> allow edit-TP/accept-TP-inv/removal-TP if StartRound > current-round
+- 5 SPEC: [tourney] threshold for seq-wins in T-results: http://www.dragongoserver.net/forum/read.php?forum=4&thread=38363#38673 -> see ~/CHK
+- 1 BUG:  [tourney] ladder-seq-wins-best counting is wrong (takes Best 1 too high)
+- 3 CHK:  [tourney] check db-indexes on rid, which is unique per tournament, so index with tid not needed !? -> checked, already optimized
+- 4 SPEC: [game] show score-state for finished-game (add link or URL-only!?): http://www.dragongoserver.net/forum/read.php?forum=5&thread=38707#38718 + answer-Q in forum
+- 1 ADM:  [site] prep rel 1.0.17.b + do release 23:20-23:30 on 03-Apr-2014
+---------------------- ^^^ bug-fix 04-Apr-2014 23:20 branch [main] chg#17
+- 1 SPEC: [tourney] Matrix: identify/fix handling TRR in a way, so that restrictions with pool/rnd-max==1 for Matrix-type is possible -> identify stories -> stories done
+- 2 SPEC: [tourney] TRR: How to name/store/handle "Matrix"-tournament? as TRR or special, or using WizType, or how!? -> probably best to keep it as TRR and restrict PUBLIC/PRIVATE-scopes for 1 pool, etc. !? -> use TRR-type, use different wiz-types for different limits
+- 1 ADM:  [tourney] answer Q ladder-chall-rule: http://www.dragongoserver.net/forum/read.php?forum=11&thread=37894#37964;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=37894#38756 -> increase ladder-outgoing-chall from 3 to 5 -> done + answered
+- 1 ADM:  [tourney] TL: (T016.e) auto-update TournamentResult for ladders best-seq-wins (with certain threshold); check/eval on LIVE-server what threshold could be;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=38363#38741 -> 7x7 (10), other ladders 15 !? -> done 08-Apr-2014
+- 2 SPEC: [tourney] Matrix (T021.a): restrict TRR use-case "start-next-round" by T-limit max-rounds + do hard-restrict of max-start-rounds even by T-admin
+- 2 DEV:  [tourney] Matrix (T021.a2): (T009.a) StartRound can not be set > 1 on registration (b/c only one pool/one round)
+- 4 SPEC: [tourney] Matrix (T021.b): restrict TPROPS to forbid CopyCustom RatingUseMode: TLimit_TPR_RATING_USE_MODE, 0=no-restriction, 1=forbid Copy-Custom
+- 4 SPEC: [tourney] Matrix (T021.b2): (T009.b) forbid ask for different T-rating on edit-reg; only allow use CURR-user-rating;; Why again? -> b/c it eases reg-process for TD (no apply-handling needed)
+- 5 SPEC: [tourney] Matrix (T021.c): restrict TRULES to forbid rated games: TLimit_TRULE_GAME_UNRATED, 0=no restriction, 1=must be unrated=rated-not-allowed
+- 5 SPEC: [tourney] Matrix (T021.d): restrict TRR "edit-round-props" with extra T-limit max-games: calculate on MaxTP/MaxPoolSize/MaxPoolCount/Game-Factor (-> no); restrict instead max-games-per-TP
+- 3 SPEC: [tourney] Matrix (T021.e): allow T-admin to overwrite restrictions, so that TD-editing can use the normally limited values -> not used for hard-limits
+- 3 DEV:  [tourney] Matrix (T021.f2) (T008): add PUBLIC MATRIX-tournament (1 round, 1 pool, 3-16 TPs, single|double-RR): max 9 TP for DOUBLE-htype => 16 TP single = 120G & 15G/TP, 9 TP double = 72G & 16G/TP
+- 3 SPEC: [tourney] Matrix (T021.f): define restrictions for Private/public TRR-mini-Ts
+- 2 SPEC: [tourney] GEN (T021.g): need way to restrict certain types for creating-Ts to users -> added Players.admin-option to allow creation of Ts
+- 2 BUG:  [game] show toggle-terr-marker only for finished-game
+---------------------- ^^^ bug-fix 09-Apr-2014 15:27 branch [main] chg#25
+- 2 SPEC: [site] updates snapshot-page + sync-DB
+---------------------- ^^^ bug-fix 10-Apr-2014 14:15 branch [main] chg#26
+- 3 BUG:  [tourney] wrong rank-calculation with same diff-points but same rank !? http://www.dragongoserver.net/tournaments/roundrobin/view_pools.php?tid=5
+---------------------- ^^^ bug-fix 10-Apr-2014 14:15 branch [main] chg#27
+- 2 DEV:  [site] adjusted pages to better support https
+- 3 SPEC: [site] test for use of SSL: see CHK-HTTP; replace HOSTBASE -> use $_SERVER['HTTPS'] non-empty if https was used
+- 2 ADM:  [site] enable SSL on LIVE-server with free-start-ssl-cert, but keep http-config;; config apache for Forward Secrecy;; http://stackoverflow.com/questions/17308690/how-do-i-enable-perfect-forward-secrecy-by-default-on-apache;; later we can rewrite all http-requests to https;; https://www.ssllabs.com/ssltest/analyze.html?d=dragongoserver.net
+- 2 DISC: [site] answer Q: SSL for DGS: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39023#39023;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2591276;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=21812&#37181;; -> need update of openssl to 1.0.1g (curr 1.0.1e) to prevent heartbleed-bug (no was patched version);; http://stackoverflow.com/questions/548029/how-much-overhead-does-ssl-impose;; http://stackoverflow.com/questions/149274/http-vs-https-performance;; https://support.servertastic.com/redirecting-pages-to-https-with-htacess/ ;; ANSWER: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39023#39097
+---------------------- ^^^ bug-fix 26-Apr-2014 22:20 branch [main] chg#28; 29-Apr-2014 (SSL-cert added)
+
 ToDos_Doc_Tournaments_1_0_17:
 - 1 DOC:  [tourney] HOW TO create T-descr: http://www.dragongoserver.net/forum/read.php?forum=11&thread=26295#26338
 - 5 DOC:  [tourney] GEN/TL/TRR: add more docs/specs in 'specs/tournaments.txt'
@@ -97,8 +600,356 @@ ToDo_FAQ_1_0_18:
 - 3 DOC:  [adm] translator-search case-sensitive in texts of selected transl-lang
 - 4 DOC:  [game] sgf-game-archive on SF-net for download, ask support to refresh http://www.dragongoserver.net/forum/read.php?forum=4&thread=39569#39730
 
+ToDo_FAQ_1_0_18_FROM_TODO_CLEANUP_RELEASED: Done + ToDoc (REL 1.0.18): (L=later, x=announced-in-forum, N=not-done-posted, ?=clarify)
+- 3 BUG:  [tourney] show directoring tournaments also for tournament-owner and including NEW-tournament-status to easier find newly created T with T-wizard
+- 7 DEV:  [site] remove ENABLE_STDHANDICAP-switch, perhaps others ? $has_sgf_alias ?
+- 2 SPEC: [game] conditional-moves (F014) (S40): load_cond_moves_from_sgf() - check basic identical stuff, identify cond-moves
+- 2 SPEC: [game] conditional-moves (F014) (S40): check sanity of identified uploaded-SGF-cond-moves-part + manually entered cond-moves
+- 2 SPEC: [game] conditional-moves (F014) (S40): preview variations on board
+- 8 SPEC: [game] conditional-moves (F014) (S40): cache move-sequence loading for game-page
+- 2 SPEC: [game] conditional-moves (F014) (S40): save without activating
+- 3 SPEC: [game] conditional-moves (F014) (S40): "show" cond-moves read-only-mode
+- 2 DEV:  [site] adjusted pages to better support https
+- 3 SPEC: [site] test for use of SSL: see CHK-HTTP; replace HOSTBASE -> use $_SERVER['HTTPS'] non-empty if https was used
+- 2 SPEC: [game] made all score-parts translatable for non-verbose output
+- 2 SPEC: [transl] added case-sensitive search in translation-texts: http://www.dragongoserver.net/forum/read.php?forum=7&thread=39149 -> announced
+- 2 SPEC: [tourney] RoundRobin: T-directors been notified when last game finished in round + tested
+- 3 SPEC: [game] conditional-moves (F014) (S40): sgf-download: only include CMs according to private-flags/game-finished/ownership & cm-option to sgf.php
+- 3 SPEC: [game] conditional-moves (F014) (S40): sgf-download: uniq 'start-cm' in merged-in CMs
+- 3 SPEC: [game] conditional-moves (F014) (S40): sgf-upload with CMs: remove 'start-CM' from previously downloaded SGF-with-CMs
+- 3 SPEC: [game] conditional-moves (F014) (S40): cm-nodes-check: check that 1st node of a variation is a SgfNode and not another var -> already checked in sgf-parser
+- 3 SPEC: [game] conditional-moves (F014) (S40): cm-nodes-check: prevent that different sub-trees start with same move
+- 5 SPEC: [game] conditional-moves (F014) (S40): restrict max-cond-moves to 100
+- 9 SPEC: [game] conditional-moves (F014) (S40): show cond-moves on game-page in board-coords (instead of mixed)
+- 2 SPEC: [game] default-view for finished-game with terr-markers: http://www.dragongoserver.net/forum/read.php?forum=5&thread=38707#38742 -> changed default to show TM -> announced
+- 3 SPEC: [game] conditional-moves (F014) (S40): "active"-flags is a STATUS, not a flag;; show CM-status
+- 2 SPEC: [game] conditional-moves (F014) (S40): set MSeq-error-code on setting ILLEGAL-status on playing CM
+- 2 SPEC: [game] conditional-moves (F014) (S40): play/process cond-moves if player submitted move
+- 7 SPEC: [game] conditional-moves (F014) (S40): check sanity of cond-moves on edit by simulate "playing" them
+- 9 SPEC: [game] conditional-moves (F014) (S40): 1. use input-field, 2. click on game-board to build, 3. use goeditor.js; fmt: wXY bXY w...; vars ? ; stop to ACK (and add msg) if opponent wrote game-message;; pass + mark-dead-stones difficulty;; special conditional-move (play any of cond-play-set-move if opp plays any of a opp-play-set; useful for end-game-play filling dame, !! but be careful to avoid dangerous answers)!! <-> alternatively play sequence of pair of moves in any order (probably better way)!!!! -> do not use (2) but later game-editor; -> do not do ANY-move for now (too dangerous)
+- 2 SPEC: [game] conditional-moves (F014) (S40): cond-moves can not be shown/edited if Handicap-stones not set, FK-negotiation, scoring
+- 2 SPEC: [game] conditional-moves (F014) (S40): save with active=on + 2nd-step submitting (activate + opt. move-msg); show current status
+- 3 SPEC: [game] conditional-moves (F014) (S40): save on opp-turn
+- 2 BUG:  [game] conditional-moves (F014) (S40): sgf-download: merge in already started cond-moves
+- 1 SPEC: [game] answer Q / stats: restrict wr-offer on players-win% (>60%) to favor players that played vs weaker players: http://www.dragongoserver.net/forum/read.php?forum=4&thread=39593#39603;; select P.ID, sum(if( (Black_ID=P.ID and Black_Start_Rating > -2000 and (White_Start_Rating < -2000 or Black_Start_Rating > White_Start_Rating +100)) or (White_ID=P.ID and White_Start_Rating>-2000 and (Black_Start_Rating < -2000 or White_Start_Rating > Black_Start_Rating +100)),1,0))/count(*) as ABC, count(*) as CNT from Players as P inner join Games as G on G.Black_ID=P.ID or G.White_ID=P.ID where G.Status='finished' and G.GameType='GO' and P.Finished > 10 and P.ID =47064 group by P.ID order by ABC desc -> announced
+- 2 SPEC: [tourney] tournament-info-page results: show TOP-10, but add "hint" (e.g. "..." or give total #), that there are more results
+- 2 SPEC: [tourney] T-log: add more filters (user/action/object) and full page-navi
+- 3 BUG:  [site] admin-intro does not allow DGS-tag-formatting like FAQ-does (see local or dev-DGS) intro-pages with links
+- 2 SPEC: [site] add lang-code / encoding in translation-stats-table; add languages in translation-stats-table without any translations: JOIN-issue I guess
+- 2 BUG:  [tourney] consecutive-wins wrong (no), but timeout-processing seems off: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39107#39107;; should a timeout count for CWs? CAN it count for only one (chall or def)?;; analysis: fix-script ignores annulled games, but CW-count is done BEFORE game-end-processing setting annull-flag;; so, how should it be? -> inc CW AFTER game-end-processing -> annull
+- 5 BUG:  [tourney] TRR: view-pools: rank-display for ties (1,2,2,4 instead of 1,2,2,3): http://www.dragongoserver.net/forum/read.php?forum=11&thread=38674#39265 -> announced
+---------------------- ^^^ server-upgrade 30-Jul-2014 branch [main]
+- 1 BUG:  [game] skip to next game fails: confirm.GAH.init_globals(664628).miss_init0;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47272#47274
+- 1 BUG:  [wroom] join WR-game, wrong table-alias used for hero-ratio-check
+---------------------- ^^^ bug-fix 30-Jul-2014 03:00 branch [main] chg#02
+- 1 BUG:  [site] forbid refs to external-images used in <image>-tag: http://www.dragongoserver.net/forum/read.php?forum=4&thread=39593#39712;; it only works b/c <image> is supported by some browser it seems, the <image> is not correctly escaped by DGS
+- 3 BUG:  [user] wrong empty-representation of hero-percentage in user-info: http://www.dragongoserver.net/forum/read.php?forum=4&thread=39593#39689
+---------------------- ^^^ bug-fix 31-Jul-2014 14:30 branch [main] chg#04
+
 ToDo_FAQ_1_19_x:
 - 1 ADM:  [faq] take over all changes for 1.19.x from TODO-file
+
+ToDo_FAQ_1_19_x_FROM_TODO_CLEANUP_RELEASED: Done + ToDoc (REL 1.19.0): (L=later, x=announced-in-forum, N=not-done-posted, ?=clarify)
+- 2 BUG:  [game] join-waitingroom with check on total-count-same-opponent is missing in join_waiting_room(): http://www.dragongoserver.net/forum/read.php?forum=2&thread=39827#39829
+- 4 SPEC: [game] default-view for SCORE-status WITH terr-markers (able to toggle) for all users (players + observers): http://www.dragongoserver.net/forum/read.php?forum=5&thread=38707#39812
+- 3 SPEC: [bulletin] add TZ for times in bulletin: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2779860
+- 4 DEV:  [game] create monthly zipped game-archive (on G.Lastchanged), without any comments, check SGF-content (copyright), file-fmt "dgs-$d1-$g_$T_$R$S$H0$K_$M$r": http://www.dragongoserver.net/forum/read.php?forum=4&thread=39569#39730;; store on SF in snapshot/sgf-archive/dgs-YYYY-MM.tar.bz2 -> ~/workspace/DGS-live/SGF/
+- 2 CHK:  [merge] merge-request dedec0: http://www.dragongoserver.net/forum/read.php?forum=4&thread=40297#40550;; work/dedec0/master;; typo language
+- 8 SPEC: [game] (dmwit?): recreate board-stones without brown-anti-aliasing: http://www.dragongoserver.net/forum/read.php?forum=4&thread=40292#40435 -> no needs .png to replace .gif
+- 2 ADM:  [merge][review] https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/8 : rejected (15:38), merged after extra changes (23:36, 29-Sep-2014 01:00)
+- 1 TXT:  [tourney] change default-title for public-tournament (1-round/1-pool) to "user's mini-tournament (NxN)"
+- 3 SPEC: [site] ticket-tag <ticket DGS-1> to reference external-ticket-system;; http://www.dragongoserver.net/forum/read.php?forum=10&thread=40572#40786 -> disabled at the moment (30-Oct-2014, 1.19.0)
+- 4 SPEC: [forum] increase max-thread-indent from 15 to 25 levels: http://www.dragongoserver.net/forum/read.php?forum=4&thread=39593#39639
+- 3 BUG:  [tourney] T-info showing T-rules: do not show "adjust handicap" if no-handicap used and no-adjustment -> CHECKED -> no-bug, set MAX-handi to 21 and the adjust-handicap-info is empty
+- 3 SPEC: [site] <bgcolor>-tag for FAQ explaining things
+- 6 SPEC: [game] game-list-view: change order of columns for user/opp/black/white-rating: http://www.dragongoserver.net/forum/read.php?forum=4&thread=40156#40164
+- 1 BUG:  [adm][transl] translation-data export should also contain FAQ/Links/Intro-tables: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#39788
+- 3 SPEC: [wroom] add link (on table-icon) to finished games with user that offered game in waiting-room: http://www.dragongoserver.net/forum/read.php?forum=2&thread=40847#40849
+- 6 SPEC: [forum] link to show "source" of text (forum) for easier editing replies: http://www.dragongoserver.net/forum/read.php?forum=4&thread=40297#40394 -> re-used already implemented ALLOW_QUOTING
+- 8 BUG:  [user] don't show verification-txt on register-user-page if SEND_ACTIVATION_MAIL=false -> already DONE
+- 8 SPEC: [user] add game-board profile-setting to disable board (=no board), ... or use white-board (white-pixel)!?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=40292#40312
+- 1 BUG:  [user] allow rating > MAX_START_RATING in rank-converter-page, but not on user-reg-page;; + fix bug for T-registering/reg-props rating-range (allow max-rating, only max-start-rating for initial rating-set)
+- 3 SPEC: [site] feature-tag <feature 123> to reference feature-vote on DGS;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#40855
+- 6 SPEC: [tourney] replace restriction on T-list page RRNG with actual rating-range
+- 5 CHK:  [site] add roadmap for 1.0.18
+- 2 ADM:  [site] write/upd NEWS/db-changes/other-changes for next release
+- 1 SPEC: [tourney] indicator in main-menu with NEW or registerable Ts !? http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#39785
+- 4 SPEC: [tourney] T-visit: T-list show new only for NEW+active T (will be removed otherwise for T finished/delete-status)
+- 4 SPEC: [tourney] T-visit: mark visit only if T is active (else it will be removed if T finished)
+- 4 SPEC: [tourney] T-wizard: create T-director (with game-end) automatically (not for T-admins)
+- 1 BUG:  [tourney] TRR: T-admin should be able set round-props higher than wizard-limits allows
+- 1 SPEC: [tourney] TRR: increased max. games per TP (15 -> 18) to allow 10 TPs with double-round-robin
+- 8 SPEC: [site] change versioning from 1.0.x -> 1.x.y (x=major, y=fix/update); change all existing branches + NEWS + docs + SL + forum-posts !? -> check first what would need to be adjusted -> external resources could reference 1.0.x already !?;; axd-post 16-Aug-2013 http://www.dragongoserver.net/forum/read.php?forum=10&thread=36876#36876
+- 1 ADM:  [tourney] remind about Hahn-scoring: play on to avoid 0p gain, but perhaps some gain
+- 8 BUG:  [game] restrict handi-type (conf/proper) for shape-games: make handicap/komi explicit with shape-game
+- 1 BUG:  [tourney] TRR: define-pools shows error if MinPoolSize < MaxPoolSize (Example: tid=13 live-server); round=1, pool=1 -> something with poolcount 2 not allowed!? http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#40865 ;; error should only be shown for user-choice and not for ALL suggestions;; define-pools: add error-check to ensure, that count of registered-TPs are covered by choice of pool-size/pool-count and min-/max-pool-size
+- 2 BUG:  [tourney] edit-game-pairing: "ALL"-checkbox needed to switch T-round-status after all games created! (1) for one round implicitly do ALL check, (2) for >1 round (add note on T-round-stat-chg + note on edit-pairing page);; http://localhost/dev/tournaments/roundrobin/edit_pairing.php?tid=31
+- 1 BUG:  [tourney] rating-range wrong has to use -50/+50 on rating-check/rating-range-storage for TournamentProperties (reg-props): http://www.dragongoserver.net/forum/read.php?forum=11&thread=39427#40788 -> double-check again 'matchRating' (it seems it is stored without the -50/+50 but checked like that, see 'matchRating'-func) !?;; NOTE: Games.GameSetup does not contain T-rating-range b/c that's stored in T-props and not in T-rules! -> checked (added more docu) -> done in forum-thread
+- 2 ADM:  [tourney] 7x7 change komi-rules 9 -> 8 ? ... wait up to 931 games (komi 6), then switch to 8 and check after 930 games: http://www.dragongoserver.net/forum/read.php?forum=11&thread=37471#38612;; Komi6:#931;;     select count(*) from TournamentGames as TG inner join Games as G on G.ID=TG.gid where TG.tid=4 and G.Komi=9  ;; select G.Komi, count(*), sum(if(G.Score<0,1,0)) as B_Win, sum(if(G.Score=0,1,0)) as Jigo, sum(if(G.Score>0,1,0)) as W_Win from TournamentGames as TG inner join Games as G on G.ID=TG.gid where TG.tid=4 and G.Status='finished' group by G.Komi -> comparison 6/8/9 komi finished, see also http://www.dragongoserver.net/forum/read.php?forum=11&thread=39944#41186
+- 5 BUG:  [user][tourney] check rating-range [min-max[ (including min, excluding max); currently it's both including: http://www.dragongoserver.net/forum/read.php?forum=11&thread=39427#41185
+- 1 ADM:  [site] fill Jira-tracker with issues (FAQ + TODO-list) -> rather use local-TODO-file after cleanup + commit it -> see (A08.2c)
+- 8 SPEC: [game] add new status-games next-game-order LAST_MOVED asc-order: http://www.dragongoserver.net/forum/read.php?forum=2&thread=41197#41200
+- 6 SPEC: [user] change text rank-diff for rating-change 6k -> 5k
+- 6 IDEA: [bulletin] eval if possible to send bulletin only to user within certain rating-range -> yes, possible -> implemented for TP/ALL-target-type
+- 5 CHK:  [game] max-limits for time-settings: F (90d + 7d), C (90d + ?/?), J (90d + ?*?) -> no
+- 3 SPEC: [site] increase width of ID-buttons to cover game-id >= 1Mio: http://www.dragongoserver.net/forum/read.php?forum=4&thread=40073#40074
+- 1 BUG:  [tourney] view-T-page results: TOP10 shows X entries but there are Y listed !? see http://www.dragongoserver.net/tournaments/view_tournament.php?tid=2#result;; or http://www.dragongoserver.net/tournaments/view_tournament.php?tid=1#result;; or http://www.dragongoserver.net/tournaments/view_tournament.php?tid=3#result
+- 1 ADM:  [site] prep rel 1.19.0 + do release 00:20-??:?? on 30-Oct-2014 CET
+---------------------- ^^^ server-upgrade 30-Oct-2014 00:21-00:51 branch [main] 1.19.0
+- 1 ADM:  [site] update SF with 1.19
+- 9 BUG:  [forum] post-subject maxlen-check / "RE:"-prefix removal !? http://www.dragongoserver.net/forum/read.php?forum=2&thread=41567#41587;; "RE:" could make sense to mark as response in forum-search -> not changed
+- 7 SPEC: [game] add 'submit and stay' submit-button on game-page: http://www.dragongoserver.net/forum/read.php?forum=4&thread=41382#41425
+- 1 SPEC: [game] for 31-Oct-2014: 1. use Halloween only for last-move-marker (but in a way to reload img); 2. use Halloween stones on 31-Oct-2014 with special-stonesize, so normal stones are not disturbed;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2818389;; icons saved in ~/DGS-data/halloween-icons-2014-10-04/ -> adjust in include/board.php #102 -> done
+- 3 SPEC: [user] show missing game to reach next level of hero-badge: round((0.38*Finished - GamesWeaker)/(1-0.38)+0.5) as NeedWkGames in user-info: http://www.dragongoserver.net/forum/read.php?forum=3&thread=41715
+- 3 SPEC: [tourney] TL/TRR: use 'Curr-FIX' as default for T-reg-props
+- 1 BUG:  [tourney] as TD: invite users violating rating-restriction of T: should be allowed with warning (currently error): http://www.dragongoserver.net/forum/read.php?forum=11&thread=41783#42005
+- 2 BUG:  [tourney] TD-invited user accepting invitation for T with COPY-RATING TPROP: rating is not copied
+- 4 BUG:  [site] replace parse_igoban() error-throwing with returning rawtext instead, otherwise forum-search with invalid draw-post() will fail with error-redirect
+- 6 BUG:  [tourney] T-info: 'tournament started' -> 'tournament start' (esp. if T not started yet)
+- 4 BUG:  [game] show opponents, "status=all games" also includes invitations (should not): exclude invitations (INVITE) & MPGs (SETUP): http://www.dragongoserver.net/forum/read.php?forum=2&thread=41600#41600
+- 1 BUG:  [site] fix translation-errors on server-upgrade: admin-bulletin min/max -> Min/Max
+- 6 SPEC: [user] add pref to configure showing rating-graph by-games (per default): http://www.dragongoserver.net/forum/read.php?forum=4&thread=41975
+- 2 ADM:  [merge][review] reject merge-req: https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/10 -> ask SF-support -> rejected done (26-Dec-2014 worked)
+- 2 ADM:  [site] added apple-touch-icons for 120x120
+- 4 SPEC: [game] optimize: search for invitation-messages: no 'use idx (uid) on MC', but 'use idx on G.Status' and add idx on Messages.Game_ID;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=41600#41610 -> G.Status index doesn't improve speed but slow it down; but added M.Game_ID-index + search for all/accepted/pending/declined invitations
+- 6 BUG:  [tourney] TL: buildMaintenanceLockText() missing lock-note !? -> no, but show all lock-types (esp. CLOSE-lock)
+- 1 ADM:  [site] prep rel 1.19.1 + do release 21:20-??:?? on 31-Dec-2014 CET
+- 3 ADM:  [tourney] announce on L19, on SL, bulletin -> done 01-Jan-2015
+- 1 CHK:  [tourney] choose T-setting: http://www.dragongoserver.net/forum/read.php?forum=11&thread=38674#39447; http://www.dragongoserver.net/forum/read.php?forum=11&thread=39585 -> checked
+- 1 ADM:  [tourney] close existing 7x7 ladder; locked 30-Oct-2014; closed
+---------------------- ^^^ server-upgrade 31-Dec-2014 21:20-21:30 branch [main] 1.19.1
+- 3 SPEC: [quick] game-handler: set_handicap-cmd: add option to set std-handicap-pattern
+- 3 SPEC: [tourney] (T022a) TL: handle inactive players; keep track of TP.Lastmoved per tournament: http://www.dragongoserver.net/forum/read.php?forum=2&thread=41996#42216
+- 1 BUG:  [tourney] TL: join-order-by-rating is completely wrong: TL::load_tournament_ladder_by_user_rating(); query like that doesn't do the right thing, has to count(*) TPs above new TP -> +1 new rank;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41299#41302;; also don't insert strongest player at pos 2 (not pos 1 if not played a game yet)
+- 1 ADM:  [site] prep rel 1.19.2 + do release 17:50 on 04-Jan-2015 CET
+---------------------- ^^^ server-upgrade 04-Jan-2015 17:40-17:50 branch [main] 1.19.2
+- 1 BUG:  [user] rating-graph by-games (if enabled in profile) is always used, even when checked to be changed on rating-graph
+- 2 SPEC: [tourney] T-info show T-start-time with timezone; edit times (reg-time, start-time, end-time) add note of local-TZ
+- 2 SPEC: [tourney] running/finished TGs-icon should be different: http://www.dragongoserver.net/forum/read.php?forum=4&thread=42534#42534
+- 3 SPEC: [quick] extend msg-handler with 'own_started_games' for invitations: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2882849
+- 1 ADM:  [site] prep rel 1.19.3 + do release 16:15-??:?? on 06-Jan-2015 CET
+---------------------- ^^^ server-upgrade 06-Jan-2015 16:15-16:17 branch [main] 1.19.3
+- 3 SPEC: [tourney] TRR: sort all pools (unplayed) by at least user-rating/ID
+- 2 SPEC: [tourney] TL/TRR: adjusted header-texts to allow for shorter translation to keep table-width in check '..#T_header' on ladder-view/pool-view
+- 2 SPEC: [tourney] TL: for ladder-view added number of running & finished games in hover-text on table-icons linked to tournament-games -> not done as count is very different from linked-page-count (detached not counted, etc)
+- 2 SPEC: [tourney] TL/TRR: added last-moved date for tournament-games on ladder-view/pool-view
+- 7 SPEC: [tourney] TL: add col/info with theoretical position if sorted by rating: http://www.dragongoserver.net/forum/read.php?forum=11&thread=41244#41301
+- 6 SPEC: [tourney] aligned running and finished table-icons with link to tournament-games on ladder-view: http://www.dragongoserver.net/forum/read.php?forum=4&thread=42534#42534
+- 4 SPEC: [site] table-lists: added description in hover-text and full-name in add-column selectbox for abbreviated headers
+- 2 SPEC: [game] waiting-room: added col with creation-date (hidden per default)
+- 2 SPEC: [game] restrict max-time to more reasonable numbers: JAP (90d main, 30d byoyomi * 200); CAN (90d main, 30d byoyomi / 200); FIS (90d main, 30d extra)
+- 1 ADM:  [site] prep rel 1.19.4 + do release 12:15-12:20 on 11-Jan-2015 CET
+---------------------- ^^^ server-upgrade 11-Jan-2015 12:15-12:20 branch [main] 1.19.4
+- 2 SPEC: [tourney] (T023a) keep rated-state of T-games: for TP-removal by T-cron (game-end-processing) or by TD (T-game-admin), for annulling TG by TD, for forfeit-game-result (by TD or GAdm);; only game-result NO-RESULT (=void) makes game unrated (set by TD/GAdm) -> TODO: DOC in forums
+- 2 SPEC: [tourney] (T023d.2) TL: don't make game unrated on user-removal (timeout/withdrawal); what about forfeit/no-result-handling? (void -> make unrated, forfeit -> keep rated-state): http://www.dragongoserver.net/forum/read.php?forum=11&thread=40161#40172
+- 4 BUG:  [tourney] TL: game annulled, shown as '[#]' on ladder, user re-enters ladder: The number behind the '#' is the ladder-rank of the opponent on the ladder. As the user is back, a number is shown again, even though the game is still annulled (having no impact on the ladder). Currently this is a flaw, which will be fixed as part of the timeout-overwork as well;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2870710 -> FIX: filter out detached games on loading TGs for ladder-view
+- 2 SPEC: [tourney] (T023e) TRR/TL: separate game-rating-concerns from tournament-handling: make tournament-game unrated (like normal game) if too few moves or opponent rejects-win-on-timeout
+- 4 SPEC: [tourney] TRR: forbid annulling of T-game for TRR (makes no diff if detached or not as unrated-setting has been removed); allow only for ladder-tournaments
+- 4 SPEC: [tourney] TRR/TL: should a annulled/detached TGame be completely removed the tournament with Games.tid=0: allow adding-time, hide from TG-lists, hints for admins, can not be deleted, link to old tournament on game-info
+- 4 SPEC: [tourney] TRR: remote TG-role column on games-list, show only for TL
+- 1 ADM:  [site] prep rel 1.19.5 + do release 18:20 on 12-Jan-2015 CET
+---------------------- ^^^ server-upgrade 12-Jan-2015 18:20-18:25 branch [main] 1.19.5
+- 4 BUG:  [msg] templates save "< > in wrong way: http://www.dragongoserver.net/forum/read.php?forum=2&thread=42682#42682
+- 4 SPEC: [site] for translators: translate-link to show translate-texts of current page: http://www.dragongoserver.net/forum/read.php?forum=7&thread=42750#42754
+- 4 SPEC: [site] markup: auto-link for simple http(s)://URL
+- 7 SPEC: [forum] append "quote"-reply-text directly after user (not in new line)
+- 5 SPEC: [quick] quick-handler: added number of web-site-hits and game-moves for user-info command
+- 3 SPEC: [forum] implement hide forum posts as contacts-option: http://www.dragongoserver.net/forum/read.php?forum=4&thread=43578#43578
+- 3 BUG:  [filter] bug in sql_replace_wildcards(): determining (i.e. counting) of wildcard-replacement is not changing the wildcard-count: http://www.dragongoserver.net/forum/read.php?forum=2&thread=43402#43454
+- 4 SPEC: [tourney] add checkbox for T-consistency-script to disable/enable T-last-move-fix
+- 3 SPEC: [tourney] T-last-move-date: right-align, always show 0h: http://www.dragongoserver.net/forum/read.php?forum=2&thread=42898#42962
+- 1 ADM:  [tourney] (T025.0) analysis timeout-handling: see ~/TIMEOUT -> moved to specs/Timeout-Handling-Ladders.txt
+- 1 SPEC: [tourney] (T025.1) TL: delay withdrawal till all running TGs finished and processed; by setting HOLD-withdrawal-TL-flag; preventing new in/out-challenges
+- 1 BUG:  [tourney] (T024)(T025.1c) TL: forbid withdrawal as long as there are unprocessed game-endings (to be done by T-cron); OR, better follow Avics approach to delay the withdrawal and process in T-cron (has lesser bad things happening); would make sense to have a HOLD-state to prevent further challenges; option (yagiza): withdrawal=set-HOLD & wait till all games finished on TL before withdrawing automatically then: http://www.dragongoserver.net/forum/read.php?forum=11&thread=40241#40262
+- 4 SPEC: [tourney] (T024)(T025.1b) TL: allow HOLD-status to prevent challenges for some time (only used for withdrawals for now): http://www.dragongoserver.net/forum/read.php?forum=11&thread=40241#40283
+- 4 BUG:  [tourney] TL: always restrict TLProps.MaxChallenges (not unlimited)
+- 4 SPEC: [tourney] (T025.1d) TL: show withdrawal-initiated also for ladder-observers and for TPs with higher rank
+- 1 BUG:  [tourney] check T-reg-time being AFTER current-time: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#43645; min. 7d into the future
+- 3 BUG:  [tourney] TL: user with annulled games still running, then re-joining has wrong ChallengeOut-count (probably because T-cron didn't run yet), race-condition probably;; TL: re-joined user with former annulled games but no running games show running-games-icon in ladder-view: why? should-not!?: http://www.dragongoserver.net/forum/read.php?forum=11&thread=43071 -> prevent register if exists TG on SCORE-status
+- 5 BUG:  [tourney] TL: ladder-admin: user-removal only possible if all finished TGs processed (no TG.Status=SCORE) -> no: just show open/unprocessed T-games & fixed re-joining only possible after all running T-games processed
+- 2 BUG:  [game] race-condition on deleting game, see _delete_base_game_tables()
+- 2 BUG:  [site] used cached stats-graph per language: http://www.dragongoserver.net/forum/read.php?forum=2&thread=37353#37353;; http://www.dragongoserver.net/forum/read.php?forum=7&thread=38394#38401
+- 5 BUG:  [msg] avoid empty messages (only spaces) -> warning/error if subject | title is empty -> trim subject/body
+- 1 SPEC: [tourney] (T025.2) TL: prevent incoming challenges with TP-flag set on loss-by-timeout, reset on own move;; later: add penalty-check to withdraw-user instead of hard remove from ladder (T025.3)
+- 1 SPEC: [tourney] (T025.2) TL: add penalty-points to withdraw-user instead of hard remove from ladder on too many timeouts: TP.PenaltyPoints, +100 for timeout, -1 for move-action; add TLProps.PenaltyWithdraw(?) = 800 for example; auto-withdraw (set HOLD-WD-flag if limit reached on timeouts);; serves as "softer" timeout-handling, that discourages timeouts, but keeping achievements longer to allow "recovery" from timeouts on ladder
+- 4 BUG:  [tourney] TRR: TP-list of multi-round Ts, show TP-list with round=2 and hidden 'Round'-column shows all TPs -> enforce auto-adding Round-column
+- 2 SPEC: [tourney] (T025.6) TL: add TL-props: PenaltyTimeout (100) for adding, PenaltyLimit (500) as limit replacing consts
+- 7 SPEC: [tourney] (T025.7) TL: replace user-removal with user-withdrawal from TL, if absent from server for too long
+- 1 ADM:  [site] prep rel 1.19.6 + do release 13:30 on 12-Apr-2015 CEST
+- 1 ADM:  [tourney] (re-)open new ladder 7x7, komi 9, CHIN or JAP rules(?);; ... but wait till timeout-stuff (T025.x) and TL-bugs are fixed; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41299#41302 -> restarted now <tourney 23>
+- 0 ADM:  [tourney] (T025) TL-prop change penalty: size-dep: PenaltyTimeout=AVG-moves/2, PenaltyLimit=5*P-timeout: SIZE (AVG/PTO/PL): 19 (188/100/500), 13 (95/50/250), 9 (45/25/125), 7 (30/15/75)
+- 3 DOC:  [tourney] (T025) survey: change timeout-handling ? 1. winner moves up and loser moves down|removed, 2. keep it as it is (only loser-timout ladder-bottom|removed), 3. winner moves up/loser stays at pos (like normal win/loss) -> not needed
+---------------------- ^^^ server-upgrade 12-Apr-2015 13:30-14:00 branch [main] 1.19.6
+- 7 TXT:  [user] changed texts "badge of honor": http://www.dragongoserver.net/forum/read.php?forum=2&thread=44095#44134
+- 7 SPEC: [game] adjusted message-boxes on game-page (title with last-player, preview-title, appearance): http://www.dragongoserver.net/forum/read.php?forum=4&thread=18244#44104
+- 7 SPEC: [game] added user-profile-option to change position of game-move-message above or below game-board: http://www.dragongoserver.net/forum/read.php?forum=4&thread=18244#44104;; see also wishlist http://senseis.xmp.net/?DGSWishlist#toc12 (Game Page Layout);; http://www.dragongoserver.net/forum/read.php?forum=4&thread=6647#6647
+- 7 TXT:  [site] added more tooltips on most of the main-menu-links: http://www.dragongoserver.net/forum/read.php?forum=4&thread=18244#44089
+- 7 TXT:  [game] added tooltips/clearer column-names for games-lists: http://www.dragongoserver.net/forum/read.php?forum=4&thread=18244#44093;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=18244#44101
+- 6 BUG:  [game] game-move-numbering wrong on clicking next-move: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44024#44024
+- 1 BUG:  [tourney] TRR: pool-header not shown if 1st col (=name-col) removed: http://www.dragongoserver.net/forum/read.php?forum=2&thread=43972#44001
+- 5 SPEC: [user] add language/encoding in user-info: http://www.dragongoserver.net/forum/read.php?forum=4&thread=43664#43667
+- 5 ADM:  [merge][review] merge-request axd: https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/11 -> obsoleted by merge-req-12 -> TODO reject (done 14-May-2015)
+---------------------- ^^^ server-upgrade 14-May-2015 17:07 branch [main] 1.19.7
+- 1 BUG:  [game] hotfix on 14-May-2015 21:38 CEST to show correct author of game-move-message for all previous history-moves: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44171#44171
+---------------------- ^^^ bug-fix 14-May-2015 21:38 branch [main] - hotfix chg#1
+- 8 SPEC: [game] add link on move-number on game-comments-page: http://www.dragongoserver.net/forum/read.php?forum=4&thread=44177#44177
+---------------------- ^^^ bug-fix 14-May-2015 22:20 branch [main] - hotfix chg#2
+- 2 ADM:  [site] renew SSL-certificate on 26-Apr-2015: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44343#44343;; https://cert.startcom.org/;; http://www.dragongoserver.net/forum/read.php?forum=1&thread=43965 -> sent mail to SamurajData 23-May-2015
+- 2 ADM:  [tourney] TL: annul one game of 2nd case with double-game started between 2 users: (1) http://www.dragongoserver.net/message_thread.php?text=1&thread=2971373&mid=2971373&oid=66046#mid2971373;; (2) http://www.dragongoserver.net/forum/read.php?forum=2&thread=44428#44428;; but first do some analysis -> 2nd game annulled -> msg sent
+- 4 SPEC: [transl] translate-page: add search for "same-translations": http://www.dragongoserver.net/forum/read.php?forum=7&thread=44830#44832
+---------------------- ^^^ bug-fix 27-Jun-2015 22:45 branch [main] - hotfix chg#3
+- 3 BUG:  [game] games-list filter on Fair-komi games results in query-error: ambiguous column 'Status'
+- 2 SPEC: [faq] always show hidden faq/intro/links entries to FAQ-editors to support writing entries with links to other entries
+- 5 SPEC: [faq] add OPS_ENTRY-flag to show entries only to executives & translators; prefix with "[OPS-only]"
+- 3 ADM:  [site] (A16.3) re-check changed server-settings on 25-May-2015 about DB_CONNECT_ERROR-problems (changed by SamurajData, mail from 25-May-2015 12:10 - renabled LOCK on backup & restart the disc-cache without the battery-backup;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=43966#44853 (26-Jun-2015)
+- 3 ADM:  [site] (A16.1) analyze too-many-connections; grep 'DB_CONNECT_ERROR:' in web-errorlog for stats: http://www.dragongoserver.net/forum/read.php?forum=2&thread=43966#43966;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=43966#44226 (16-May-2015)
+- 4 BUG:  [tourney] clear caches for tournament-consistency-script
+- 2 BUG:  [tourney] TL: double-game started between 2 users: (1) http://www.dragongoserver.net/message_thread.php?text=1&thread=2971373&mid=2971373&oid=66046#mid2971373;; (2) http://www.dragongoserver.net/forum/read.php?forum=2&thread=44428#44428;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=44428#44433 -> lock tables on ladder-challenge;; TEST-local: http://localhost/dev/game.php?gid=646001
+- 2 SPEC: [transl] translate-page: when translator logged in -> collect T_()-calls on traversing in APC-cache, that can be searched for on translate-page-link redirecting to translate-page
+- 5 BUG:  [user] show language/encoding in user-info in translation: http://www.dragongoserver.net/forum/read.php?forum=4&thread=43664#43667;; http://www.dragongoserver.net/forum/read.php?forum=7&thread=44553#44736
+- 7 CHK:  [transl] translate-page: check order of search-selection-texts;; combined with var/const-cleanup: http://www.dragongoserver.net/forum/read.php?forum=7&thread=44830#44838;; http://www.dragongoserver.net/forum/read.php?forum=7&thread=44850#44850
+- 7 TXT:  [transl] mention "&language=N" to get the (original) "native text" in readme-translations;; http://www.dragongoserver.net/forum/read.php?forum=7&thread=44553#44759
+- 6 SPEC: [user] (S070.1) overwork people-page: change order (support-contacts up): admins, forum-moderators, faq-editors, translators, contributors, credits -> see also (D01)
+- 8 SPEC: [user] (A17) half-hourly-cron: log number of email-notifications sent into error-log
+- 8 SPEC: [user] (S071) add email-notification config to send NEW-games-to-moves & NEW-priv-msg since LAST-RUN (instead of default since LAST-ACCESS): http://www.dragongoserver.net/forum/read.php?forum=2&thread=44899#44923
+- 6 SPEC: [user] (S070.2) overwork people-page: replace static "contributors" with server-specific configurable list: editor for contributors (store in new Contribution-table type, category, comment)
+- 1 ADM:  [tourney] T#18 Handi division: start 2nd round at 07-Jul-2015 09:30 -> started 09-Jul-2015 08:50
+- 1 DISC: [forum] (D01) answer axd/others dev-contributors, people-page: http://www.dragongoserver.net/forum/read.php?forum=4&thread=43732;; DEV-f: http://www.dragongoserver.net/forum/read.php?forum=10&thread=43501 -> answered/resolved in http://www.dragongoserver.net/forum/read.php?forum=4&thread=43732#45070
+- 2 CHK:  [merge] merge-request #12 axd (people/contrib): https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/12 -> see (D01) => rejected http://www.dragongoserver.net/forum/read.php?forum=4&thread=43732#45070
+- 2 CHK:  [merge] merge-request #13 axd (people/contrib): https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/13 -> see (D01) => rejected http://www.dragongoserver.net/forum/read.php?forum=4&thread=43732#45070
+- 1 DISC: [forum] answer Q Simon (about new forum-features); wait for other comments first; comment other posts: http://www.dragongoserver.net/forum/read.php?forum=4&thread=45025#45025
+- 4 SPEC: [tourney] (T026) TRR: T#18 Rnd#1: keep "withdrawn"-players at their "original" rank (not sorted at the pool-bottom)
+- 7 DOC:  [site] add why L#138 is working in get_language_descriptions_translated(..): T_($langname) ); // TODO: T_($var) - add why this is working -> reads translations/known_languages (containing the static langs), so manual changes in TranslationLanguages requires run of the translation-scripts to re-generate 'translations/known_languages.php' -> also in README.translations
+- 1 ADM:  [site] prep rel 1.19.8 + do release 12-Jul-2015 18:30 CEST
+---------------------- ^^^ server-upgrade 12-Jul-2015 18:30-18:40 branch [main] 1.19.8
+- 9 ADM:  [user] (S070.3) seed contributation on LIVE-server: axd (recruit), avic (recruit), ejlo (founder/main-dev), jug (main-dev), uxs (recruit), ragou (main-dev), rodival (main-dev); client-devs (bots-masters, iphone-app, android-apps, notifiers); teachers?; reviewers?; idea-givers?
+- 8 BUG:  [site] people-page: removed word-wrap on user-contributions
+- 8 SPEC: [site] people-page: added anchor '#contrib' on user-contributions
+- 1 BUG:  [transl] translate: fixed submitting translations when using tpage/pvisit filters/searches
+---------------------- ^^^ bug-fix 12-Jul-2015 21:55 branch [main] - hotfix chg#3
+- 1 DISC: [site] answer Q FT: http://www.dragongoserver.net/forum/read.php?forum=2&thread=45190#45190
+- 0 ADM:  [tourney] T#12 ask users >3d last-access if they want to participate: http://www.dragongoserver.net/userinfo.php?uid=8335 http://www.dragongoserver.net/userinfo.php?uid=87556 http://www.dragongoserver.net/userinfo.php?uid=43156 http://www.dragongoserver.net/userinfo.php?uid=61361;; (8335,87556,43156,61361);; select ID, Handle, Lastaccess, SendEmail, Notify, Email from Players where ID in (8335,87556,43156,61361);  NOTE: only 43156 had SendEmail non-empty -> restore others;; WAIT: http://www.dragongoserver.net/message_thread.php?thread=3017589&mid=3017589&oid=8335 (user Gebusi wants to continue; other Players.SendEmail restored to '')
+- 7 TXT:  [transl] fix polish translation: http://www.dragongoserver.net/forum/read.php?forum=7&thread=44481#44481
+- 4 SPEC: [transl] remove translate-page link to select translation-group of current-page !?; disable page-visit-filter on translate-page if no APC-mem-cache available!?: http://www.dragongoserver.net/forum/read.php?forum=7&thread=45138#45142
+- 0 ADM:  [tourney] T#11 SDK division: start 2nd round at 21-Jul-2015 14:20 (wait for last game to finish)
+- 8 TXT:  [site] game-page: correct translation-text for board-info about adding time: http://www.dragongoserver.net/forum/read.php?forum=11&thread=41785#45264
+- 1 DISC: [tourney] inter-server play-off-game of Sunjang-tournament champions of DGS & OGS server: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3027049 -> answered
+- 3 DEV:  [gview] game-viewer (V01.b): updated jquery
+- 7 SPEC: [cleanup] removed old-goban-editor (no longer used, so far kept for reference)
+- 7 SPEC: [cleanup] removed old JS-based go-editor using GoDiagrams-db-table
+- 1 BUG:  [quick][gview] (V14.b) saving game-notes only possible for players (B/W or MPG)
+- 1 BUG:  [feature] why is (1) shown after feature-status-change WORK->VOTE ?;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=45325#45325;; was a super-admin-chg, that was not supported
+- 7 SPEC: [game] show-games: add Black/White remaining-time for all views with started games: http://www.dragongoserver.net/forum/read.php?forum=2&thread=45334#45337 (possible, but TD should not do)
+- 8 BUG:  [transl] translate-page: page-entry-count wrong due to removed "double"-entries originating from translations appearing in more than one translation-group -> removed group-join if no filter on specific group
+- 3 BUG:  [gview] game-viewer (F013) (V10): go to "my previous move" only possible for own games; what about other games?
+- 7 SPEC: [gview] game-viewer (F013) JS-game-editor: revert game-info-box format & remove from tab, tab-order Analyse/Notes with same width, move msg-box into Analyse-tab
+- 4 SPEC: [game] add user-online (with vacation) column on my/user-running-games (replacing "workaround" instead of sending notify on vacation-start): http://www.dragongoserver.net/forum/read.php?forum=4&thread=45506#45511 (hot-fix already done on LIVE)
+- 2 SPEC: [game] add user-online column in waiting-room
+- 3 DISC: [site] answer Q: axd versioning/version-tags/move-tags: http://www.dragongoserver.net/forum/read.php?forum=10&thread=36876#40062 -> done
+- 3 DISC: [site] answer Q docs/FAQ with code (for versioning): http://www.dragongoserver.net/forum/read.php?forum=5&thread=39894#40011 -> clup
+- 3 DISC: [site] Jira: check ways to export issues and preserve/convert/migrate data into other ticket-systems: http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#40357 -> Jira not done
+- 4 DISC: [tourney] answer DISC: 7x7 change komi-rules 9 -> 8 ? http://www.dragongoserver.net/forum/read.php?forum=11&thread=39944#39988 -> not needed with new 9komi 7x7 ladder
+- 5 IDEA: [tourney] fair-komi for tourneys ? -> better not
+- 1 ADM:  [game][adm] ask opponent if no-result ok: http://www.dragongoserver.net/forum/read.php?forum=5&thread=45599#45599;; "Article 12. No result" in Jap-rules http://www.cs.cmu.edu/~wjh/go/rules/Japanese.html -> asked 19-Aug-2015 19:10 http://www.dragongoserver.net/message_thread.php?thread=3041033&mid=3041033 -> agreement received -> game ended with no-result
+- 1 ADM:  [news] (A20) renewal-outage: 1. find out details about renewal-outage and post in News-forum -> DONE: http://www.dragongoserver.net/forum/read.php?forum=1&thread=45638#45638
+- 1 ADM:  [news] (A20) renewal-outage: 4. post in L19 http://www.lifein19x19.com/forum/viewtopic.php?f=49&t=12207 & http://www.lifein19x19.com/forum/viewtopic.php?f=10&t=12208 -> http://www.lifein19x19.com/forum/viewtopic.php?f=49&t=12213
+- 3 DOC:  [faq] (B13.2) correct FAQ about hero% (1)-condition is only for showing hero% not for "counting as hero-game"
+- 3 DBG:  [user] (B13.1) count hero-game if >= (currently > 1k): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3044458;; adjust '>' to '>=' in http://www.dragongoserver.net/faq.php?read=t&cat=12&e=421#Entry421
+- 1 ADM:  [news] (A20) renewal-outage: 2. re-enable cron (23-Aug-2015 23:30 CEST all crons except clock-tick re-enabled) => done 27-Aug-2015 19:42
+- 3 ADM:  [news] (A20) renewal-outage: 3. re-work SLs http://senseis.xmp.net/?DragonGoServer
+- 0 ADM:  [tourney] T#15 Sunjang (shape-test): 32 TP: 4x8 -> 4x2PW = 8 PW -> 1x8 => 3 PW in 2 rounds -> finished
+- 1 ADM:  [adm] (A19) changed primary NS from Erik's dyn-dns to ns1/2.dotster.com;; DONE 10-Sep-2015 ~18:45 -> check for problems -> WAIT -> 12-Sep-2015 09:33 no problems so far
+- 1 SPEC: [tourney] TL: ladder-challenge: show user away on vacation more prominently: http://www.dragongoserver.net/forum/read.php?forum=11&thread=45684
+- 3 DEV:  [tourney] TL: (T016.d) replace (or remove feature?) crown-king-of-the-hill on rank-kept-time; replace with consecutive wins/jigo-games: http://www.dragongoserver.net/forum/read.php?forum=4&thread=38363#38453;; 1st release tracking of seq-wins on live-server, then check, then next-step: perhaps replace T-results/crown-king/etc -> remove auto-crowning, but keep crowning-by-TDir
+- 3 SPEC: [tourney] TRR-only: add H-type "even games with 'alternating' colors;; "REALLY needed?? hm doubtful (strict B/W pattern favors the strong that is often used for given pool-order)!?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#40930 !?;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41785#42620; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41785#42605
+---------------------- ^^^ server-upgrade 13-Sep-2015 23:05 branch [main] 1.19.9
+- 1 TXT:  [tourney] TRR-only: ALTERNATE-htype: use clearer description on T-info-page
+---------------------- ^^^ bug-fix 14-Sep-2015 00:38 branch [main] - hotfix chg#1
+- 3 ADM:  [site] samurajdata: web-stats also take in https-log (also add %D in combined log) -> ASKED 12-Sep-2015 -> WAIT[ADM] -> https already logs in the same http-log; crypto-log is extra -> no chg needed
+- 2 ADM:  [site] (A16.6) DB: proposal to change backup-time to less frequented times (web-stats), ~2-3AM (timezone of web-stats?), perhaps something wrong with web-stats?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=43966#44895;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=43966#44896 -> ask SamurajData -> ASKED 12-Sep-2015 -> WAIT[ADM] -> moved to 02:15 GMT, news-forum done
+- 7 BUG:  [quick] SGF-download with game-notes for MPG: correctly detect player with game-notes for MPG;; note as well in http://www.dragongoserver.net/forum/read.php?forum=10&thread=45783#45783
+- 7 BUG:  [quick] SGF-download with comment in last-move & game-notes for finished/unfinished games: put notes not in 2nd C[] SGF-prop: http://www.dragongoserver.net/forum/read.php?forum=10&thread=45783#45783
+- 1 ADM:  [game] enabled Halloween (animated GIFs) on 31-Oct-2015 00:10 CET: http://www.dragongoserver.net/forum/read.php?forum=8&thread=41320#45991
+- 1 ADM:  [game] deactivate Halloween on 01-Nov-2015 09:00 CET: http://www.dragongoserver.net/forum/read.php?forum=8&thread=41320#45991; restore Stonesize from ConfigBoard2;; select CB.* from Players as P inner join ConfigBoard2 as CB on CB.uid=P.ID inner join ConfigBoard as CBO ON CBO.User_Id=P.ID where CB.StoneSize <> CBO.Stonesize ;; dropped table ConfigBoard2;; disabled Halloween-stones 01-Nov-2015 09:05 CET
+- 0 ADM:  [tourney] T#18 Handi division: start 3rd round at 19-Dec-2015 21:00 -> started on time 21:14
+- 0 ADM:  [tourney] T#10 Dan division: start 3rd round at 08-Jan-2016 18:30 -> started on 19:45
+- 7 SPEC: [game] add start-time on game-lists: http://www.dragongoserver.net/forum/read.php?forum=4&thread=46380#46382
+- 1 ADM:  [adm] investigate intruder on games: http://www.dragongoserver.net/forum/read.php?forum=2&thread=46269#46290;; sent msg to user Dida 02-Jan-2015;; WAIT -> resolved (no intruders)
+- 0 ADM:  [tourney] T#12 DDK division: start 3rd round at 23-Jan-2016 01:00 -> started on 04:35
+- 0 ADM:  [tourney] T#11 SDK division: start 3rd round at 02-Feb-2016 19:30 -> started on 21:35
+- 3 DEV:  [game] add user-id in game-comments page: http://www.dragongoserver.net/forum/read.php?forum=4&thread=46119#46491
+- 5 DEV:  [tourney] increase diff reg-period from 7d -> 3d
+- 3 DEV:  [user] add descriptive title-hints on pages: users, opponents, etc
+- 4 ADM:  [tourney] NEW DGS Sunjang: impressions from previous T: http://www.dragongoserver.net/forum/read.php?forum=11&thread=45736#45736 -> started T#47
+- 3 BUG:  [tourney] T-info: don't show date of 1970 if no start-date set
+- 0 ADM:  [game] check from time to time about state of user Druidtree (avoid timeouts, preserve rating for posterity): http://www.dragongoserver.net/forum/read.php?forum=5&thread=46250#46283 -> done
+- 3 SPEC: [user/game] (S072.1) add game-stats-table to track game-stats between players (without MPG); show different-opponents (+ratio) of all games on user-info; show running/finished games with opponent on user-info/users/opponents-page; add in quick-suite too;; add consistency-scripts to seed & fix table: http://www.dragongoserver.net/forum/read.php?forum=4&thread=46802#46818
+- 4 SPEC: [wroom] (S072.2) add wroom-restriction to limit games based on having played with them never before (use WR.SameOpponent change range for total RUNNING-games);; utilize GameStats-table (S072.1) to add restriction on only-NEW-player;; replace SOT -> SOS in wroom-restrictions: http://www.dragongoserver.net/forum/read.php?forum=4&thread=46802#46818
+- 2 ADM:  [site] adjust copyright to "2001-" (instead of changing the year every year)
+- 7 SPEC: [wroom] (S072.3) show running/finished games on wroom-info/invitation-msg/quick-suite
+- 4 DBG:  [wroom] wrong text for "RT" on wroom-list (it's not, that user has no rating, but something else);; compare wroom-game-info with wroom-list restrictions: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3166414 -> fixed
+- 3 SPEC: [tourney] allow edit of Tournament-info & T-rules at any time for TD with special admin-edit rights (shouldn't, but needed sometimes): http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#43645;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=44438#44442
+- 1 DBG:  [game] game-admin set void does set jigo !? <-> check with tourney-game-admin void-result; action game 1055943 was CH_BELOW -> should be NO_CHANGE;; http://www.dragongoserver.net/tournaments/show_tournament_log.php?sf1=106920&search_f=Search&tid=3;; DrStraw: 5% chg on jigo: http://www.dragongoserver.net/forum/read.php?forum=4&thread=46522#46534 -> checked code/tested 10-Apr-2016 (seems to work fine) => tested on game 957668 successfully on LIVE-server, so probably clicked wrong button -> retested after 1.19.10 release and still worked
+- 6 SPEC: [tourney] RoundRobin (S20.1): allow multi-pool/multi-round for public & private round-robin tourney with max-TP-limit (3-64) / max-pool-limit (1-8) / max-rounds (1-3)
+- 3 BUG:  [game] game-info-page: Lastmove empty shown as "1970-01-01.."
+- 2 SPEC: [tourney] mark all for tournaments NEW-marker: http://www.dragongoserver.net/forum/read.php?forum=4&thread=44275#44392
+- 5 SPEC: [profile] (S073.1) rating-graph: add LSQ-line (least-squares-line): http://www.dragongoserver.net/forum/read.php?forum=4&thread=7759#7767
+- 5 DEV:  [profile] (S073.2) rating-graph: linear(=simple)/binomial (LaPlace-pyramid) weighted-moving-average N-tap filter (N=2..25): http://www.dragongoserver.net/forum/read.php?forum=4&thread=46754#46885;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=7759
+- 7 DEV:  [profile] (S073.3) cleanup rating-graph: removed (unused) win-pie
+- 1 ADM:  [site] prep rel 1.19.10 + do release 12-Apr-2016 22:00 CEST
+- 1 ADM:  [adm] updated SF with 1.19.10
+- 1 BUG:  [tournament] hot-bugfix: missed LOCK on GameStats-table on ladder-challenge;; data-fix (removed Games.tid on wrongly started games) -> see ~/DGS-fixes/Schekker-2014-04-12_2200/DATA: http://www.dragongoserver.net/forum/read.php?forum=2&thread=46915#46915
+---------------------- ^^^ server-upgrade 12-Apr-2016 22:00-22:20 (news -01:45) branch [main] 1.19.10
+- 7 DEV:  [forum] extended forums-search on terms (subject/text) with simple substring-query if prefixed with '='
+- 7 DEV:  [profile] rating-graph: removed median-filter; removed binomial-WMA-filter; text-adjustments; x-centered WMA-filter; use %-default for WMA-taps based on existing rated games: http://www.dragongoserver.net/forum/read.php?forum=4&thread=7759#46941
+- 7 DEV:  [filter] cleanup/fix: empty-string matches
+- 5 DEV:  [user] opponents-page: exclude opponents from MP-games
+- 5 BUG:  [profile] rating-graph generation took too long consuming too much resources (memory probably) for users with too many ratinglog-entries -> restricted it to 3000
+---------------------- ^^^ fixes 13-Apr-2016 16:30 + 18:00 branch [main] - hotfix chg#8
+- 2 BUG:  [tourney] T-admin cannot edit admin-edit-T-director enabled pages any more
+---------------------- ^^^ fixes 14-Apr-2016 11:55 branch [main] - hotfix chg#9
+- 8 TXT:  [game] unify 'start date/time' & 'end date/time' -> 'start/end time': http://www.dragongoserver.net/forum/read.php?forum=2&thread=47010#47010
+- 3 IDEA: [game] add new tag <m|mysecret>text</m> for game-comments, that are private to author, be shown to other players after the game, always hidden for everyone else: http://www.dragongoserver.net/forum/read.php?forum=4&thread=46975
+---------------------- ^^^ fixes 15-Apr-2016 00:55 branch [main] - hotfix chg#11
+- 8 TXT:  [tourney] fix wrong English 'Directoring tournaments' -> 'Managing tournaments'
+- 3 ADM:  [adm] clean up db-Errorlog: freed 300MB deleting entries < 2016-01-01
+- 8 TXT:  [tourney] keep my-Ts view for "show T-notes"-link
+- 1 BUG:  [game] sgf-download MPG wrong (user-info on moves) ? http://www.dragongoserver.net/sgf.php?gid=1060197 -> fixed
+---------------------- ^^^ bug-fixes 18-Apr-2016 22:35 branch [main] - hotfix chg#14
+- 3 SPEC: [adm] (A22.1) extend admin-users-page with option to mark user-account as candidate for deletion; doing safety-checks to count existing db-entries;; -> needs refining to cover warning and actual deletion
+- 6 ADM:  [adm] extracted snapshot of rating-log for all users: http://www.dragongoserver.net/forum/read.php?forum=4&thread=7759#47230;; http://dragongoserver.sourceforge.net/snapshot/rating-graph/dgs-ratinglog-2016-05-04_0102.csv.bz2
+- 1 ADM:  [tourney] bulletin about SDK-tourney #58: http://www.dragongoserver.net/view_bulletin.php?bid=246
+- 2 ADM:  [site] renew SSL-certificate on 15-May-2016: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44343#44343 -> sent mail to SamurajData 15-May-2016 -> deployed 16-May-2016 .. forgot to update intermediate CA;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47269#47270;; -> re-deployed with fixed intermediate-CA 16-May-2016
+- 6 SPEC: [tourney] TL: add ladder-withdrawal-link on edit-registration-page too: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3227377
+- 0 ADM:  [tourney] T#18 Handi division 2015: 127 TP: 16x8 (1x7+15x8) -> 16x2PW + 2 ties = 34 PW: 4x9 (2x8+2x9) -> 4x2PW = 8 PW -> 1x8 => 3 PW in 3 rounds -> started 24-Jan-2015 finished 24-May-2016
+- 5 BUG:  [tourney] T-list: show T-notes-link fails
+- 5 BUG:  [user] do not show link on "vacation-days" for other users: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3269268
+- 0 ADM:  [tourney] T#12 DDK division 2015: 237 TP: 27x9 (6x8+21x9) -> 27x1PW = 27 PW: 3x9 (3x9) -> 3x3PW = 9 PW -> 1x9 => 3 PW in 3 rounds => 27-Jun-2016
+- 0 ADM:  [tourney] T#10 Dan division 2015:  45 TP: 6x8 (3x7+3x8) -> 6x3PW = 18 PW: 3x6 -> 3x3PW = 9 PW -> 1x9 => 3 PW in 3 rounds => ENDED 03-Jul-2016
+- 1 ADM:  [adm] end games with white-robot with user: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3273553 -> sent mail to Yves -> WAIT till Wed-03-Aug-2016 -> done (games unstuck by Yves)
+- 1 ADM:  [tourney] bulletin + L19 mid Aug-2016 for tourney #63 Dan-division -> sent 12-Aug-2016
+- 7 BUG:  [msg] message-lists (status/msg-list) always links msg-icons to current message instead of prev/next: http://www.dragongoserver.net/forum/read.php?forum=2&thread=47485#47498
+- 5 CHK:  [tourney] (B15.1) T-caching on TP-delete "TPCount.tid" is not removed: http://www.dragongoserver.net/forum/read.php?forum=2&thread=47509#47514 -> cannot reproduce locally -> NOT FIXED
+- 6 SPEC: [game] add vert-align for user-handle on game-comments-page: http://www.dragongoserver.net/game_comments.php?gid=952333
+- 6 BUG:  [filter] show table-header description correctly in filter-warning/errors
+- 6 CHK:  [filter] search for '\' in a TEXT-filter gives a SQL-query error -> cannot reproduce (strange)
+- 3 BUG:  [tourney] T-list mark-read not working on 2nd page: http://www.dragongoserver.net/forum/read.php?forum=11&thread=47326#47333 -> from-row-reset on filter-val-change (defaults filled in on first submit)
+- 1 BUG:  [tourney] (B14) BUG or DOC problem on T-start/pair/pool: #pool-winners can only be set BEFORE switching to POOL-status !!! (so after start of DEFINING pool with simul pool-paras no chg possible any more); PROBLEM is, only after that it might be clear how much pool-winners possible !? -> added extra-edit of pool-winners-rank on define-pool-page, allow =0 on 1st edit
+- 7 SPEC: [tourney] TRR: allow PoolWinnerRanks == MaxPoolsize (before it had to be smaller to prevent neverending tournaments in higher rounds): it's in the responsibility of the T-director to choose
+- 3 BUG:  [tourney] (T027.1) TD cannot fix issue: 1pool-1round TRR with pool-count=0, switch to Pool-status, then Create-pools is blocked somehow and pool-count cannot be edited any longer in define-pools: http://www.dragongoserver.net/tournaments/roundrobin/define_pools.php?tid=59;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3234286 -> allow editing pool-params if users in special pool #0
+- 2 BUG:  [tourney][game] check game-settings-output when using adjustments: (1) add consistency-check/warning on using conv/proper with adjustments (if there are some); (2a) skip adjustment-info for tournament-rules if not using adjustments!?; (2b) check skipping of adjustment-info for new-game/invitation/T-rules (probably show for all except T-rules)!? http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3120192 -> implemented (2a): showing H/K-adjustments only for CONV/PROPER on waiting-room-info/invitations/T-info
+- 6 CHK:  [tourney] T-list: remove/adjust hover-texts on restrictions-column: http://www.dragongoserver.net/forum/read.php?forum=2&thread=45964#45965;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3079492 -> removed hover-text + fixed invite-color on restriction-column
+- 1 BUG:  [tourney] TL: Penalty limit > or >= to withdraw-init !? -> must be '>='
+- 7 SPEC: [tourney] improve admin-edit-T-director warning: http://www.dragongoserver.net/forum/read.php?forum=2&thread=46981#46998 -> changed text + darker red-color
+- 2 CHK:  [tourney] TRR: remove TP.Admin-message ? - not used in a good way by TD/TPs !? -> no keep it
+- 5 SPEC: [cleanup][tourney] cleanup: simplify Tournament-registration by removing user-message/admin-notes -> done
+- 5 SPEC: [cleanup][tourney] cleanup: rename Tournament-registration TournamentParticipant.AdminMessage -> DirectorMessage -> done
+- 4 BUG:  [tourney] allow editing of bulletins (for certain bulletin-types TNEWS/PRIV_MSG/AD): http://www.dragongoserver.net/forum/read.php?forum=2&thread=46957#47145
+- 1 ADM:  [site] created final translation-data & images-tar in LIVE/snapshot-dir + finalized scripts/updates/1.19/-dir and prep'ed for next major version 1.20
+---------------------- ^^^ fixes 20-Aug-2016 19:35 branch [main] - chg#18
+
+
+
 
 #-------------------------------------------------------------------------
 

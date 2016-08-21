@@ -11,8 +11,14 @@ Release [2016-08-20] - DGS 1.19.11 - tag [release-1_19_11-20160820] on (later) b
 ChangeLog
 ------------------------------------------------------------------
 
+2016-08-21 jug
+
+   * specs/FAQ-jug:
+   - copied over release-info from local TODO for release & sub-releases of 1.0.16, 1.0.17, 1.0.18, 1.19.x
+     - needs cleanup for FAQ-processing
+
 2016-08-20 jug
 
    * snapshot.php:
-   - updated links, added link to clone latest stable version, sorted archive-files
+   - on snapshot-page updated links, added link to clone latest stable version, sorted archive-files
 
