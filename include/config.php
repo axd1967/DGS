@@ -274,6 +274,9 @@ define('FORUM_WEEKS_NEW_END', 12);
 // Forums.ID of Support-forum (required for some error-conditions)
 define('FORUM_ID_SUPPORT', 2);
 
+// Forum: regex-part (e.g. 'foo|bar') with offensive words not be used in forum-posts; ''=skip check
+define('FORUM_POST_FORBIDDEN_TERMS', '');
+
 // Games-list: Configuring number of (starting) chars from private game-notes
 // as Notes-column in status-game-list and my-games-list
 // - set to 0 to disable

@@ -120,6 +120,9 @@ require_once 'forum/post.php';
    {
       $preview_Subject = trim(get_request_arg('Subject'));
       $preview_Text = trim(get_request_arg('Text'));
+      $errmsg_post_violations = check_forum_post_violations( $preview_Subject, $preview_Text );
+      if ( $errmsg_post_violations && !$post_errmsg )
+         $post_errmsg = $errmsg_post_violations;
 
       if ( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($preview_Text) ) // lazy-load
          $cfg_board = ConfigBoard::load_config_board_or_default($my_id);

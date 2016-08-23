@@ -3,6 +3,25 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
 %TOC%
 
+#release DGS_1_20 [2016-Aug-23] - DGS 1.20.x  (Forum)
+
+   New features and Major changes:
+
+   Minor changes:
+
+   * Forum:
+      * Added check to prevent use of server-configured offensive terms
+
+   Bug fixes:
+
+   Code improvements:
+
+   Administrative changes:
+
+   Server config:
+      * Added config-switches:
+         * FORUM_POST_FORBIDDEN_TERMS        - regex with offensive terms
+
 #release DGS_1_19 [2014-Oct-29] - DGS 1.19.x  (Tournament, Markup, Forum, Games changes)
 
    New features and Major changes:

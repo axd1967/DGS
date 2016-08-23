@@ -65,6 +65,10 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
    if ( (string)$Subject == '' || (string)$Text == '' )
       return array( 0, T_('Message not saved, because of missing subject and/or text-body.') );
 
+   $errmsg_post_violations = check_forum_post_violations( $Subject, $Text );
+   if ( $errmsg_post_violations )
+      return array( 0, $errmsg_post_violations );
+
    $ReadOnly = (bool)get_request_arg('ReadOnly');
    if ( !$parent || !ForumPost::allow_post_read_only() ) // new post setting read-only flag only allowed for new-thread and executives
       $ReadOnly = false;
@@ -480,5 +484,25 @@ function recalc_forum_lastpost( $fid )
 
    Forum::delete_cache_forum( "recalc_forum_lastpost.update_lastpost($fid)", $fid );
 }
+
+/*! \brief Returns error-message if subject and/or text contains offensive terms; 0 = no violations. */
+function check_forum_post_violations( $subject, $text )
+{
+   if ( (string)FORUM_POST_FORBIDDEN_TERMS == '' )
+      return 0;
+
+   $regex = "/\\b(" . FORUM_POST_FORBIDDEN_TERMS . ")\\b/";
+   $text_violations = array();
+   if ( preg_match($regex, $subject) )
+      $text_violations[] = T_('subject#forum');
+   if ( preg_match($regex, $text) )
+      $text_violations[] = T_('message text#forum');
+
+   if ( count($text_violations) )
+      return sprintf( T_('Message not saved due to use of offensive words in [%s].'),
+         join(' & ', $text_violations) );
+
+   return 0;
+}//check_forum_post_violations
 
 ?>

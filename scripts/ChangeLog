@@ -11,6 +11,16 @@ Release [2016-08-20] - DGS 1.19.11 - tag [release-1_19_11-20160820] on (later) b
 ChangeLog
 ------------------------------------------------------------------
 
+2016-08-23 jug
+
+   * include/config.php (FORUM_POST_FORBIDDEN_TERMS),
+     forum/post.php (post_message, check_forum_post_violations),
+     forum/read.php:
+   - added server-configuration to prevent forum-post with offensive terms
+     - added global config 'FORUM_POST_FORBIDDEN_TERMS' with regex preventing forum-post
+       with offensive terms
+     - check for offensive terms on forum-post & preview of it
+
 2016-08-21 jug
 
    * specs/FAQ-jug:
