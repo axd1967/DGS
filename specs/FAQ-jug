@@ -4,6 +4,7 @@ Version: $Id: FAQ-DGS,v 1.2 2013/08/09 21:14:19 jug Exp jug $
 
 New_Issues:   set prio + sort into sections
 - 7 DOC:  [faq] improve sleep-time description?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47174#47174;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47174#47208
+- 7 DOC:  [faq][shape] correct starting game from existing game: http://www.dragongoserver.net/forum/read.php?forum=2&thread=47739#47741
 
 Open_Tasks_Stack:
 #---------------
@@ -648,6 +649,7 @@ ToDo_FAQ_1_0_18_FROM_TODO_CLEANUP_RELEASED: Done + ToDoc (REL 1.0.18): (L=later,
 
 ToDo_FAQ_1_19_x:
 - 1 ADM:  [faq] take over all changes for 1.19.x from TODO-file
+- 2 DOC:  [faq][game] fix FAQ: see ~/DGS-fixes/faq/seki-scoring.txt; http://www.dragongoserver.net/forum/read.php?forum=2&thread=44303#44325
 
 ToDo_FAQ_1_19_x_FROM_TODO_CLEANUP_RELEASED: Done + ToDoc (REL 1.19.0): (L=later, x=announced-in-forum, N=not-done-posted, ?=clarify)
 - 2 BUG:  [game] join-waitingroom with check on total-count-same-opponent is missing in join_waiting_room(): http://www.dragongoserver.net/forum/read.php?forum=2&thread=39827#39829
@@ -947,6 +949,8 @@ ToDo_FAQ_1_19_x_FROM_TODO_CLEANUP_RELEASED: Done + ToDoc (REL 1.19.0): (L=later,
 - 4 BUG:  [tourney] allow editing of bulletins (for certain bulletin-types TNEWS/PRIV_MSG/AD): http://www.dragongoserver.net/forum/read.php?forum=2&thread=46957#47145
 - 1 ADM:  [site] created final translation-data & images-tar in LIVE/snapshot-dir + finalized scripts/updates/1.19/-dir and prep'ed for next major version 1.20
 ---------------------- ^^^ fixes 20-Aug-2016 19:35 branch [main] - chg#18
++- 1 BUG:  [tourney] TRR(priv/public): max-rounds limit set without min-value, so took max-value as min-value: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#47749
++---------------------- ^^^ fixes 06-Sep-2016 01:00 branch [main] - chg#2
 
 
 
