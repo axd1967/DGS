@@ -5,7 +5,7 @@ changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
 previous server upgrade:
-Release [2016-08-20] - DGS 1.19.11 - tag [release-1_19_11-20160820] on (later) branch [DGS-stable-20160820]
+Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [DGS-stable-20160820]
 
 ------------------------------------------------------------------
 ChangeLog
@@ -15,7 +15,9 @@ ChangeLog
 
    * tournaments/include/types/private_round_robin.php (class PrivateRoundRobinTournament._construct),
      tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct):
-   - bugfix: restricting max-rounds for private & public round-robin-tournaments was missing min-value
+   - sync changes & fix from stable-branch DGS-stable-20141029:
+     - bugfix: restricting max-rounds for private & public round-robin-tournaments was missing min-value
+     - increased max-rounds for private & public round-robin-tournaments from 3 to 16
 
 2016-08-23 jug
 

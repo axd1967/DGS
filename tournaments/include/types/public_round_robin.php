@@ -49,7 +49,7 @@ class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
       $min_tp = 3;
       $max_tp = 64;
       $max_pools = 8;
-      $max_rounds = 3;
+      $max_rounds = 16;
 
       parent::__construct( TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN,
          sprintf( T_('Public Round-Robin with %s participants, %s pools, %s rounds#tourney'),

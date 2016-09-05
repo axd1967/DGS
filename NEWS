@@ -42,7 +42,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
          * setting forfeit-game-result by game-admin or tournament-director
       * Make tournament-game unrated like normal game, if too few moves or depending on opponents reject-win-on-timeout setting
 
-      * Extended restrictions of public and private round-robin tournament: 16 -> 3-64 participants, 1 -> 1-8 pools, 1 -> 1-3 rounds
+      * Extended restrictions of public and private round-robin tournament: 16 -> 3-64 participants, 1 -> 1-8 pools, 1 -> 1-16 rounds
       * Allowed tournament-directors with special rights to edit tournament-info & tournament-rules on more occasions
       * Replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
       * Increased max. number of games (18) per participant to allow double-round-robin for private/public tournaments

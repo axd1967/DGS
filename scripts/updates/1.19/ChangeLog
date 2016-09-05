@@ -24,8 +24,19 @@ Release [2014-10-29] - DGS 1.19.x - tag [release-1_19_0-20141029] on (later) bra
 2016-04-15 00:55                       - hotfix, 11 changes
 2016-04-18 22:35                       - hotfix, 14 changes
 2016-08-20 19:29-19:38 release 1.19.11 - update, 18 changes
+2016-09-06 01:00       release 1.19.12 - hotfix, 2 changes
 
 ==================================================================
+
+### ----- release-1_19_12-20160906 -----
+
+2016-09-06 jug
+
+   * tournaments/include/types/private_round_robin.php (class PrivateRoundRobinTournament._construct),
+     tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct),
+     include/globals.php (DGS_VERSION):
+   - bugfix: restricting max-rounds for private & public round-robin-tournaments was missing min-value
+   - increased max-rounds for private & public round-robin-tournaments from 3 to 16
 
 ### ----- release-1_19_11-20160820 -----
 
