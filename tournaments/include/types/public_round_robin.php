@@ -59,7 +59,7 @@ class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
       // overwrite tournament-type-specific properties
       $this->need_admin_create_tourney = false;
       $this->limits->setLimits( TLIMITS_MAX_TP, true, $min_tp, $max_tp );
-      $this->limits->setLimits( TLIMITS_TRD_MAX_ROUNDS, false, $max_rounds );
+      $this->limits->setLimits( TLIMITS_TRD_MAX_ROUNDS, false, 1, $max_rounds );
       $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 2, 16 );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLSIZE, false, 2, 16 );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLCOUNT, true, 1, $max_pools );

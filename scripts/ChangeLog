@@ -11,6 +11,12 @@ Release [2016-08-20] - DGS 1.19.11 - tag [release-1_19_11-20160820] on (later) b
 ChangeLog
 ------------------------------------------------------------------
 
+2016-09-06 jug
+
+   * tournaments/include/types/private_round_robin.php (class PrivateRoundRobinTournament._construct),
+     tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct):
+   - bugfix: restricting max-rounds for private & public round-robin-tournaments was missing min-value
+
 2016-08-23 jug
 
    * include/config.php (FORUM_POST_FORBIDDEN_TERMS),
