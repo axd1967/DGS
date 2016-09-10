@@ -13,6 +13,9 @@ ChangeLog
 
 2016-09-10 jug
 
+   * ratinggraph.php, ratingpng.php:
+   - removed LSQ regression-line from rating-graph
+
    * include/message_functions.php (message_info_table; MessageListBuilder.message_list_body),
      message_thread.php:
    - jumping to "current" message on opening message-thread-view

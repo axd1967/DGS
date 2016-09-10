@@ -53,7 +53,6 @@ require_once 'include/db/ratinglog.php';
 
    $show_by_number = (bool)@$_GET['bynumber']; // x-axis (true=Games, false=Time)
    $hide_rating_data = (bool)@$_GET['hd'];
-   $show_lsq = (bool)@$_GET['lsq'];
    $show_wma = (bool)@$_GET['wma']; // weighted moving average
    $wma_taps = (int)@$_GET['wma_taps'];
 
@@ -91,7 +90,6 @@ require_once 'include/db/ratinglog.php';
    $light_blue = $gr->getcolor(220, 229, 255);
    $number_color = $gr->getcolor(250, 100, 98);
 
-   $lsq_color = $gr->getcolor(0, 0x80, 0);
    $wma_color = $gr->getcolor(0xd0, 0, 0);
 
 
@@ -102,16 +100,6 @@ require_once 'include/db/ratinglog.php';
    $x_data = ( $show_by_number ) ? $number : $time;
 
    // graph filters
-
-   if ( $show_lsq )
-   {
-      $arr_lsq = calculate_LSQ( $show_by_number, $ratings, $x_data );
-      $has_lsq = is_array($arr_lsq);
-      if ( $has_lsq )
-         list( $a, $b, $x0, $y0, $xLast, $yLast ) = $arr_lsq;
-   }
-   else
-      $has_lsq = false;
 
    if ( $show_wma )
    {
@@ -154,11 +142,6 @@ require_once 'include/db/ratinglog.php';
 
    $ymax = array_reduce($ratingmax, "max",-10000);
    $ymin = array_reduce($ratingmin, "min", 10000);
-   if ( $has_lsq )
-   {
-      $ymax = max( $ymax, $y0, $yLast );
-      $ymin = min( $ymin, $y0, $yLast );
-   }
 
 
    //just a string sample to evaluate $marge_left
@@ -283,9 +266,6 @@ require_once 'include/db/ratinglog.php';
 
    if ( $show_wma )
       $gr->curve($xvals, $rating_wma, $nr_points, $wma_color);
-
-   if ( $has_lsq )
-      $gr->line( $gr->scaleX($x0), $gr->scaleY($y0), $gr->scaleX($xLast), $gr->scaleY($yLast), $lsq_color );
 
 
    // misc drawings
@@ -420,6 +400,7 @@ function get_rating_data($uid)
 
 
 
+/* unused, but kept
 // regression-line formulas taken from https://de.wikipedia.org/wiki/Methode_der_kleinsten_Quadrate#Herleitung_und_Verfahren
 // \return arr( a, b, x0, xLast, y0, yLast ) for linear func(x) := a*x + b
 function calculate_LSQ( $show_by_number, $ratings, $x_data )
@@ -452,6 +433,7 @@ function calculate_LSQ( $show_by_number, $ratings, $x_data )
 
    return array( $a, $b, $x0, $y0, $xL, $yL );
 }//calculate_LSQ
+*/
 
 
 // \param $taps must be > 1

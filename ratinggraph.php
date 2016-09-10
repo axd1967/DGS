@@ -106,7 +106,6 @@ require_once 'include/form_functions.php';
       $show_time = (int)(bool)@$_REQUEST['show_time'];
       $dyna= floor($NOW/(SECS_PER_HOUR/TICK_FREQUENCY));
       $hide_data = (bool)@$_REQUEST['hd'];
-      $show_lsq = (bool)@$_REQUEST['lsq'];
       $show_wma = (bool)@$_REQUEST['wma']; // weighted moving average
       $wma_taps = (int)@$_REQUEST['wma_taps'];
       if ( @$_REQUEST['use_form'] ) // NOTE: needed to overwrite db-default b/c unchecked checkbox leads to using default
@@ -123,7 +122,6 @@ require_once 'include/form_functions.php';
          ,($show_time ? URI_AMP.'show_time=1' : '')
          ,($bynumber ? URI_AMP.'bynumber=1' : '')
          ,($hide_data ? URI_AMP.'hd=1' : '')
-         ,($show_lsq ? URI_AMP.'lsq=1' : '')
          ,($show_wma ? URI_AMP.'wma=1' : '')
          ,($wma_taps ? URI_AMP.'wma_taps='.$wma_taps : '')
          ,URI_AMP,"dyna=$dyna" //force caches refresh
@@ -167,8 +165,6 @@ require_once 'include/form_functions.php';
             'DESCRIPTION', T_('Y-Axis'),
             'CHECKBOX', 'hd', '1', T_('Hide rating line'), $hide_data,
             'TEXT', MED_SPACING,
-            'CHECKBOX', 'lsq', '1', T_('Regression line'), $show_lsq,
-            'TEXT', SMALL_SPACING.SMALL_SPACING,
             'CHECKBOX', 'wma', '1', T_('Moving Average with'), $show_wma,
             'TEXT', MED_SPACING,
             'TEXTINPUT', 'wma_taps', '3', '3', $wma_taps,
