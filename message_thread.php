@@ -164,13 +164,13 @@ function echo_message_row( $threadlist, &$mtable )
 
    $oid = (int)$item['other_ID'];
    $oid_url = ( (@$item['Flags'] & MSGFLAG_BULK) && $oid > 0 ) ? URI_AMP."oid=$oid" : '';
+   $curr_msg = name_anchor("mid{$item['ID']}");
    if ( $item['ID'] == $mid && (!$other_uid || $other_uid == $oid) )
-      $curr_msg = name_anchor("mid$mid")
-            . anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid{$oid_url}",
-                  image( $base_path.'images/msg.gif', T_('Current message'), null, 'class="InTextImage"' ))
+   {
+      $curr_msg .= anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid{$oid_url}",
+                           image( $base_path.'images/msg.gif', T_('Current message'), null, 'class="InTextImage"' ))
             . MINI_SPACING;
-   else
-      $curr_msg = '';
+   }
    $max_indent = min( 20, $level );
 
    $row_str = array();

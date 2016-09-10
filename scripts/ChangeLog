@@ -11,6 +11,13 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-09-10 jug
+
+   * include/message_functions.php (message_info_table; MessageListBuilder.message_list_body),
+     message_thread.php:
+   - jumping to "current" message on opening message-thread-view
+     - expand all messages on message-thread-view
+
 2016-09-06 jug
 
    * tournaments/include/types/private_round_robin.php (class PrivateRoundRobinTournament._construct),

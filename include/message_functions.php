@@ -712,14 +712,15 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    else
       $name = $other_name; //i.e. T_("Server message"); or T_('Receiver not found');
 
-   $oid_url = ''; // other-uid URL-part
+   $msg_thr_url = URI_AMP.'text=1'; // default msg-thread URL-suffix
    $is_bulk = ($flags & MSGFLAG_BULK);
    if ( $is_bulk && $mid > 0 )
    {
-      $oid_url = ($other_id > 0) ? URI_AMP."oid=$other_id" : '';
+      if ( $other_id > 0 )
+         $msg_thr_url .= URI_AMP."oid=$other_id";
       $bulk_info = T_('Bulk-Message with other receivers');
       if ( $thread > 0 )
-         $bulk_info = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url#mid$mid", $bulk_info );
+         $bulk_info = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid{$msg_thr_url}#mid$mid", $bulk_info );
       $bulk_info = SMALL_SPACING . "[ $bulk_info ]";
    }
    else
@@ -764,7 +765,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
              "<img border=0 alt='$alt' src='$ico' title=\"" . T_("Next messages") . "\"></a>&nbsp;";
    }
    if ( ($str || $is_bulk) && $thread > 0 ) // $str set if msg is answer or has answer
-      $str0 .= anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url#mid$mid",
+      $str0 .= anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid{$msg_thr_url}#mid$mid",
          image( $base_path.'images/thread.gif', T_('Message thread') ),
          T_('Show message thread') ) . MINI_SPACING;
    if ( $thread > 0 && $thread != $mid )
@@ -2116,6 +2117,7 @@ class MessageListBuilder
          );
       $dirs = get_message_directions();
 
+      $msg_thr_url = URI_AMP.'text=1'; // default msg-thread-view
       $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
       $arr_marks = array(); // mid => 1
 
@@ -2135,7 +2137,7 @@ class MessageListBuilder
 
          // link to message
          $oid_url = ( $is_bulk && $oid > 0 ) ? URI_AMP."oid=$oid" : '';
-         $msg_url = 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid$oid_url$url_terms";
+         $msg_url = 'message.php?mode=ShowMessage'.URI_AMP."mid=".$mid.$oid_url.$url_terms;
 
          $mrow_strings = array();
          $mrow_strings[ 1] = array(
@@ -2187,7 +2189,7 @@ class MessageListBuilder
          $mrow_strings[10] = '';
          if ( $thread )
          {
-            $mrow_strings[ 9] = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url",
+            $mrow_strings[ 9] = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=".$mid.$oid_url.$msg_thr_url."#mid".$mid,
                   image( $base_path.'images/thread.gif', T_('Message thread') ),
                   T_('Show message thread') );
 
