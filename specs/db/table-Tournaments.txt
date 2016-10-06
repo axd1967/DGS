@@ -468,7 +468,6 @@ Description:
 | PoolWinnerRanks | tinyint(3) unsigned                      | NO   |     | 0                   |                |
 | Pools           | smallint(5) unsigned                     | NO   |     | 0                   |                |
 | PoolSize        | tinyint(3) unsigned                      | NO   |     | 0                   |                |
-| Field           | Type                                     | Null | Key | Default             | Extra          |
 | PoolNamesFormat | varchar(64)                              | NO   |     |                     |                |
 | Lastchanged     | datetime                                 | NO   |     | 0000-00-00 00:00:00 |                |
 | ChangedBy       | char(54)                                 | NO   |     |                     |                |

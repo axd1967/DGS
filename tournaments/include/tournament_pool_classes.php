@@ -1097,6 +1097,9 @@ class PoolNameFormatter
       if ( (string)$chk_fmt == '' )
          return false;
 
+      if ( preg_match("/[<>]/", $this->format) ) // no HTML <|>
+         return false;
+
       return true;
    }//is_valid_format
 
