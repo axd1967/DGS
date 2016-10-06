@@ -11,6 +11,31 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-10-06 jug
+
+   * tournaments/include/tournament_pool_classes.php (class PoolViewer, ~.__construct, ~.make_single_pool_table;
+       class PoolNameFormatter, ~.__construct, ~.format, ~.is_valid_format, ~.format_with_default),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament,
+       ~.getDefaultPoolNamesFormat),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.add_new_tournament_round,
+       ~.start_next_tournament_round),
+     tournaments/include/tournament_round.php (class TournamentRound, ~.__construct, ~.fillEntityData,
+       ~.new_from_row),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.getDefaultPoolNamesFormat),
+     tournaments/include/tournament_template.php (TournamentTemplate.getDefaultPoolNamesFormat),
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form),
+     scripts/updates/1.20/database_changes.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/game_admin.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_rounds.php, tournaments/roundrobin/view_pools.php,
+     tournaments/view_tournament.php:
+   - add formatting for pool-names of round-robin-tournaments
+-----------
+-- add formatting for round-robin pool-names
+ALTER TABLE TournamentRound
+   ADD PoolNamesFormat varchar(64) NOT NULL default '' AFTER PoolSize ;
+-----------
+
 2016-09-10 jug
 
    * ratinggraph.php, ratingpng.php:

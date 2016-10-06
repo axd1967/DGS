@@ -1359,6 +1359,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRound` (
   `PoolWinnerRanks` tinyint(3) unsigned NOT NULL default '0',
   `Pools` smallint(5) unsigned NOT NULL default '0',
   `PoolSize` tinyint(3) unsigned NOT NULL default '0',
+  `PoolNamesFormat` varchar(64) NOT NULL default '',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` char(54) NOT NULL default '',
   PRIMARY KEY  (`ID`),

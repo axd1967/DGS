@@ -468,6 +468,8 @@ Description:
 | PoolWinnerRanks | tinyint(3) unsigned                      | NO   |     | 0                   |                |
 | Pools           | smallint(5) unsigned                     | NO   |     | 0                   |                |
 | PoolSize        | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| Field           | Type                                     | Null | Key | Default             | Extra          |
+| PoolNamesFormat | varchar(64)                              | NO   |     |                     |                |
 | Lastchanged     | datetime                                 | NO   |     | 0000-00-00 00:00:00 |                |
 | ChangedBy       | char(54)                                 | NO   |     |                     |                |
 
@@ -497,6 +499,15 @@ Description:
 * Pools : number of pools actually used for tournament-round
 
 * PoolSize : max. size of every pool actually used for tournament-round
+
+* PoolNamesFormat : round-specific format for pool-names
+   - NOTE: default = "%P %p(num)"
+   - NOTE: see also PoolNameFormatter-class
+   - %P = translated text for 'Pool'
+   - %p(fmt) = formatted pool-index
+      - %p(num) : format pool-index as number 1..
+      - %p(uc)  : format pool-index as upper-case letter A..Z; pool-index > 26 will fallback to number-format 27..
+   - %% = escaping '%'
 
 * Lastchanged : date of last update of table-entry
 

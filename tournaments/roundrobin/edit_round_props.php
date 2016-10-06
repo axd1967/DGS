@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_log_helper.php';
+require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -128,6 +129,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       $trform->add_empty_row();
    }
 
+   $pn_formatter = new PoolNameFormatter( $tround->PoolNamesFormat );
    $trform->add_row( array( 'HR' ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Min. Pool Size'),
@@ -145,6 +147,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Winner Ranks'),
          'TEXTINPUT',   'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], ));
+   $trform->add_row( array(
+         'DESCRIPTION', T_('Pool Names Format'),
+         'TEXTINPUT',   'pool_names_fmt', 32, 64, $vars['pool_names_fmt'],
+         'TEXT',        sprintf('%s: %s', T_('Format'), '%P, %p(num), %p(uc), %%'), ));
+   $trform->add_row( array(
+         'TAB', 'TEXT', sprintf('%s: "%s"', T_('Preview'), make_html_safe($pn_formatter->format(9), true)), ));
 
    $trform->add_empty_row();
    $trform->add_row( array(
@@ -188,6 +196,7 @@ function parse_edit_form( &$trd, $t_limits )
       'max_pool_size'   => $trd->MaxPoolSize,
       'max_pool_count'  => $trd->MaxPoolCount,
       'poolwinner_ranks' => $trd->PoolWinnerRanks,
+      'pool_names_fmt'  => $trd->PoolNamesFormat,
    );
 
    // copy to determine edit-changes
@@ -254,11 +263,19 @@ function parse_edit_form( &$trd, $t_limits )
             build_range_text( $min_poolwinner_ranks, $trd->MaxPoolSize ) );
       }
 
+      $new_value = trim($vars['pool_names_fmt']);
+      $pn_formatter = new PoolNameFormatter( $new_value );
+      if ( $pn_formatter->is_valid_format() )
+         $trd->PoolNamesFormat = $new_value;
+      else
+         $errors[] = sprintf( T_('Bad format for %s.'), T_('Pool Names Format') );
+
       // determine edits
       if ( $old_vals['min_pool_size'] != $trd->MinPoolSize ) $edits[] = T_('Pool Size');
       if ( $old_vals['max_pool_size'] != $trd->MaxPoolSize ) $edits[] = T_('Pool Size');
       if ( $old_vals['max_pool_count'] != $trd->MaxPoolCount ) $edits[] = T_('Pool Count');
       if ( $old_vals['poolwinner_ranks'] != $trd->PoolWinnerRanks ) $edits[] = T_('Pool Winner Ranks');
+      if ( $old_vals['pool_names_fmt'] != $trd->PoolNamesFormat ) $edits[] = T_('Pool Names Format');
    }
 
    return array( $vars, array_unique($edits), $errors );

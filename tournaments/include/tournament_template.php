@@ -150,6 +150,8 @@ abstract class TournamentTemplate
    /*! \brief Returns inserted Tournament.ID if successful; 0 otherwise. */
    abstract public function createTournament();
 
+   abstract public function getDefaultPoolNamesFormat();
+
    /*!
     * \brief Returns calculated min-participants required for specific tournament-type.
     * \param $tround TournamentRound, can be null

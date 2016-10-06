@@ -86,6 +86,9 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          if ( !($tround instanceof TournamentRound) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.check(%s)");
 
+         // enrich tournament-related objects
+         $tround->PoolNamesFormat = $this->getDefaultPoolNamesFormat();
+
          // insert tournament-related tables
          if ( !$tourney->persist() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tourney.insert(%s)");
@@ -115,6 +118,11 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 
       return $tid;
    }//_createTournament
+
+   public function getDefaultPoolNamesFormat()
+   {
+      return '%P %p(num)';
+   }
 
    public function calcTournamentMinParticipants( $tprops, $tround )
    {

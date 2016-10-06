@@ -805,6 +805,7 @@ class PoolViewer
    private $table; // Table-object
 
    private $my_id; // player_row['ID']
+   private $pool_name_formatter;
    private $games_factor;
    private $options;
    private $edit_callback = null;
@@ -813,14 +814,18 @@ class PoolViewer
    private $first_pool = true;
    private $poolidx; // start-index of result-matrix starting with 1
 
-   /*! \brief Construct PoolViewer setting up Table-structure. */
-   public function __construct( $tid, $page, $pool_tables, $games_factor=1, $pv_opts=0 )
+   /*!
+    * \brief Construct PoolViewer setting up Table-structure.
+    * \param $pool_tables PoolTables object
+    */
+   public function __construct( $tid, $page, $pool_tables, $pool_names_format, $games_factor=1, $pv_opts=0 )
    {
       global $player_row;
 
       $this->tid = $tid;
       $this->ptabs = $pool_tables;
       $this->my_id = $player_row['ID'];
+      $this->pool_name_formatter = new PoolNameFormatter($pool_names_format);
       $this->games_factor = (int)$games_factor;
       $this->options = (int)$pv_opts;
       $this->pools_max_users = $this->ptabs->count_pools_max_user();
@@ -940,7 +945,9 @@ class PoolViewer
          $this->table->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
       if ( $cnt_users )
       {
-         $pool_title = ($pool == 0) ? T_('Users without pool assignment') : sprintf( T_('Pool %s'), $pool );
+         $pool_title = ( $pool == 0 )
+            ? T_('Users without pool assignment') :
+            $this->pool_name_formatter->format($pool);
          $this->table->add_row_title( "<a name=\"pool$pool\">$pool_title</a>" );
          if ( $this->first_pool )
             $this->table->add_row_thead();
@@ -951,7 +958,8 @@ class PoolViewer
       if ( $cnt_users == 0 ) // empty-pool
       {
          if ( !($this->options & PVOPT_NO_EMPTY) || ($opts & PVOPT_EMPTY_SEL) )
-            $this->table->add_row_title( sprintf( T_('Pool %s (empty)'), $pool ) );
+            $this->table->add_row_title(
+               sprintf( T_('%s (empty)#poolname'), $this->pool_name_formatter->format($pool) ) );
          return;
       }
 
@@ -1054,6 +1062,51 @@ class PoolViewer
    }
 
 } // end of 'PoolViewer'
+
+
+
+class PoolNameFormatter
+{
+   private $format;
+
+   public function __construct( $format=null )
+   {
+      $this->format = ( $format ) ? $format : '%P %p(num)';
+   }
+
+   public function format( $pool )
+   {
+      static $ARR_FMT_NEEDLES = array( '%P', '%p(num)', '%p(uc)', '%%' );
+
+      return str_replace( $ARR_FMT_NEEDLES,
+            array(
+               /* %P      */  T_('Pool#poolname'),
+               /* %p(num) */  $pool,
+               /* %p(uc)  */  ($pool >= 1 && $pool <= 26 ? chr(ord('A') + $pool - 1) : $pool ),
+               /* %%      */  '%',
+            ), $this->format );
+   }//format
+
+   public function is_valid_format()
+   {
+      if ( !preg_match("/%p\(num|uc\)/", $this->format) ) // must have '%p(..)'
+         return false;
+
+      // must have some other text
+      $chk_fmt = trim( str_replace( array('%p(num)', '%p(uc)', '%%'), '', $this->format ) );
+      if ( (string)$chk_fmt == '' )
+         return false;
+
+      return true;
+   }//is_valid_format
+
+   public static function format_with_default( $pool )
+   {
+      $pn_formatter = new PoolNameFormatter();
+      return $pn_formatter->format($pool);
+   }
+
+} // end of 'PoolNameFormatter'
 
 
 

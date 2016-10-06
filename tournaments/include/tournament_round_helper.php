@@ -395,10 +395,14 @@ class TournamentRoundHelper
 
    /*!
     * \brief Adds new tournament-round and updates Tournament.Rounds, returning new TournamentRound-object.
+    * \param $src_tround TournamentRound to take over some values from for new tournament-round;
+    *       or null if nothing to seed in new entry
     * \param $set_curr_round true = sets current round to newly added round; false = no change of current round
+    * \note Assumes, that there's at least one tournament-round already existing & persisted.
     * \return new TournamentRound on success; null on failure
     */
-   public static function add_new_tournament_round( $tlog_type, $tourney, &$errors, $check_only, $set_curr_round=false )
+   public static function add_new_tournament_round( $tlog_type, $tourney, $src_tround, &$errors,
+         $check_only, $set_curr_round=false )
    {
       $tid = $tourney->ID;
       $ttype = TournamentFactory::getTournament($tourney->WizardType);
@@ -415,7 +419,14 @@ class TournamentRoundHelper
       {//HOT-section to add T-round and updating T-data
          $tround = TournamentRound::add_tournament_round( $tid );
          if ( !is_null($tround) )
+         {
+            $tround->PoolNamesFormat = ( is_null($src_tround) )
+               ? $ttype->getDefaultPoolNamesFormat()
+               : $src_tround->PoolNamesFormat;
+            $tround->update();
+
             $success = $tourney->update_rounds( 1, ($set_curr_round ? $tround->Round : 0) );
+         }
          else
             $success = false;
 
@@ -549,7 +560,7 @@ class TournamentRoundHelper
 
       if ( $check_only && $curr_round == $cnt_rounds )
       {
-         self::add_new_tournament_round( $tlog_type, $tourney, $errors_add_round, /*chk-only*/true );
+         self::add_new_tournament_round( $tlog_type, $tourney, $tround, $errors_add_round, /*chk-only*/true );
          if ( count($errors_add_round) )
             $errors = array_unique( array_merge( $errors, $errors_add_round ) );
       }
@@ -585,7 +596,7 @@ class TournamentRoundHelper
 
          // 3. add new round + set it as current round
          // NOTE: must be atomar operation and last step (b/c current-round changed, which is a precondition for steps1+3)
-         if ( (($success & 3) == 3) && self::add_new_tournament_round( $tlog_type, $tourney, $errors, /*chk*/false, /*set-curr-rnd*/true ) )
+         if ( (($success & 3) == 3) && self::add_new_tournament_round( $tlog_type, $tourney, $tround, $errors, /*chk*/false, /*set-curr-rnd*/true ) )
             $success |= 4;
 
          TournamentLogHelper::log_start_next_tournament_round( $tid, $tlog_type, $tourney, $curr_round, $success );

@@ -127,7 +127,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
       if ( $my_tpool )
       {
-         $pool_link = anchor('#pool'.$my_tpool->Pool, sprintf( T_('Pool %s'), $my_tpool->Pool ) );
+         $pn_formatter = new PoolNameFormatter( $tround->PoolNamesFormat );
+         $pool_link = anchor('#pool'.$my_tpool->Pool, $pn_formatter->format($my_tpool->Pool) );
          echo sprintf( T_('You are playing in %s.#tpool'), $pool_link ), "<br>\n";
       }
       echo "<br>\n";
@@ -141,7 +142,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          echo implode(', ', $out), "<br><br>\n";
       }
 
-      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_factor,
+      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $tround->PoolNamesFormat, $games_factor,
          ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) | ($use_pool_cache ? PVOPT_NO_ONLINE : 0) );
       if ( $edit )
          $poolViewer->setEditCallback( 'pool_user_edit_rank' );

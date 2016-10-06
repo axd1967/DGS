@@ -112,7 +112,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
       // only checks
       if ( @$_REQUEST['tre_add'] )
-         TournamentRoundHelper::add_new_tournament_round( $allow_edit_tourney, $tourney, $action_errors, true );
+         TournamentRoundHelper::add_new_tournament_round( $allow_edit_tourney, $tourney, $tround, $action_errors, true );
       elseif ( @$_REQUEST['tre_del'] )
          TournamentRoundHelper::remove_tournament_round( $allow_edit_tourney, $tourney, $tround, $action_errors, true );
       elseif ( @$_REQUEST['tre_set'] )
@@ -122,7 +122,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       // do confirmed actions
       elseif ( @$_REQUEST['tre_add_confirm'] && $is_admin ) // add new T-round
       {
-         $new_tround = TournamentRoundHelper::add_new_tournament_round( $allow_edit_tourney, $tourney, $action_errors, false );
+         $new_tround = TournamentRoundHelper::add_new_tournament_round( $allow_edit_tourney, $tourney, $tround, $action_errors, false );
          if ( !is_null($new_tround) )
          {
             $round = $new_tround->Round;
@@ -289,6 +289,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       $tform->add_row( array(
             'DESCRIPTION', T_('Pool Winner Ranks'),
             'TEXT', $tround->PoolWinnerRanks, ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Pool Names Format'),
+            'TEXT', $tround->PoolNamesFormat, ));
    }
 
 

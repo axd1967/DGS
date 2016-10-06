@@ -33,6 +33,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -216,7 +217,7 @@ define('GAT_RES_ANNUL',     7);
          $arr[] = sprintf( T_('Round %s on Status [%s]#tourney'), $tround->Round, TournamentRound::getStatusText($tround->Status) );
    }
    if ( $tgame->Pool > 0 )
-      $arr[] = sprintf( T_('Pool %s'), $tgame->Pool );
+      $arr[] = PoolNameFormatter::format_with_default( $tgame->Pool );
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Info'),
          'TEXT',        implode(', ', $arr) ));

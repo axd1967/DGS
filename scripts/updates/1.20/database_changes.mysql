@@ -10,3 +10,7 @@
 # * Recommendation: Import it section by section manually taking comments into account !
 #
 
+-- add formatting for round-robin pool-names
+ALTER TABLE TournamentRound
+   ADD PoolNamesFormat varchar(64) NOT NULL default '' AFTER PoolSize ;
+

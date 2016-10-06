@@ -46,6 +46,7 @@ $ENTITY_TOURNAMENT_ROUND = new Entity( 'TournamentRound',
    FTYPE_CHBY,
    FTYPE_INT,   'ID', 'tid', 'Round', 'MinPoolSize', 'MaxPoolSize', 'MaxPoolCount', 'PoolWinnerRanks',
                 'Pools', 'PoolSize',
+   FTYPE_TEXT,  'PoolNamesFormat',
    FTYPE_DATE,  'Lastchanged',
    FTYPE_ENUM,  'Status'
    );
@@ -62,13 +63,14 @@ class TournamentRound
    public $PoolWinnerRanks;
    public $Pools;
    public $PoolSize;
+   public $PoolNamesFormat;
    public $Lastchanged;
    public $ChangedBy;
 
    /*! \brief Constructs TournamentRound-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
          $min_pool_size=2, $max_pool_size=2, $max_pool_count=0, $poolwinner_ranks=1, $pool_count=0, $pool_size=0,
-         $lastchanged=0, $changed_by='' )
+         $pool_names_format=null, $lastchanged=0, $changed_by='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -80,6 +82,7 @@ class TournamentRound
       $this->PoolWinnerRanks = (int)$poolwinner_ranks;
       $this->Pools = (int)$pool_count;
       $this->PoolSize = (int)$pool_size;
+      $this->PoolNamesFormat = $pool_names_format;
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
    }
@@ -151,6 +154,7 @@ class TournamentRound
       $data->set_value( 'PoolWinnerRanks', $this->PoolWinnerRanks );
       $data->set_value( 'Pools', $this->Pools );
       $data->set_value( 'PoolSize', $this->PoolSize );
+      $data->set_value( 'PoolNamesFormat', $this->PoolNamesFormat );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       return $data;
@@ -282,6 +286,7 @@ class TournamentRound
             @$row['PoolWinnerRanks'],
             @$row['Pools'],
             @$row['PoolSize'],
+            @$row['PoolNamesFormat'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy']
          );

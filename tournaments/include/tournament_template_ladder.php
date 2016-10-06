@@ -109,6 +109,11 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       return $tid;
    }//_createTournament
 
+   public function getDefaultPoolNamesFormat()
+   {
+      return '';
+   }
+
    public function checkProperties( $tourney, $t_status )
    {
       $tid = $tourney->ID;

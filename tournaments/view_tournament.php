@@ -105,7 +105,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          $tpool = TournamentPool::load_tournament_pool_user( $tid, $tourney->CurrentRound, $my_id ); // NOTE: not cached for now
          if ( $tpool && $tpool->Pool > 0 )
          {
-            $tt_user_state = sprintf( T_('Rank %s in Pool %s'), $tpool->formatRankText(), $tpool->Pool );
+            $pn_formatter = new PoolNameFormatter( $tt_props->PoolNamesFormat );
+            $tt_user_state = sprintf( T_('Rank %s in %s#rank_poolinfo'),
+               $tpool->formatRankText(), $pn_formatter->format($tpool->Pool) );
             if ( $tpool->Rank > 0 )
                $tt_user_state .= SMALL_SPACING . '+ ' . $tpool->echoRankImage();
          }
