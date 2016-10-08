@@ -571,33 +571,21 @@ class TournamentPool
       $NOW = $GLOBALS['NOW'];
       $entity_tpool = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
       $arr_inserts = array();
-      $arr_pools = array(); // [ pool-id => entries ], also for pool-id=0
-      foreach ( range(0, $tround->Pools) as $pool_id )
-         $arr_pools[$pool_id] = 0;
-      $pool = ( $slice_mode == TROUND_SLICE_FILLUP_POOLS ) ? 1 : 0;
-
+      $slicer = new PoolSlicer( $slice_mode, $tround->Pools, $tround->PoolSize );
       foreach ( $arr_TPs as $row )
       {
          $uid = $row['uid'];
 
          // handle slice-mode for user-distribution on pools
-         if ( $slice_mode == TROUND_SLICE_ROUND_ROBIN )
-         {
-            if ( ++$pool > $tround->Pools )
-               $pool = 1;
-         }
-         elseif ( $slice_mode == TROUND_SLICE_FILLUP_POOLS )
-         {
-            if ( $pool < $tround->Pools && $arr_pools[$pool] >= $tround->PoolSize )
-               ++$pool;
-         } //else: $pool always 0 for TROUND_SLICE_MANUAL
+         $pool = $slicer->next_pool();
 
          $tpool = $tpool_iterator->getIndexValue( 'uid', $uid, 0 );
          if ( is_null($tpool) ) // user not joined yet
             $tpool = new TournamentPool( 0, $tid, $round, $pool, $uid );
          else // user already joined
             $tpool->Pool = $pool;
-         $arr_pools[$pool]++;
+
+         $slicer->visit_pool();
 
          $data_tpool = $tpool->fillEntityData( $entity_tpool );
          $arr_inserts[] = $data_tpool->build_sql_insert_values(false, /*with-PK*/true);
@@ -619,7 +607,7 @@ class TournamentPool
       db_unlock();
 
       TournamentLogHelper::log_seed_pools( $tid, $tlog_type, $round,
-         "seed_order=$seed_order, slice_mode=$slice_mode", $cnt, count($arr_pools), $result );
+         "seed_order=$seed_order, slice_mode=$slice_mode", $cnt, $slicer->count_visited_pools(), $result );
 
       self::delete_cache_tournament_pools( "TournamentPool:seed_pools($tid,$round)", $tid, $round );
 
@@ -1128,8 +1116,9 @@ class TournamentPool
       if ( is_null($ARR_SLICE_MODES) ) // lazy-init
       {
          $ARR_SLICE_MODES = array(
-            /*default*/TROUND_SLICE_ROUND_ROBIN,
+            /*default*/TROUND_SLICE_SNAKE,
             array(
+               TROUND_SLICE_SNAKE         => T_('Snake Seeding#trd_slicemode'),
                TROUND_SLICE_ROUND_ROBIN   => T_('Round-Robin#trd_slicemode'),
                TROUND_SLICE_FILLUP_POOLS  => T_('Filling up pools#trd_slicemode'),
                TROUND_SLICE_MANUAL        => T_('Manual#trd_slicemode'),

@@ -1065,6 +1065,11 @@ class PoolViewer
 
 
 
+ /*!
+  * \class PoolNameFormatter
+  *
+  * \brief Class to format pool-name
+  */
 class PoolNameFormatter
 {
    private $format;
@@ -1110,6 +1115,107 @@ class PoolNameFormatter
    }
 
 } // end of 'PoolNameFormatter'
+
+
+
+
+ /*!
+  * \class PoolSlicer
+  *
+  * \brief Helper-class with different slice-modes for seeding pools.
+  */
+class PoolSlicer
+{
+   private $slice_mode;
+   private $pool_count;
+   private $pool_size;
+
+   private $idx_slicing;
+   private $curr_pool;
+   private $arr_pools;
+
+   private $arr_snaking = null;
+   private $mod_snaking = 0;
+
+   public function __construct( $slice_mode, $pool_count, $pool_size )
+   {
+      $this->slice_mode = $slice_mode;
+      $this->pool_count = (int)$pool_count;
+      $this->pool_size = (int)$pool_size;
+
+      $this->init();
+   }
+
+   private function init()
+   {
+      static $ARR_START_POOL = array(
+            TROUND_SLICE_SNAKE         => 1,
+            TROUND_SLICE_ROUND_ROBIN   => 0,
+            TROUND_SLICE_FILLUP_POOLS  => 1,
+            TROUND_SLICE_MANUAL        => 0,
+         );
+
+      $this->idx_slicing = 0;
+      $this->curr_pool = $ARR_START_POOL[$this->slice_mode];
+
+      $this->arr_pools = array(); // [ pool => entries ], also for pool=0
+      foreach ( range(0, $this->pool_count) as $pool )
+         $this->arr_pools[$pool] = 0;
+
+      if ( $this->slice_mode == TROUND_SLICE_SNAKE )
+      {
+         $this->arr_snaking = array_merge(
+            array(0),
+            array_fill( 1, $this->pool_count - 1, 1 ),
+            array(0),
+            array_fill( $this->pool_count + 1, $this->pool_count - 1, -1) );
+         $this->mod_snaking = 2 * $this->pool_count; // should be == count($arr_snaking)
+      }
+   }//init
+
+   /*! \brief Returns next pool-index for chosen slice-mode. */
+   public function next_pool()
+   {
+      switch( $this->slice_mode )
+      {
+         case TROUND_SLICE_SNAKE:
+            $this->curr_pool += $this->arr_snaking[$this->idx_slicing % $this->mod_snaking];
+            break;
+         case TROUND_SLICE_ROUND_ROBIN:
+            if ( ++$this->curr_pool > $this->pool_count )
+               $this->curr_pool = 1;
+            break;
+         case TROUND_SLICE_FILLUP_POOLS:
+            if ( $this->curr_pool < $this->pool_count && $this->arr_pools[$this->curr_pool] >= $this->pool_size )
+               ++$this->curr_pool;
+            break;
+         case TROUND_SLICE_MANUAL:
+         default:
+            // else: pool always 0
+            break;
+      }
+
+      $this->idx_slicing++;
+      return $this->curr_pool;
+   }//next_pool
+
+   public function visit_pool( )
+   {
+      $this->arr_pools[$this->curr_pool]++;
+   }
+
+   public function count_visited_pools()
+   {
+      $cnt_pools = 0;
+      foreach( $this->arr_pools as $pool => $cnt )
+      {
+         if ( $cnt > 0 )
+            $cnt_pools++;
+      }
+      return $cnt_pools;
+   }
+
+} // end of 'PoolSlicer'
 
 
 

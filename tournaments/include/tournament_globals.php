@@ -217,9 +217,10 @@ define('TROUND_MAX_COUNT', 255);
 define('TROUND_MAX_POOLSIZE', 25); // must be < 100 (see TPOOLRK_NO_RANK)
 define('TROUND_MAX_POOLCOUNT', 1000);
 
-define('TROUND_SLICE_ROUND_ROBIN', 1);
-define('TROUND_SLICE_FILLUP_POOLS', 2);
-define('TROUND_SLICE_MANUAL', 3);
+define('TROUND_SLICE_SNAKE', 1);
+define('TROUND_SLICE_ROUND_ROBIN', 2);
+define('TROUND_SLICE_FILLUP_POOLS', 3);
+define('TROUND_SLICE_MANUAL', 4);
 
 // ---------- Tournament Pool Stuff -------------------------------
 

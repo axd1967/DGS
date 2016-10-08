@@ -11,6 +11,16 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-10-08 jug
+
+   * tournaments/include/tournament_pool_classes.php (class PoolSlicer, ~.__construct, ~.init,
+       ~.next_pool, ~.visit_pool, ~.count_visited_pools),
+     tournaments/include/tournament_pool.php (TournamentPool.seed_pools, ~.get_slice_modes),
+     tournaments/include/tournament_globals.php  (TROUND_SLICE_SNAKE),
+     scripts/tests/PoolSlicerTest.php, scripts/tests/AllTests.php:
+   - added snake-seeding slice-mode for seeding pools of round-robin-tournaments
+     - refactored slicing-modes into PoolSlicer-class
+
 2016-10-06 jug
 
    * tournaments/include/tournament_pool_classes.php (class PoolViewer, ~.__construct, ~.make_single_pool_table;
