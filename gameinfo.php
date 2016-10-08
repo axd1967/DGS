@@ -35,6 +35,7 @@ if ( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament_games.php';
    require_once 'tournaments/include/tournament_helper.php';
    require_once 'tournaments/include/tournament_ladder.php';
+   require_once 'tournaments/include/tournament_round.php';
 }
 
 $GLOBALS['ThePage'] = new Page('GameInfo');
@@ -116,7 +117,7 @@ function build_rating_diff( $rating_diff )
    $white_id = $grow['White_ID'];
    $shape_id = (int)@$grow['ShapeID'];
    $tid = (int) @$grow['tid'];
-   $tourney = $tgame = $tladder_rank = null;
+   $tourney = $tgame = $tladder_rank = $tround = null;
    $old_tid = 0;
    if ( !ALLOW_TOURNAMENTS || $tid <= 0 )
    {
@@ -133,14 +134,19 @@ function build_rating_diff( $rating_diff )
       $tourney = TournamentCache::load_cache_tournament( "gameinfo.find_tournament($gid,$tid)", $tid );
       $tgame = TournamentGames::load_tournament_game_by_gid($gid);
 
-      if ( $tourney->Type == TOURNEY_TYPE_LADDER && !is_null($tgame) && isRunningGame($game_status) )
+      if ( !is_null($tgame) )
       {
-         $tladder_rank = array( $black_id => NO_VALUE, $white_id => NO_VALUE );
-         $arr_tladder = TournamentLadder::load_tournament_ladder_by_uids( $tid, array( $black_id, $white_id ) );
-         if ( isset($arr_tladder[$black_id]) )
-            $tladder_rank[$black_id] = $arr_tladder[$black_id]->Rank;
-         if ( isset($arr_tladder[$white_id]) )
-            $tladder_rank[$white_id] = $arr_tladder[$white_id]->Rank;
+         if ( $tourney->Type == TOURNEY_TYPE_LADDER && isRunningGame($game_status) )
+         {
+            $tladder_rank = array( $black_id => NO_VALUE, $white_id => NO_VALUE );
+            $arr_tladder = TournamentLadder::load_tournament_ladder_by_uids( $tid, array( $black_id, $white_id ) );
+            if ( isset($arr_tladder[$black_id]) )
+               $tladder_rank[$black_id] = $arr_tladder[$black_id]->Rank;
+            if ( isset($arr_tladder[$white_id]) )
+               $tladder_rank[$white_id] = $arr_tladder[$white_id]->Rank;
+         }
+         elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+            $tround = TournamentRound::load_tournament_round_by_id($tgame->Round_ID);
       }
    }
 
@@ -504,6 +510,11 @@ function build_rating_diff( $rating_diff )
          $itable->add_sinfo(
                T_('Current Round#tourney'),
                $tourney->formatRound() );
+      if ( !is_null($tround) && !is_null($tgame) )
+         $itable->add_sinfo(
+               T_('Tournament Game Pool'),
+               anchor( $base_path."tournaments/roundrobin/view_pools.php?tid=$tid".URI_AMP."round={$tround->Round}#pool{$tgame->Pool}",
+                  sprintf( 'Round #%s, Pool %s', $tround->Round, $tgame->Pool ) ) );
       $itable->add_sinfo(
             T_('Tournament Status'),
             Tournament::getStatusText($tourney->Status) );

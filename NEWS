@@ -14,6 +14,9 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Minor changes:
 
+   * Game info page:
+      * Added link for round-robin-tournaments to tournament-game-pool
+
    * Forum:
       * Added check to prevent use of server-configured offensive terms
 
