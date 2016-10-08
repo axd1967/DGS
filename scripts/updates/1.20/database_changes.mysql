@@ -14,3 +14,8 @@
 ALTER TABLE TournamentRound
    ADD PoolNamesFormat varchar(64) NOT NULL default '' AFTER PoolSize ;
 
+
+-- add League-tournament
+ALTER TABLE Tournament
+   MODIFY Type enum('LADDER','ROUNDROBIN','LEAGUE') NOT NULL ;
+

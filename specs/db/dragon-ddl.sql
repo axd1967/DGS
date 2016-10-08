@@ -1048,7 +1048,7 @@ CREATE TABLE IF NOT EXISTS `SurveyVote` (
 CREATE TABLE IF NOT EXISTS `Tournament` (
   `ID` int(11) NOT NULL auto_increment,
   `Scope` enum('DRAGON','PUBLIC','PRIVATE') NOT NULL default 'PUBLIC',
-  `Type` enum('LADDER','ROUNDROBIN') NOT NULL,
+  `Type` enum('LADDER','ROUNDROBIN','LEAGUE') NOT NULL,
   `WizardType` tinyint(4) NOT NULL,
   `Title` varchar(255) NOT NULL,
   `Description` text NOT NULL,

@@ -225,23 +225,29 @@ function make_links_ttype_specific( $tourney, $tstat )
             . '<li>'
             . make_admin_tgame( $tid ) . MED_SPACING . '(' . T_('also see game info pages') . ')'
             . subList( array( T_('End game, Add time#t_mng') ));
-   }
+   }// ladder
 
 
-   // TYPE: round-robin-specific stuff
-   if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   // TYPE: round-robin- & league-specific stuff
+   $is_league = ( $tourney->Type == TOURNEY_TYPE_LEAGUE );
+   if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $is_league )
    {
+      $type_path = ( $is_league ) ? 'league' : 'roundrobin';
+
       if ( $tstat == TOURNEY_STATUS_NEW )
          return '<li>'
             . make_menu_link( T_('Edit points#tourney'), array( 'url' => "tournaments/roundrobin/edit_points.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Setup tournament points to determine pool-winners') ))
+            . subList( array( T_('Setup tournament points to determine pool-ranks') ))
             . '<li>'
-            . make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
+            . ( $is_league
+                  ? make_menu_link( T_('Edit Round Properties#tourney'), array( 'url' => "tournaments/league/edit_round_props.php?tid=$tid", 'class' => 'TAdmin' ))
+                  : make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
+              )
             . subList( array( T_('Setup tournament rounds for pooling and pairing') ));
 
       if ( $tstat == TOURNEY_STATUS_PAIR )
          return '<li>'
-            . make_menu_link( T_('Define pools'), array( 'url' => "tournaments/roundrobin/define_pools.php?tid=$tid", 'class' => 'TAdmin' ))
+            . make_menu_link( T_('Define pools'), array( 'url' => "tournaments/$type_path/define_pools.php?tid=$tid", 'class' => 'TAdmin' ))
             . SEP_SPACING
             . make_menu_link( T_('Create pools'), array( 'url' => "tournaments/roundrobin/create_pools.php?tid=$tid", 'class' => 'TAdmin' ))
             . SEP_SPACING
@@ -264,12 +270,19 @@ function make_links_ttype_specific( $tourney, $tstat )
             . make_admin_tgame( $tid ) . MED_SPACING . '(' . T_('also see game info pages') . ')'
             . subList( array( T_('End game, Add time#t_mng') ))
             . '<li>'
-            . make_menu_link( T_('Edit ranks#tpool'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Set pool-ranks, pool-winners (next-round flagging)#t_mng') ))
-            . '<li>'
-            . make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Start next round') ));;
-   }
+            . ( $is_league
+                  ? make_menu_link( T_('Edit ranks & relegations#tpool'), array( 'url' => "tournaments/league/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
+                     . subList( array( T_('Set pool-ranks, relegations (next-cycle flagging)#t_mng') ))
+                  : make_menu_link( T_('Edit ranks#tpool'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
+                     . subList( array( T_('Set pool-ranks, pool-winners (next-round flagging)#t_mng') ))
+              )
+            . ( $is_league
+                  ? ''
+                  : '<li>'
+                     . make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
+                     . subList( array( T_('Start next round') ))
+              );
+   }// round-robin | league
 
    return '';
 }//make_links_ttype_specific

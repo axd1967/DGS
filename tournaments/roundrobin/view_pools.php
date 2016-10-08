@@ -153,7 +153,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       $poolViewer->echo_pool_table();
    }//allow_view
 
-   $trnd_notes = $tround->build_notes_props( $games_factor, false );
+   $trnd_notes = $tround->build_notes_props( $games_factor, ($tourney->Type == TOURNEY_TYPE_ROUND_ROBIN), false );
    $notes = TournamentGuiHelper::build_tournament_pool_notes($tpoints, /*pool-view*/true );
    $notes[] = null;
    $notes[] = array_merge( array( $trnd_notes[0] ), $trnd_notes[1] );

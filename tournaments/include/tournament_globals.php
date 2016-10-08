@@ -34,7 +34,8 @@ define('CHECK_TOURNEY_SCOPE', 'DRAGON|PUBLIC|PRIVATE');
 // tournament-types
 define('TOURNEY_TYPE_LADDER',      'LADDER');
 define('TOURNEY_TYPE_ROUND_ROBIN', 'ROUNDROBIN');
-define('CHECK_TOURNEY_TYPE', 'LADDER|ROUNDROBIN');
+define('TOURNEY_TYPE_LEAGUE',      'LEAGUE');
+define('CHECK_TOURNEY_TYPE', 'LADDER|ROUNDROBIN|LEAGUE');
 
 // wizard tournament-types with different profiles for tournament-types
 // also adjust TournamentUtils::getWizardTournamentType()
@@ -44,7 +45,8 @@ define('TOURNEY_WIZTYPE_PRIVATE_LADDER', 3);
 define('TOURNEY_WIZTYPE_DGS_ROUNDROBIN', 4);
 define('TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN', 5);
 define('TOURNEY_WIZTYPE_PRIVATE_ROUNDROBIN', 6);
-define('MAX_TOURNEY_WIZARD_TYPE', 6);
+define('TOURNEY_WIZTYPE_DGS_LEAGUE', 7);
+define('MAX_TOURNEY_WIZARD_TYPE', 7);
 
 // bitmasks for wizard: bits 0-3 reserved for modes/opts, bits 4-7 for types
 define('TWIZ_DGS',     0x03);
@@ -53,6 +55,7 @@ define('TWIZ_PRIVATE', 0x01);
 define('TWIZT_MASK',        0xF0); // reserved bits
 define('TWIZT_LADDER',      0x10);
 define('TWIZT_ROUND_ROBIN', 0x20);
+define('TWIZT_LEAGUE',      0x40);
 
 // also adjust TournamentStatus::check_status_change()
 define('TOURNEY_STATUS_ADMIN',    'ADM');

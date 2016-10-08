@@ -116,6 +116,7 @@ class TournamentUtils
          TOURNEY_WIZTYPE_DGS_ROUNDROBIN => TOURNEY_TYPE_ROUND_ROBIN,
          TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN => TOURNEY_TYPE_ROUND_ROBIN,
          TOURNEY_WIZTYPE_PRIVATE_ROUNDROBIN => TOURNEY_TYPE_ROUND_ROBIN,
+         TOURNEY_WIZTYPE_DGS_LEAGUE     => TOURNEY_TYPE_LEAGUE,
       );
       if ( !isset($arr_map[$wizard_type]) )
          error('invalid_args', "TournamentUtils:getWizardTournamentType($wizard_type)");

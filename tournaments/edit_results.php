@@ -197,7 +197,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    $trform->add_row( array( 'HR' ));
    $row_arr = array(
          'DESCRIPTION', T_('Result Round#tourney'),
-         'TEXTINPUT',   'user_round', 3, 3, $user_vars['user_round'], );
+         'TEXTINPUTX',  'user_round', 3, 3, $user_vars['user_round'], ($is_trr ? '' : 'disabled=1') );
    if ( $is_trr )
       array_push( $row_arr,
          'SUBMITBUTTON', 'tr_create_pw', T_('Create tournament results from pool-winners') );
@@ -387,7 +387,7 @@ function load_tournament_info( $tourney, $user, &$uvars, $is_new )
             if ( is_null($tladder) )
                $warnings[] = sprintf( T_('No ladder entry found for user [%s].#tourney'), $user->Handle );
          }
-         elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+         elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $tourney->Type == TOURNEY_TYPE_LEAGUE )
          {
             $user_round = (int)$uvars['user_round'];
             $tpool = TournamentPool::load_tournament_pool_user( $tid, $user_round, $uid );
@@ -421,7 +421,7 @@ function build_show_user_text( $tourney )
 {
    if ( $tourney->Type == TOURNEY_TYPE_LADDER )
       return T_('Show ladder info#tourney');
-   else if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   else if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $tourney->Type == TOURNEY_TYPE_LEAGUE )
       return T_('Show pool info#tourney');
    else
       error('invalid_args', "edit_results.build_show_user_text({$tourney->ID})");

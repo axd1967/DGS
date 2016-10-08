@@ -188,16 +188,17 @@ class Tournament
    // current-round / rounds|*
    public function formatRound( $short=false )
    {
-      $rounds_str = ($this->Rounds > 0) ? $this->Rounds : '*';
-      if ( $this->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      switch( $this->Type )
       {
-         if ( $short )
-            return $this->CurrentRound . ' / ' . $rounds_str;
-         else
-            return sprintf( T_('%s of %s rounds#tourney'), $this->CurrentRound, $rounds_str );
+         case TOURNEY_TYPE_ROUND_ROBIN:
+            $rounds_str = ($this->Rounds > 0) ? $this->Rounds : '*';
+            return ( $short )
+               ? $this->CurrentRound . ' / ' . $rounds_str
+               : sprintf( T_('%s of %s rounds#tourney'), $this->CurrentRound, $rounds_str );
+
+         default: // TOURNEY_TYPE_LADDER | TOURNEY_TYPE_LEAGUE
+            return ( $short ) ? 1 : T_('1 round#tourney');
       }
-      else //if ( $this->Type == TOURNEY_TYPE_LADDER )
-         return ( $short ) ? 1 : T_('1 round#tourney');
    }//formatRound
 
    public function persist()
@@ -431,7 +432,7 @@ class Tournament
             $link = "tournaments/ladder/view.php?tid={$this->ID}";
          }
       }
-      elseif ( $this->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      elseif ( $this->Type == TOURNEY_TYPE_ROUND_ROBIN || $this->Type == TOURNEY_TYPE_LEAGUE )
       {
          if ( $this->Status == TOURNEY_STATUS_PLAY || $this->Status == TOURNEY_STATUS_CLOSED )
          {
@@ -614,6 +615,7 @@ class Tournament
       {
          $arr = array();
          $arr[TOURNEY_TYPE_LADDER] = T_('Ladder#T_type');
+         $arr[TOURNEY_TYPE_LEAGUE] = T_('League#T_type');
          $arr[TOURNEY_TYPE_ROUND_ROBIN] = T_('Round Robin#T_type');
          self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
@@ -639,6 +641,7 @@ class Tournament
          $arr[TOURNEY_WIZTYPE_DGS_ROUNDROBIN] = T_('DGS Round-Robin');
          $arr[TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN] = T_('Public Round-Robin');
          $arr[TOURNEY_WIZTYPE_PRIVATE_ROUNDROBIN] = T_('Private Round-Robin');
+         $arr[TOURNEY_WIZTYPE_DGS_LEAGUE] = T_('DGS League');
          self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 

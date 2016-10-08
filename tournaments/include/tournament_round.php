@@ -190,7 +190,7 @@ class TournamentRound
     * \brief Returns array( header, notes-array ) with this properties in textual form.
     * \param $games_factor factor for calculation of games per user
     */
-   public function build_notes_props( $games_factor=1, $full=true )
+   public function build_notes_props( $games_factor=1, $incl_poolwinners=true, $full=true )
    {
       $arr_props = array();
 
@@ -212,11 +212,14 @@ class TournamentRound
       $arr_props[] = array( 'text' => span('bold', make_html_safe($max_games_text, 'line')) );
 
       // general conditions
-      if ( $this->PoolWinnerRanks > 0 )
-         $arr_props[] = sprintf( T_('For the current round, the players with ranks %s are pool winners.'),
-            '1..' . $this->PoolWinnerRanks );
-      else
-         $arr_props[] = T_('For the current round, the pool winners settings is not configured yet.');
+      if ( $incl_poolwinners )
+      {
+         if ( $this->PoolWinnerRanks > 0 )
+            $arr_props[] = sprintf( T_('For the current round, the players with ranks %s are pool winners.'),
+               '1..' . $this->PoolWinnerRanks );
+         else
+            $arr_props[] = T_('For the current round, the pool winners settings is not configured yet.');
+      }
 
       return array( sprintf( T_('Configuration of the current tournament round #%s'), $this->Round )
             . ':', $arr_props );

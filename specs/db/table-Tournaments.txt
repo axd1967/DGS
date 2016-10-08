@@ -28,7 +28,7 @@ Description:
 +--------------+------------------------------------------------------+------+-----+---------------------+----------------+
 | ID           | int(11)                                              | NO   | PRI | NULL                | auto_increment |
 | Scope        | enum('DRAGON','PUBLIC','PRIVATE')                    | NO   |     | PUBLIC              |                |
-| Type         | enum('LADDER','ROUNDROBIN')                          | NO   |     | NULL                |                |
+| Type         | enum('LADDER','ROUNDROBIN','LEAGUE')                 | NO   |     | NULL                |                |
 | WizardType   | tinyint(4)                                           | NO   |     | NULL                |                |
 | Title        | varchar(255)                                         | NO   |     | NULL                |                |
 | Description  | text                                                 | NO   |     | NULL                |                |
@@ -57,7 +57,7 @@ Description:
 * Type : Tournament-type
    - LADDER = TP can "climb" up ladder (=KING-OF-THE-HILL)
    - ROUNDROBIN = TPs playing in pooled rounds
-   - future: LEAGUE = Team-tournaments
+   - LEAGUE = TPs playing in pools in pyramid structured tiers (=leagues)
 
 * WizardType : type of tournament created by tournament-wizard (more precise than Type)
    - reflects variations of main-Type with different attributes and limitations,
@@ -500,12 +500,14 @@ Description:
 * PoolSize : max. size of every pool actually used for tournament-round
 
 * PoolNamesFormat : round-specific format for pool-names
-   - NOTE: default = "%P %p(num)"
+   - NOTE: default = "%P %t(uc)%p(num)"
    - NOTE: see also PoolNameFormatter-class
    - %P = translated text for 'Pool'
+   - %L = translated text for 'League'
    - %p(fmt) = formatted pool-index
       - %p(num) : format pool-index as number 1..
       - %p(uc)  : format pool-index as upper-case letter A..Z; pool-index > 26 will fallback to number-format 27..
+   - %t(fmt) = formatted tier-index (only for league-tournament); fmt like for %p(fmt)
    - %% = escaping '%'
 
 * Lastchanged : date of last update of table-entry
@@ -898,7 +900,7 @@ Notes:
 
 * Rank : place of users within one pool
    - -100 = Rank not set yet, not shown
-   -    0 = no rank, shown as NO_VALUE
+   -    0 = no rank, also "withdrawn" TP, shown as NO_VALUE
    -   <0 = Rank, user is no pool-winner (so DOES NOT proceed to next round or appear in T-result),
             shown as ABS(Rank)
    -   >0 = Rank, user is a pool-winner (so DOES proceed to next round or appear in T-result)

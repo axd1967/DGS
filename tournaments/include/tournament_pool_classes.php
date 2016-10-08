@@ -1076,18 +1076,21 @@ class PoolNameFormatter
 
    public function __construct( $format=null )
    {
-      $this->format = ( $format ) ? $format : '%P %p(num)';
+      $this->format = ( $format ) ? $format : '%P %t(uc)%p(num)';
    }
 
-   public function format( $pool )
+   public function format( $pool, $tier=-1 )
    {
-      static $ARR_FMT_NEEDLES = array( '%P', '%p(num)', '%p(uc)', '%%' );
+      static $ARR_FMT_NEEDLES = array( '%P', '%p(num)', '%p(uc)', '%L', '%t(num)', '%t(uc)', '%%' );
 
       return str_replace( $ARR_FMT_NEEDLES,
             array(
                /* %P      */  T_('Pool#poolname'),
                /* %p(num) */  $pool,
                /* %p(uc)  */  ($pool >= 1 && $pool <= 26 ? chr(ord('A') + $pool - 1) : $pool ),
+               /* %L      */  T_('League#poolname'),
+               /* %t(num) */  ($tier < 0 ) ? '' : $tier,
+               /* %t(uc)  */  ($tier >= 1 && $tier <= 26 ? chr(ord('A') + $tier - 1) : ($tier < 0 ? '' : $tier) ),
                /* %%      */  '%',
             ), $this->format );
    }//format
@@ -1098,20 +1101,25 @@ class PoolNameFormatter
          return false;
 
       // must have some other text
-      $chk_fmt = trim( str_replace( array('%p(num)', '%p(uc)', '%%'), '', $this->format ) );
+      $chk_fmt = preg_replace( "/(%[pt]\((num|uc)\)|%%|\\s+)/", '', $this->format );
       if ( (string)$chk_fmt == '' )
          return false;
 
-      if ( preg_match("/[<>]/", $this->format) ) // no HTML <|>
+      // no other than allowed '%'-macros
+      $chk_fmt = str_replace( array('%P', '%L'), '', $chk_fmt );
+      if ( strpos($chk_fmt, '%') !== false )
+         return false;
+
+      if ( preg_match("/[<>\r\n]/", $this->format) ) // no HTML <|>
          return false;
 
       return true;
    }//is_valid_format
 
-   public static function format_with_default( $pool )
+   public static function format_with_default( $pool, $tier=-1 )
    {
       $pn_formatter = new PoolNameFormatter();
-      return $pn_formatter->format($pool);
+      return $pn_formatter->format($pool, $tier);
    }
 
 } // end of 'PoolNameFormatter'

@@ -11,6 +11,48 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-10-09 jug
+
+   * tournaments/include/tournament_globals.php (TOURNEY_TYPE_LEAGUE, CHECK_TOURNEY_TYPE,
+       TOURNEY_WIZTYPE_DGS_LEAGUE, MAX_TOURNEY_WIZARD_TYPE, TWIZT_LEAGUE),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules,
+       ~.prepare_create_game_row, ~.getHandicaptypeText),
+     tournaments/include/tournament_pool_classes.php (PoolNameFormatter.__construct, ~.format,
+       ~.is_valid_format, ~.format_with_default),
+     tournaments/include/tournament_template_league.php (class TournamentTemplateLeague,
+       ~.__construct, ~.getDefaultPoolNamesFormat),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_game_end,
+       ~.check_tournament_result),
+     tournaments/include/tournament.php (Tournament.formatRound, ~.build_data_link, ~.getTypeText,
+       ~.getWizardTypeText),
+     tournaments/include/tournament_factory.php (TournamentFactory.getTournament, ~.getTournamentTypes),
+     tournaments/include/tournament_pool.php (TournamentPool.update_tournament_pool_set_pool_winners),
+     tournaments/include/tournament_utils.php (TournamentUtils.getWizardTournamentType),
+     tournaments/include/tournament_round.php (TournamentRound.build_notes_props),
+     tournaments/include/types/dgs_league.php (class DgsLeagueTournament, ~.__construct,
+       ~.createTournament),
+     include/config.php (ALLOW_TOURNAMENTS),
+     scripts/updates/1.20/database_changes.mysql, scripts/updates/1.20/other_changes.txt,
+     scripts/tests/PoolNameFormatterTest.php, scripts/tests/AllTests.php,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/roundrobin/view_pools.php,
+     tournaments/manage_tournament.php (make_links_ttype_specific),
+     tournaments/cron_tournaments.php, tournaments/edit_properties.php,
+     tournaments/edit_results.php, tournaments/view_tournament.php:
+   - start new league-tournament-type
+     - add dragon-scope league-tournament
+     - adjust links on tournament-manager-page to some new league-specific pages
+     - restrict tournament-properties to match one cycle = one round
+     - extend & re-use basic features from round-robin-tournaments
+     - disable pool-winners for league-tournaments for now
+     - edit-properties: forbid editing of custom-round for admins
+     - extended default pool-names-format to include tier/league with %L, %t(num), %t(uc)
+-----------
+-- add League-tournament
+ALTER TABLE Tournament
+   MODIFY Type enum('LADDER','ROUNDROBIN','LEAGUE') NOT NULL ;
+-----------
+
 2016-10-08 jug
 
    * gameinfo.php:

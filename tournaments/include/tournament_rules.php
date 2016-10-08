@@ -349,7 +349,7 @@ class TournamentRules
 
          case HTYPE_DOUBLE:
          case HTYPE_ALTERNATE:
-            if ( $this->TourneyType != TOURNEY_TYPE_ROUND_ROBIN )
+            if ( $this->TourneyType != TOURNEY_TYPE_ROUND_ROBIN && $this->TourneyType != TOURNEY_TYPE_LEAGUE )
                error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.bad_htype({$this->tid},{$this->TourneyType},$handicap_type)");
             // fall-through setting H/K
 
@@ -673,7 +673,7 @@ class TournamentRules
          case TRULE_HANDITYPE_BLACK:
             if ( $this->TourneyType == TOURNEY_TYPE_LADDER ) // challenger is black
                $ch_is_black = true;
-            else //TOURNEY_TYPE_ROUND_ROBIN : stronger is black
+            else //TOURNEY_TYPE_ROUND_ROBIN|LEAGUE : stronger is black
                $ch_is_black = ( $ch_rating > $df_rating );
             $gs_uid = ($ch_is_black) ? $ch_uid : $df_uid;
             break;
@@ -681,7 +681,7 @@ class TournamentRules
          case TRULE_HANDITYPE_WHITE:
             if ( $this->TourneyType == TOURNEY_TYPE_LADDER ) // challenger is white
                $ch_is_black = false;
-            else //TOURNEY_TYPE_ROUND_ROBIN : stronger is white
+            else //TOURNEY_TYPE_ROUND_ROBIN|LEAGUE : stronger is white
                $ch_is_black = ( $ch_rating < $df_rating );
             $gs_uid = ($ch_is_black) ? $df_uid : $ch_uid;
             break;
@@ -823,7 +823,7 @@ class TournamentRules
             $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with Challenger getting Black#T_ladder');
             $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with Challenger getting White#T_ladder');
          }
-         elseif ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+         elseif ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN || $tourney_type == TOURNEY_TYPE_LEAGUE )
          {
             $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with stronger player getting Black#tourney');
             $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with stronger player getting White#tourney');

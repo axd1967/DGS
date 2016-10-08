@@ -150,7 +150,7 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
    static $ARR_ROUND_ROBIN_TG_STAT_OPEN = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE );
    foreach ( $visited_tourney as $tid => $tourney )
    {
-      if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $tourney->Type == TOURNEY_TYPE_LEAGUE )
       {
          $tround = TournamentRound::load_tournament_round( $tid, $tourney->CurrentRound );
          if ( is_null($tround) ) // something dead wrong if that happens

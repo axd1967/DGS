@@ -924,7 +924,7 @@ class TournamentPool
    }//update_tournament_pool_ranks
 
    /*!
-    * \brief Updates TournamentPool.Rank setting pool-winners determined by tround->PoolWinnerRanks.
+    * \brief Updates TournamentPool.Rank setting pool-winners determined by tround->PoolWinnerRanks (if >0).
     * \param $tround TournamentRound-object
     * \return number of affected rows
     *
@@ -937,6 +937,8 @@ class TournamentPool
       $tid = (int)$tround->tid;
       $round = (int)$tround->Round;
       $poolwinner_ranks = (int)$tround->PoolWinnerRanks;
+      if ( $poolwinner_ranks == 0 )
+         return 0;
 
       $result = db_query( "TournamentPool:update_tournament_pool_set_pool_winners.update($tid,{$tround->ID},$round,$poolwinner_ranks)",
          "UPDATE TournamentPool SET Rank=ABS(Rank) " .

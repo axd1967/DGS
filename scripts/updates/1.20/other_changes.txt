@@ -1,0 +1,5 @@
+
+-----------
+# adjust 'include/config-local.php' reflecting changes
+# - added 'LEAGUE'-type in 'ALLOW_TOURNAMENTS'
+

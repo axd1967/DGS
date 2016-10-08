@@ -95,7 +95,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_all_counts[1][TP_STATUS_REGISTER] )
          : NO_VALUE;
    }
-   elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $tourney->Type == TOURNEY_TYPE_LEAGUE )
    {
       $tt_props = TournamentCache::load_cache_tournament_round( 'Tournament.view_tournament',
          $tid, $tourney->CurrentRound, /*chk*/false );
@@ -288,7 +288,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // show tourney-type-specific properties
    $tt_notes = null;
    if ( !is_null($tt_props) )
-      $tt_notes = $tt_props->build_notes_props( $games_factor );
+      $tt_notes = $tt_props->build_notes_props( $games_factor, ($tourney->Type == TOURNEY_TYPE_ROUND_ROBIN) );
    if ( !is_null($tt_notes) )
       echo_notes( 'ttprops', $tt_notes[0], $tt_notes[1], false );
 

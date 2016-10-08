@@ -60,7 +60,7 @@ class TournamentHelper
    public static function process_tournament_game_end( $tourney, $tgame, $check_only )
    {
       $tid = $tourney->ID;
-      if ( $tourney->Type != TOURNEY_TYPE_LADDER && $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
+      if ( !preg_match("/^(".CHECK_TOURNEY_TYPE.")$/", $tourney->Type) )
          error('invalid_args', "TournamentHelper.process_tournament_game_end($tid,{$tourney->Type},{$tgame->ID})");
 
       // check if processing needed
@@ -71,7 +71,7 @@ class TournamentHelper
 
       if ( $tourney->Type == TOURNEY_TYPE_LADDER )
          $result = TournamentLadderHelper::process_tournament_ladder_game_end( $tourney, $tgame );
-      elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $tourney->Type == TOURNEY_TYPE_LEAGUE )
          $result = TournamentRoundHelper::process_tournament_round_robin_game_end( $tourney, $tgame );
       else
          $result = false;
@@ -264,7 +264,7 @@ class TournamentHelper
       {
          if ( ( $tourney->Type == TOURNEY_TYPE_LADDER
                   && $tresult->Type != TRESULTTYPE_TL_KING_OF_THE_HILL && $tresult->Type != TRESULTTYPE_TL_SEQWINS )
-            || ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN
+            || ( ($tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $tourney->Type == TOURNEY_TYPE_LEAGUE )
                   && $tresult->Type != TRESULTTYPE_TRR_POOL_WINNER ) )
          {
             $errors[] = sprintf( T_('Result type [%s] can not be selected for this tournament-type [%s].'),

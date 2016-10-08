@@ -243,7 +243,7 @@ define('WROOM_MAX_ENTRIES', 4);
 define('ALLOWED_RULESETS', 'JAPANESE|CHINESE');
 
 // list of supported tournament-types separated by '|'; for list see Type-enum in Tournament-table; ''=disable tournaments
-define('ALLOW_TOURNAMENTS', 'LADDER|ROUNDROBIN');
+define('ALLOW_TOURNAMENTS', 'LADDER|ROUNDROBIN|LEAGUE');
 
 // Allow creation of tournaments only to Tournament-Admin (false) or every user (true)
 // NOTE: can be overwritten by Players.AdminOptions(ADMOPT_ALLOW_TOURNEY_CREATE)

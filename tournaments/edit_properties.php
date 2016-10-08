@@ -77,7 +77,7 @@ define('DAYS_MIN_REG_ENDTIME', 3);
    $errors = $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
    $arr_rating_use_modes = TournamentHelper::get_restricted_RatingUseModeTexts($t_limits);
    $rating_array = getRatingArray();
-   $allow_custom_round = ( $is_admin || $ttype->getMaxRounds() > 1 );
+   $allow_custom_round = ( $is_admin || $ttype->getMaxRounds() > 1 ) && ( $tourney->Type != TOURNEY_TYPE_LEAGUE );
    if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
