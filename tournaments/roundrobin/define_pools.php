@@ -99,7 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    // check + parse edit-form (notes)
    $old_tround = clone $tround;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $reg_count );
-   $errors = array_merge( $errors, $input_errors, $tround->check_round_properties() );
+   $errors = array_merge( $errors, $input_errors, $tround->check_round_properties($tourney->Type) );
 
    $adjust_pool = '';
    if ( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )

@@ -13,6 +13,18 @@ ChangeLog
 
 2016-10-09 jug
 
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkProperties),
+     tournaments/include/tournament_round.php (TournamentRound.check_round_properties),
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form),
+     tournaments/roundrobin/define_pools.php,
+     tournaments/manage_tournament.php (make_links_ttype_specific):
+   - adjust round-robin edit-rounds-props-page for league-tournament
+     - allow no pool-winner-ranks for league-tournament
+     - extend pool-name-format for league-formats
+     - use fix rounds for league-tournament to represent one cycle
+     - disabled input & changes of league-tournament-defaults for round-properties
+     - removed link to edit-rounds for league-tournament
+
    * tournaments/include/tournament_globals.php (TOURNEY_TYPE_LEAGUE, CHECK_TOURNEY_TYPE,
        TOURNEY_WIZTYPE_DGS_LEAGUE, MAX_TOURNEY_WIZARD_TYPE, TWIZT_LEAGUE),
      tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules,

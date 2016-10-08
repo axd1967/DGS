@@ -240,7 +240,7 @@ function make_links_ttype_specific( $tourney, $tstat )
             . subList( array( T_('Setup tournament points to determine pool-ranks') ))
             . '<li>'
             . ( $is_league
-                  ? make_menu_link( T_('Edit Round Properties#tourney'), array( 'url' => "tournaments/league/edit_round_props.php?tid=$tid", 'class' => 'TAdmin' ))
+                  ? make_menu_link( T_('Edit Round Properties#tourney'), array( 'url' => "tournaments/roundrobin/edit_round_props.php?tid=$tid", 'class' => 'TAdmin' ))
                   : make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
               )
             . subList( array( T_('Setup tournament rounds for pooling and pairing') ));

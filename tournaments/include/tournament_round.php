@@ -161,7 +161,7 @@ class TournamentRound
    }
 
    /*! \brief Checks if all round-properties are valid; return error-list, empty if ok. */
-   public function check_round_properties()
+   public function check_round_properties( $tourney_type )
    {
       $errors = array();
 
@@ -174,7 +174,8 @@ class TournamentRound
       if ( $this->MinPoolSize > $this->MaxPoolSize )
          $errors[] = T_('Tournament Round min. pool size must be smaller than max. pool size.');
 
-      $min_poolwinner_ranks = ( $this->Status == TROUND_STATUS_INIT ) ? 0 : 1;
+      $is_league = ( $tourney_type == TOURNEY_TYPE_LEAGUE );
+      $min_poolwinner_ranks = ( $this->Status == TROUND_STATUS_INIT || $is_league ) ? 0 : 1;
       if ( $this->PoolWinnerRanks < $min_poolwinner_ranks || $this->PoolWinnerRanks > $this->MaxPoolSize )
          $errors[] = sprintf( T_('Tournament Round pool winner ranks must be in range %s.'),
             build_range_text($min_poolwinner_ranks, $this->MaxPoolSize ) );

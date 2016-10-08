@@ -49,6 +49,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       error('not_allowed_for_guest', 'Tournament.roundrobin.edit_round_props');
 
 /* Actual REQUEST calls used:
+     NOTE: used for round-robin-tournaments & league-tournaments (hard-coded round:=1)
+
      tid=&round=              : edit tournament round
      tr_preview&tid=&round=   : preview for tournament-round-save
      tr_save&tid=&round=      : update (replace) tournament-round in database
@@ -57,22 +59,26 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $tid = (int) @$_REQUEST['tid'];
    if ( $tid < 0 ) $tid = 0;
    $round = (int) @$_REQUEST['round'];
-   if ( $round < 0 ) $round = 0;
+   if ( $round <= 0 ) $round = 1;
 
-   $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_round_props.find_tournament', $tid );
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.roundrobin.edit_round_props.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    $t_limits = $ttype->getTournamentLimits();
    if ( !$ttype->need_rounds )
-      error('tournament_edit_rounds_not_allowed', "Tournament.edit_round_props.need_rounds($tid)");
+      error('tournament_edit_rounds_not_allowed', "Tournament.roundrobin.edit_round_props.need_rounds($tid)");
+
+   $is_league = ( $tourney->Type == TOURNEY_TYPE_LEAGUE );
+   if ( $is_league )
+      $round = 1; // only one cycle for leagues -> fix round 1
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    if ( !$allow_edit_tourney )
-      error('tournament_edit_not_allowed', "Tournament.edit_round_props.edit_tournament($tid,$my_id)");
+      error('tournament_edit_not_allowed', "Tournament.roundrobin.edit_round_props.edit_tournament($tid,$my_id)");
 
    // load existing T-round
-   $tround = TournamentCache::load_cache_tournament_round( 'Tournament.edit_round_props', $tid, $round );
+   $tround = TournamentCache::load_cache_tournament_round( 'Tournament.roundrobin.edit_round_props', $tid, $round );
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    // init
@@ -83,8 +89,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    // check + parse edit-form (notes)
    $old_tround = clone $tround;
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $t_limits );
-   $errors = array_merge( $errors, $input_errors, $tround->check_round_properties() );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $t_limits, $is_league );
+   $errors = array_merge( $errors, $input_errors, $tround->check_round_properties($tourney->Type) );
 
    // save tournament-round-object with values from edit-form
    if ( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
@@ -130,29 +136,32 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    }
 
    $pn_formatter = new PoolNameFormatter( $tround->PoolNamesFormat );
+   $disabled = ( $is_league ) ? 'disabled=1' : '';
+
    $trform->add_row( array( 'HR' ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Min. Pool Size'),
-         'TEXTINPUT',   'min_pool_size', 3, 3, $vars['min_pool_size'],
+         'TEXTINPUTX',  'min_pool_size', 3, 3, $vars['min_pool_size'], $disabled,
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MIN_POOLSIZE), ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Max. Pool Size'),
-         'TEXTINPUT',   'max_pool_size', 3, 3, $vars['max_pool_size'],
+         'TEXTINPUTX',  'max_pool_size', 3, 3, $vars['max_pool_size'], $disabled,
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MAX_POOLSIZE), ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Max. Pool Count'),
-         'TEXTINPUT',   'max_pool_count', 5, 5, $vars['max_pool_count'],
+         'TEXTINPUTX',  'max_pool_count', 5, 5, $vars['max_pool_count'], $disabled,
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MAX_POOLCOUNT), ));
    $trform->add_empty_row();
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Winner Ranks'),
-         'TEXTINPUT',   'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], ));
+         'TEXTINPUTX',  'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], $disabled, ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Names Format'),
-         'TEXTINPUT',   'pool_names_fmt', 32, 64, $vars['pool_names_fmt'],
-         'TEXT',        sprintf('%s: %s', T_('Format'), '%P, %p(num), %p(uc), %%'), ));
+         'TEXTINPUT',   'pool_names_fmt', 32, 64, $vars['pool_names_fmt'], ));
    $trform->add_row( array(
-         'TAB', 'TEXT', sprintf('%s: "%s"', T_('Preview'), make_html_safe($pn_formatter->format(9), true)), ));
+         'TAB', 'TEXT', sprintf('%s: %s', T_('Format'), '%P, %p(num), %p(uc), %L, %t(num), %t(uc), %%'), ));
+   $trform->add_row( array(
+         'TAB', 'TEXT', sprintf('%s: "%s"', T_('Preview'), make_html_safe($pn_formatter->format(9, ($is_league ? 1 : -1)), true)), ));
 
    $trform->add_empty_row();
    $trform->add_row( array(
@@ -175,8 +184,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   $menu_array[T_('Edit rounds#tourney')] =
-         array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round", 'class' => 'TAdmin' );
+   if ( !$is_league )
+      $menu_array[T_('Edit rounds#tourney')] =
+            array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
@@ -185,7 +195,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$trd, $t_limits )
+function parse_edit_form( &$trd, $t_limits, $is_league )
 {
    $edits = array();
    $errors = array();
@@ -203,7 +213,10 @@ function parse_edit_form( &$trd, $t_limits )
    $old_vals = array_merge( array(), $vars );
    // read URL-vals into vars
    foreach ( $vars as $key => $val )
-      $vars[$key] = get_request_arg( $key, $val );
+   {
+      if ( !$is_league || !preg_match("/^(min_pool_size|max_pool_size|max_pool_count|poolwinner_ranks)$/", $key) )
+         $vars[$key] = get_request_arg( $key, $val );
+   }
 
    // parse URL-vars
    if ( @$_REQUEST['tr_save'] || @$_REQUEST['tr_preview'] )
@@ -258,7 +271,7 @@ function parse_edit_form( &$trd, $t_limits )
          $trd->PoolWinnerRanks = $new_value;
       else
       {
-         $min_poolwinner_ranks = ( $trd->Status == TROUND_STATUS_INIT ) ? 0 : 1;
+         $min_poolwinner_ranks = ( $trd->Status == TROUND_STATUS_INIT || $is_league ) ? 0 : 1;
          $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Pool Winner Ranks'),
             build_range_text( $min_poolwinner_ranks, $trd->MaxPoolSize ) );
       }

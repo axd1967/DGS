@@ -145,7 +145,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkProperties',
          $tid, $curr_round );
       if ( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
-         $errors = array_merge( $errors, $tround->check_round_properties() );
+         $errors = array_merge( $errors, $tround->check_round_properties($tourney->Type) );
 
       if ( $t_status == TOURNEY_STATUS_REGISTER )
       {
