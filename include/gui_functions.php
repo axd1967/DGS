@@ -130,16 +130,24 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true, $html_safe=true )
    {
       if ( is_null($note) || (string)$note === '' )
          echo "<p></p>\n";
-      elseif ( is_array($note) && isset($note['text']) )
+      elseif ( is_array($note) && isset($note['text']) ) // note with HTML: arr( 'safe' => 0|1, 'text' => note )
       {
          $safe = (bool)@$note['safe'];
          echo '  <li>', ( $safe ? make_html_safe($note['text'], 'line') : $note['text'] ), "\n";
       }
-      elseif ( is_array($note) )
+      elseif ( is_array($note) ) // note with sub-notes: arr( sub-title, arr( sub-notes, ... ))
       {
          echo '  <li>', array_shift( $note ), "\n<ul class=\"SubNotes\">\n"; // note-title
          foreach ( $note as $note_item )
-            echo "<li>$note_item\n";
+         {
+            if ( is_array($note_item) && isset($note_item['text']) )
+            {
+               $safe = (bool)@$note_item['safe'];
+               echo '  <li>', ( $safe ? make_html_safe($note_item['text'], 'line') : $note_item['text'] ), "\n";
+            }
+            else
+               echo "<li>$note_item\n";
+         }
          echo "</ul>\n";
       }
       else

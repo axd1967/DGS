@@ -31,6 +31,7 @@ require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -86,11 +87,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $use_pool_cache = !$allow_edit_tourney && ($tround->Pools > 4)
       && in_array($tourney->Status, TournamentHelper::get_view_data_status());
 
+   $games_factor = TournamentHelper::determine_games_factor( $tid );
+
    if ( $allow_view )
    {
       $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.pool_view', $tid );
       $need_trating = $tprops->need_rating_copy();
-      $games_factor = TournamentHelper::determine_games_factor( $tid );
 
       $tpool_iterator = TournamentCache::load_cache_tournament_pools( 'Tournament.pool_view.load_pools',
          $tid, $round, $need_trating, /*TP-lastmove*/true, $use_pool_cache );
@@ -151,7 +153,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       $poolViewer->echo_pool_table();
    }//allow_view
 
+   $trnd_notes = $tround->build_notes_props( $games_factor, false );
    $notes = TournamentGuiHelper::build_tournament_pool_notes($tpoints, /*pool-view*/true );
+   $notes[] = null;
+   $notes[] = array_merge( array( $trnd_notes[0] ), $trnd_notes[1] );
    echo_notes( 'tpoolnotesTable', T_('Tournament Pool notes'), $notes, true, false );
 
 

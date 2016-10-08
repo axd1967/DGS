@@ -190,18 +190,22 @@ class TournamentRound
     * \brief Returns array( header, notes-array ) with this properties in textual form.
     * \param $games_factor factor for calculation of games per user
     */
-   public function build_notes_props( $games_factor=1 )
+   public function build_notes_props( $games_factor=1, $full=true )
    {
       $arr_props = array();
 
-      // status / pool-size / pool-count
-      $arr_props[] = sprintf( '%s: %s', T_('Tournament Round Status'), self::getStatusText($this->Status) );
-      $arr_props[] = sprintf( '%s: %s', T_('Min. Pool Size'), $this->MinPoolSize );
-      $arr_props[] = sprintf( '%s: %s', T_('Max. Pool Size'), $this->MaxPoolSize );
-      if ( $this->MaxPoolCount > 0 )
-         $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
+      if ( $full )
+      {
+         // status / pool-size / pool-count
+         $arr_props[] = sprintf( '%s: %s', T_('Tournament Round Status'), self::getStatusText($this->Status) );
 
-      $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
+         $arr_props[] = sprintf( '%s: %s', T_('Min. Pool Size'), $this->MinPoolSize );
+         $arr_props[] = sprintf( '%s: %s', T_('Max. Pool Size'), $this->MaxPoolSize );
+         if ( $this->MaxPoolCount > 0 )
+            $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
+
+         $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
+      }
 
       $max_games_text = sprintf( '%s: %s', T_('Max. simultaneous games per user in this round'),
          $games_factor * ( $this->MaxPoolSize - 1 ) );
