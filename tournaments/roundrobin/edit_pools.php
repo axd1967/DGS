@@ -283,7 +283,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       $pv_opts = PVOPT_NO_COLCFG | PVOPT_NO_RESULT | PVOPT_NO_EMPTY;
       if ( $show_pools && !$show_unassigned && $count_status_errors == 0 )
          $pv_opts |= PVOPT_EDIT_COL;
-      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $tround->PoolNamesFormat, $games_factor, $pv_opts );
+      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $ttype->getDefaultPoolNamesFormat(), $games_factor, $pv_opts );
       $poolViewer->setEditCallback( 'pools_edit_col_actions' );
       $poolViewer->init_pool_table();
       foreach ( $arr_selpool as $pool )

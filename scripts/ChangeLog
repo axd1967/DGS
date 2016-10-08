@@ -13,10 +13,14 @@ ChangeLog
 
 2016-10-08 jug
 
+   * tournaments/roundrobin/edit_pools.php:
+   - show default pool-names-format on edit-pools-page to assist tournament-director
+     in selecting correct pool
+
    * tournaments/include/tournament_round.php (TournamentRound.build_notes_props),
      include/gui_functions.php (echo_notes),
      tournaments/roundrobin/view_pools.php:
-   - show pool-winner-ranks & max. simul-games per user on view-pools-page too
+	- show pool-winner-ranks & max. simul-games per user on view-pools-page too
 
    * tournaments/include/tournament_pool_classes.php (class PoolSlicer, ~.__construct, ~.init,
        ~.next_pool, ~.visit_pool, ~.count_visited_pools),
