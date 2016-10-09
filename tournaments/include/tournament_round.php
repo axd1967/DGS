@@ -189,7 +189,7 @@ class TournamentRound
 
    /*!
     * \brief Returns array( header, notes-array ) with this properties in textual form.
-    * \param $games_factor factor for calculation of games per user
+    * \param $games_factor factor for calculation of games per user; 0 = skip max-simul-games info
     */
    public function build_notes_props( $games_factor=1, $incl_poolwinners=true, $full=true )
    {
@@ -208,9 +208,12 @@ class TournamentRound
          $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
       }
 
-      $max_games_text = sprintf( '%s: %s', T_('Max. simultaneous games per user in this round'),
-         $games_factor * ( $this->MaxPoolSize - 1 ) );
-      $arr_props[] = array( 'text' => span('bold', make_html_safe($max_games_text, 'line')) );
+      if ( $games_factor > 0 )
+      {
+         $max_games_text = sprintf( '%s: %s', T_('Max. simultaneous games per user in this round'),
+            $games_factor * ( $this->MaxPoolSize - 1 ) );
+         $arr_props[] = array( 'text' => span('bold', make_html_safe($max_games_text, 'line')) );
+      }
 
       // general conditions
       if ( $incl_poolwinners )

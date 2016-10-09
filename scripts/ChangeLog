@@ -13,6 +13,10 @@ ChangeLog
 
 2016-10-09 jug
 
+   * tournaments/include/tournament_round.php (TournamentRound.build_notes_props),
+     tournaments/roundrobin/edit_round_props.php:
+   - add reduced tournament-round-info on edit-round-props-page for league-tournaments
+
    * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkProperties),
      tournaments/include/tournament_round.php (TournamentRound.check_round_properties),
      tournaments/roundrobin/edit_round_props.php (parse_edit_form),

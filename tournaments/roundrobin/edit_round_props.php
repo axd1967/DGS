@@ -49,7 +49,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       error('not_allowed_for_guest', 'Tournament.roundrobin.edit_round_props');
 
 /* Actual REQUEST calls used:
-     NOTE: used for round-robin-tournaments & league-tournaments (hard-coded round:=1)
+     NOTE: used for round-robin-tournaments (with default round = 1)
+     NOTE: used for league-tournaments (with hard-coded round := 1 )
 
      tid=&round=              : edit tournament round
      tr_preview&tid=&round=   : preview for tournament-round-save
@@ -180,6 +181,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    echo "<h3 class=Header>$title</h3>\n";
 
    $trform->echo_string();
+
+   $notes = $tround->build_notes_props( 0, ($tourney->Type == TOURNEY_TYPE_ROUND_ROBIN) );
+   section( 'preview', T_('Tournament Round Info') );
+   echo_notes( 'ttprops', $notes[0], $notes[1], false );
 
 
    $menu_array = array();
