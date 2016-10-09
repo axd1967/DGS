@@ -55,7 +55,7 @@ class PoolSlicerTest extends PHPUnit_Framework_TestCase {
    public function test_pool_slicer_snake() {
       $pc = new PoolSlicer( TROUND_SLICE_SNAKE, TST_POOL_COUNT, TST_POOL_SIZE );
 
-      $chk = $this->seed_pools( $pc );
+      $chk = $this->_seed_pools( $pc );
       $this->assertEquals( '1,2,3,4,4,3,2,1,1,2,3,4,4,3,2,1,1', join(',', $chk));
       $this->assertEquals( TST_POOL_COUNT, $pc->count_visited_pools());
    }
@@ -63,7 +63,7 @@ class PoolSlicerTest extends PHPUnit_Framework_TestCase {
    public function test_pool_slicer_round_robin() {
       $pc = new PoolSlicer( TROUND_SLICE_ROUND_ROBIN, TST_POOL_COUNT, TST_POOL_SIZE );
 
-      $chk = $this->seed_pools( $pc );
+      $chk = $this->_seed_pools( $pc );
       $this->assertEquals( '1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1', join(',', $chk));
       $this->assertEquals( TST_POOL_COUNT, $pc->count_visited_pools());
    }
@@ -71,7 +71,7 @@ class PoolSlicerTest extends PHPUnit_Framework_TestCase {
    public function test_pool_fillup_pools() {
       $pc = new PoolSlicer( TROUND_SLICE_FILLUP_POOLS, TST_POOL_COUNT, TST_POOL_SIZE );
 
-      $chk = $this->seed_pools( $pc );
+      $chk = $this->_seed_pools( $pc );
       $this->assertEquals( '1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4', join(',', $chk));
       $this->assertEquals( TST_POOL_COUNT, $pc->count_visited_pools());
    }
@@ -79,7 +79,7 @@ class PoolSlicerTest extends PHPUnit_Framework_TestCase {
    public function test_pool_slicer_manual() {
       $pc = new PoolSlicer( TROUND_SLICE_MANUAL, TST_POOL_COUNT, TST_POOL_SIZE );
 
-      $chk = $this->seed_pools( $pc );
+      $chk = $this->_seed_pools( $pc );
       $this->assertEquals( '0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0', join(',', $chk));
       $this->assertEquals( 1, $pc->count_visited_pools());
    }
@@ -87,12 +87,12 @@ class PoolSlicerTest extends PHPUnit_Framework_TestCase {
    public function test_pool_count_visited_pools() {
       $pc = new PoolSlicer( TROUND_SLICE_FILLUP_POOLS, TST_POOL_COUNT, TST_POOL_SIZE );
 
-      $chk = $this->seed_pools( $pc, TST_POOL_SIZE + 2 );
+      $chk = $this->_seed_pools( $pc, TST_POOL_SIZE + 2 );
       $this->assertEquals( '1,1,1,1,1,2,2', join(',', $chk));
       $this->assertEquals( 2, $pc->count_visited_pools());
    }
 
-   private function seed_pools( &$pc, $cnt=TST_CNT_TP )
+   private function _seed_pools( &$pc, $cnt=TST_CNT_TP )
    {
       $result = array();
       for ($i=0; $i < $cnt; $i++)
