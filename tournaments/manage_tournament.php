@@ -232,8 +232,6 @@ function make_links_ttype_specific( $tourney, $tstat )
    $is_league = ( $tourney->Type == TOURNEY_TYPE_LEAGUE );
    if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $is_league )
    {
-      $type_path = ( $is_league ) ? 'league' : 'roundrobin';
-
       if ( $tstat == TOURNEY_STATUS_NEW )
          return '<li>'
             . make_menu_link( T_('Edit points#tourney'), array( 'url' => "tournaments/roundrobin/edit_points.php?tid=$tid", 'class' => 'TAdmin' ))
@@ -247,7 +245,7 @@ function make_links_ttype_specific( $tourney, $tstat )
 
       if ( $tstat == TOURNEY_STATUS_PAIR )
          return '<li>'
-            . make_menu_link( T_('Define pools'), array( 'url' => "tournaments/$type_path/define_pools.php?tid=$tid", 'class' => 'TAdmin' ))
+            . make_menu_link( T_('Define pools'), array( 'url' => "tournaments/roundrobin/define_pools.php?tid=$tid", 'class' => 'TAdmin' ))
             . SEP_SPACING
             . make_menu_link( T_('Create pools'), array( 'url' => "tournaments/roundrobin/create_pools.php?tid=$tid", 'class' => 'TAdmin' ))
             . SEP_SPACING

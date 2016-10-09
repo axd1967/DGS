@@ -53,6 +53,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $page = "define_pools.php";
 
 /* Actual REQUEST calls used:
+     NOTE: used for round-robin-tournaments
+     NOTE: used for league-tournaments (without suggestions)
+
      tid=                     : define tournament pools
      t_preview&tid=           : preview for tournament-pool-save
      t_save&tid=              : update (replace) tournament-round pool-info in database
@@ -70,6 +73,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.define_pools.need_rounds($tid)");
+   $is_league = ( $tourney->Type == TOURNEY_TYPE_LEAGUE );
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
@@ -98,7 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    // check + parse edit-form (notes)
    $old_tround = clone $tround;
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $reg_count );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $is_league );
    $errors = array_merge( $errors, $input_errors, $tround->check_round_properties($tourney->Type) );
 
    $adjust_pool = '';
@@ -144,8 +148,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    if ( @$_REQUEST['t_suggest'] || @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
    {
       $games_factor = TournamentHelper::determine_games_factor( $tid );
-      $ttable = make_suggestions_table( $tround, $reg_count, $errors, $games_factor,
-         $tround->PoolSize, $tround->Pools );
+      if ( !$is_league )
+         $ttable = make_suggestions_table( $tround, $reg_count, $errors, $games_factor,
+            $tround->PoolSize, $tround->Pools );
    }
    else
       $games_factor = 1;
@@ -187,13 +192,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    $tform->add_row( array( 'HR' ));
 
+   $disabled = ( $is_league ) ? 'disabled=1' : '';
    $tform->add_row( array(
          'DESCRIPTION', T_('Base Pool Size'),
-         'TEXTINPUT',   'pool_size', 4, 3, $vars['pool_size'],
+         'TEXTINPUTX',  'pool_size', 4, 3, $vars['pool_size'], $disabled,
          'TEXT',        build_range_text( $tround->MinPoolSize, $tround->MaxPoolSize ), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Pool Count'),
-         'TEXTINPUT',   'pool_count', 4, 4, $vars['pool_count'],
+         'TEXTINPUTX',  'pool_count', 4, 4, $vars['pool_count'], $disabled,
          'TEXT',        ( $adjust_pool ? "<b>$adjust_pool</b>" . SMALL_SPACING : ''),
          'TEXT',        build_range_text( $min_pool_count, $max_pool_count ), ));
 
@@ -212,7 +218,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $tform->add_empty_row();
    $tform->add_row( array(
          'DESCRIPTION', T_('Pool Winner Ranks'),
-         'TEXTINPUT',   'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], ));
+         'TEXTINPUTX',  'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], $disabled, ));
 
    $tform->add_empty_row();
    $tform->add_row( array(
@@ -227,13 +233,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 't_cancel', T_('Cancel'), ));
 
-   $tform->add_empty_row();
-   $tform->add_row( array(
-         'CELL', 2, '',
-         'TEXT',        T_('Order by') . ' ',
-         'SELECTBOX',   'sugg_order', 1, $arr_sugg_order, $sugg_order_val, false,
-         'TEXT', SMALL_SPACING,
-         'SUBMITBUTTON', 't_suggest', T_('Suggest Pool Parameters'), ));
+   if ( !$is_league )
+   {
+      $tform->add_empty_row();
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT',        T_('Order by') . ' ',
+            'SELECTBOX',   'sugg_order', 1, $arr_sugg_order, $sugg_order_val, false,
+            'TEXT', SMALL_SPACING,
+            'SUBMITBUTTON', 't_suggest', T_('Suggest Pool Parameters'), ));
+   }
 
 
    $title = T_('Tournament Pools Setup');
@@ -242,7 +251,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    $tform->echo_string();
 
-   if ( !is_null($ttable) )
+   if ( !$is_league && !is_null($ttable) )
    {
       section( 'suggestions', T_('Pool Suggestions') );
       echo "<p>\n",
@@ -293,7 +302,7 @@ function stripLF( $str )
 }
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$trd )
+function parse_edit_form( &$trd, $is_league )
 {
    $edits = array();
    $errors = array();
@@ -312,7 +321,10 @@ function parse_edit_form( &$trd )
    $old_vals = array_merge( array(), $vars );
    // read URL-vals into vars
    foreach ( $vars as $key => $val )
-      $vars[$key] = get_request_arg( $key, $val );
+   {
+      if ( !$is_league || !preg_match("/^(pool_size|pool_count|poolwinner_ranks)$/", $key) )
+         $vars[$key] = get_request_arg( $key, $val );
+   }
    // handle checkboxes having no key/val in _POST-hash
    if ( $is_posted )
    {
@@ -360,6 +372,7 @@ function parse_edit_form( &$trd )
 
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
+
 
 // return array( 0:$pool_size, 1:$pool_count, 2:$user_capacity, 3:$pool_size_base,
 //               4:$pool_count_remain, 5:$pool_count_base, 6:$max_games_per_user 7:$games_count,

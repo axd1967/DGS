@@ -13,6 +13,13 @@ ChangeLog
 
 2016-10-09 jug
 
+   * tournaments/roundrobin/define_pools.php (parse_edit_form),
+     tournaments/manage_tournament.php (make_links_ttype_specific):
+   - adjust round-robin define-pools-page for league-tournament
+     - allow no pool-winner-ranks
+     - disabled input & changes of league-tournament-defaults for round-properties
+     - disabled pool-suggestions
+
    * tournaments/include/tournament_round.php (TournamentRound.build_notes_props),
      tournaments/roundrobin/edit_round_props.php:
    - add reduced tournament-round-info on edit-round-props-page for league-tournaments
