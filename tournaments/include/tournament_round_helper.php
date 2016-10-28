@@ -116,6 +116,7 @@ class TournamentRoundHelper
       $round = $tround->Round;
 
       // check pools to create games for -> create_pools = 0 | arr( pools )
+      $tier = 0; // all-tiers
       if ( is_numeric($create_pools) )
       {
          if ( $create_pools < 0 || $create_pools > $tround->Pools )
@@ -217,8 +218,8 @@ class TournamentRoundHelper
          $load_opts_tpool |= TPOOL_LOADOPT_TRATING;
       $tpool_iterator = new ListIterator( "$dbgmsg.load_pools" );
       $tpool_iterator->addIndex( 'uid' );
-      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, $create_pools,
-         $load_opts_tpool );
+      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator,
+         $tid, $round, $tier, $create_pools, $load_opts_tpool );
 
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
@@ -459,7 +460,7 @@ class TournamentRoundHelper
       if ( $cnt_games > 0 )
          $errors[] = sprintf( T_('There are %s tournament games for round %s.'), $cnt_games, $tround->Round );
 
-      if ( TournamentPool::exists_tournament_pool( $tourney->ID, $tround->Round ) )
+      if ( TournamentPool::exists_tournament_tier_pool( $tourney->ID, $tround->Round ) )
          $errors[] = sprintf( T_('There are existing tournament pools for round %s.'), $tround->Round );
 
       if ( count($errors) || $check_only )
@@ -628,7 +629,7 @@ class TournamentRoundHelper
             $arr_finished_pools[] = $pool;
       }
 
-      $arr_pools_no_rank = TournamentPool::count_tournament_pool_users( $tid, $round, TPOOLRK_NO_RANK );
+      $arr_pools_no_rank = TournamentPool::count_tournament_tiered_pool_users( $tid, $round, '%p(num)', TPOOLRK_NO_RANK );
       foreach ( $arr_finished_pools as $pool )
       {
          if ( @$arr_pools_no_rank[$pool] ) // pool is to finish when there are entries with NO_RANK
@@ -644,8 +645,8 @@ class TournamentRoundHelper
          $tpoints = TournamentCache::load_cache_tournament_points( 'Tournament.pool_view', $tid );
 
          $tpool_iterator = new ListIterator( 'TRH:fill_ranks_tournament_pool.load_pools' );
-         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round,
-            $arr_pools_to_finish, /*load-opts*/0 );
+         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator,
+            $tid, $round, 0, $arr_pools_to_finish, /*load-opts*/0 );
          $poolTables = new PoolTables( $tround->Pools );
          $poolTables->fill_pools( $tpool_iterator );
 

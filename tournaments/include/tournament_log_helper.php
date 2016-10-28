@@ -517,7 +517,8 @@ class TournamentLogHelper
    }//log_change_tournament_round_props
 
 
-   public static function log_assign_tournament_pool( $tid, $tlog_type, $tround, $old_pools, $uids, $new_pool )
+   public static function log_assign_tournament_pool( $tid, $tlog_type, $tround, $old_pools, $uids,
+         $new_tier_pool, $new_pool )
    {
       $old_state = array();
       foreach ( $old_pools as $old_pool => $old_uids )
@@ -525,7 +526,8 @@ class TournamentLogHelper
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Pool', TLOG_ACT_SET, 0,
          sprintf('Assign pool in round %s/#%s for users: [%s] -> new pool %s%s',
-            $tround->ID, $tround->Round, implode('; ', $old_state), $new_pool, ($new_pool==0 ? ' (REMOVE)' : '') ));
+            $tround->ID, $tround->Round, implode('; ', $old_state),
+            $new_tier_pool, ($new_pool==0 ? ' (REMOVE)' : '') ));
       $tlog->insert();
    }
 
@@ -573,7 +575,7 @@ class TournamentLogHelper
 
 
    public static function log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round, $action, $uid,
-         $rank_from, $rank_to, $pool, $upd_count )
+         $rank_from, $rank_to, $tier_pool, $upd_count )
    {
       if ( $action == RKACT_SET_POOL_WIN )
          $act_text = 'SetPoolWinner';
@@ -587,7 +589,7 @@ class TournamentLogHelper
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOOL_Rank', TLOG_ACT_SET, 0,
          sprintf('Exec rank-action [%s:%s] on round #%s for user [%s]: rank %s..%s, pool %s -> [%s] (%s entries updated)',
             $action, $act_text, $round, $uid, $rank_from, $rank_to,
-            ((string)$pool != '' ? $pool : 'ALL'), ($upd_count ? 'OK' : 'FAILED'), $upd_count ));
+            ((string)$tier_pool != '' ? $tier_pool : 'ALL'), ($upd_count ? 'OK' : 'FAILED'), $upd_count ));
       $tlog->insert();
    }
 

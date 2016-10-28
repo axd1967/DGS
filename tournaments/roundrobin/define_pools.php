@@ -106,6 +106,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $errors = array_merge( $errors, $input_errors, $tround->check_round_properties($tourney->Type) );
 
    $adjust_pool = '';
+   $tier = 1;
    if ( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
    {
       // NOTE: add/del-pools checkboxes don't show up under 'edits'
@@ -120,7 +121,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          elseif ( $vars['delpool'] )
          {
             $adjust_pool = '-1';
-            if ( TournamentPool::exists_tournament_pool($tid, $round, $tround->Pools) )
+            if ( TournamentPool::exists_tournament_tier_pool($tid, $round, $tier, $tround->Pools) )
                $errors[] = sprintf( T_('Last Pool [%s] must be empty to allow deletion!'), $tround->Pools );
             else
             {
@@ -131,7 +132,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       }
       else
       {
-         if ( TournamentPool::exists_tournament_pool($tid, $round, -1) )
+         if ( TournamentPool::exists_tournament_tier_pool($tid, $round, 0, -1) )
             $errors[] = T_('Pool parameters can only be directly changed if all pools have been removed!');
       }
    }

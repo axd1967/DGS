@@ -57,7 +57,7 @@ global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
    FTYPE_PKEY,  'ID',
    FTYPE_AUTO,  'ID',
-   FTYPE_INT,   'ID', 'tid', 'Round', 'Pool', 'uid', 'Rank'
+   FTYPE_INT,   'ID', 'tid', 'Round', 'Tier', 'Pool', 'uid', 'Rank'
    );
 
 class TournamentPool
@@ -65,6 +65,7 @@ class TournamentPool
    public $ID;
    public $tid;
    public $Round;
+   public $Tier;
    public $Pool;
    public $uid;
    public $Rank;
@@ -80,11 +81,12 @@ class TournamentPool
    public $CalcRank = 0;
 
    /*! \brief Constructs TournamentPool-object with specified arguments. */
-   private function __construct( $id=0, $tid=0, $round=1, $pool=1, $uid=0, $rank=TPOOLRK_NO_RANK )
+   private function __construct( $id=0, $tid=0, $round=1, $tier=1, $pool=1, $uid=0, $rank=TPOOLRK_NO_RANK )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
       $this->Round = (int)$round;
+      $this->Tier = (int)$tier;
       $this->Pool = (int)$pool;
       $this->uid = (int)$uid;
       $this->Rank = (int)$rank;
@@ -112,7 +114,7 @@ class TournamentPool
             T_('Tournament Pool') )
          . MINI_SPACING
          . span('bold', T_('Tournament Pool'), '%s: ')
-         . sprintf( T_('Pool [%s], Rank [%s]#tourney'), $this->Pool, $rank_str )
+         . sprintf( T_('Tier [%s], Pool [%s], Rank [%s]#tourney'), $this->Tier, $this->Pool, $rank_str )
          . ',' . MED_SPACING . $this->echoRankImage( T_('No Pool winner#tourney') );
    }
 
@@ -187,6 +189,7 @@ class TournamentPool
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'Round', $this->Round );
+      $data->set_value( 'Tier', $this->Tier );
       $data->set_value( 'Pool', $this->Pool );
       $data->set_value( 'uid', $this->uid );
       $data->set_value( 'Rank', $this->Rank );
@@ -198,12 +201,15 @@ class TournamentPool
 
    /*!
     * \brief Returns db-fields to be used for query of TournamentPool-objects for given tournament-id.
+    * \param $tier 0 = all tiers, otherwise specific tiers or tier-list if array of tiers
     * \param $pool 0 = all pools, otherwise specific pool or pool-list if array of pools
     */
-   public static function build_query_sql( $tid=0, $round=0, $pool=0 )
+   public static function build_query_sql( $tid=0, $round=0, $tier=0, $pool=0 )
    {
       $tid = (int)$tid;
       $round = (int)$round;
+      if ( !is_array($tier) )
+         $tier = (int)$tier;
       if ( !is_array($pool) )
          $pool = (int)$pool;
 
@@ -212,12 +218,19 @@ class TournamentPool
          $qsql->add_part( SQLP_WHERE, "TPOOL.tid='$tid'" );
       if ( $round > 0 )
          $qsql->add_part( SQLP_WHERE, "TPOOL.Round='$round'" );
+
+      if ( is_array($tier) )
+         $qsql->add_part( SQLP_WHERE, build_query_in_clause( 'TPOOL.Tier', $tier, /*is-str*/false ) );
+      elseif ( $tier > 0 )
+         $qsql->add_part( SQLP_WHERE, "TPOOL.Tier='$tier'" );
+
       if ( is_array($pool) )
          $qsql->add_part( SQLP_WHERE, build_query_in_clause( 'TPOOL.Pool', $pool, /*is-str*/false ) );
       elseif ( $pool > 0 )
          $qsql->add_part( SQLP_WHERE, "TPOOL.Pool='$pool'" );
+
       return $qsql;
-   }
+   }//build_query_sql
 
    /*! \brief Returns TournamentPool-object created from specified (db-)row. */
    public static function new_from_row( $row )
@@ -227,6 +240,7 @@ class TournamentPool
             @$row['ID'],
             @$row['tid'],
             @$row['Round'],
+            @$row['Tier'],
             @$row['Pool'],
             @$row['uid'],
             @$row['Rank']
@@ -236,51 +250,63 @@ class TournamentPool
 
    /*!
     * \brief Checks, if TournamentPool-entry exists in db; false if no entry found.
+    * \param $tier 0 = all tiers; >0 = specific tier
     * \param $pool -2 = check for all pools; -1 = all "real" pools (Pool>0); 0 = special pool #0 for unassigned users
     */
-   public static function exists_tournament_pool( $tid, $round, $pool=-2, $uid=null )
+   public static function exists_tournament_tier_pool( $tid, $round, $tier=0, $pool=-2, $uid=null )
    {
       $tid = (int)$tid;
       $round = (int)$round;
+      $tier = (int)$tier;
       $pool = (int)$pool;
 
       $query = "SELECT 1 FROM TournamentPool WHERE tid=$tid AND Round=$round";
+      if ( $tier > 0 )
+         $query .= " AND Tier=$tier";
+
       if ( $pool >= 0 )
          $query .= " AND Pool=$pool";
       elseif ( $pool == -1 )
          $query .= " AND Pool>0";
+
       if ( !is_null($uid) && is_numeric($uid) )
          $query .= " AND uid=$uid";
 
       $row = mysql_single_fetch( "TournamentPool:exists_tournament_pool.find($tid,$round,$pool,$uid)",
          "$query LIMIT 1" );
       return (bool)$row;
-   }//exists_tournament_pool
+   }//exists_tournament_tier_pool
 
    /*!
-    * \brief Returns array( pool-entries, pool-count, distinct-user-count ) for given tournament-id
-    *        and round (and pool-id if given).
+    * \brief Returns array( pool-entries, distinct-tier/pool-count, distinct-user-count ) for given tournament-id
+    *        and round (and tier & pool if given).
+    * \param $tier 0 = count in all tiers; >0 = count only in specific tier
+    * \param $pool 0 = count in all pools; >0 = count only in specific pool
+    * \note entries with TournamentPool.Pool=0 cannot be counted with this method
     */
-   public static function count_tournament_pool( $tid, $round, $pool=0, $count_uid=false )
+   public static function count_tournament_tiered_pool( $tid, $round, $tier=0, $pool=0, $count_uid=false )
    {
       $tid = (int)$tid;
       $round = (int)$round;
 
-      $query = 'SELECT COUNT(*) AS X_CountAll, COUNT(DISTINCT Pool) AS X_CountPools, '
+      $query = 'SELECT SQL_SMALL_RESULT COUNT(*) AS X_CountAll, COUNT(DISTINCT Tier, Pool) AS X_CountPools, '
          . ( $count_uid ? 'COUNT(DISTINCT uid)' : '0' ) . ' AS X_CountUsers '
          . "FROM TournamentPool WHERE tid=$tid AND Round=$round";
+      if ( is_numeric($tier) && $tier > 0 )
+         $query .= " AND Tier=$tier";
       if ( is_numeric($pool) && $pool > 0 )
          $query .= " AND Pool=$pool";
 
-      $row = mysql_single_fetch( "TournamentPool:count_tournament_pool($tid,$round,$pool)", $query );
+      $row = mysql_single_fetch( "TournamentPool:count_tournament_pool($tid,$round,$tier,$pool)", $query );
       return ($row) ? array( $row['X_CountAll'], $row['X_CountPools'], $row['X_CountUsers'] ) : array( 0, 0, 0 );
-   }//count_tournament_pool
+   }//count_tournament_tiered_pool
 
    /*!
-    * \brief Returns array( pool => user-count ) for given tournament-id and round.
+    * \brief Returns array( tier/pool-fmt => user-count ) for given tournament-id and round.
+    * \param $pn_format PoolNameFormatter for keys in result-array, e.g. '%t(uc).%p(num)' for 'C.2'
     * \param $rank null=count-all, TPOOLRK_NO_RANK = count-all-unset-rank, other value = count-all with Rank>value
     */
-   public static function count_tournament_pool_users( $tid, $round, $rank=null )
+   public static function count_tournament_tiered_pool_users( $tid, $round, $pn_format, $rank=null )
    {
       $tid = (int)$tid;
       $round = (int)$round;
@@ -289,17 +315,21 @@ class TournamentPool
          $where_rank = ( $rank == TPOOLRK_NO_RANK ) ? "AND Rank <= $rank" : "AND Rank > $rank";
       else
          $where_rank = '';
-      $result = db_query( "TournamentPool:count_tournament_pool_users($tid,$round,$rank)",
-         "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
-         "WHERE tid=$tid AND Round=$round $where_rank GROUP BY Pool" );
+      $result = db_query( "TournamentPool:count_tournament_tiered_pool_users($tid,$round,$rank)",
+         "SELECT SQL_SMALL_RESULT Tier, Pool, COUNT(*) AS X_Count FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round $where_rank GROUP BY Tier, Pool" );
 
       $arr = array();
+      $pn = new PoolNameFormatter( $pn_format );
       while ( $row = mysql_fetch_assoc($result) )
-         $arr[$row['Pool']] = $row['X_Count'];
+      {
+         $key = $pn->format( $row['Tier'], $row['Pool'] );
+         $arr[$key] = $row['X_Count'];
+      }
       mysql_free_result($result);
 
       return $arr;
-   }//count_tournament_pool_users
+   }//count_tournament_tiered_pool_users
 
    /*! \brief Returns array( rank => count ) for given tournament-id and round. */
    public static function count_tournament_pool_ranks( $tid, $round )
@@ -319,15 +349,15 @@ class TournamentPool
       return $arr;
    }//count_tournament_pool_ranks
 
-   /*! \brief Returns expected sum of games for all pools for given tournament and round. */
-   public static function count_tournament_pool_games( $tid, $round )
+   /*! \brief Returns expected sum of games for all tiered pools for given tournament and round. */
+   public static function count_tournament_tiered_pool_games( $tid, $round )
    {
       $tid = (int)$tid;
       $round = (int)$round;
 
-      $result = db_query( "TournamentPool:count_tournament_pool_games($tid,$round)",
-         "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
-         "WHERE tid=$tid AND Round=$round GROUP BY Pool" );
+      $result = db_query( "TournamentPool:count_tournament_tiered_pool_games($tid,$round)",
+         "SELECT SQL_SMALL_RESULT Tier, Pool, COUNT(*) AS X_Count FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round GROUP BY Tier, Pool" );
 
       $games_factor = TournamentHelper::determine_games_factor( $tid );
 
@@ -337,7 +367,7 @@ class TournamentPool
       mysql_free_result($result);
 
       return $count;
-   }//count_tournament_pool_games
+   }//count_tournament_tiered_pool_games
 
    /*!
     * \brief Returns array( pool-entries, pool-count, distinct-user-count ) for given tournament-id
@@ -369,7 +399,7 @@ class TournamentPool
       $uid = (int)$uid;
       $tpool_user_iterator = new ListIterator( 'TournamentPool:load_tournament_pool_user',
          new QuerySQL( SQLP_WHERE, "TPOOL.uid=$uid") );
-      $tpool_user_iterator = self::load_tournament_pools( $tpool_user_iterator, $tid, $round, 0, $load_opts );
+      $tpool_user_iterator = self::load_tournament_pools( $tpool_user_iterator, $tid, $round, 0, 0, $load_opts );
 
       if ( $tpool_user_iterator->getItemCount() == 1 )
       {
@@ -383,18 +413,19 @@ class TournamentPool
 
    /*!
     * \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id.
-    * \param $pool 0 = load all pools, otherwise load specific pool or pools if array of pools
+    * \param $tier 0 = load all tiers, otherwise load specific tier, or tiers if array of tiers
+    * \param $pool 0 = load all pools, otherwise load specific pool, or pools if array of pools
     * \param $load_opts see options TPOOL_LOADOPT_...
     * \return uid-indexed iterator with items: TournamentPool + .User + .User.urow[TP_X_RegisterTime|TP_Rating]
     *
     * \note IMPORTANT NOTE: keep in sync with TournamentCache::load_cache_tournament_pools()
     */
-   public static function load_tournament_pools( $iterator, $tid, $round, $pool=0, $load_opts=0 )
+   public static function load_tournament_pools( $iterator, $tid, $round, $tier=0, $pool=0, $load_opts=0 )
    {
       $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_TP_LASTMOVED|TPOOL_LOADOPT_REGTIME) );
       $needs_tp_rating = ( $load_opts & TPOOL_LOADOPT_TRATING );
 
-      $qsql = self::build_query_sql( $tid, $round, $pool );
+      $qsql = self::build_query_sql( $tid, $round, $tier, $pool );
       if ( $load_opts & TPOOL_LOADOPT_USER )
       {
          if ( !($load_opts & TPOOL_LOADOPT_ONLY_RATING) )
@@ -477,8 +508,8 @@ class TournamentPool
 
    /*!
     * \brief Returns ListIterator of tournament-participants with NextRound=$round with array-items:
-    *       incomplete TPool(tid,round,pool) + orow.
-    * \return orow: array( 'uid' => X, 'Pool' => Y, 'X_HasPool' => 0|1 (0=TP without pool-entry) ).
+    *       incomplete TPool(tid,round,tier,pool) + orow.
+    * \return orow: array( 'uid' => X, 'Tier' => T, 'Pool' => Y, 'X_HasPool' => 0|1 (0=TP without pool-entry) ).
     * \note TPool returned is incomplete, so don't update() from that object
     */
    private static function load_tournament_participants_with_pools( $iterator, $tid, $round, $only_pools=false )
@@ -486,7 +517,7 @@ class TournamentPool
       if ( $only_pools )
       {
          $qsql = new QuerySQL(
-            SQLP_FIELDS, 'uid', 'ID', 'Pool', '1 AS X_HasPool',
+            SQLP_FIELDS, 'uid', 'ID', 'Tier', 'Pool', '1 AS X_HasPool',
             SQLP_FROM,   'TournamentPool',
             SQLP_WHERE,  "tid=$tid", "Round=$round" );
       }
@@ -495,7 +526,7 @@ class TournamentPool
          $qsql = new QuerySQL(
             SQLP_FIELDS,
                'TP.uid',
-               'TPOOL.ID', 'TPOOL.Pool', 'IFNULL(TPOOL.ID,0) AS X_HasPool',
+               'TPOOL.ID', 'TPOOL.Tier', 'TPOOL.Pool', 'IFNULL(TPOOL.ID,0) AS X_HasPool',
             SQLP_FROM,
                'TournamentParticipant AS TP',
                "LEFT JOIN TournamentPool AS TPOOL ON TPOOL.uid=TP.uid "
@@ -517,7 +548,7 @@ class TournamentPool
       while ( $row = mysql_fetch_array( $result ) )
       {
          $tpool = ( $row['X_HasPool'] )
-            ? new TournamentPool( $row['ID'], $tid, $round, $row['Pool'], $row['uid'] )
+            ? new TournamentPool( $row['ID'], $tid, $round, $row['Tier'], $row['Pool'], $row['uid'] )
             : null;
          $iterator->addItem( $tpool, $row );
       }
@@ -541,7 +572,7 @@ class TournamentPool
       return $result;
    }//delete_pools
 
-   /*! \brief Seeds pools with all registered TPs for round. */
+   /*! \brief Seeds pools with all registered TPs for round (with fix Tier:=1). */
    public static function seed_pools( $tlog_type, $tid, $tprops, $tround, $seed_order, $slice_mode )
    {
       if ( !is_numeric($tid) || $tid <= 0 )
@@ -572,6 +603,7 @@ class TournamentPool
       $entity_tpool = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
       $arr_inserts = array();
       $slicer = new PoolSlicer( $slice_mode, $tround->Pools, $tround->PoolSize );
+      $tier = 1;
       foreach ( $arr_TPs as $row )
       {
          $uid = $row['uid'];
@@ -581,7 +613,7 @@ class TournamentPool
 
          $tpool = $tpool_iterator->getIndexValue( 'uid', $uid, 0 );
          if ( is_null($tpool) ) // user not joined yet
-            $tpool = new TournamentPool( 0, $tid, $round, $pool, $uid );
+            $tpool = new TournamentPool( 0, $tid, $round, $tier, $pool, $uid );
          else // user already joined
             $tpool->Pool = $pool;
 
@@ -637,6 +669,7 @@ class TournamentPool
       $entity_tpool = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
       $arr_inserts = array();
 
+      $tier = 1;
       $pool = 0; // like for TROUND_SLICE_MANUAL
       foreach ( $arr_TPs as $row )
       {
@@ -646,7 +679,7 @@ class TournamentPool
          if ( !is_null($tpool) ) // user already joined
             continue;
 
-         $tpool = new TournamentPool( 0, $tid, $round, $pool, $uid );
+         $tpool = new TournamentPool( 0, $tid, $round, $tier, $pool, $uid );
          $data_tpool = $tpool->fillEntityData( $entity_tpool );
          $arr_inserts[] = $data_tpool->build_sql_insert_values(false, /*with-PK*/true);
       }
@@ -670,13 +703,16 @@ class TournamentPool
       return $result;
    }//add_missing_registered_users
 
-   /*! \brief Assigns list of users to given tournament-round and pool. */
-   public static function assign_pool( $tlog_type, $tround, $pool, $arr_uid )
+   /*! \brief Assigns list of users to given tournament-round and tier/pool. */
+   public static function assign_pool( $tlog_type, $tround, $tier, $pool, $arr_uid )
    {
+      $dbg = "TournamentPool:assign_pool($tid,$round,$tier,$pool)";
       $tid = (int)$tround->tid;
       $round = (int)$tround->Round;
+      if ( !is_numeric($tier) || $tier <= 0 )
+         error('invalid_args', "$dbg.check.tier");
       if ( !is_numeric($pool) || $pool < 0 || $pool > $tround->Pools )
-         error('invalid_args', "TournamentPool:assign_pool.check.pool($tid,$round,$pool)");
+         error('invalid_args', "$dbg.check.pool");
 
       $cnt = count($arr_uid);
       if ( $cnt == 0 )
@@ -684,28 +720,32 @@ class TournamentPool
 
       // find old-pool-state for T-logging
       $uid_where = implode(',', $arr_uid);
-      $result = db_query( "TournamentPool:assign_pool.find_old($tid,$round,$pool)",
-         "SELECT Pool, uid FROM TournamentPool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
-      $arr_old_pools = array(); // pool -> [uid, ...]
+      $result = db_query( "$dbg.find_old",
+         "SELECT Tier, Pool, uid FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
+      $arr_old_pools = array(); // arr( tier.pool -> [uid, ...] )
+      $pn = new PoolNameFormatter( '%t(num).%p(num)' );
       while ( $row = mysql_fetch_assoc($result) )
       {
-         $old_pool = $row['Pool'];
-         if ( !isset($arr_old_pools[$old_pool]) )
-            $arr_old_pools[$old_pool] = array( $row['uid'] );
+         $key = $pn->format( $row['Tier'], $row['Pool'] );
+         if ( !isset($arr_old_pools[$key]) )
+            $arr_old_pools[$key] = array( $row['uid'] );
          else
-            $arr_old_pools[$old_pool][] = $row['uid'];
+            $arr_old_pools[$key][] = $row['uid'];
       }
       mysql_free_result($result);
 
       // assign new pool for given users
-      $result = db_query( "TournamentPool:assign_pool.update($tid,$round,$pool)",
-         "UPDATE TournamentPool SET Pool=$pool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
+      $result = db_query( "$dbg.update",
+         "UPDATE TournamentPool SET Tier=$tier, Pool=$pool " .
+         "WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
       $upd_count = mysql_affected_rows();
 
-      TournamentLogHelper::log_assign_tournament_pool( $tid, $tlog_type, $tround, $arr_old_pools, $arr_uid, $pool );
+      TournamentLogHelper::log_assign_tournament_pool( $tid, $tlog_type, $tround, $arr_old_pools, $arr_uid,
+         $pn->format( $tier, $pool ), $pool );
 
       if ( $upd_count > 0 )
-         self::delete_cache_tournament_pools( "TournamentPool:assign_pool($tid,$round,$pool)", $tid, $round );
+         self::delete_cache_tournament_pools( $dbg, $tid, $round );
 
       return $upd_count;
    }//assign_pool
@@ -739,7 +779,7 @@ class TournamentPool
       if ( $only_summary ) // load only summary
       {
          // check game-counts integrity for all pools
-         $arr_game_counts = TournamentPool::check_pools_game_integrity( $tround );
+         $arr_game_counts = self::check_pools_game_integrity( $tround );
          $cnt_miss_games = $cnt_bad_games = 0;
          foreach ( $pool_summary as $pool => $arr )
          {
@@ -777,7 +817,7 @@ class TournamentPool
       $cnt_pool0 = (int)@$arr_counts[0];
       $cnt_real_pools = count($arr_counts) - ( $cnt_pool0 > 0 ? 1 : 0 ); // pool-count without 0-pool
       list( $cnt_entries, $cnt_pools, $cnt_users ) = // cnt_pools can include 0-pool
-         self::count_tournament_pool( $tid, $round, 0, /*count_uid*/true );
+         self::count_tournament_tiered_pool( $tid, $round, /*tier*/0, /*pool*/0, /*count_uid*/true );
 
       // ---------- check pool integrity ----------
 
@@ -861,7 +901,7 @@ class TournamentPool
     * \return count of TournamentGames- and respective Games-entries (which should be the same) for each pool in array:
     *       array( pool => array( TournamentGames-count, Games-count ), ... )
     */
-   public static function check_pools_game_integrity( $tround )
+   private static function check_pools_game_integrity( $tround )
    {
       $tid = $tround->tid;
       $round_id = $tround->ID;
@@ -962,10 +1002,12 @@ class TournamentPool
     *        RKACT_REMOVE_RANKS   = sets Rank=TPOOLRK_NO_RANK to allow filling ranks anew
     * \param $rank_from ''=all ranks, otherwise numeric rank
     * \param $rank_to ''=same as rank_from (single rank), otherwise numeric rank
+    * \param $tier ''=all tiers, otherwise specific tier
     * \param $pool ''=all pools, otherwise specific pool
     * \return number of updated entries
     */
-   public static function execute_rank_action( $tlog_type, $tid, $round, $action, $uid, $rank_from=null, $rank_to=null, $pool=null )
+   public static function execute_rank_action( $tlog_type, $tid, $round, $action, $uid, $rank_from=null, $rank_to=null,
+         $tier='', $pool='' )
    {
       if ( !is_numeric($action) && ($action < 1 || $action > 4) )
          error('invalid_args', "TournamentPool:execute_rank_action.check.action($tid,$round,$action)");
@@ -977,8 +1019,10 @@ class TournamentPool
             error('invalid_args', "TournamentPool:execute_rank_action.check.rank_from($tid,$round,$rank_from)");
          if ( (string)$rank_to != '' && ( !is_numeric($rank_to) || $rank_to < 0 ))
             error('invalid_args', "TournamentPool:execute_rank_action.check.rank_to($tid,$round,$rank_to)");
+         if ( (string)$tier != '' && !is_numeric($tier) )
+            error('invalid_args', "TournamentPool:execute_rank_action.check.tier($tid,$round,$tier,$pool)");
          if ( (string)$pool != '' && !is_numeric($pool) )
-            error('invalid_args', "TournamentPool:execute_rank_action.check.pool($tid,$round,$pool)");
+            error('invalid_args', "TournamentPool:execute_rank_action.check.pool($tid,$round,$tier,$pool)");
       }
 
       $qpart_rank = ''; // where-clause
@@ -1047,16 +1091,18 @@ class TournamentPool
 
       $query = "UPDATE TournamentPool SET Rank=$rankval "
          . "WHERE tid=$tid AND Round=$round "
+         . ( is_numeric($tier) ? " AND Tier=$tier" : '' )
          . ( is_numeric($pool) ? " AND Pool=$pool" : '' )
          . ( $change_unset ? '' : " AND Rank >".TPOOLRK_RANK_ZONE ) // don't touch UNSET-ranks
          . $qpart_rank
          . ( $uid ? " AND uid=$uid LIMIT 1" : '' );
       $result = db_query( "TournamentPool:execute_rank_action.update("
-         . "$tid,$round,a$action,u$uid,$rank_from-$rank_to,p$pool)", $query );
+         . "$tid,$round,a$action,u$uid,$rank_from-$rank_to,t$tier,p$pool)", $query );
       $upd_count = mysql_affected_rows();
 
+      $pn = new PoolNameFormatter( '%t(uc).%p(num)' );
       TournamentLogHelper::log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round,
-         $action, $uid, $rank_from, $rank_to, $pool, $upd_count );
+         $action, $uid, $rank_from, $rank_to, $pn->format( $tier, $pool ), $upd_count );
 
       if ( $upd_count > 0 )
          self::delete_cache_tournament_pools( "TournamentPool:execute_rank_action($tid,$round)", $tid, $round );

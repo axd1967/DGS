@@ -1283,6 +1283,7 @@ CREATE TABLE IF NOT EXISTS `TournamentPool` (
   `ID` int(11) NOT NULL auto_increment,
   `tid` int(11) NOT NULL,
   `Round` tinyint(3) unsigned NOT NULL,
+  `Tier` tinyint(3) unsigned NOT NULL default '1',
   `Pool` smallint(5) unsigned NOT NULL,
   `uid` int(11) NOT NULL default '0',
   `Rank` tinyint(4) NOT NULL default '-100',

@@ -11,6 +11,33 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-10-28 jug
+
+   * tournaments/include/tournament_pool.php (class TournamentPool, ~.__construct, ~.build_result_info,
+       ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.exists_tournament_tier_pool,
+       ~.count_tournament_tiered_pool, ~.count_tournament_tiered_pool_users,
+       ~.count_tournament_tiered_pool_games, ~.load_tournament_pool_user, ~.load_tournament_pools,
+       ~.load_tournament_participants_with_pools, ~.seed_pools, ~.add_missing_registered_users,
+       ~.assign_pool, ~.check_pools, ~.check_pools_game_integrity, ~.execute_rank_action),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.start_tournament_round_games,
+       ~.remove_tournament_round, ~.fill_ranks_tournament_pool),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_assign_tournament_pool,
+       ~.log_execute_tournament_pool_rank_action),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkGamesStarted,
+       ~.checkClosingTournament),
+     tournaments/include/tournament_result_control.php (TournamentResultControl.create_tournament_result_pool_winners),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_pools),
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     scripts/updates/1.20/database_changes.mysql,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pools.php, tournaments/roundrobin/edit_ranks.php:
+   - add db-field TournamentPool.Tier to support league-tournament
+-----------
+-- add tier for league-tournament
+ALTER TABLE TournamentPool
+   ADD Tier tinyint unsigned NOT NULL default '1' AFTER Round ;
+-----------
+
 2016-10-09 jug
 
    * tournaments/roundrobin/define_pools.php (parse_edit_form),

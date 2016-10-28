@@ -864,13 +864,14 @@ Description:
 ## --- TournamentPool ---
 
 Description:
-   Table to store pool-entries for round-robin tournaments with assigned users.
+   Table to store pool-entries for round-robin & league tournaments with assigned users.
 
 Notes:
    - TournamentPool-table is actually keeping track of user-assignment in a pool along with
      the users pool-rank. A better table-name would be TournamentPoolEntry, but TournamentPool
      is used as it is shorter.
-     Also to note is, that the table is only in 2NF containing some redundancies (tid+Round_ID+Pool
+
+     Also to note is, that the table is only in 2NF containing some redundancies (tid+Round_ID+Tier+Pool
      could be extracted as FK for example), but these fields are kept out of performance-reasons.
 
    - number of running tournament-games :
@@ -882,6 +883,7 @@ Notes:
 | ID    | int(11)              | NO   | PRI | NULL    | auto_increment |
 | tid   | int(11)              | NO   | MUL | NULL    |                |
 | Round | tinyint(3) unsigned  | NO   |     | NULL    |                |
+| Tier  | tinyint(3) unsigned  | NO   |     | 1       |                |
 | Pool  | smallint(5) unsigned | NO   |     | NULL    |                |
 | uid   | int(11)              | NO   | MUL | 0       |                |
 | Rank  | tinyint(4)           | NO   | MUL | -100    |                |
@@ -893,7 +895,14 @@ Notes:
 
 * Round : round number
 
+* Tier : tier number (for league-tournaments)
+   - value: 1..n
+   - NOTE: always 1 for round-robin-tournaments
+
 * Pool : pool number
+   - 0 = special pool with unassigned users (Tier=1)
+      - NOTE: can only exist if tournament-games not started yet, used for manual pool-editing
+   - value: 1..n
 
 * uid : FK to TournamentParticipant.uid = Players.ID
    - one uid can only appear once in the same pool -> UNIQ(tid,Round,Pool,uid)

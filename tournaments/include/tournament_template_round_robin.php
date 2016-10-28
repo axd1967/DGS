@@ -219,7 +219,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
                               TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
 
       // check, that all T-games are started for current round
-      $expected_games = TournamentPool::count_tournament_pool_games( $tid, $round );
+      $expected_games = TournamentPool::count_tournament_tiered_pool_games( $tid, $round );
       $count_tgames = TournamentGames::count_tournament_games( $tid, $tround->ID, array() );
       $count_games_started = TournamentGames::count_games_started( $tid, $tround->ID );
 
@@ -377,10 +377,13 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       }
 
       // warn, if there is more than one pool in final round.
-      list( $cnt_all, $cnt_pools, $cnt_users ) = TournamentPool::count_tournament_pool( $tid, $last_round );
-      if ( $cnt_pools > 1 )
-         $warnings[] = sprintf( T_('There is more than one pool in last round #%s: found %s pools.'),
-            $last_round, $cnt_pools );
+      if ( $tourney->Type != TOURNEY_TYPE_LEAGUE )
+      {
+         list( $cnt_all, $cnt_pools, $cnt_users ) = TournamentPool::count_tournament_tiered_pool( $tid, $last_round );
+         if ( $cnt_pools > 1 )
+            $warnings[] = sprintf( T_('There is more than one pool in last round #%s: found %s pools.'),
+               $last_round, $cnt_pools );
+      }
 
       return array( $errors, $warnings );
    }//checkClosingTournament

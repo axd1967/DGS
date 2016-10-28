@@ -123,9 +123,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $action    = (int)get_request_arg('action');
          $rank_from = get_request_arg('rank_from');
          $rank_to   = get_request_arg('rank_to');
+         $act_tier  = '';
          $act_pool  = get_request_arg('pool');
          $upd_count = TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, /*uid*/0,
-            $rank_from, $rank_to, $act_pool );
+            $rank_from, $rank_to, $act_tier, $act_pool );
       }
       elseif ( $uid && @$_REQUEST['t_userexec'] ) // execute rank-actions on single user
       {

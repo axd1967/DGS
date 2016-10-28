@@ -19,3 +19,9 @@ ALTER TABLE TournamentRound
 ALTER TABLE Tournament
    MODIFY Type enum('LADDER','ROUNDROBIN','LEAGUE') NOT NULL ;
 
+
+-- add tier for league-tournament
+ALTER TABLE TournamentPool
+   ADD Tier tinyint unsigned NOT NULL default '1' AFTER Round ;
+
+

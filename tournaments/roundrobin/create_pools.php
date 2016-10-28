@@ -53,6 +53,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    $page = "create_pools.php";
 
 /* Actual REQUEST calls used:
+     NOTE: used for round-robin-tournaments
+     NOTE: used for league-tournaments
+
      tid=                                   : create/manage tournament pools
      t_seed&tid=&seed_order=&slice_mode=    : seed pools
      t_delete&tid=                          : delete all pools (needs confirm)
@@ -72,6 +75,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.create_pools.need_rounds($tid)");
+   $is_league = ( $tourney->Type == TOURNEY_TYPE_LEAGUE );
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
@@ -84,7 +88,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.create_pools', $tid );
-   list( $count_poolrows, $count_pools ) = TournamentPool::count_tournament_pool( $tid, $round );
+   list( $count_poolrows, $count_pools ) = TournamentPool::count_tournament_tiered_pool( $tid, $round );
 
 
    // init
@@ -92,7 +96,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    $errors = array_merge( $errors, $trstatus->check_edit_round_status( TROUND_STATUS_POOL ) );
    if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
-   if ( $tround->PoolSize == 0 || $tround->Pools == 0 )
+   if ( $tround->PoolSize == 0 || ( !$is_league && $tround->Pools == 0 ) )
       $errors[] = T_('Pool parameters must be defined first before you can manage pools!');
    if ( @$_REQUEST['t_del_confirm'] )
    {

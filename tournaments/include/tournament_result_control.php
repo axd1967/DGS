@@ -243,7 +243,7 @@ class TournamentResultControl
       $iterator = new ListIterator( "TRC:create_tresult_pool_winners.TournamentPool",
          new QuerySQL( SQLP_WHERE, 'TPOOL.Rank > 0' ), // find pool-winners
          'ORDER BY Rank ASC, Pool ASC' ); // order by highest rank first
-      $iterator = TournamentPool::load_tournament_pools( $iterator, $tid, $round, 0,
+      $iterator = TournamentPool::load_tournament_pools( $iterator, $tid, $round, 0, 0,
          TPOOL_LOADOPT_USER | TPOOL_LOADOPT_TP_ID | TPOOL_LOADOPT_TRATING | TPOOL_LOADOPT_ONLY_RATING );
 
       $cnt = 0;

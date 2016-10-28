@@ -533,7 +533,7 @@ class TournamentCache
          $arr_tpools = null;
       if ( is_null($arr_tpools) )
       {
-         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts );
+         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, 0, $load_opts );
 
          if ( $use_cache )
             DgsCache::store( $dbgmsg, CACHE_GRP_TPOOLS, $key, $tpool_iterator->getItemRows(), SECS_PER_HOUR, $group_id );

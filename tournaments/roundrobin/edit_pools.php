@@ -116,13 +116,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    }
 
    // perform edit-actions: remove-from-pool, assign-pool
+   $tier = 1;
    if ( count($errors) == 0 )
    {
       if ( @$_REQUEST['t_remove'] )
       {
          $arr_marked_uid = get_marked_users();
          if ( count($arr_marked_uid) )
-            TournamentPool::assign_pool( $allow_edit_tourney, $tround, 0, $arr_marked_uid );
+            TournamentPool::assign_pool( $allow_edit_tourney, $tround, $tier, 0, $arr_marked_uid );
       }
       if ( @$_REQUEST['t_assign'] || @$_REQUEST['t_reassign'] )
       {
@@ -134,7 +135,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          if ( count($arr_assign_uid) )
          {
             foreach ( $arr_assign_uid as $pool => $arr_uids )
-               TournamentPool::assign_pool( $allow_edit_tourney, $tround, $pool, $arr_uids );
+               TournamentPool::assign_pool( $allow_edit_tourney, $tround, $tier, $pool, $arr_uids );
          }
       }
       if ( @$_REQUEST['t_assign'] )
@@ -149,7 +150,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
             {
                $arr_marked_uid = get_marked_users();
                if ( count($arr_marked_uid) )
-                  TournamentPool::assign_pool( $allow_edit_tourney, $tround, $newpool, $arr_marked_uid );
+                  TournamentPool::assign_pool( $allow_edit_tourney, $tround, $tier, $newpool, $arr_marked_uid );
             }
          }
       }
@@ -180,9 +181,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       $games_factor = TournamentHelper::determine_games_factor( $tid );
 
       $tpool_iterator = new ListIterator( 'Tournament.pool_edit.load_pools' );
-      $tpool_iterator->addQuerySQLMerge(
-         new QuerySQL( SQLP_WHERE, 'TPOOL.Pool IN (' . implode(',', $arr_selpool) . ')' ));
-      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts_tpool );
+      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator,
+         $tid, $round, /*tier*/0, $arr_selpool, $load_opts_tpool );
 
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
@@ -424,7 +424,7 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
          $uatable->current_limit_string() );
    $tpool0_iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE, 'TPOOL.Pool=0' ));
    $tpool0_iterator = TournamentPool::load_tournament_pools(
-      $tpool0_iterator, $tid, $round, 0, $load_opts_tpool );
+      $tpool0_iterator, $tid, $round, 0, 0, $load_opts_tpool );
 
    $show_rows = $uatable->compute_show_rows( $tpool0_iterator->getResultRows() );
    $uatable->set_found_rows( mysql_found_rows('Tournament.edit_pools.pools_unassigned.found_rows') );
