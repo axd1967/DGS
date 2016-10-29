@@ -61,7 +61,7 @@ abstract class TournamentTemplateLeague extends TournamentTemplateRoundRobin
       $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 5, 10 );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLSIZE, false, 10, 10 );
 
-      // consts to be editable later
+      // consts to be editable later (see also fields of TournamentRound-class)
       // TierFactor := 2
       // PromoteRanks := 2
       // DemoteStartRank := 6

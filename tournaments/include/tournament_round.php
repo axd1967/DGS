@@ -67,6 +67,10 @@ class TournamentRound
    public $Lastchanged;
    public $ChangedBy;
 
+   // league-tournament specifics (const/not-saved for now)
+
+   public $TierFactor = 2;
+
    /*! \brief Constructs TournamentRound-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
          $min_pool_size=2, $max_pool_size=2, $max_pool_count=0, $poolwinner_ranks=1, $pool_count=0, $pool_size=0,
@@ -205,7 +209,8 @@ class TournamentRound
          if ( $this->MaxPoolCount > 0 )
             $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
 
-         $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
+         if ( $this->Pools > 0 )
+            $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
       }
 
       if ( $games_factor > 0 )

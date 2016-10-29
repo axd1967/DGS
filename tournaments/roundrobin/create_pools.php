@@ -114,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       {
          $seed_order = (int)get_request_arg('seed_order');
          $slice_mode = (int)get_request_arg('slice_mode');
-         if ( TournamentPool::seed_pools( $allow_edit_tourney, $tid, $tprops, $tround, $seed_order, $slice_mode ) )
+         if ( TournamentPool::seed_pools( $allow_edit_tourney, $tid, $tourney->Type, $tprops, $tround, $seed_order, $slice_mode ) )
          {
             $sys_msg = urlencode( T_('Tournament Pools seeded!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");

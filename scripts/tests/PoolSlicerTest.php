@@ -96,10 +96,7 @@ class PoolSlicerTest extends PHPUnit_Framework_TestCase {
    {
       $result = array();
       for ($i=0; $i < $cnt; $i++)
-      {
          $result[] = $pc->next_pool();
-         $pc->visit_pool();
-      }
       return $result;
    }
 

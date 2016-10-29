@@ -30,6 +30,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/table_columns.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_pool.php';
+require_once 'tournaments/include/tournament_round.php';
 
 
  /*!
@@ -1128,6 +1129,124 @@ class PoolNameFormatter
 
 
  /*!
+  * \class TierSlicer
+  *
+  * \brief Helper-class to create pools with tiered leagues.
+  */
+class TierSlicer
+{
+   private $tourney_type;
+   private $tround;
+   private $slice_mode;
+   private $tp_count;
+
+   private $tier_pool_count; // pool-count for current tier
+   private $tier_max_tp; // max-TP for current tier
+
+   private $curr_tier;
+   private $tier_idx_tp;
+   private $remaining_tp; // remaining TPs
+   private $pool_slicer = null;
+   private $arr_tier_pools;
+   private $max_tier;
+
+   public function __construct( $tourney_type, $tround, $slice_mode, $tp_count )
+   {
+      if ( !($tround instanceof TournamentRound) )
+         error('invalid_args', "TierSlicer:__construct.check_tround($tourney_type,$slice_mode,$tp_count)");
+
+      $this->tourney_type = $tourney_type;
+      $this->tround = $tround;
+      $this->slice_mode = $slice_mode;
+      $this->tp_count = (int)$tp_count;
+
+      $this->init();
+   }
+
+   private function init()
+   {
+      $this->curr_tier = 1;
+      $this->tier_idx_tp = 0;
+      $this->remaining_tp = $this->tp_count;
+
+      $this->arr_tier_pools = array(); // [ tier.pool => 1 ], also for pool=0
+      $this->max_tier = 1;
+
+      if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
+      {
+         $this->tier_pool_count = 1;
+         $this->tier_max_tp = $this->tround->PoolSize;
+      }
+      else //if ( $this->tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         $this->tier_pool_count = $this->tround->Pools;
+         $this->tier_max_tp = $this->tp_count;
+      }
+
+      $this->reset_pool_slicer();
+   }
+
+   private function reset_pool_slicer( $slice_mode=null )
+   {
+      if ( is_null($slice_mode) )
+         $slice_mode = $this->slice_mode;
+      $this->pool_slicer = new PoolSlicer( $slice_mode, $this->tier_pool_count, $this->tround->PoolSize );
+   }
+
+   public function next_tier_pool()
+   {
+      if ( $this->tier_idx_tp >= $this->tier_max_tp )
+      {
+         $this->tier_idx_tp = 0;
+         $this->curr_tier++;
+
+         if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
+         {
+            $this->tier_max_tp *= $this->tround->TierFactor;
+            $this->tier_pool_count *= $this->tround->TierFactor;
+
+            // handle bottom-tier
+            if ( $this->remaining_tp >= $this->tround->MinPoolSize * $this->tier_pool_count )
+               $this->reset_pool_slicer();
+            elseif ( $this->remaining_tp < $this->tround->MinPoolSize )
+            {
+               // fill remaining TPs into unassigned-pool
+               $this->curr_tier = 1;
+               $this->reset_pool_slicer( TROUND_SLICE_MANUAL );
+            }
+            else // min-pool-size <= rem_tp < min-pool-size * tier-pool-count
+            {
+               $this->tier_pool_count = floor( $this->remaining_tp / $this->tround->MinPoolSize );
+               $this->reset_pool_slicer();
+            }
+         }
+      }
+      $this->tier_idx_tp++;
+      $this->remaining_tp--;
+
+      $curr_pool = $this->pool_slicer->next_pool();
+      $this->visit_tier_pool( $this->curr_tier, $curr_pool );
+      return array( $this->curr_tier, $curr_pool );
+   }//next_tier_pool
+
+   private function visit_tier_pool( $tier, $pool )
+   {
+      if ( $tier > $this->max_tier )
+         $this->max_tier = $tier;
+      $this->arr_tier_pools["$tier:$pool"] = 1;
+   }
+
+   /*! \brief Returns creation stats: arr( max-tier, #pools (without unassigned), has-unassigned-pool=0|1 ). */
+   public function get_slicer_counts()
+   {
+      return array( $this->max_tier, count($this->arr_tier_pools), (int)@$this->arr_tier_pools['1:0'] );
+   }
+
+} // end of 'TierSlicer'
+
+
+
+ /*!
   * \class PoolSlicer
   *
   * \brief Helper-class with different slice-modes for seeding pools.
@@ -1147,6 +1266,11 @@ class PoolSlicer
 
    public function __construct( $slice_mode, $pool_count, $pool_size )
    {
+      if ( $pool_count <= 0 )
+         error('invalid_args', "PoolSlicer:__construct.check_poolcount($slice_mode,$pool_count,$pool_size)");
+      if ( $pool_count < 1 )
+         error('invalid_args', "PoolSlicer:__construct.check_poolsize($slice_mode,$pool_count,$pool_size)");
+
       $this->slice_mode = $slice_mode;
       $this->pool_count = (int)$pool_count;
       $this->pool_size = (int)$pool_size;
@@ -1172,11 +1296,16 @@ class PoolSlicer
 
       if ( $this->slice_mode == TROUND_SLICE_SNAKE )
       {
-         $this->arr_snaking = array_merge(
-            array(0),
-            array_fill( 1, $this->pool_count - 1, 1 ),
-            array(0),
-            array_fill( $this->pool_count + 1, $this->pool_count - 1, -1) );
+         if ( $this->pool_count == 1 )
+            $this->arr_snaking = array( 0, 0 );
+         else
+         {
+            $this->arr_snaking = array_merge(
+               array(0),
+               array_fill( 1, $this->pool_count - 1, 1 ),
+               array(0),
+               array_fill( $this->pool_count + 1, $this->pool_count - 1, -1) );
+         }
          $this->mod_snaking = 2 * $this->pool_count; // should be == count($arr_snaking)
       }
    }//init
@@ -1203,14 +1332,10 @@ class PoolSlicer
             break;
       }
 
+      $this->arr_pools[$this->curr_pool]++;
       $this->idx_slicing++;
       return $this->curr_pool;
    }//next_pool
-
-   public function visit_pool( )
-   {
-      $this->arr_pools[$this->curr_pool]++;
-   }
 
    public function count_visited_pools()
    {

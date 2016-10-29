@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
+require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -572,8 +573,8 @@ class TournamentPool
       return $result;
    }//delete_pools
 
-   /*! \brief Seeds pools with all registered TPs for round (with fix Tier:=1). */
-   public static function seed_pools( $tlog_type, $tid, $tprops, $tround, $seed_order, $slice_mode )
+   /*! \brief Seeds pools with all registered TPs for round. */
+   public static function seed_pools( $tlog_type, $tid, $t_type, $tprops, $tround, $seed_order, $slice_mode )
    {
       if ( !is_numeric($tid) || $tid <= 0 )
          error('unknown_tournament', "TournamentPool:seed_pools.check_tid($tid)");
@@ -581,17 +582,18 @@ class TournamentPool
       if ( !($tround instanceof TournamentRound) )
          error('invalid_args', "TournamentPool:seed_pools.check_tround($tid,$seed_order)");
       $round = $tround->Round;
+      $dbgmsg = "TournamentPool:seed_pools($tid,$round,$seed_order,$slice_mode)";
 
       list( $def, $arr_seed_order ) = $tprops->build_seed_order();
       if ( !isset($arr_seed_order[$seed_order]) )
-         error('invalid_args', "TournamentPool:seed_pools.check_seed_order($tid,$seed_order)");
+         error('invalid_args', "$dbgmsg.check_seed_order");
 
       list( $def, $arr_slice_mode ) = self::get_slice_modes();
       if ( !isset($arr_slice_mode[$slice_mode]) )
-         error('invalid_args', "TournamentPool:seed_pools.check_slice_mode($tid,$slice_mode)");
+         error('invalid_args', "$dbgmsg.check_slice_mode");
 
       // load already joined pool-users
-      $tpool_iterator = new ListIterator( "TournamentPool:seed_pools.load_pools($tid,$round)" );
+      $tpool_iterator = new ListIterator( "$dbgmsg.load_pools" );
       $tpool_iterator->addIndex( 'uid' );
       $tpool_iterator = self::load_tournament_pools( $tpool_iterator, $tid, $round );
 
@@ -599,25 +601,24 @@ class TournamentPool
       $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $round, $seed_order );
 
       // add all TPs to pools
-      $NOW = $GLOBALS['NOW'];
       $entity_tpool = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
       $arr_inserts = array();
-      $slicer = new PoolSlicer( $slice_mode, $tround->Pools, $tround->PoolSize );
-      $tier = 1;
+      $slicer = new TierSlicer( $t_type, $tround, $slice_mode, count($arr_TPs) );
       foreach ( $arr_TPs as $row )
       {
          $uid = $row['uid'];
 
-         // handle slice-mode for user-distribution on pools
-         $pool = $slicer->next_pool();
+         // handle slice-mode for user-distribution on tiers & pools
+         list( $tier, $pool ) = $slicer->next_tier_pool();
 
          $tpool = $tpool_iterator->getIndexValue( 'uid', $uid, 0 );
          if ( is_null($tpool) ) // user not joined yet
             $tpool = new TournamentPool( 0, $tid, $round, $tier, $pool, $uid );
          else // user already joined
+         {
+            $tpool->Tier = $tier;
             $tpool->Pool = $pool;
-
-         $slicer->visit_pool();
+         }
 
          $data_tpool = $tpool->fillEntityData( $entity_tpool );
          $arr_inserts[] = $data_tpool->build_sql_insert_values(false, /*with-PK*/true);
@@ -625,23 +626,34 @@ class TournamentPool
       unset($arr_TPs);
       unset($tpool_iterator);
 
+      list( $max_tier, $cnt_pools, $cnt_unassigned_pool ) = $slicer->get_slicer_counts();
+
       // insert all registered TPs to pools
       $cnt = count($arr_inserts);
       $seed_query = $entity_tpool->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
-         . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
+         . " ON DUPLICATE KEY UPDATE Tier=VALUES(Tier), Pool=VALUES(Pool) ";
 
-      db_lock( "TournamentPool:seed_pools($tid,$round,$seed_order,$slice_mode)",
-         "TournamentPool WRITE" );
-      {//LOCK TournamentPool
-         $result = db_query( "TournamentPool:seed_pools.insert($tid,$round,$seed_order,$slice_mode,#$cnt)",
-            $seed_query );
+      ta_begin();
+      {//HOT-section for seeding-pools
+         db_lock( $dbgmsg, "TournamentPool WRITE, TournamentRound WRITE" );
+         {//LOCK TournamentPool
+            $result = db_query( "$dbgmsg.insert(#$cnt)", $seed_query );
+            self::delete_cache_tournament_pools( $dbgmsg, $tid, $round );
+
+            if ( $t_type == TOURNEY_TYPE_LEAGUE )
+            {
+               $tround->Pools = (int)$cnt_pools;
+               $tround->update();
+               TournamentRound::delete_cache_tournament_round( $dbgmsg, $tid, $round );
+            }
+         }
+         db_unlock();
+
+         TournamentLogHelper::log_seed_pools( $tid, $tlog_type, $round,
+            "seed_order=$seed_order, slice_mode=$slice_mode",
+            $cnt, $max_tier, $cnt_pools, $cnt_unassigned_pool, $result );
       }
-      db_unlock();
-
-      TournamentLogHelper::log_seed_pools( $tid, $tlog_type, $round,
-         "seed_order=$seed_order, slice_mode=$slice_mode", $cnt, $slicer->count_visited_pools(), $result );
-
-      self::delete_cache_tournament_pools( "TournamentPool:seed_pools($tid,$round)", $tid, $round );
+      ta_end();
 
       return $result;
    }//seed_pools

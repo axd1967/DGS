@@ -39,6 +39,7 @@ require_once 'PoolNameFormatterTest.php';
 require_once 'PoolSlicerTest.php';
 require_once 'ProfileTest.php';
 require_once 'SgfParserTest.php';
+require_once 'TierSlicerTest.php';
 require_once 'TimeFormatTest.php';
 require_once 'TournamentPointsTest.php';
 
@@ -75,6 +76,7 @@ class AllTests
             'PoolSlicerTest',
             'ProfileTest',
             'SgfParserTest',
+            'TierSlicerTest',
             'TimeFormatTest',
             'TournamentPointsTest',
          );

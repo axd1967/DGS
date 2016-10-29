@@ -549,11 +549,13 @@ class TournamentLogHelper
    }
 
 
-   public static function log_seed_pools( $tid, $tlog_type, $round, $params, $count_users, $count_pools, $success )
+   public static function log_seed_pools( $tid, $tlog_type, $round, $params, $count_users, $max_tier, $count_pools,
+         $count_unassigned_pool, $success )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Pool', TLOG_ACT_SEED, 0,
-         sprintf('Seed pools (%s) for round #%s: %s users, %s pools -> [%s]',
-            $params, $round, $count_users, $count_pools, ($success ? 'OK' : 'FAILED') ));
+         sprintf('Seed pools (%s) for round #%s: %s users, %s tiers, %s(+%s) pools -> [%s]',
+            $params, $round, $count_users, $max_tier, $count_pools, $count_unassigned_pool,
+            ($success ? 'OK' : 'FAILED') ));
       $tlog->insert();
    }
 

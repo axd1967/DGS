@@ -11,6 +11,21 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-10-29 jug
+
+   * tournaments/include/tournament_pool_classes.php (class TierSlicer, ~.__construct, ~.init,
+         ~.reset_pool_slicer, ~.next_tier_pool, ~.visit_tier_pool, ~.get_slicer_counts;
+       PoolSlicer.__construct, ~.init, ~.next_pool),
+     tournaments/include/tournament_round.php (class TournamentRound, ~.build_notes_props),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_seed_pools),
+     tournaments/include/tournament_pool.php (TournamentPool.seed_pools),
+     scripts/tests/AllTests.php, scripts/tests/PoolSlicerTest.php, scripts/tests/TierSlicerTest.php,
+     tournaments/roundrobin/create_pools.php:
+   - add seeding-pools for league-tournament with handling of tiers
+     - add TierSlicer on top of PoolSlicer to handle round-robin & league tournaments alike
+     - add constant league-specific fields in TournamentRound-class: TierFactor
+     - assign too-few remaining players in bottom-tier into unassigned-pool
+
 2016-10-28 jug
 
    * tournaments/include/tournament_pool.php (class TournamentPool, ~.__construct, ~.build_result_info,
