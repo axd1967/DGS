@@ -11,6 +11,13 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-11-03 jug
+
+   * tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_round_props.php:
+   - hide const tournament-round in top info-section & pool-winner-ranks for league-tournaments
+
 2016-11-02 jug
 
    * tournaments/include/tournament_pool.php (TournamentPool.check_pools):

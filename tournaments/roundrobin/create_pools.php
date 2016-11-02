@@ -146,9 +146,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round'),
-         'TEXT',        $tourney->formatRound(), ));
+   if ( !$is_league )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament Round'),
+            'TEXT',        $tourney->formatRound(), ));
+   }
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Round Status#tourney'),

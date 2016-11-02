@@ -62,6 +62,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    $page = "edit_pairing.php";
 
 /* Actual REQUEST calls used:
+     NOTE: used for round-robin-tournaments
+     NOTE: used for league-tournaments
+
      tid=                        : edit tournament pairing
      t_pair&tid=                 : start all pool T-games for current round
 */
@@ -150,9 +153,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round'),
-         'TEXT',        $tourney->formatRound(), ));
+   if ( $tourney->Type != TOURNEY_TYPE_LEAGUE )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament Round'),
+            'TEXT',        $tourney->formatRound(), ));
+   }
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Round Status#tourney'),

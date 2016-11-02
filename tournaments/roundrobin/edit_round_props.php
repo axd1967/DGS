@@ -116,9 +116,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $trform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
-   $trform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round'),
-         'TEXT',        $tround->Round, ));
+   if ( !$is_league )
+   {
+      $trform->add_row( array(
+            'DESCRIPTION', T_('Tournament Round'),
+            'TEXT',        $tround->Round, ));
+   }
    $trform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tround->Lastchanged, $tround->ChangedBy) ));

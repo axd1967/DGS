@@ -54,7 +54,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
 /* Actual REQUEST calls used:
      NOTE: used for round-robin-tournaments
-     NOTE: used for league-tournaments (without suggestions)
+     NOTE: used for league-tournaments (without pool-winners)
 
      tid=                     : define tournament pools
      t_preview&tid=           : preview for tournament-pool-save
@@ -175,9 +175,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round'),
-         'TEXT',        $tourney->formatRound(), ));
+   if ( !$is_league )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament Round'),
+            'TEXT',        $tourney->formatRound(), ));
+   }
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Round Status#tourney'),
@@ -216,10 +219,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
                'CHECKBOX', 'delpool', 1, T_('Delete last Pool (possible if pool empty and no violation)'), $vars['delpool'], ));
    }
 
-   $tform->add_empty_row();
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Pool Winner Ranks'),
-         'TEXTINPUTX',  'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], $disabled, ));
+   if ( !$is_league )
+   {
+      $tform->add_empty_row();
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Pool Winner Ranks'),
+            'TEXTINPUTX',  'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], $disabled, ));
+   }
 
    $tform->add_empty_row();
    $tform->add_row( array(

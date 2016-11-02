@@ -57,6 +57,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $page = "edit_pools.php";
 
 /* Actual REQUEST calls used:
+     NOTE: used for round-robin-tournaments
+     NOTE: used for league-tournaments
+
      tid=                                 : edit tournament pools
      t_unassigned&tid=                    : show unassigned users (+ selected pools)
      t_showpools&tid=                     : show selected pools only
@@ -219,9 +222,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round'),
-         'TEXT',        $tourney->formatRound(), ));
+   if ( $tourney->Type != TOURNEY_TYPE_LEAGUE )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament Round'),
+            'TEXT',        $tourney->formatRound(), ));
+   }
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Round Status#tourney'),
