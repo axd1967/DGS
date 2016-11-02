@@ -135,7 +135,7 @@ class TournamentResultControl
 
       if ( $this->tourney->Type == TOURNEY_TYPE_LADDER )
          $trtable->set_default_sort( 9, 6 ); // [Type ASC,] Result DESC, Rank DESC [, EndTime ASC]
-      elseif ( $this->tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      elseif ( $this->tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $this->tourney->Type == TOURNEY_TYPE_LEAGUE )
          $trtable->set_default_sort( 6, 8 ); // [Type ASC, Round DESC,] Rank DESC, EndTime ASC
 
       // load tournament-results
