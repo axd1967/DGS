@@ -194,7 +194,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       else
          $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkPooling', $tid, $round );
 
-      list( $check_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround );
+      list( $check_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround, $tourney->Type );
       return $check_errors;
    }//checkPooling
 
@@ -379,7 +379,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       // warn, if there is more than one pool in final round.
       if ( $tourney->Type != TOURNEY_TYPE_LEAGUE )
       {
-         list( $cnt_all, $cnt_pools, $cnt_users ) = TournamentPool::count_tournament_tiered_pool( $tid, $last_round );
+         list( $cnt_all, $cnt_pools, $cnt_users ) = TournamentPool::count_tournament_tiered_pools( $tid, $last_round );
          if ( $cnt_pools > 1 )
             $warnings[] = sprintf( T_('There is more than one pool in last round #%s: found %s pools.'),
                $last_round, $cnt_pools );

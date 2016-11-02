@@ -1110,6 +1110,7 @@ CREATE TABLE IF NOT EXISTS `TournamentGames` (
   `ID` int(11) NOT NULL auto_increment,
   `tid` int(11) NOT NULL,
   `Round_ID` int(11) NOT NULL default '0',
+  `Tier` tinyint(3) unsigned NOT NULL default '1',
   `Pool` smallint(5) unsigned NOT NULL default '0',
   `gid` int(11) NOT NULL default '0',
   `Status` enum('INIT','PLAY','SCORE','WAIT','DONE') NOT NULL default 'INIT',

@@ -35,6 +35,7 @@ if ( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament_games.php';
    require_once 'tournaments/include/tournament_helper.php';
    require_once 'tournaments/include/tournament_ladder.php';
+   require_once 'tournaments/include/tournament_pool_classes.php';
    require_once 'tournaments/include/tournament_round.php';
 }
 
@@ -145,7 +146,7 @@ function build_rating_diff( $rating_diff )
             if ( isset($arr_tladder[$white_id]) )
                $tladder_rank[$white_id] = $arr_tladder[$white_id]->Rank;
          }
-         elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+         elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN || $tourney->Type == TOURNEY_TYPE_LEAGUE )
             $tround = TournamentRound::load_tournament_round_by_id($tgame->Round_ID);
       }
    }
@@ -510,11 +511,15 @@ function build_rating_diff( $rating_diff )
          $itable->add_sinfo(
                T_('Current Round#tourney'),
                $tourney->formatRound() );
-      if ( !is_null($tround) && !is_null($tgame) )
+      if ( !is_null($tround) && !is_null($tgame) && !is_null($tourney) )
+      {
+         $pool_label = PoolViewer::format_pool_label( $tourney->Type, $tgame->Tier, $tgame->Pool );
+         $tier_pool = PoolViewer::format_tier_pool( $tourney->Type, $tgame->Tier, $tgame->Pool );
          $itable->add_sinfo(
                T_('Tournament Game Pool'),
-               anchor( $base_path."tournaments/roundrobin/view_pools.php?tid=$tid".URI_AMP."round={$tround->Round}#pool{$tgame->Pool}",
-                  sprintf( 'Round #%s, Pool %s', $tround->Round, $tgame->Pool ) ) );
+               anchor( $base_path."tournaments/roundrobin/view_pools.php?tid=$tid".URI_AMP."round={$tround->Round}#$pool_label",
+                  sprintf( T_('Round #%s#tourney').', %s', $tround->Round, $tier_pool ) ) );
+      }
       $itable->add_sinfo(
             T_('Tournament Status'),
             Tournament::getStatusText($tourney->Status) );

@@ -410,7 +410,7 @@ function load_tournament_info( $tourney, $user, &$uvars, $is_new )
       if ( !is_null($tladder) )
          $info[] = str_replace("\n", "<br>\n", $tladder->build_result_info() );
       if ( !is_null($tpool) )
-         $info[] = str_replace("\n", "<br>\n", $tpool->build_result_info() );
+         $info[] = str_replace("\n", "<br>\n", $tpool->build_result_info( $tourney->Type ) );
       $info_str = ( count($info) ) ? "<ul><li>" . implode("<br><br></li>\n<li>", $info) . "</ul>\n" : '';
    }
 

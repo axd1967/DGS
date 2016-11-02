@@ -25,3 +25,8 @@ ALTER TABLE TournamentPool
    ADD Tier tinyint unsigned NOT NULL default '1' AFTER Round ;
 
 
+-- add tier for league-tournament games
+ALTER TABLE TournamentGames
+   ADD Tier tinyint unsigned NOT NULL default '1' AFTER Round_ID ;
+
+

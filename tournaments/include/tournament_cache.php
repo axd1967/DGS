@@ -457,22 +457,20 @@ class TournamentCache
       return array( $result_iterator, $result_found_rows );
    }//load_cache_tournament_results
 
-   /*! \brief Loads and caches TournamentGames for given tournament-id. */
-   public static function load_cache_tournament_games( $dbgmsg, $tid, $round_id=0, $pool=0, $status=null )
+   /*! \brief Loads and caches all TournamentGames for given tournament-id & round-id & statuses. */
+   public static function load_cache_tournament_games( $dbgmsg, $tid, $round_id=0, $status=null )
    {
       $tid = (int)$tid;
-      $pool_info = (is_array($pool)) ? implode(',', $pool) : $pool;
 
-      $dbgmsg .= ".TCache:load_cache_tgames($tid)";
+      $dbgmsg .= ".TCache:load_cache_tgames($tid,$round_id)";
       $group_id = "TGames.$tid";
-      $key = "TGames.$tid.$round_id.$pool_info";
+      $key = "TGames.$tid.$round_id";
       $tg_iterator = new ListIterator( $dbgmsg );
 
       $arr_tgames = DgsCache::fetch( $dbgmsg, CACHE_GRP_TGAMES, $key );
       if ( is_null($arr_tgames) )
       {
-         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $round_id, $pool, $status );
-
+         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $round_id, 0, $status );
          DgsCache::store( $dbgmsg, CACHE_GRP_TGAMES, $key, $tg_iterator->getItemRows(), SECS_PER_DAY, $group_id );
       }
       else // transform cache-stored row-arr into ListIterator of TournamentGames
@@ -533,8 +531,7 @@ class TournamentCache
          $arr_tpools = null;
       if ( is_null($arr_tpools) )
       {
-         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, 0, $load_opts );
-
+         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts );
          if ( $use_cache )
             DgsCache::store( $dbgmsg, CACHE_GRP_TPOOLS, $key, $tpool_iterator->getItemRows(), SECS_PER_HOUR, $group_id );
       }

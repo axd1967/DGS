@@ -162,7 +162,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $trform->add_row( array(
          'TAB', 'TEXT', sprintf('%s: %s', T_('Format'), '%P, %p(num), %p(uc), %L, %t(num), %t(uc), %%'), ));
    $trform->add_row( array(
-         'TAB', 'TEXT', sprintf('%s: "%s"', T_('Preview'), make_html_safe($pn_formatter->format(9, ($is_league ? 1 : -1)), true)), ));
+         'TAB', 'TEXT', sprintf('%s: "%s"', T_('Preview'), make_html_safe($pn_formatter->format(1, 9), true)), ));
 
    $trform->add_empty_row();
    $trform->add_row( array(

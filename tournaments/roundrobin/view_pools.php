@@ -96,12 +96,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
       $tpool_iterator = TournamentCache::load_cache_tournament_pools( 'Tournament.pool_view.load_pools',
          $tid, $round, $need_trating, /*TP-lastmove*/true, $use_pool_cache );
-      $poolTables = new PoolTables( $tround->Pools );
-      $poolTables->fill_pools( $tpool_iterator );
+      $poolTables = new PoolTables( $tpool_iterator );
       $count_players = $tpool_iterator->getItemCount();
 
-      $tg_iterator = TournamentCache::load_cache_tournament_games( 'Tournament.pool_view',
-         $tid, $tround->ID, 0, /*all-stati*/null );
+      $tg_iterator = TournamentCache::load_cache_tournament_games( 'Tournament.pool_view', $tid, $tround->ID );
       $poolTables->fill_games( $tg_iterator, $tpoints );
       $counts = $poolTables->count_games();
    }//allow_view
@@ -130,7 +128,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       if ( $my_tpool )
       {
          $pn_formatter = new PoolNameFormatter( $tround->PoolNamesFormat );
-         $pool_link = anchor('#pool'.$my_tpool->Pool, $pn_formatter->format($my_tpool->Pool) );
+         $pool_label = PoolViewer::format_pool_label( $tourney->Type, $my_tpool->Tier, $my_tpool->Pool );
+         $pool_link = anchor("#$pool_label", $pn_formatter->format($my_tpool->Tier, $my_tpool->Pool) );
          echo sprintf( T_('You are playing in %s.#tpool'), $pool_link ), "<br>\n";
       }
       echo "<br>\n";
@@ -144,7 +143,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          echo implode(', ', $out), "<br><br>\n";
       }
 
-      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $tround->PoolNamesFormat, $games_factor,
+      $poolViewer = new PoolViewer( $tid, $page, $tourney->Type, $poolTables, $tround->PoolNamesFormat, $games_factor,
          ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) | ($use_pool_cache ? PVOPT_NO_ONLINE : 0) );
       if ( $edit )
          $poolViewer->setEditCallback( 'pool_user_edit_rank' );

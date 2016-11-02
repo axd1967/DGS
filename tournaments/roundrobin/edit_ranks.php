@@ -153,9 +153,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       if ( $show_stats || @$_REQUEST['t_exec'] || @$_REQUEST['t_userexec'] || @$_REQUEST['t_setrank'] )
          $show_rank_sum = true;
       elseif ( @$_REQUEST['t_fillranks'] )
-         $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool( $allow_edit_tourney, $tround );
+         $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool(
+            $allow_edit_tourney, $tround, $tourney->Type );
       elseif ( @$_REQUEST['t_setpoolwinners'] )
-         $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool( $allow_edit_tourney, $tround );
+         $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool(
+            $allow_edit_tourney, $tround, $tourney->Type );
    }
 
    $pw_errors = $pw_warnings = null;

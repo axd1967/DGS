@@ -217,7 +217,7 @@ define('GAT_RES_ANNUL',     7);
          $arr[] = sprintf( T_('Round %s on Status [%s]#tourney'), $tround->Round, TournamentRound::getStatusText($tround->Status) );
    }
    if ( $tgame->Pool > 0 )
-      $arr[] = PoolNameFormatter::format_with_default( $tgame->Pool );
+      $arr[] = PoolNameFormatter::format_with_default( $tgame->Tier, $tgame->Pool );
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Info'),
          'TEXT',        implode(', ', $arr) ));

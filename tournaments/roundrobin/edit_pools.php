@@ -103,39 +103,43 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       $errors[] = T_('Pool parameters must be defined first before you can edit pools assigning users!');
 
    // check select-pools
-   $pool_range_str = build_range_text( 1, $tround->Pools );
+   $p_parser = new PoolParser( $tourney->Type, $tround );
    $arr_selpool = array();
    foreach ( range(1,3) as $idx )
    {
-      $pool = trim( get_request_arg('selpool'.$idx) );
-      if ( is_numeric($pool) && $pool >= 1 && $pool <= $tround->Pools )
-         $arr_selpool[] = $pool;
-      elseif ( (string)$pool != '' )
-         $errors[] = sprintf( T_('Pool selection #%s with value [%s] is invalid, must be in range %s'),
-                              $idx, $pool, $pool_range_str );
+      $pool_input = trim( get_request_arg('selpool'.$idx) );
+      if ( (string)$pool_input == '' )
+         continue;
+      $tier_pool_key = $p_parser->parse_tier_pool( T_('Select pool'), $pool_input );
+      if ( $tier_pool_key > 0 )
+         $arr_selpool[] = $tier_pool_key;
+      else
+         $errors = array_merge( $errors, $p_parser->errors );
    }
 
    // perform edit-actions: remove-from-pool, assign-pool
-   $tier = 1;
    if ( count($errors) == 0 )
    {
-      if ( @$_REQUEST['t_remove'] )
+      if ( @$_REQUEST['t_remove'] ) // move users to unassigned-pool
       {
          $arr_marked_uid = get_marked_users();
          if ( count($arr_marked_uid) )
-            TournamentPool::assign_pool( $allow_edit_tourney, $tround, $tier, 0, $arr_marked_uid );
+            TournamentPool::assign_pool( $allow_edit_tourney, $tround, 1, 0, $arr_marked_uid );
       }
       if ( @$_REQUEST['t_assign'] || @$_REQUEST['t_reassign'] )
       {
          // bulk-updates for users with invidually assigned new pool
-         if ( $show_pools && !$show_unassigned )
-            $arr_assign_uid = get_assigned_user_pools( $errors, 'rap_' ); // re-assign pool-users
-         else
-            $arr_assign_uid = get_assigned_user_pools( $errors, 'uap_' ); // assign removed users
+         $assign_prefix = ( $show_pools && !$show_unassigned )
+            ? 'rap_'  // re-assign pool-users
+            : 'uap_'; // assign removed users
+         $arr_assign_uid = get_assigned_user_pools( $errors, $assign_prefix, $p_parser );
          if ( count($arr_assign_uid) )
          {
-            foreach ( $arr_assign_uid as $pool => $arr_uids )
+            foreach ( $arr_assign_uid as $tier_pool_key => $arr_uids )
+            {
+               list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
                TournamentPool::assign_pool( $allow_edit_tourney, $tround, $tier, $pool, $arr_uids );
+            }
          }
       }
       if ( @$_REQUEST['t_assign'] )
@@ -144,14 +148,18 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          $newpool = trim(get_request_arg('newpool'));
          if ( (string)$newpool != '' )
          {
-            if ( !is_numeric($newpool) || $newpool < 1 || $newpool > $tround->Pools )
-               $errors[] = sprintf( T_('Pool [%s] for assigning is invalid, must be in range %s'), $newpool, $pool_range_str );
-            else
+            $tier_pool_key = $p_parser->parse_tier_pool( T_('Assign pool'), $newpool );
+            if ( $tier_pool_key > 0 )
             {
                $arr_marked_uid = get_marked_users();
                if ( count($arr_marked_uid) )
-                  TournamentPool::assign_pool( $allow_edit_tourney, $tround, $tier, $newpool, $arr_marked_uid );
+               {
+                  list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+                  TournamentPool::assign_pool( $allow_edit_tourney, $tround, $tier, $pool, $arr_marked_uid );
+               }
             }
+            else
+               $errors = array_merge( $errors, $p_parser->errors );
          }
       }
    }
@@ -159,7 +167,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $arr_pool_summary = null;
    if ( @$_REQUEST['t_check'] )
    {
-      list( $check_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround );
+      list( $check_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround, $tourney->Type );
       $errors = array_merge( $errors, $check_errors );
    }
 
@@ -182,10 +190,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
 
       $tpool_iterator = new ListIterator( 'Tournament.pool_edit.load_pools' );
       $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator,
-         $tid, $round, /*tier*/0, $arr_selpool, $load_opts_tpool );
-
-      $poolTables = new PoolTables( $tround->Pools );
-      $poolTables->fill_pools( $tpool_iterator );
+         $tid, $round, $arr_selpool, $load_opts_tpool );
+      $poolTables = new PoolTables( $tpool_iterator );
    }
 
 
@@ -238,15 +244,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          'CELL', 1, '', // align submit-buttons
          'SUBMITBUTTON', 't_unassigned', T_('Show Unassigned#tpool'),
          'TEXT', MED_SPACING,
-         'TEXTINPUT',   'selpool1', 4, 4, get_request_arg('selpool1'),
-         'TEXTINPUT',   'selpool2', 4, 4, get_request_arg('selpool2'),
-         'TEXTINPUT',   'selpool3', 4, 4, get_request_arg('selpool3'),
-         'SUBMITBUTTON', 't_showpools', T_('Show Pools'),
-         'TEXT', $pool_range_str, ));
+         'TEXTINPUT',   'selpool1', 5, 5, get_request_arg('selpool1'),
+         'TEXTINPUT',   'selpool2', 5, 5, get_request_arg('selpool2'),
+         'TEXTINPUT',   'selpool3', 5, 5, get_request_arg('selpool3'),
+         'SUBMITBUTTON', 't_showpools', T_('Show Pools'), ));
    $tform->add_row( array(
          'DESCRIPTION',  T_('Check'),
          'SUBMITBUTTON', 't_check', T_('Check Pools'),
-         'TEXT', MED_SPACING . '(' . T_('Check pool integrity and show summary') . ')', ));
+         'TEXT', MED_SPACING . '(' . T_('Check pool integrity, Show summary, List valid pools') . ')', ));
 
    if ( $show_pools || $show_unassigned )
    {
@@ -276,18 +281,22 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    echo $tform->print_start_default(), $tform->get_form_string();
 
    if ( !is_null($arr_pool_summary) )
-      echo_pool_summary( $tround, $arr_pool_summary );
+      echo_pool_summary( $tround, $arr_pool_summary, $tourney->Type );
 
    if ( $show_pools && !is_null($poolTables) )
    {
       $pv_opts = PVOPT_NO_COLCFG | PVOPT_NO_RESULT | PVOPT_NO_EMPTY;
       if ( $show_pools && !$show_unassigned && $count_status_errors == 0 )
          $pv_opts |= PVOPT_EDIT_COL;
-      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $ttype->getDefaultPoolNamesFormat(), $games_factor, $pv_opts );
+      $poolViewer = new PoolViewer( $tid, $page, $tourney->Type, $poolTables, $ttype->getDefaultPoolNamesFormat(),
+         $games_factor, $pv_opts );
       $poolViewer->setEditCallback( 'pools_edit_col_actions' );
       $poolViewer->init_pool_table();
-      foreach ( $arr_selpool as $pool )
-         $poolViewer->make_single_pool_table( $pool, PVOPT_EMPTY_SEL );
+      foreach ( $arr_selpool as $tier_pool_key )
+      {
+         list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+         $poolViewer->make_single_pool_table( $tier, $pool, PVOPT_EMPTY_SEL );
+      }
 
       section('poolSelected', T_('Selected Pools'));
       $poolViewer->echo_pool_table();
@@ -334,33 +343,28 @@ function get_marked_users()
    return $arr;
 }//get_marked_users
 
-// return: array( pool => array( uids, ... ), ... ); empty-array on error
-function get_assigned_user_pools( &$errors, $prefix )
+// return: [ tier-pool-key => [ uids, ... ], ... ]; empty-array on error
+function get_assigned_user_pools( &$errors, $prefix, $p_parser )
 {
-   global $tround, $pool_range_str;
-
-   $arr = array();
-   $len = strlen($prefix);
-   foreach ( $_REQUEST as $key => $pool )
+   $arr_result = array();
+   $len_prefix = strlen($prefix);
+   foreach ( $_REQUEST as $key => $value )
    {
-      if ( strpos($key, $prefix) !== 0 ) continue;
-      $uid = (int)substr($key, $len);
+      $value = trim($value);
+      if ( (string)$value == '' || strpos($key, $prefix) !== 0 )
+         continue;
+      $uid = (int)substr($key, $len_prefix);
       if ( !is_numeric($uid) )
          error('assert', "Tournament.edit_pools.get_assigned_user_pools($key,$prefix)");
 
-      $pool = trim($pool);
-      if ( (string)$pool == '' ) continue;
-      if ( !is_numeric($pool) || $pool < 1 || $pool > $tround->Pools )
-      {
-         $err_fmt = ( $prefix == 'uap_' )
-            ? T_('Pool [%s] to assign for unassigned user is invalid, must be in range %s')
-            : T_('Pool [%s] to re-assign for pool-user is invalid, must be in range %s');
-         $errors[] = sprintf( $err_fmt, $pool, $pool_range_str );
-      }
+      $err_context = ( $prefix == 'uap_' ) ? T_('Assign unassigned user') : T_('Reassign pool-user');
+      $tier_pool_key = $p_parser->parse_tier_pool( $err_context, $value );
+      if ( $tier_pool_key > 0 )
+         $arr_result[$tier_pool_key][] = $uid;
       else
-         $arr[$pool][] = $uid;
+         $errors = array_merge( $errors, $p_parser->errors );
    }
-   return $arr;
+   return $arr_result;
 }//get_assigned_user_pools
 
 function make_pool_unassigned_table( $tid, &$uatable, &$uafilter )
@@ -423,8 +427,7 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
          $uatable->current_order_string(),
          $uatable->current_limit_string() );
    $tpool0_iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE, 'TPOOL.Pool=0' ));
-   $tpool0_iterator = TournamentPool::load_tournament_pools(
-      $tpool0_iterator, $tid, $round, 0, 0, $load_opts_tpool );
+   $tpool0_iterator = TournamentPool::load_tournament_pools( $tpool0_iterator, $tid, $round, 0, $load_opts_tpool );
 
    $show_rows = $uatable->compute_show_rows( $tpool0_iterator->getResultRows() );
    $uatable->set_found_rows( mysql_found_rows('Tournament.edit_pools.pools_unassigned.found_rows') );
@@ -450,7 +453,7 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
          $row_arr[6] = (@$user->urow['TP_X_RegisterTime'] > 0) ? date(DATE_FMT2, $user->urow['TP_X_RegisterTime']) : '';
       if ( $uatable->Is_Column_Displayed[7] )
          $row_arr[7] = ($user->Lastaccess > 0) ? date(DATE_FMT2, $user->Lastaccess) : '';
-      $row_arr[8] = $tform->print_insert_text_input( "uap_$uid", 4, 4, '', array( 'title' => T_('assign (unassigned) user to new pool')) )
+      $row_arr[8] = $tform->print_insert_text_input( "uap_$uid", 5, 5, '', array( 'title' => T_('assign (unassigned) user to new pool')) )
          . ' '
          . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, array( 'title' => T_('mark user for pool-action')) )
          . MED_SPACING;
@@ -463,7 +466,7 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
 function pools_edit_col_actions( &$poolviewer, $uid )
 {
    global $tform;
-   return $tform->print_insert_text_input( "rap_$uid", 4, 4, '', array( 'title' => T_('re-assign user to new pool')) )
+   return $tform->print_insert_text_input( "rap_$uid", 5, 5, '', array( 'title' => T_('re-assign user to new pool')) )
       . ' '
       . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, array( 'title' => T_('mark user for pool-action')) )
       . MED_SPACING;
@@ -473,16 +476,16 @@ function pools_edit_col_actions( &$poolviewer, $uid )
 function pools_unassigned_extend_table_form( &$table, &$form )
 {
    return SMALL_SPACING
-      . $form->print_insert_text_input( 'newpool', 4, 4, get_request_arg('newpool'), array( 'title' => T_('pool to assign for marked users')) )
+      . $form->print_insert_text_input( 'newpool', 5, 5, get_request_arg('newpool'), array( 'title' => T_('pool to assign for marked users')) )
       . $form->print_insert_submit_button( 't_assign', T_('Assign to Pool') );
 }
 
-function echo_pool_summary( $tround, $arr_pool_sum )
+function echo_pool_summary( $tround, $arr_pool_sum, $tourney_type )
 {
    global $page, $base_path;
    $tid = $tround->tid;
 
-   $pool_sum = new PoolSummary( $page, $arr_pool_sum );
+   $pool_sum = new PoolSummary( $page, $arr_pool_sum, $tourney_type );
    $pstable = $pool_sum->make_table_pool_summary();
 
    section('poolSummary', T_('Pool Summary'));

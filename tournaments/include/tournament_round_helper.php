@@ -97,7 +97,7 @@ class TournamentRoundHelper
    /*!
     * \brief Starts all tournament games needed for current round and specified pools, prints progress by printing
     *       and flushing on STDOUT.
-    * \param $create_pools 0 = start games for all pools, otherwise only for specific pool or array of pools
+    * \param $create_pools 0 = start games for all pools; otherwise array with tier-pool-keys for pools to create
     *
     * \note TournamentRound-status will be set to PLAY if ALL expected games have been started.
     *
@@ -116,29 +116,22 @@ class TournamentRoundHelper
       $round = $tround->Round;
 
       // check pools to create games for -> create_pools = 0 | arr( pools )
-      $tier = 0; // all-tiers
-      if ( is_numeric($create_pools) )
-      {
-         if ( $create_pools < 0 || $create_pools > $tround->Pools )
-         {
-            return ErrorCode::get_error_text('invalid_args')
-               . "; TRH:start_tround_games.check.pools.bad_value($tid,$round,$create_pools)";
-         }
+      if ( is_numeric($create_pools) && $create_pools == 0 )
          $dbg_pool = $create_pools;
-         if ( $create_pools > 0 )
-            $create_pools = array( (int)$create_pools );
-      }
       elseif ( is_array($create_pools) )
       {
          if ( count($create_pools) == 0 )
             return ErrorCode::get_error_text('invalid_args')
                . "; TRH:start_tround_games.check.pools_arr.empty($tid,$round)";
-         foreach ( $create_pools as $pool )
+
+         $p_parser = new PoolParser( $tourney->Type, $tround );
+         foreach ( $create_pools as $tier_pool_key )
          {
-            if ( !is_numeric($pool) || $pool < 1 || $pool > $tround->Pools )
+            list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+            if ( !$p_parser->is_valid_tier_pool( $tier, $pool ) )
             {
                return ErrorCode::get_error_text('invalid_args')
-                  . "; TRH:start_tround_games.check.pools_arr.bad_value($tid,$round,$pool)";
+                  . "; TRH:start_tround_games.check.pools_arr.bad_value($tid,$round,$tier,$pool)";
             }
          }
          $dbg_pool = implode(',', $create_pools);
@@ -219,27 +212,25 @@ class TournamentRoundHelper
       $tpool_iterator = new ListIterator( "$dbgmsg.load_pools" );
       $tpool_iterator->addIndex( 'uid' );
       $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator,
-         $tid, $round, $tier, $create_pools, $load_opts_tpool );
+         $tid, $round, $create_pools, $load_opts_tpool );
 
-      $poolTables = new PoolTables( $tround->Pools );
-      $poolTables->fill_pools( $tpool_iterator );
+      $poolTables = new PoolTables( $tpool_iterator );
       if ( $trules->Handicaptype == TRULE_HANDITYPE_ALTERNATE )
          $poolTables->reorder_pool_users_by_tp_id();
-      $arr_poolusers = $poolTables->get_pool_users();
       $expected_games = $poolTables->calc_pool_games_count( $games_factor );
 
       $errmsg = null;
       $switched_tround_status = false;
-      if ( isset($arr_poolusers[0]) && count($arr_poolusers[0]) > 0 )
+      if ( $poolTables->count_unassigned_pool_users() > 0 )
       {
          $errmsg = sprintf( T_('Inconsistency found: there are %s unassigned pool-users for tournament #%s in round %s.'),
-            count($arr_users), $tid, $round );
+            $poolTables->count_unassigned_pool_users(), $tid, $round );
       }
       else
       {
          list( $count_games, $count_old_games ) =
-            self::start_games_for_specificed_pools(
-               $tround, $trules, $arr_poolusers, $poolTables, $check_tgames, $created_games_col );
+            self::start_games_for_specific_pools( $tourney->Type, $tround, $trules, $poolTables, $check_tgames,
+               $created_games_col );
 
          if ( $count_games > 0 )
          {
@@ -272,7 +263,7 @@ class TournamentRoundHelper
     * \internal used by start_tournament_round_games()
     * \return arr( count-games-created, count-old-games-existing, count-games-expected )
     */
-   private static function start_games_for_specificed_pools( $tround, $trules, $arr_poolusers, $poolTables,
+   private static function start_games_for_specific_pools( $tourney_type, $tround, $trules, $poolTables,
          $check_tgames, $created_games_col )
    {
       mt_srand((double)microtime()*1000000);
@@ -280,13 +271,14 @@ class TournamentRoundHelper
       // loop over specified pools
       echo "<table id=\"Progress\"><tr><td><ul>\n";
       $count_games = $count_old_games = $progress = 0;
-      $cnt_pools = count($arr_poolusers);
-      foreach ( $arr_poolusers as $pool => $arr_users )
+      $arr_pools = $poolTables->get_pools();
+      foreach ( $arr_pools as $tier_pool_key => $arr_users )
       {
          if ( count($arr_users) == 0 ) // skip empty pools
             continue;
+         list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
 
-         echo "<br>\n<li>", sprintf( T_('Pool %s of %s'), $pool, $cnt_pools ), ":<br>\n";
+         echo "<br>\n<li>", PoolViewer::format_tier_pool( $tourney_type, $tier, $pool ), ":<br>\n";
 
          // determine start-color for alternating color
          $chall_col_start_black = ( $trules->Handicaptype == TRULE_HANDITYPE_ALTERNATE )
@@ -315,7 +307,7 @@ class TournamentRoundHelper
                   $count_old_games += $cnt_exist_tgames;
                else // NEW
                {
-                  $arr_tg = self::create_pairing_games( $trules, $tround->ID, $pool, $user_ch, $df_tpool->User,
+                  $arr_tg = self::create_pairing_games( $trules, $tround->ID, $tier, $pool, $user_ch, $df_tpool->User,
                      $chall_col_black );
                   if ( is_array($arr_tg) )
                      $count_games += count($arr_tg);
@@ -335,7 +327,7 @@ class TournamentRoundHelper
       echo "</ul></td></tr></table>\n";
 
       return array( $count_games, $count_old_games );
-   }//start_games_for_specificed_pools
+   }//start_games_for_specific_pools
 
    private static function determine_htype_alternate_start_color( $arr_users, $created_games )
    {
@@ -359,6 +351,7 @@ class TournamentRoundHelper
     * \internal
     * \param $trules TournamentRules-object containing tourney-id tid
     * \param $tround_id TournamentRound-ID
+    * \param $tier TournamentPool.Tier number
     * \param $pool TournamentPool.Pool number
     * \param $user_ch 1st user (challenger) as User-object with ID and urow->['TP_ID'] (=rid) set
     * \param $user_df 2nd user (defender) as User-object (dito as $user_ch)
@@ -366,7 +359,7 @@ class TournamentRoundHelper
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   private static function create_pairing_games( $trules, $tround_id, $pool, $user_ch, $user_df, $chall_col_black )
+   private static function create_pairing_games( $trules, $tround_id, $tier, $pool, $user_ch, $user_df, $chall_col_black )
    {
       $gids = $trules->create_tournament_games( $user_ch, $user_df, $chall_col_black );
       if ( !$gids )
@@ -383,6 +376,7 @@ class TournamentRoundHelper
 
          $tg->gid = $gid;
          $tg->Round_ID = $tround_id;
+         $tg->Tier = $tier;
          $tg->Pool = $pool;
          $tg->setStatus( TG_STATUS_PLAY );
          $tg->StartTime = $GLOBALS['NOW'];
@@ -613,31 +607,36 @@ class TournamentRoundHelper
     * \param $tround TournamentRound-object
     * \return array of actions taken
     */
-   public static function fill_ranks_tournament_pool( $tlog_type, $tround )
+   public static function fill_ranks_tournament_pool( $tlog_type, $tround, $tourney_type )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
-      $arr_pools_to_finish = array(); // [ pool, ... ]
       $result = array();
 
       // 1. identify pools to finish
       $arr_tgames = TournamentGames::count_tournament_games( $tid, $tround->ID, array(), /*pool-group*/true );
-      $arr_finished_pools = array(); // [ pool, ... ] = all pool that have all games finished
-      foreach ( $arr_tgames as $pool => $arr_status )
+      $arr_finished_pools = array(); // [ tier-pool-key, ... ] = all pools that have all games finished
+      foreach ( $arr_tgames as $tier_pool_key => $arr_status )
       {
          if ( !array_key_exists(TG_STATUS_PLAY, $arr_status) )
-            $arr_finished_pools[] = $pool;
+            $arr_finished_pools[] = $tier_pool_key;
       }
 
-      $arr_pools_no_rank = TournamentPool::count_tournament_tiered_pool_users( $tid, $round, '%p(num)', TPOOLRK_NO_RANK );
-      foreach ( $arr_finished_pools as $pool )
+      $arr_pools_no_rank = TournamentPool::count_tournament_tiered_pool_users( $tid, $round, TPOOLRK_NO_RANK );
+      $arr_pools_to_finish = array(); // [ tier-pool-key, ... ]
+      $arr_pools_to_finish_formatted = array();
+      foreach ( $arr_finished_pools as $tier_pool_key )
       {
-         if ( @$arr_pools_no_rank[$pool] ) // pool is to finish when there are entries with NO_RANK
-            $arr_pools_to_finish[] = $pool;
+         if ( @$arr_pools_no_rank[$tier_pool_key] ) // pool is to finish when there are entries with NO_RANK
+         {
+            list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+            $arr_pools_to_finish[] = $tier_pool_key;
+            $arr_pools_to_finish_formatted[] = PoolViewer::format_tier_pool( $tourney_type, $tier, $pool, true );
+         }
       }
       $count_finish = count($arr_pools_to_finish);
       $result[] = sprintf( T_('Identified %s pools to finish by setting ranks for pools: %s'),
-         $count_finish, ($count_finish ? implode(', ', $arr_pools_to_finish) : NO_VALUE) );
+         $count_finish, ($count_finish ? implode(', ', $arr_pools_to_finish_formatted) : NO_VALUE) );
 
       // 2. calculate ranks for users of identified (finished) pools
       if ( $count_finish )
@@ -646,13 +645,11 @@ class TournamentRoundHelper
 
          $tpool_iterator = new ListIterator( 'TRH:fill_ranks_tournament_pool.load_pools' );
          $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator,
-            $tid, $round, 0, $arr_pools_to_finish, /*load-opts*/0 );
-         $poolTables = new PoolTables( $tround->Pools );
-         $poolTables->fill_pools( $tpool_iterator );
+            $tid, $round, $arr_pools_to_finish, /*load-opts*/0 );
+         $poolTables = new PoolTables( $tpool_iterator );
 
          $tg_iterator = new ListIterator( 'TRH:fill_ranks_tournament_pool.load_tgames' );
-         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID,
-            $arr_pools_to_finish, /*all-stati*/null );
+         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID, $arr_pools_to_finish );
          $poolTables->fill_games( $tg_iterator, $tpoints );
 
          // 3. finish identified pools (update rank)
@@ -666,10 +663,10 @@ class TournamentRoundHelper
          ta_begin();
          {//HOT-section to update user-ranks for finished pools
             $count_done = 0;
-            foreach ( $arr_updates as $rank => $arr_tpools )
+            foreach ( $arr_updates as $rank => $arr_tpool_ids )
             {
                $count_done += TournamentPool::update_tournament_pool_ranks($tid, $tlog_type, 'fill_ranks',
-                  $arr_tpools, -$rank);
+                  $arr_tpool_ids, -$rank);
             }
          }
          ta_end();
@@ -690,12 +687,11 @@ class TournamentRoundHelper
     * \param $tround TournamentRound-object
     * \return array of actions taken
     */
-   public static function fill_pool_winners_tournament_pool( $tlog_type, $tround )
+   public static function fill_pool_winners_tournament_pool( $tlog_type, $tround, $tourney_type )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
-      $arr_pools_to_finish = array(); // [ pool, ... ]
-      $result = self::fill_ranks_tournament_pool( $tlog_type, $tround );
+      $result = self::fill_ranks_tournament_pool( $tlog_type, $tround, $tourney_type );
 
       $cnt_upd = TournamentPool::update_tournament_pool_set_pool_winners( $tround );
       $result[] = sprintf( T_('%s players set as pool winners for finished pools.'), $cnt_upd );

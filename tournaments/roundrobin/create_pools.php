@@ -88,7 +88,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.create_pools', $tid );
-   list( $count_poolrows, $count_pools ) = TournamentPool::count_tournament_tiered_pool( $tid, $round );
+   list( $count_poolrows, $count_pools ) = TournamentPool::count_tournament_tiered_pools( $tid, $round );
 
 
    // init

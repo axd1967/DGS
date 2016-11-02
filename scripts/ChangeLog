@@ -13,6 +13,64 @@ ChangeLog
 
 2016-11-02 jug
 
+   * tournaments/include/tournament_pool_classes.php (class PoolTables, ~.__construct,
+         ~.get_tier_pool_keys, ~.get_pools, ~.get_pool_users, ~.count_unassigned_pool_users,
+         ~.get_user_col_map, ~.fill_pools, ~.reorder_pool_users_by_tp_id, ~.fill_games,
+         ~.count_pools_max_user, ~.calc_pool_summary, ~.calc_pool_games_count;
+       class PoolSummary, ~.__construct, ~.make_table_pool_summary, ~.get_counts;
+       class PoolSummaryEntry, ~.__construct;
+       class PoolViewer.__construct, ~.make_pool_table, ~.make_single_pool_table,
+         ~.format_pool_label, ~.format_tier_pool;
+       class PoolNameFormatter, ~.format, ~.format_with_default;
+       class PoolParser, ~.__construct, ~.build_valid_tier_pools, ~.get_valid_tier_pools,
+         ~.parse_tier_pool, ~.is_valid_tier_pool, ~.add_error),
+     tournaments/include/tournament_pool.php (TournamentPool.build_result_info, ~.build_query_sql,
+       ~.count_tournament_tiered_pools, ~.count_tournament_tiered_pool_users, ~.load_tournament_pool_user,
+       ~.load_tournament_pools, ~.assign_pool, ~.check_pools, ~.check_pools_game_integrity),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.start_tournament_round_games,
+       ~.start_games_for_specific_pools, ~.create_pairing_games, ~.fill_ranks_tournament_pool,
+       ~.fill_pool_winners_tournament_pool),
+     tournaments/include/tournament_games.php (class TournamentGames, ~.__construct, ~.fillEntityData,
+       ~.new_from_row, ~.load_tournament_games, ~.count_tournament_games),
+     tournaments/include/tournament_utils.php (TournamentUtils.encode_tier_pool_key,
+       ~.decode_tier_pool_key, ~.add_qpart_with_tier_pools),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPooling,
+       ~.checkClosingTournament),
+     tournaments/include/tournament_result_control.php (TournamentResultControl.create_tournament_result_pool_winners),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_games),
+     tournaments/include/tournament_globals.php (TROUND_MAX_TIERCOUNT),
+     scripts/tests/AllTests.php, scripts/tests/TierSlicerTest.php,
+     scripts/tests/PoolNameFormatterTest.php, scripts/tests/PoolParserTest.php,
+     scripts/updates/1.20/database_changes.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/ladder/view.php,
+     tournaments/roundrobin/edit_pools.php (main; get_assigned_user_pools, load_and_fill_pool_unassigned,
+       pools_edit_col_actions, pools_unassigned_extend_table_form, echo_pool_summary),
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/edit_pairing.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/view_pools.php, tournaments/edit_results.php (load_tournament_info),
+     tournaments/game_admin.php, tournaments/view_tournament.php, gameinfo.php:
+   - add handling of tiered pools for league-tournament
+     - adjust view-pools- & edit-pools-page for league-tournament with tiered pools
+     - adjust checking pools & seeding pools & starting tournament-games & filling ranks for tiered pools
+     - assign too-few players for bottom-tier into unassigned-pool for manual resolution by T-director
+     - add db-field TournamentGames.Tier
+     - replace simple round-robin pool handling with tier-pool-key handling to support
+       round-robin & league-tournaments
+     - add PoolParser to parse & validate various pool-formats
+     - adjust pool-label to support tiered pools
+     - add special handling for pool-name formatting & parsing for pool0 with unassigned pool-users
+     - add pool-count in pool-summary-table on edit-pools-page
+     - cleanup / minor changes (rename vars):
+       - change tier/pool-argument order of PoolNameFormatter->format()
+       - refactor pool-summary sub-array-items into PoolSummaryEntry-class
+       - refactor fill_pools()-method into PoolTables-constructor
+-----------
+-- add tier for league-tournament games
+ALTER TABLE TournamentGames
+   ADD Tier tinyint unsigned NOT NULL default '1' AFTER Round_ID ;
+-----------
+
    * tournaments/include/tournament_pool_classes.php (PoolTables.init_pool_table),
      include/globals.php (CSS_VERSION),
      skins/dragon/screen.css:

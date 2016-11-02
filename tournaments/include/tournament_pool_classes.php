@@ -31,6 +31,7 @@ require_once 'include/table_columns.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 
  /*!
@@ -395,15 +396,17 @@ class PoolTables
 {
    /*! \brief list of pool-users: map( uid => TournamentPool with ( User, PoolGame-list, Rank(later) ), ... ) */
    public $users = array();
-   /*! \brief list of pool-numbers with list of result-ordered(!) pool-users: map( poolNo => [ uid, ... ] ) */
-   public $pools = array();
+   /*!
+    * \brief list of pool-numbers with list of result-ordered(!) pool-users: map( tierPoolKey => [ uid, ... ] )
+    * \note IMPORTANT: must be kept sorted by Tier, Pool
+    */
+   private $pools = array();
    /*! \brief TournamentPoints-object; mandatory, if fill_games() is used to calculate points/rank of pool. */
    private $tpoints = null;
 
-   public function __construct( $count_pools )
+   public function __construct( $tpool_iterator )
    {
-      for ( $pool=1; $pool <= $count_pools; $pool++ )
-         $this->pools[$pool] = array();
+      $this->fill_pools( $tpool_iterator );
    }
 
    public function get_user_tournament_pool( $uid )
@@ -411,10 +414,28 @@ class PoolTables
       return @$this->users[$uid];
    }
 
-   /*! \brief Returns array( pool => arr[ uid's, ... ] ); not-filled pools have empty user-array. */
-   public function get_pool_users()
+   /*! \brief returns list of tier-pool-keys. */
+   public function get_tier_pool_keys()
+   {
+      return array_keys($this->pools);
+   }
+
+   /*! \brief Returns array( tier-pool-key => arr[ uid's, ... ] ); not-filled pools have empty user-array (if present). */
+   public function get_pools()
    {
       return $this->pools;
+   }
+
+   /*! \brief Returns non-null array with pool-users. */
+   public function get_pool_users( $tier, $pool )
+   {
+      $tier_pool_key = TournamentUtils::encode_tier_pool_key( $tier, $pool );
+      return (isset($this->pools[$tier_pool_key])) ? $this->pools[$tier_pool_key] : array();
+   }
+
+   public function count_unassigned_pool_users()
+   {
+      return count( $this->get_pool_users(1,0) );
    }
 
    public function get_tournament_points()
@@ -423,32 +444,36 @@ class PoolTables
    }
 
    /*!
-    * \brief Returns array( uid => col-idx, ... ) for given pool-no.
+    * \brief Returns array( uid => col-idx, ... ) for given tier & pool.
     * \return col-idx in resulting array starting with 0(!) and not taking $games_factor (games-per-challenge) into account.
     * \note array-key is defined by PoolGame.get_opponent()
     */
-   public function get_user_col_map( $pool, $games_factor )
+   public function get_user_col_map( $tier, $pool, $games_factor )
    {
       $map = array();
       $idx = -1;
-      foreach ( $this->pools[$pool] as $uid )
+      $arr_users = $this->get_pool_users( $tier, $pool );
+      foreach ( $arr_users as $uid => $tmp_col_idx )
          $map[$uid] = ++$idx;
       return $map;
    }
 
-   public function fill_pools( $tpool_iterator )
+   private function fill_pools( $tpool_iterator )
    {
       while ( list(,$arr_item) = $tpool_iterator->getListIterator() )
       {
          list( $tpool, $orow ) = $arr_item;
          if ( is_null($tpool) )
             continue;
+
          $uid = $tpool->uid;
-         $pool = $tpool->Pool;
+         $tier_pool_key = TournamentUtils::encode_tier_pool_key( $tpool->Tier, $tpool->Pool );
 
          $this->users[$uid] = $tpool;
-         $this->pools[$pool][] = $uid;
+         $this->pools[$tier_pool_key][] = $uid;
       }
+
+      ksort($this->pools); // MUST be kept sorted by Tier,Pool
    }//fill_pools
 
    /*!
@@ -457,8 +482,8 @@ class PoolTables
     */
    public function reorder_pool_users_by_tp_id()
    {
-      foreach ( $this->pools as $pool => $arr_users )
-         usort( $this->pools[$pool], array( $this, '_compare_user_tp_id' ) );
+      foreach ( $this->pools as $tier_pool_key => $arr_users )
+         usort( $this->pools[$tier_pool_key], array( $this, '_compare_user_tp_id' ) );
    }//reorder_pool_users
 
    /*! \internal Comparator-function to sort users of pool by TP.ID. */
@@ -545,12 +570,12 @@ class PoolTables
       }
 
       // re-order all pool-users per pool (unplayed pools by user-rating)
-      foreach ( $this->pools as $pool => $tmp )
+      foreach ( $this->pools as $tier_pool_key => $tmp )
       {
          // calculate rank for users determined by tie-breakers
-         PoolRankCalculator::calc_ranks( $this->users, $this->pools[$pool] );
+         PoolRankCalculator::calc_ranks( $this->users, $this->pools[$tier_pool_key] );
 
-         usort( $this->pools[$pool], array( $this, '_compare_user_ranks' ) ); //by TPool-fields.Rank/CalcRank
+         usort( $this->pools[$tier_pool_key], array( $this, '_compare_user_ranks' ) ); //by TPool-fields.Rank/CalcRank
       }
    }//fill_games
 
@@ -641,25 +666,24 @@ class PoolTables
    public function count_pools_max_user()
    {
       $max_users = 0;
-      foreach ( $this->pools as $pool => $arr_users )
+      foreach ( $this->pools as $tier_pool_key => $arr_users )
       {
+         list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
          if ( $pool > 0 )
             $max_users = max( $max_users, count($arr_users) );
       }
       return $max_users;
    }
 
-   /*!
-    * \brief Returns #users for each pool with some extra.
-    * \return arr( pool => arr( user-count, errors-arr(empty), pool-games-count, pool-started-games-count=0 ), ... ).
-    */
+   /*! \brief Returns arr( tier-pool-key => PoolSummaryEntry, ... ) used for input to PoolSummary-class. */
    public function calc_pool_summary( $games_factor )
    {
-      $arr = array(); // [ pool => [ #users, [], #games-per-pool, #started-games-per-pool=0 ], ... ]
-      foreach ( $this->pools as $pool => $arr_users )
+      $arr = array();
+      foreach ( $this->pools as $tier_pool_key => $arr_users )
       {
          $usercount = count($arr_users);
-         $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount, $games_factor), 0 );
+         $arr[$tier_pool_key] = new PoolSummaryEntry(
+            $usercount, TournamentUtils::calc_pool_games($usercount, $games_factor) );
       }
       return $arr;
    }
@@ -668,7 +692,7 @@ class PoolTables
    public function calc_pool_games_count( $games_factor )
    {
       $count = 0;
-      foreach ( $this->pools as $pool => $arr_users )
+      foreach ( $this->pools as $tier_pool_key => $arr_users )
          $count += TournamentUtils::calc_pool_games( count($arr_users), $games_factor );
       return $count;
    }
@@ -682,17 +706,19 @@ class PoolTables
  /*!
   * \class PoolSummary
   *
-  * \brief Utility methods for pool-summary for one tournament-round
+  * \brief Utility methods for pool-summary for one tournament-round.
   */
 class PoolSummary
 {
-   private $pool_summary; // pool => [ pool-user-count, errors, pool-games ]
+   private $pool_summary; // [ tier-pool-key => PoolSummaryEntry, ... ]
    private $table; // Table-object
+   private $tourney_type;
    private $choice_form = null; // Form-object
 
-   public function __construct( $page, $arr_pool_sum, $choice_form=null )
+   public function __construct( $page, $arr_pool_sum, $tourney_type, $choice_form=null )
    {
       $this->pool_summary = $arr_pool_sum;
+      $this->tourney_type = $tourney_type;
       $this->choice_form = $choice_form;
 
       $pstable = new Table( 'TPoolSummary', $page, null, 'ps',
@@ -715,37 +741,39 @@ class PoolSummary
       ksort($this->pool_summary);
       $cnt_pools = count($this->pool_summary);
       $cnt_users = $cnt_games = $cnt_started_games = 0;
-      foreach ( $this->pool_summary as $pool => $arr )
+      foreach ( $this->pool_summary as $tier_pool_key => $pse )
       {
-         list( $pool_usercount, $errors, $pool_games, $pool_started_games ) = $arr;
-         $cnt_errors = count($errors);
-         $cnt_users += $pool_usercount;
-         $cnt_games += $pool_games;
-         $cnt_started_games += $pool_started_games;
+         list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+
+         $cnt_errors = count($pse->errors);
+         $cnt_users += $pse->count_users;
+         $cnt_games += $pse->count_games;
+         $cnt_started_games += $pse->count_started_games;
 
          $row_arr = array(
-            1 => $pool,
-            2 => $pool_usercount,
-            3 => $pool_games,
-            4 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK') ),
+            1 => PoolViewer::format_tier_pool( $this->tourney_type, $tier, $pool, true ),
+            2 => $pse->count_users,
+            3 => $pse->count_games,
+            4 => ( $cnt_errors ? implode(', ', $pse->errors ) : T_('OK') ),
          );
          if ( $this->choice_form )
          {
-            $key = "p$pool";
+            $key = 'tpk_' . $tier_pool_key;
             if ( $cnt_pools > 1 ) // use 'ALL' instead if only 1 pool in total
                $row_arr[5] = $this->choice_form->print_insert_checkbox( $key, '1', '', @$_REQUEST[$key],
                   array( 'title' => T_('Select pool for starting tournament games')) );
-            $row_arr[6] = ( $pool_games != $pool_started_games )
-               ? span('EmphasizeWarn', $pool_started_games)
-               : $pool_started_games;
+            $row_arr[6] = ( $pse->count_games != $pse->count_started_games )
+               ? span('EmphasizeWarn', $pse->count_started_games)
+               : $pse->count_started_games;
          }
          if ( $cnt_errors )
             $row_arr['extra_class'] = 'Violation';
          $this->table->add_row( $row_arr );
-      }
+      }//pools-loop
 
       // summary row
       $row_arr = array(
+            1 => ( $this->tourney_type == TOURNEY_TYPE_ROUND_ROBIN ) ? '' : $cnt_pools,
             2 => $cnt_users,
             3 => $cnt_games,
             4 => T_('Sum'),
@@ -754,7 +782,7 @@ class PoolSummary
       if ( $this->choice_form )
       {
          $row_arr[1] = T_('All');
-         $row_arr[5] = $this->choice_form->print_insert_checkbox( 'pall', '1', '', @$_REQUEST['pall'],
+         $row_arr[5] = $this->choice_form->print_insert_checkbox( 'tpk_all', '1', '', @$_REQUEST['tpk_all'],
                array( 'title' => T_('Starting tournament games for ALL pools')) );
          $row_arr[6] = ( $cnt_games != $cnt_started_games )
             ? span('EmphasizeWarn', $cnt_started_games)
@@ -765,22 +793,44 @@ class PoolSummary
       return $this->table;
    }//make_table_pool_summary
 
-   /*! \brief returns arr( pools-count, user-count, games-count, started-games-count ). */
+   /*! \brief returns total counts of all pools: arr( pools-count, user-count, games-count, started-games-count ). */
    public function get_counts()
    {
       $cnt_users = $cnt_games = $cnt_started_games = 0;
-      foreach ( $this->pool_summary as $pool => $arr )
+      foreach ( $this->pool_summary as $tier_pool_key => $pse )
       {
-         list( $pool_usercount, $errors, $pool_games, $pool_started_games ) = $arr;
-         $cnt_users += $pool_usercount;
-         $cnt_games += $pool_games;
-         $cnt_started_games += $pool_started_games;
+         $cnt_users += $pse->count_users;
+         $cnt_games += $pse->count_games;
+         $cnt_started_games += $pse->count_started_games;
       }
 
       return array( count($this->pool_summary), $cnt_users, $cnt_games, $cnt_started_games );
    }//get_counts
 
 } // end of 'PoolSummary'
+
+
+ /*!
+  * \class PoolSummaryEntry
+  *
+  * \brief Class for entries of PoolSummary-class containing specific data about single pool.
+  */
+class PoolSummaryEntry
+{
+   public $count_users;
+   public $count_games;
+   public $count_started_games;
+   public $errors;
+
+   public function __construct( $count_users, $count_games, $count_started_games=0 )
+   {
+      $this->count_users = (int)$count_users;
+      $this->count_games = (int)$count_games;
+      $this->count_started_games = (int)$count_started_games;
+      $this->errors = array();
+   }
+
+} // end of 'PoolSummaryEntry'
 
 
 
@@ -803,6 +853,7 @@ define('PVOPT_NO_ONLINE',  0x80); // don't show user-online-icon (may be disable
 class PoolViewer
 {
    private $tid;
+   private $tourney_type;
    private $ptabs; // PoolTables-object
    private $table; // Table-object
 
@@ -820,11 +871,12 @@ class PoolViewer
     * \brief Construct PoolViewer setting up Table-structure.
     * \param $pool_tables PoolTables object
     */
-   public function __construct( $tid, $page, $pool_tables, $pool_names_format, $games_factor=1, $pv_opts=0 )
+   public function __construct( $tid, $page, $tourney_type, $pool_tables, $pool_names_format, $games_factor=1, $pv_opts=0 )
    {
       global $player_row;
 
       $this->tid = $tid;
+      $this->tourney_type = $tourney_type;
       $this->ptabs = $pool_tables;
       $this->my_id = $player_row['ID'];
       $this->pool_name_formatter = new PoolNameFormatter($pool_names_format);
@@ -914,21 +966,23 @@ class PoolViewer
       $this->first_pool = true;
 
       // unassigned users first
-      if ( isset($this->ptabs->pools[0]) )
-         $this->make_single_pool_table( 0 );
+      if ( $this->ptabs->count_unassigned_pool_users() )
+         $this->make_single_pool_table( 1, 0 );
 
-      foreach ( $this->ptabs->pools as $pool => $arr_users )
+      $arr_pool_keys = $this->ptabs->get_tier_pool_keys();
+      foreach ( $arr_pool_keys as $tier_pool_key )
       {
+         list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
          if ( $pool > 0 )
-            $this->make_single_pool_table( $pool, 0 );
+            $this->make_single_pool_table( $tier, $pool );
       }
    }//make_pool_table
 
    /*!
     * \brief Makes table for single pool.
-    * \param $opts optional: PVOPT_EMPTY_SEL
+    * \param $opts optional: PVOPT_...
     */
-   public function make_single_pool_table( $pool, $opts=0 )
+   public function make_single_pool_table( $tier, $pool, $opts=0 )
    {
       global $base_path, $NOW;
 
@@ -938,10 +992,10 @@ class PoolViewer
 
       $tpoints = $this->ptabs->get_tournament_points();
       if ( $show_results && is_null($tpoints) )
-         error('miss_args', "PoolViewer.make_single_pool_table.miss_tpoints");
+         error('miss_args', "PoolViewer.make_single_pool_table.miss_tpoints({$this->tid},$tier,$pool)");
 
-      $arr_users = $this->ptabs->pools[$pool];
-      $map_usercols = $this->ptabs->get_user_col_map( $pool, $this->games_factor );
+      $arr_users = $this->ptabs->get_pool_users( $tier, $pool );
+      $map_usercols = $this->ptabs->get_user_col_map( $tier, $pool, $this->games_factor );
       $cnt_users = count($arr_users);
 
       // header
@@ -951,8 +1005,9 @@ class PoolViewer
       {
          $pool_title = ( $pool == 0 )
             ? T_('Users without pool assignment') :
-            $this->pool_name_formatter->format($pool);
-         $this->table->add_row_title( "<a name=\"pool$pool\">$pool_title</a>" );
+            $this->pool_name_formatter->format($tier, $pool);
+         $pool_label = self::format_pool_label( $this->tourney_type, $tier, $pool );
+         $this->table->add_row_title( "<a name=\"$pool_label\">$pool_title</a>" );
          if ( $this->first_pool )
             $this->table->add_row_thead();
          else
@@ -963,7 +1018,7 @@ class PoolViewer
       {
          if ( !($this->options & PVOPT_NO_EMPTY) || ($opts & PVOPT_EMPTY_SEL) )
             $this->table->add_row_title(
-               sprintf( T_('%s (empty)#poolname'), $this->pool_name_formatter->format($pool) ) );
+               sprintf( T_('%s (empty)#poolname'), $this->pool_name_formatter->format($tier, $pool) ) );
          return;
       }
 
@@ -1065,7 +1120,34 @@ class PoolViewer
       echo $this->table->echo_table();
    }
 
+   /*! \brief Returns tourney-type-specific label for tier/pool (for view_pools-page): pool_C3 (league), pool3 (round-robin) */
+   public static function format_pool_label( $tourney_type, $tier, $pool )
+   {
+      if ( $tourney_type == TOURNEY_TYPE_LEAGUE )
+      {
+         $pn_league = new PoolNameFormatter('pool_%t(uc)%p(num)');
+         $pool_label = $pn_league->format( $tier, $pool );
+      }
+      else //if ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+         $pool_label = "pool$pool";
+
+      return $pool_label;
+   }
+
+   /*! \brief Returns tourney-type-specific format for tier/pool: Pool C3 (league), Pool 3 (round-robin). */
+   public static function format_tier_pool( $tourney_type, $tier, $pool, $short=false )
+   {
+      $pool_prefix = ($short) ? '' : '%P ';
+      if ( $tourney_type == TOURNEY_TYPE_LEAGUE )
+         $pn = new PoolNameFormatter($pool_prefix.'%t(uc)%p(num)');
+      else //if ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+         $pn = new PoolNameFormatter($pool_prefix.'%p(num)');
+
+      return $pn->format( $tier, $pool );
+   }
+
 } // end of 'PoolViewer'
+
 
 
 
@@ -1083,9 +1165,12 @@ class PoolNameFormatter
       $this->format = ( $format ) ? $format : '%P %t(uc)%p(num)';
    }
 
-   public function format( $pool, $tier=-1 )
+   public function format( $tier, $pool )
    {
       static $ARR_FMT_NEEDLES = array( '%P', '%p(num)', '%p(uc)', '%L', '%t(num)', '%t(uc)', '%%' );
+
+      if ( $pool == 0 ) // unassigned-pool => always '0' (without tier)
+         $tier = -1;
 
       return str_replace( $ARR_FMT_NEEDLES,
             array(
@@ -1120,13 +1205,127 @@ class PoolNameFormatter
       return true;
    }//is_valid_format
 
-   public static function format_with_default( $pool, $tier=-1 )
+   public static function format_with_default( $tier, $pool )
    {
       $pn_formatter = new PoolNameFormatter();
-      return $pn_formatter->format($pool, $tier);
+      return $pn_formatter->format($tier, $pool);
    }
 
 } // end of 'PoolNameFormatter'
+
+
+
+ /*!
+  * \class PoolParser
+  *
+  * \brief Class to parse different pool-formats & check for valid tier/pool-combination.
+  */
+class PoolParser
+{
+   private $tourney_type;
+   private $tround;
+   public $errors = array();
+
+   private $valid_tier_pools; // [ tier-pool-key => 1, .. ]
+
+   public function __construct( $tourney_type, $tround )
+   {
+      $this->tourney_type = $tourney_type;
+      $this->tround = $tround;
+
+      $this->build_valid_tier_pools();
+   }
+
+   private function build_valid_tier_pools()
+   {
+      $arr = array();
+      $arr[TournamentUtils::encode_tier_pool_key($tier=1, 1)] = 1;
+
+      $cnt_pools = 1;
+      $tier_inc_factor = 1;
+      while ( ++$tier <= TROUND_MAX_TIERCOUNT && $cnt_pools < $this->tround->Pools )
+      {
+         $max_tier_pools = $this->tround->TierFactor * $tier_inc_factor;
+         $tier_inc_factor *= 2;
+         for ( $pool=1; $pool <= $max_tier_pools && $cnt_pools < $this->tround->Pools; $pool++, $cnt_pools++)
+            $arr[TournamentUtils::encode_tier_pool_key($tier, $pool)] = 1;
+      }
+
+      $this->valid_tier_pools = $arr;
+   }//build_valid_tier_pools
+
+   public function get_valid_tier_pools()
+   {
+      return $this->valid_tier_pools;
+   }
+
+   /*!
+    * \brief Returns tier-pool-key of parsed $value; 0 on error.
+    * \param $value accepted formats:
+    *       league-tournament: "C3", "c3";  "3[non-digits]1", "3 1", "3.1", "3:1", etc.
+    *       round-robin-tournament: "3"
+    */
+   public function parse_tier_pool( $error_context, $value )
+   {
+      $this->errors = array();
+
+      if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
+      {
+         if ( preg_match("/^(\d+)\D+(\d+)$/", $value, $matches) ) // "3[non-digit]1" -> tier=3, pool=1
+            $result = TournamentUtils::encode_tier_pool_key( $matches[1], $matches[2] );
+         elseif ( preg_match("/^([A-Z])(\d+)$/i", $value, $matches) ) // "C3|c3" -> tier=3, pool=1
+         {
+            $tier = ord( strtoupper($matches[1]) ) - ord('A') + 1;
+            $result = TournamentUtils::encode_tier_pool_key( $tier, $matches[2] );
+         }
+         else
+            return $this->add_error( $error_context, sprintf( T_('Pool [%s] is invalid'), $value ) );
+
+         if ( !isset($this->valid_tier_pools[$result]) )
+            return $this->add_error( $error_context, sprintf( T_('Pool [%s] is invalid'), $value ));
+      }
+      else //if ( $this->tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         if ( is_numeric($value) && $value >= 1 && $value <= $this->tround->Pools )
+            $result = TournamentUtils::encode_tier_pool_key( 1, $value );
+         else
+            return $this->add_error( $error_context, sprintf( T_('Pool [%s] is invalid, must be in range %s'),
+                  $value, build_range_text(1, $this->tround->Pools) ));
+      }
+
+      if ( $result == 0 || $result == TournamentUtils::encode_tier_pool_key(1, 0) ) // unassigned-pool not allowed
+         return $this->add_error( $error_context, sprintf( T_('Pool [%s] is invalid'), $value ));
+
+      return $result;
+   }//parse_tier_pool
+
+   /*! \brief Returns true, if given $tier/$pool are a valid pool for specific tournament (type + pool-count). */
+   public function is_valid_tier_pool( $tier, $pool )
+   {
+      if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
+      {
+         $tier_pool_key = TournamentUtils::encode_tier_pool_key( $tier, $pool );
+         if ( isset($this->valid_tier_pools[$tier_pool_key]) )
+            return true;
+      }
+      else //if ( $this->tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         if ( !is_numeric($tier) || $tier != 1 )
+            return false;
+         if ( is_numeric($tier) && $pool >= 1 && $pool <= $this->tround->Pools )
+            return true;
+      }
+
+      return false;
+   }//is_valid_tier_pool
+
+   private function add_error( $error_context, $error_msg )
+   {
+      $this->errors[] = "[$error_context]: $error_msg";
+      return 0;
+   }
+
+} // end of 'PoolParser'
 
 
 
@@ -1150,7 +1349,7 @@ class TierSlicer
    private $tier_idx_tp;
    private $remaining_tp; // remaining TPs
    private $pool_slicer = null;
-   private $arr_tier_pools;
+   private $arr_tier_pools; // { tier:pool => 1 }
    private $max_tier;
 
    public function __construct( $tourney_type, $tround, $slice_mode, $tp_count )
@@ -1172,7 +1371,7 @@ class TierSlicer
       $this->tier_idx_tp = 0;
       $this->remaining_tp = $this->tp_count;
 
-      $this->arr_tier_pools = array(); // [ tier.pool => 1 ], also for pool=0
+      $this->arr_tier_pools = array(); // [ tier:pool => 1 ], also for pool=0
       $this->max_tier = 1;
 
       if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
@@ -1205,6 +1404,7 @@ class TierSlicer
 
          if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
          {
+            //TODO TODO TLG: only correct for TierFactor=2, not for >2
             $this->tier_max_tp *= $this->tround->TierFactor;
             $this->tier_pool_count *= $this->tround->TierFactor;
 

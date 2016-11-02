@@ -36,6 +36,7 @@ require_once 'GameSgfParserTest.php';
 require_once 'GeneralFunctionsTest.php';
 require_once 'GuiFunctionsTest.php';
 require_once 'PoolNameFormatterTest.php';
+require_once 'PoolParserTest.php';
 require_once 'PoolSlicerTest.php';
 require_once 'ProfileTest.php';
 require_once 'SgfParserTest.php';
@@ -73,6 +74,7 @@ class AllTests
             'GeneralFunctionsTest',
             'GuiFunctionsTest',
             'PoolNameFormatterTest',
+            'PoolParserTest',
             'PoolSlicerTest',
             'ProfileTest',
             'SgfParserTest',

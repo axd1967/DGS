@@ -107,15 +107,17 @@ class TournamentPool
       return print_r( $this, true );
    }
 
-   public function build_result_info()
+   public function build_result_info( $tourney_type )
    {
       $rank_str = $this->formatRank(false, T_('unset#tpool'));
+      $pool_label = PoolViewer::format_pool_label( $tourney_type, $this->Tier, $this->Pool );
+      $tier_pool = PoolViewer::format_tier_pool( $tourney_type, $this->Tier, $this->Pool );
       return
-         echo_image_info( "tournaments/roundrobin/view_pools.php?tid={$this->tid}".URI_AMP."round={$this->Round}#pool{$this->Pool}",
+         echo_image_info( "tournaments/roundrobin/view_pools.php?tid={$this->tid}".URI_AMP."round={$this->Round}#$pool_label",
             T_('Tournament Pool') )
          . MINI_SPACING
          . span('bold', T_('Tournament Pool'), '%s: ')
-         . sprintf( T_('Tier [%s], Pool [%s], Rank [%s]#tourney'), $this->Tier, $this->Pool, $rank_str )
+         . sprintf( T_('%s, Rank [%s]#tourney'), $tier_pool, $rank_str )
          . ',' . MED_SPACING . $this->echoRankImage( T_('No Pool winner#tourney') );
    }
 
@@ -202,34 +204,20 @@ class TournamentPool
 
    /*!
     * \brief Returns db-fields to be used for query of TournamentPool-objects for given tournament-id.
-    * \param $tier 0 = all tiers, otherwise specific tiers or tier-list if array of tiers
-    * \param $pool 0 = all pools, otherwise specific pool or pool-list if array of pools
+    * \param $tier_pools 0 = load all tiers/pool; otherwise arr( tier-pool-key, ... ) to load specific tier/pools-combinations
     */
-   public static function build_query_sql( $tid=0, $round=0, $tier=0, $pool=0 )
+   public static function build_query_sql( $tid=0, $round=0, $tier_pools=0 )
    {
       $tid = (int)$tid;
       $round = (int)$round;
-      if ( !is_array($tier) )
-         $tier = (int)$tier;
-      if ( !is_array($pool) )
-         $pool = (int)$pool;
 
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newQuerySQL('TPOOL');
       if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TPOOL.tid='$tid'" );
       if ( $round > 0 )
          $qsql->add_part( SQLP_WHERE, "TPOOL.Round='$round'" );
-
-      if ( is_array($tier) )
-         $qsql->add_part( SQLP_WHERE, build_query_in_clause( 'TPOOL.Tier', $tier, /*is-str*/false ) );
-      elseif ( $tier > 0 )
-         $qsql->add_part( SQLP_WHERE, "TPOOL.Tier='$tier'" );
-
-      if ( is_array($pool) )
-         $qsql->add_part( SQLP_WHERE, build_query_in_clause( 'TPOOL.Pool', $pool, /*is-str*/false ) );
-      elseif ( $pool > 0 )
-         $qsql->add_part( SQLP_WHERE, "TPOOL.Pool='$pool'" );
-
+      if ( is_array($tier_pools) )
+         TournamentUtils::add_qpart_with_tier_pools( $qsql, 'TPOOL', $tier_pools );
       return $qsql;
    }//build_query_sql
 
@@ -280,12 +268,9 @@ class TournamentPool
 
    /*!
     * \brief Returns array( pool-entries, distinct-tier/pool-count, distinct-user-count ) for given tournament-id
-    *        and round (and tier & pool if given).
-    * \param $tier 0 = count in all tiers; >0 = count only in specific tier
-    * \param $pool 0 = count in all pools; >0 = count only in specific pool
-    * \note entries with TournamentPool.Pool=0 cannot be counted with this method
+    *        and round (for all tiers & pools, including unassigned-pool).
     */
-   public static function count_tournament_tiered_pool( $tid, $round, $tier=0, $pool=0, $count_uid=false )
+   public static function count_tournament_tiered_pools( $tid, $round, $count_uid=false )
    {
       $tid = (int)$tid;
       $round = (int)$round;
@@ -293,21 +278,16 @@ class TournamentPool
       $query = 'SELECT SQL_SMALL_RESULT COUNT(*) AS X_CountAll, COUNT(DISTINCT Tier, Pool) AS X_CountPools, '
          . ( $count_uid ? 'COUNT(DISTINCT uid)' : '0' ) . ' AS X_CountUsers '
          . "FROM TournamentPool WHERE tid=$tid AND Round=$round";
-      if ( is_numeric($tier) && $tier > 0 )
-         $query .= " AND Tier=$tier";
-      if ( is_numeric($pool) && $pool > 0 )
-         $query .= " AND Pool=$pool";
 
-      $row = mysql_single_fetch( "TournamentPool:count_tournament_pool($tid,$round,$tier,$pool)", $query );
+      $row = mysql_single_fetch( "TournamentPool:count_tournament_pool($tid,$round,$count_uid)", $query );
       return ($row) ? array( $row['X_CountAll'], $row['X_CountPools'], $row['X_CountUsers'] ) : array( 0, 0, 0 );
-   }//count_tournament_tiered_pool
+   }//count_tournament_tiered_pools
 
    /*!
-    * \brief Returns array( tier/pool-fmt => user-count ) for given tournament-id and round.
-    * \param $pn_format PoolNameFormatter for keys in result-array, e.g. '%t(uc).%p(num)' for 'C.2'
+    * \brief Returns array( tier-pool-key => user-count ) for given tournament-id and round.
     * \param $rank null=count-all, TPOOLRK_NO_RANK = count-all-unset-rank, other value = count-all with Rank>value
     */
-   public static function count_tournament_tiered_pool_users( $tid, $round, $pn_format, $rank=null )
+   public static function count_tournament_tiered_pool_users( $tid, $round, $rank=null )
    {
       $tid = (int)$tid;
       $round = (int)$round;
@@ -321,11 +301,10 @@ class TournamentPool
          "WHERE tid=$tid AND Round=$round $where_rank GROUP BY Tier, Pool" );
 
       $arr = array();
-      $pn = new PoolNameFormatter( $pn_format );
       while ( $row = mysql_fetch_assoc($result) )
       {
-         $key = $pn->format( $row['Tier'], $row['Pool'] );
-         $arr[$key] = $row['X_Count'];
+         $tier_pool_key = TournamentUtils::encode_tier_pool_key( $row['Tier'], $row['Pool'] );
+         $arr[$tier_pool_key] = $row['X_Count'];
       }
       mysql_free_result($result);
 
@@ -400,7 +379,7 @@ class TournamentPool
       $uid = (int)$uid;
       $tpool_user_iterator = new ListIterator( 'TournamentPool:load_tournament_pool_user',
          new QuerySQL( SQLP_WHERE, "TPOOL.uid=$uid") );
-      $tpool_user_iterator = self::load_tournament_pools( $tpool_user_iterator, $tid, $round, 0, 0, $load_opts );
+      $tpool_user_iterator = self::load_tournament_pools( $tpool_user_iterator, $tid, $round, 0, $load_opts );
 
       if ( $tpool_user_iterator->getItemCount() == 1 )
       {
@@ -414,19 +393,18 @@ class TournamentPool
 
    /*!
     * \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id.
-    * \param $tier 0 = load all tiers, otherwise load specific tier, or tiers if array of tiers
-    * \param $pool 0 = load all pools, otherwise load specific pool, or pools if array of pools
+    * \param $tier_pools 0 = load all tiers/pool; otherwise arr( tier-pool-key, ... ) to load specific tier/pools-combinations
     * \param $load_opts see options TPOOL_LOADOPT_...
     * \return uid-indexed iterator with items: TournamentPool + .User + .User.urow[TP_X_RegisterTime|TP_Rating]
     *
     * \note IMPORTANT NOTE: keep in sync with TournamentCache::load_cache_tournament_pools()
     */
-   public static function load_tournament_pools( $iterator, $tid, $round, $tier=0, $pool=0, $load_opts=0 )
+   public static function load_tournament_pools( $iterator, $tid, $round, $tier_pools=0, $load_opts=0 )
    {
       $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_TP_LASTMOVED|TPOOL_LOADOPT_REGTIME) );
       $needs_tp_rating = ( $load_opts & TPOOL_LOADOPT_TRATING );
 
-      $qsql = self::build_query_sql( $tid, $round, $tier, $pool );
+      $qsql = self::build_query_sql( $tid, $round, $tier_pools );
       if ( $load_opts & TPOOL_LOADOPT_USER )
       {
          if ( !($load_opts & TPOOL_LOADOPT_ONLY_RATING) )
@@ -715,16 +693,15 @@ class TournamentPool
       return $result;
    }//add_missing_registered_users
 
-   /*! \brief Assigns list of users to given tournament-round and tier/pool. */
+   /*!
+    * \brief Assigns list of users to given tournament-round and tier/pool.
+    * \note parameters $tier & $pool are not checked for valid values!
+    */
    public static function assign_pool( $tlog_type, $tround, $tier, $pool, $arr_uid )
    {
-      $dbg = "TournamentPool:assign_pool($tid,$round,$tier,$pool)";
       $tid = (int)$tround->tid;
       $round = (int)$tround->Round;
-      if ( !is_numeric($tier) || $tier <= 0 )
-         error('invalid_args', "$dbg.check.tier");
-      if ( !is_numeric($pool) || $pool < 0 || $pool > $tround->Pools )
-         error('invalid_args', "$dbg.check.pool");
+      $dbg = "TournamentPool:assign_pool($tid,$round,$tier,$pool)";
 
       $cnt = count($arr_uid);
       if ( $cnt == 0 )
@@ -735,15 +712,12 @@ class TournamentPool
       $result = db_query( "$dbg.find_old",
          "SELECT Tier, Pool, uid FROM TournamentPool " .
          "WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
-      $arr_old_pools = array(); // arr( tier.pool -> [uid, ...] )
-      $pn = new PoolNameFormatter( '%t(num).%p(num)' );
+      $arr_old_pools = array(); // arr( tier/pool -> [uid, ...] )
+      $pn_log = new PoolNameFormatter( 'T%t(num)P%p(num)' );
       while ( $row = mysql_fetch_assoc($result) )
       {
-         $key = $pn->format( $row['Tier'], $row['Pool'] );
-         if ( !isset($arr_old_pools[$key]) )
-            $arr_old_pools[$key] = array( $row['uid'] );
-         else
-            $arr_old_pools[$key][] = $row['uid'];
+         $key = $pn_log->format( $row['Tier'], $row['Pool'] );
+         $arr_old_pools[$key][] = $row['uid'];
       }
       mysql_free_result($result);
 
@@ -754,7 +728,7 @@ class TournamentPool
       $upd_count = mysql_affected_rows();
 
       TournamentLogHelper::log_assign_tournament_pool( $tid, $tlog_type, $tround, $arr_old_pools, $arr_uid,
-         $pn->format( $tier, $pool ), $pool );
+         $pn_log->format($tier, $pool), $pool );
 
       if ( $upd_count > 0 )
          self::delete_cache_tournament_pools( $dbg, $tid, $round );
@@ -764,15 +738,12 @@ class TournamentPool
 
    /*!
     * \brief checks pool integrity and return list of errors, and fills in number of started-game-counts
-    *       in PoolSummary-arrays; empty list if all ok.
-    * \return array( errors, pool_summary )
-    *         $pool_summary fill in pool-summary:
-    *         array( pool => array( pool-user-count,
-    *                array( errormsg, ... ),
-    *                pool-games-count,
-    *                pool-started-games-count ), ... )
+    *       in PoolSummary-array; empty list if all ok.
+    * \param $tround TournamentRound-object
+    * \param $tourney_type Tournament.Type
+    * \return array( errors, pool_summary ) with pool_summary := [ tier-pool-key => PoolSummaryEvent, ... ]
     */
-   public static function check_pools( $tround, $only_summary=false )
+   public static function check_pools( $tround, $tourney_type, $only_summary=false )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
@@ -781,11 +752,9 @@ class TournamentPool
       $games_factor = TournamentHelper::determine_games_factor( $tid );
 
       // load tourney-participants and pool data
-      $iterator = new ListIterator( 'TournamentPool.check_pools.load_tp_pools' );
-      $iterator = self::load_tournament_participants_with_pools( $iterator, $tid, $round, $only_summary );
-
-      $poolTables = new PoolTables( $tround->Pools );
-      $poolTables->fill_pools( $iterator );
+      $tpool_iterator = new ListIterator( 'TournamentPool.check_pools.load_tp_pools' );
+      $tpool_iterator = self::load_tournament_participants_with_pools( $tpool_iterator, $tid, $round, $only_summary );
+      $poolTables = new PoolTables( $tpool_iterator );
 
       $pool_summary = $poolTables->calc_pool_summary( $games_factor );
       if ( $only_summary ) // load only summary
@@ -793,12 +762,14 @@ class TournamentPool
          // check game-counts integrity for all pools
          $arr_game_counts = self::check_pools_game_integrity( $tround );
          $cnt_miss_games = $cnt_bad_games = 0;
-         foreach ( $pool_summary as $pool => $arr )
+         foreach ( $pool_summary as $tier_pool_key => $pse )
          {
-            $cnt_expected_games = $arr[2];
-            if ( isset($arr_game_counts[$pool]) )
+            list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+
+            $cnt_expected_games = $pse->count_games;
+            if ( isset($arr_game_counts[$tier_pool_key]) )
             {
-               list( $cnt_tgames, $cnt_games ) = $arr_game_counts[$pool];
+               list( $cnt_tgames, $cnt_games ) = $arr_game_counts[$tier_pool_key];
                if ( $cnt_tgames != $cnt_games || $cnt_expected_games != $cnt_tgames )
                {
                   if ( $cnt_expected_games != $cnt_tgames )
@@ -806,11 +777,11 @@ class TournamentPool
                   if ( $cnt_tgames != $cnt_games )
                      ++$cnt_bad_games;
 
-                  $pool_summary[$pool][1][] =
+                  $pse->errors[] =
                      sprintf( T_('Inconsistency: expected %s games, but have: %s TGames & %s Games#tourney'),
                         $cnt_expected_games, $cnt_tgames, $cnt_games );
                }
-               $pool_summary[$pool][3] += $cnt_tgames;
+               $pse->count_started_games += $cnt_tgames;
             }
          }
          if ( $cnt_miss_games )
@@ -822,14 +793,15 @@ class TournamentPool
       }//only-summary
 
 
-      $arr_counts = array(); // [ pool => #users, ... ]
-      foreach ( $pool_summary as $pool => $arr )
-         $arr_counts[$pool] = $arr[0];
+      $arr_user_counts = array(); // [ tier-pool-key => #users, ... ]
+      foreach ( $pool_summary as $tier_pool_key => $pse )
+         $arr_user_counts[$tier_pool_key] = $pse->count_users;
 
-      $cnt_pool0 = (int)@$arr_counts[0];
-      $cnt_real_pools = count($arr_counts) - ( $cnt_pool0 > 0 ? 1 : 0 ); // pool-count without 0-pool
-      list( $cnt_entries, $cnt_pools, $cnt_users ) = // cnt_pools can include 0-pool
-         self::count_tournament_tiered_pool( $tid, $round, /*tier*/0, /*pool*/0, /*count_uid*/true );
+      $pool0_key = TournamentUtils::encode_tier_pool_key( 1, 0 );
+      $cnt_pool0 = (int)@$arr_user_counts[$pool0_key];
+      $cnt_real_pools = count($arr_user_counts) - ( $cnt_pool0 > 0 ? 1 : 0 ); // pool-count without 0-pool
+      list( $cnt_entries, $cnt_pools, $cnt_users ) = // $cnt_pools can include 0-pool
+         self::count_tournament_tiered_pools( $tid, $round, /*count_uid*/true );
 
       // ---------- check pool integrity ----------
 
@@ -847,18 +819,25 @@ class TournamentPool
 
       // check that count of pools matches the expected TRound.Pools-count
       if ( $cnt_real_pools != $tround->Pools )
-      {
          $errors[] = sprintf( T_('Expected %s pools, but currently there are %s pools.'),
             $tround->Pools, $cnt_real_pools );
-         for ( $i = $tround->Pools; $i <= $cnt_real_pools; $i++ )
-            $pool_summary[$i][1][] = T_('Bad Pool-Number');
+
+      // check for correct use of tier/pools
+      $p_parser = new PoolParser( $tourney_type, $tround );
+      foreach ( $pool_summary as $tier_pool_key => $pse )
+      {
+         list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+         if ( $tier == 1 && $pool == 0 ) // skip unassigned-pool
+            continue;
+         if ( !$p_parser->is_valid_tier_pool( $tier, $pool ) )
+            $pse->errors[] = T_('Invalid tier/pool combination');
       }
 
       // check that all registered users joined somewhere in the pools
       $arr_missing_users = array();
-      $iterator->resetListIterator();
+      $tpool_iterator->resetListIterator();
       $cnt_missing_users = 0;
-      while ( list(,$arr_item) = $iterator->getListIterator() )
+      while ( list(,$arr_item) = $tpool_iterator->getListIterator() )
       {
          list(,$orow ) = $arr_item;
          if ( !$orow['X_HasPool'] )
@@ -872,20 +851,22 @@ class TournamentPool
       if ( $cnt_pool0 > 0 )
       {
          $errors[] = sprintf( T_('There are %s unassigned users. Please assign them to a pool!'), $cnt_pool0 );
-         $pool_summary[0][1][] = T_('Unassigned users#tpool');
+         $pool_summary[$pool0_key]->errors[] = T_('Unassigned users#tpool');
       }
 
       // check that the user-count of each pool is in valid range of min/max-pool-size
       $cnt_violate_poolsize = 0;
-      foreach ( $arr_counts as $pool => $pool_usercount )
+      foreach ( $arr_user_counts as $tier_pool_key => $pool_usercount )
       {
-         if ( $pool == 0 ) continue;
+         list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+         if ( $pool == 0 )
+            continue;
          if ( $pool_usercount < $tround->MinPoolSize || $pool_usercount > $tround->MaxPoolSize )
             $cnt_violate_poolsize++;
          if ( $pool_usercount < $tround->MinPoolSize )
-            $pool_summary[$pool][1][] = T_('Pool-Size too small');
+            $pool_summary[$tier_pool_key]->errors[] = T_('Pool-Size too small');
          if ( $pool_usercount > $tround->MaxPoolSize )
-            $pool_summary[$pool][1][] = T_('Pool-Size too big');
+            $pool_summary[$tier_pool_key]->errors[] = T_('Pool-Size too big');
       }
       if ( $cnt_violate_poolsize > 0 )
          $errors[] = sprintf( T_('There are %s pools violating the valid pool-size range %s.'),
@@ -894,12 +875,12 @@ class TournamentPool
 
       // check that there are no empty pools
       $cnt_empty = 0;
-      foreach ( $arr_counts as $pool => $pool_usercount )
+      foreach ( $arr_user_counts as $tier_pool_key => $pool_usercount )
       {
          if ( $pool_usercount == 0 )
          {
             $cnt_empty++;
-            $pool_summary[$pool][1][] = T_('Pool empty');
+            $pool_summary[$tier_pool_key]->errors[] = T_('Pool empty');
          }
       }
       if ( $cnt_empty > 0 )
@@ -909,9 +890,9 @@ class TournamentPool
    }//check_pools
 
    /*!
-    * \brief checks game integrity for pools of given tournament-round.
+    * \brief checks game integrity for (tiered) pools of given tournament-round.
     * \return count of TournamentGames- and respective Games-entries (which should be the same) for each pool in array:
-    *       array( pool => array( TournamentGames-count, Games-count ), ... )
+    *       array( tier-pool-key => array( TournamentGames-count, Games-count ), ... )
     */
    private static function check_pools_game_integrity( $tround )
    {
@@ -920,15 +901,18 @@ class TournamentPool
 
       $qsql = new QuerySQL(
          SQLP_OPTS, 'SQL_SMALL_RESULT',
-         SQLP_FIELDS, 'Pool', 'COUNT(*) AS X_Count_TGames', 'SUM(IF(ISNULL(G.ID),0,1)) AS X_Count_Games',
+         SQLP_FIELDS, 'Tier', 'Pool', 'COUNT(*) AS X_Count_TGames', 'SUM(IF(ISNULL(G.ID),0,1)) AS X_Count_Games',
          SQLP_FROM, 'TournamentGames AS TG', 'LEFT JOIN Games as G ON G.ID=TG.gid',
          SQLP_WHERE, "TG.tid=$tid", "TG.Round_ID=$round_id",
-         SQLP_GROUP, 'Pool' );
+         SQLP_GROUP, 'Tier', 'Pool' );
 
       $result = db_query( "TournamentPool:check_pools_game_integrity($tid,$round_id)", $qsql->get_select() );
       $arr = array();
       while ( $row = mysql_fetch_array( $result ) )
-         $arr[$row['Pool']] = array( $row['X_Count_TGames'], $row['X_Count_Games'] );
+      {
+         $tier_pool_key = TournamentUtils::encode_tier_pool_key( $row['Tier'], $row['Pool'] );
+         $arr[$tier_pool_key] = array( $row['X_Count_TGames'], $row['X_Count_Games'] );
+      }
       mysql_free_result($result);
 
       return $arr;

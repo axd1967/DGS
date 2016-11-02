@@ -183,7 +183,7 @@ class TournamentUtils
    }
 
    /*!
-    * Returns number of games that need to be played for a pool of given size: n*(n-1)/2 x games_per_round.
+    * \brief Returns number of games that need to be played for a pool of given size: n*(n-1)/2 x games_per_round.
     * \param $games_factor factor of games per challenge
     */
    public static function calc_pool_games( $pool_size, $games_factor )
@@ -196,6 +196,38 @@ class TournamentUtils
       return T_('Running tournament games will be annulled, i.e. detached from the tournament, ' .
          'so they have no further effect on the tournament, but will be continued as normal games.');
    }
+
+   public static function encode_tier_pool_key( $tier, $pool )
+   {
+      return ($tier << 16) + $pool;
+   }
+
+   public static function decode_tier_pool_key( $key )
+   {
+      return array( $key >> 16, $key & 0xffff );
+   }
+
+   /*!
+    * \brief Adds query-part for optimized index-search on db-field Tier/Pool for list of tier/pool-combinations.
+    * \note db-tables with index-utilization: TournamentGames, TournamentPool
+    */
+   public static function add_qpart_with_tier_pools( &$qsql, $table, $tier_pools )
+   {
+      if ( !is_array($tier_pools) )
+         return;
+
+      // extract pools for optimized index-search
+      $arr_pools = array();
+      foreach ( $tier_pools as $tier_pool_key )
+      {
+         list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+         $arr_pools[] = $pool;
+      }
+
+      $qsql->add_part( SQLP_WHERE,
+         build_query_in_clause( "$table.Pool", $arr_pools, /*str*/false ),
+         build_query_in_clause( "(($table.Tier << 16) + $table.Pool)", $tier_pools, /*str*/false ) );
+   }//add_qpart_with_tier_pools
 
 } // end of 'TournamentUtils'
 

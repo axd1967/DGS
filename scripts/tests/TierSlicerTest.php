@@ -89,7 +89,7 @@ class TierSlicerTest extends PHPUnit_Framework_TestCase {
       $ts = new TierSlicer( TOURNEY_TYPE_LEAGUE, $tround, TROUND_SLICE_ROUND_ROBIN, $cnt_tps );
 
       $chk = $this->_seed_pools( $ts, $cnt_tps );
-      $this->assertEquals( self::$EXPECT_T3_P4.',A0,A0,A0', join(',', $chk));
+      $this->assertEquals( self::$EXPECT_T3_P4.',0,0,0', join(',', $chk));
       $this->assertEquals( array( 3, 8, 1 ), $ts->get_slicer_counts());
    }
 
@@ -140,7 +140,7 @@ class TierSlicerTest extends PHPUnit_Framework_TestCase {
       for ($i=0; $i < $cnt; $i++)
       {
          list( $tier, $pool ) = $ts->next_tier_pool();
-         $result[] = $pn->format( $pool, $tier );
+         $result[] = $pn->format( $tier, $pool );
       }
       return $result;
    }

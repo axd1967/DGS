@@ -95,14 +95,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    // parse URL-args
    $input_errors = array();
    $create_pools = -1;
-   if ( @$_REQUEST['pall'] )
+   if ( @$_REQUEST['tpk_all'] )
       $create_pools = 0; // create all pools
    else
    {
       $create_pools = array();
-      for ( $pool=1; $pool <= $tround->Pools; $pool++ )
-         if ( @$_REQUEST["p$pool"] )
-            $create_pools[] = $pool;
+      foreach ( $_REQUEST as $key => $value )
+      {
+         if ( preg_match("/^tpk_\d+$/", $key) ) // see PoolSummary.make_table_pool_summary()
+            $create_pools[] = (int)substr($key, 4);
+      }
    }
    if ( $do_pair && ($create_pools < 0 || count($create_pools) == 0) )
       $errors[] = T_('No pool selected to start tournament games.') . "<br>\n";
@@ -136,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    if ( $do_pair )
       $arr_pool_summary = $pool_errors = null;
    else
-      list( $pool_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround, /*only-sum*/true );
+      list( $pool_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround, $tourney->Type, /*only-sum*/true );
 
 
    // --------------- Tournament-Pairing EDIT form --------------------
@@ -181,7 +183,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
 
    if ( !is_null($arr_pool_summary) )
    {
-      $pool_sum = new PoolSummary( $page, $arr_pool_summary, $tform );
+      $pool_sum = new PoolSummary( $page, $arr_pool_summary, $tform, $tourney->Type );
       $pstable = $pool_sum->make_table_pool_summary();
       list( $count_pools, $count_users, $count_games, $count_started_games ) = $pool_sum->get_counts();
 

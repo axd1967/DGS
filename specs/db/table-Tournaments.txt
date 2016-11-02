@@ -733,6 +733,7 @@ Description:
 | ID             | int(11)                                   | NO   | PRI | NULL                | auto_increment |
 | tid            | int(11)                                   | NO   | MUL | NULL                |                |
 | Round_ID       | int(11)                                   | NO   |     | 0                   |                |
+| Tier           | tinyint(3) unsigned                       | NO   |     | 1                   |                |
 | Pool           | smallint(5) unsigned                      | NO   |     | 0                   |                |
 | gid            | int(11)                                   | NO   | MUL | 0                   |                |
 | Status         | enum('INIT','PLAY','SCORE','WAIT','DONE') | NO   | MUL | INIT                |                |
@@ -760,6 +761,11 @@ Description:
      A: problem is that T-game is not unique for different rounds. Two players
         could meet again in later rounds. T-game most often be used to process
         T-game-end. Round-number makes a bad index, so used TRound.ID
+
+* Tier : tier number
+   - value: 1..n
+   - for round-robin-/league-type tournaments: corresponding TournamentPool.Tier for T-game
+   - NOTE: always 1 for ladder- & round-robin-tournaments
 
 * Pool : pool number
    - for ladder-type tournaments: 0

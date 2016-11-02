@@ -186,7 +186,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       else
       {
          $tg_iterator = TournamentCache::load_cache_tournament_games( 'Tournament.ladder_view',
-            $tid, 0, 0, array(TG_STATUS_PLAY, TG_STATUS_WAIT, TG_STATUS_SCORE) );
+            $tid, 0, array(TG_STATUS_PLAY, TG_STATUS_WAIT, TG_STATUS_SCORE) );
 
          // add ladder-info (challenge-range)
          $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
