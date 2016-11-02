@@ -1347,6 +1347,7 @@ class TierSlicer
 
    private $curr_tier;
    private $tier_idx_tp;
+   private $tier_inc_factor;
    private $remaining_tp; // remaining TPs
    private $pool_slicer = null;
    private $arr_tier_pools; // { tier:pool => 1 }
@@ -1372,6 +1373,7 @@ class TierSlicer
       $this->remaining_tp = $this->tp_count;
 
       $this->arr_tier_pools = array(); // [ tier:pool => 1 ], also for pool=0
+      $this->tier_inc_factor = 1;
       $this->max_tier = 1;
 
       if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
@@ -1404,9 +1406,9 @@ class TierSlicer
 
          if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
          {
-            //TODO TODO TLG: only correct for TierFactor=2, not for >2
-            $this->tier_max_tp *= $this->tround->TierFactor;
-            $this->tier_pool_count *= $this->tround->TierFactor;
+            $this->tier_pool_count = $this->tround->TierFactor * $this->tier_inc_factor;
+            $this->tier_max_tp = $this->tier_pool_count * $this->tround->PoolSize;
+            $this->tier_inc_factor *= 2;
 
             // handle bottom-tier
             if ( $this->remaining_tp >= $this->tround->MinPoolSize * $this->tier_pool_count )

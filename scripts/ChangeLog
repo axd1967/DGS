@@ -13,6 +13,11 @@ ChangeLog
 
 2016-11-02 jug
 
+   * tournaments/include/tournament_pool_classes.php (class TierSlicer, ~.init, ~.next_tier_pool),
+     scripts/tests/TierSlicerTest.php:
+   - fix TierSlicer for seeding tiered pools of league-tournament with TierFactor > 2
+     - next tier has only twice as much pools as previous tier, not by factor TierFactor times
+
    * tournaments/include/tournament_pool_classes.php (class PoolTables, ~.__construct,
          ~.get_tier_pool_keys, ~.get_pools, ~.get_pool_users, ~.count_unassigned_pool_users,
          ~.get_user_col_map, ~.fill_pools, ~.reorder_pool_users_by_tp_id, ~.fill_games,

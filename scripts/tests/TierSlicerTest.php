@@ -123,13 +123,24 @@ class TierSlicerTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( array( 2, 2, 0 ), $ts->get_slicer_counts());
    }
 
+   public function test_tier_slicer_league_round_robin_tierfactor3() {
+      $cnt_tps = 45;
+      $tround = $this->_create_tround( 0, 2, 2, 3 );
+      $ts = new TierSlicer( TOURNEY_TYPE_LEAGUE, $tround, TROUND_SLICE_ROUND_ROBIN, $cnt_tps );
 
-   private function _create_tround( $pool_count, $pool_size, $min_pool_size=2 )
+      $chk = $this->_seed_pools( $ts, $cnt_tps );
+      $this->assertEquals( 'A1,A1,B1,B2,B3,B1,B2,B3,C1,C2,C3,C4,C5,C6,C1,C2,C3,C4,C5,C6,D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,0', join(',', $chk));
+      $this->assertEquals( array( 4, 23, 1 ), $ts->get_slicer_counts());
+   }
+
+
+   private function _create_tround( $pool_count, $pool_size, $min_pool_size=2, $tier_factor=2 )
    {
       $tround = new TournamentRound();
       $tround->Pools = $pool_count;
       $tround->PoolSize = $pool_size;
       $tround->MinPoolSize = $min_pool_size;
+      $tround->TierFactor = $tier_factor;
       return $tround;
    }
 
