@@ -602,7 +602,8 @@ class PoolTables
       {
          foreach ( $tpool->PoolGames as $poolGame )
          {
-            if ( @$visited[$poolGame->gid] ) continue;
+            if ( @$visited[$poolGame->gid] )
+               continue;
             $visited[$poolGame->gid] = 1;
 
             $count_games++;
@@ -884,15 +885,17 @@ class PoolViewer
       {
          $this->table->add_tablehead( 6, new TableHead( T_('Position#tourneyheader'), T_('Position#TRR_tourney')), 'NumberC', TABLE_NO_HIDE );
 
-         foreach ( range(1, $this->pools_max_users) as $pool )
+         $wider_class = ($this->pools_max_users >= 10) ? ' wider' : '';
+         foreach ( range(1, $this->pools_max_users) as $user_idx )
          {
+            $ext_class = ( $user_idx < 10 ) ? $wider_class : '';
             if ( $this->games_factor > 1 )
             {
                for ( $g=0; $g < $this->games_factor; ++$g )
-                  $this->table->add_tablehead( ++$idx, $pool, 'Matrix', TABLE_NO_HIDE );
+                  $this->table->add_tablehead( ++$idx, $user_idx, 'Matrix'.$ext_class, TABLE_NO_HIDE );
             }
             else
-               $this->table->add_tablehead( ++$idx, $pool, 'Matrix', TABLE_NO_HIDE );
+               $this->table->add_tablehead( ++$idx, $user_idx, 'Matrix'.$ext_class, TABLE_NO_HIDE );
          }
 
          $this->table->add_tablehead( 9, T_('#Wins#tourney'), 'NumberC', 0 );
@@ -1267,9 +1270,9 @@ class PoolSlicer
    public function __construct( $slice_mode, $pool_count, $pool_size )
    {
       if ( $pool_count <= 0 )
-         error('invalid_args', "PoolSlicer:__construct.check_poolcount($slice_mode,$pool_count,$pool_size)");
+         error('invalid_args', "PoolSlicer:__construct.check_pool_count($slice_mode,$pool_count,$pool_size)");
       if ( $pool_count < 1 )
-         error('invalid_args', "PoolSlicer:__construct.check_poolsize($slice_mode,$pool_count,$pool_size)");
+         error('invalid_args', "PoolSlicer:__construct.check_pool_size($slice_mode,$pool_count,$pool_size)");
 
       $this->slice_mode = $slice_mode;
       $this->pool_count = (int)$pool_count;

@@ -399,7 +399,10 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
    return true;
 }
 
-/*! \brief Returns query-part for field with IN-clause. */
+/*!
+ * \brief Returns query-part for field with IN-clause.
+ * \param $field can be expression
+ */
 function build_query_in_clause( $field, $arr, $is_string=true )
 {
    $clause = '';

@@ -521,8 +521,8 @@ class TournamentLogHelper
          $new_tier_pool, $new_pool )
    {
       $old_state = array();
-      foreach ( $old_pools as $old_pool => $old_uids )
-         $old_state[] = "pool $old_pool (" . implode(', ', $old_uids) . ')';
+      foreach ( $old_pools as $old_tier_pool => $old_uids )
+         $old_state[] = "pool $old_tier_pool (" . implode(', ', $old_uids) . ')';
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Pool', TLOG_ACT_SET, 0,
          sprintf('Assign pool in round %s/#%s for users: [%s] -> new pool %s%s',
