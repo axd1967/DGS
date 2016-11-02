@@ -453,7 +453,7 @@ class PoolTables
       $map = array();
       $idx = -1;
       $arr_users = $this->get_pool_users( $tier, $pool );
-      foreach ( $arr_users as $uid => $tmp_col_idx )
+      foreach ( $arr_users as $uid )
          $map[$uid] = ++$idx;
       return $map;
    }
