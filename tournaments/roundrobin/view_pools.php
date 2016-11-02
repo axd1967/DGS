@@ -137,7 +137,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       if ( $tourney->Rounds > 1 )
       {
          $out = array();
-         for( $r=1; $r <= $tourney->Rounds; $r++ )
+         for ( $r=1; $r <= $tourney->Rounds; $r++ )
             $out[] = anchor( $base_path."tournaments/roundrobin/view_pools.php?tid=$tid".URI_AMP."round=$r",
                sprintf( T_('View Pools (Round #%s)'), $r ));
          echo implode(', ', $out), "<br><br>\n";

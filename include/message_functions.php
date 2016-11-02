@@ -886,7 +886,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       $ShapeBlackFirst = (bool)@$arr_shape['PlayColorB'];
    }
 
-   switch( (string)$tablestyle )
+   switch ( (string)$tablestyle )
    {
       case GSET_WAITINGROOM:
          //$calculated passed in from $game_row

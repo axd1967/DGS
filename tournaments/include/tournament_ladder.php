@@ -1548,7 +1548,7 @@ class TournamentLadder
 
       arsort($arr);
       $pos = 0;
-      foreach( $arr as $uid => $rating )
+      foreach ( $arr as $uid => $rating )
          $arr[$uid] = ++$pos;
 
       while ( list(,$arr_item) = $tl_iterator->getListIterator() )

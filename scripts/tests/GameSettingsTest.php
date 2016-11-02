@@ -253,9 +253,9 @@ class GameSettingsTest extends PHPUnit_Framework_TestCase {
    // $chk_iamblack : null = don't check
    private function check_suggest_prop( $my_rating, $opp_rating, $game_settings, $chk_handi, $chk_komi, $chk_iamblack, $chk_nigiri )
    {
-      if( is_string($my_rating) )
+      if ( is_string($my_rating) )
          $my_rating = read_rating($my_rating);
-      if( is_string($opp_rating) )
+      if ( is_string($opp_rating) )
          $opp_rating = read_rating($opp_rating);
 
       list( $handi, $komi, $iamblack, $is_nigiri ) = $game_settings->suggest_proper( $my_rating, $opp_rating );
@@ -269,9 +269,9 @@ class GameSettingsTest extends PHPUnit_Framework_TestCase {
    // $chk_iamblack : null = don't check
    private function check_suggest_conv( $my_rating, $opp_rating, $game_settings, $chk_handi, $chk_komi, $chk_iamblack, $chk_nigiri )
    {
-      if( is_string($my_rating) )
+      if ( is_string($my_rating) )
          $my_rating = read_rating($my_rating);
-      if( is_string($opp_rating) )
+      if ( is_string($opp_rating) )
          $opp_rating = read_rating($opp_rating);
 
       list( $handi, $komi, $iamblack, $is_nigiri ) = $game_settings->suggest_conventional( $my_rating, $opp_rating );

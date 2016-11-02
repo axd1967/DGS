@@ -532,7 +532,7 @@ class UserRegistration
          return 0;
 
       $my_id = $player_row['ID'];
-      if( $verification->uid != $my_id ) // can only delete own verifications
+      if ( $verification->uid != $my_id ) // can only delete own verifications
          return -1;
 
       ta_begin();

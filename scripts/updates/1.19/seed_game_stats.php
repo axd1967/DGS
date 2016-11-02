@@ -157,9 +157,9 @@ function fill_game_stats( $bsize, $do_it )
    $cnt_run = $cnt_fin = $cnt_ent = 0;
    $v_arr = array();
    $i = 0;
-   foreach( $data as $uid => $arr_oid )
+   foreach ( $data as $uid => $arr_oid )
    {
-      foreach( $arr_oid as $oid => $arr )
+      foreach ( $arr_oid as $oid => $arr )
       {
          $cnt_run += $arr[COL_RUN];
          $cnt_fin += $arr[COL_FIN];

@@ -80,7 +80,7 @@ class TournamentVisit
          return;
 
       $v_arr = array();
-      foreach( $arr_tids as $tid )
+      foreach ( $arr_tids as $tid )
          $v_arr[] = "($uid,$tid,FROM_UNIXTIME($NOW),".TVTYPE_MARK_READ.")";
 
       // Existing entries can only be of visit-type TVTYPE_MARK_READ or TVTYPE_OPEN_INFO, so in

@@ -357,7 +357,7 @@ function find_running_tournaments( $uid )
 {
    $out = array();
 
-   if( ALLOW_TOURNAMENTS )
+   if ( ALLOW_TOURNAMENTS )
    {
       $tstats = array( TOURNEY_STATUS_ADMIN, TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR,
          TOURNEY_STATUS_PLAY );
@@ -432,7 +432,7 @@ function build_user_activities_list()
       $gid = $arr['gid'];
       $out[] = anchor( $base_path."gameinfo.php?gid=$gid", "#$gid ({$arr['opp_handle']})" );
    }
-   if( count($out) )
+   if ( count($out) )
       $lines[] = T_('Running normal games (opponents)#adm') . ":<br>\n" . build_text_block($out, 5) . "<br>\n";
 
    $out = array();
@@ -442,13 +442,13 @@ function build_user_activities_list()
       $out[] = anchor( $base_path."game_players.php?gid=$gid",
          "#$gid " . GameTexts::format_game_type( $arr['GameType'], $arr['GamePlayers'] ) . " [{$arr['GroupColor']}]");
    }
-   if( count($out) )
+   if ( count($out) )
       $lines[] = T_('Running multi-player-games [player-color]#adm') . ":<br>\n" . build_text_block($out, 5) . "<br>\n";
 
    $out = array();
    foreach ( $arr_invitations as $arr )
       $out[] = anchor( $base_path."userinfo.php?uid={$arr['opp_uid']}", $arr['opp_handle'] );
-   if( count($out) )
+   if ( count($out) )
       $lines[] = T_('Open invitations (opponents)#adm') . ":<br>\n" . build_text_block($out, 10) . "<br>\n";
 
    if ( ALLOW_TOURNAMENTS )
@@ -456,7 +456,7 @@ function build_user_activities_list()
       $out = array();
       foreach ( $arr_tourneys as $tid )
          $out[] = anchor( $base_path."tournaments/view_tournament.php?tid=$tid", "#$tid " );
-      if( count($out) )
+      if ( count($out) )
          $lines[] = T_('Active tournaments#adm') . ":<br>\n" . build_text_block($out, 15) . "<br>\n";
    }
 

@@ -430,7 +430,7 @@ function mark_new_tournaments_as_read( &$iterator, $show_rows, $uid )
 {
    $arr_tids = array();
    $cnt_entries = $iterator->getItemCount();
-   for( $i=0; ($show_rows-- > 0) && $i < $cnt_entries; $i++ )
+   for ( $i=0; ($show_rows-- > 0) && $i < $cnt_entries; $i++ )
    {
       list( $tourney, $orow ) = $iterator->getItem( $i );
       if ( !$orow['TV_VisitType'] ) // unvisited "new" tournament

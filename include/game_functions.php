@@ -5610,12 +5610,12 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
 {
    if ( $same_opp == 0 )
       return T_('always#same_opp');
-   elseif( $same_opp == SAMEOPP_ONLY_NEW )
+   elseif ( $same_opp == SAMEOPP_ONLY_NEW )
       return T_('accept only if never played before#same_opp');
 
    if ( $same_opp < SAMEOPP_TOTAL_STARTED )
    {
-      if ($same_opp == SAMEOPP_TOTAL_STARTED-1 )
+      if ( $same_opp == SAMEOPP_TOTAL_STARTED-1 )
          $out = T_('1 total time (started games)#same_opp');
       else
          $out = sprintf( T_('%s total times (started games)#same_opp'), -$same_opp + SAMEOPP_TOTAL_STARTED );
@@ -5624,9 +5624,9 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
    }
    elseif ( $same_opp < 0 )
    {
-      if ($same_opp == -1)
+      if ( $same_opp == -1 )
          $out = T_('1 time (same offer)#same_opp');
-      else //if ($same_opp < 0)
+      else //if ( $same_opp < 0 )
          $out = sprintf( T_('%s times (same offer)#same_opp'), -$same_opp );
       if ( is_array($game_row) && (int)@$game_row['JoinedCount'] > 0 )
       {
@@ -5639,9 +5639,9 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
    else
    {
       global $NOW;
-      if ($same_opp == 1)
+      if ( $same_opp == 1 )
          $out = T_('after 1 day#same_opp');
-      else //if ($same_opp > 0)
+      else //if ( $same_opp > 0 )
          $out = sprintf( T_('after %s days#same_opp'), $same_opp );
       if ( is_array($game_row) && isset($game_row['X_ExpireDate']) && ($game_row['X_ExpireDate'] > $NOW) )
       {

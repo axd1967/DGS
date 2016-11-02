@@ -124,7 +124,7 @@ function fix_game_stats_user( $uid, $do_it )
    count_games_for_user( $dbgmsg, $uid, true,  $data );
 
    $v_arr = array();
-   foreach( $data as $oid => $arr )
+   foreach ( $data as $oid => $arr )
    {
       $g_run = $arr[COL_RUN];
       $g_fin = $arr[COL_FIN];

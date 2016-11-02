@@ -97,7 +97,7 @@ $GLOBALS['ThePage'] = new Page('Docs');
       closedir($handle);
 
       asort($files);
-      foreach( $files as $file )
+      foreach ( $files as $file )
          add_link_page_link("snapshot/archive/$file", $file);
    }
 

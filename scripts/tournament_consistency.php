@@ -163,7 +163,7 @@ function fix_tournament_RegisteredTP( $arg_tid, $do_it )
    // clear caches
    if ( $do_it )
    {
-      foreach( $upd_cache as $tid => $tmp )
+      foreach ( $upd_cache as $tid => $tmp )
          TournamentCache::delete_cache_tournament( "$dbgmsg($tid)", $tid );
    }
 
@@ -276,9 +276,9 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
    // clear caches
    if ( $do_it )
    {
-      foreach( $upd_cache as $tid => $arr_uid )
+      foreach ( $upd_cache as $tid => $arr_uid )
       {
-         foreach( $arr_uid as $uid )
+         foreach ( $arr_uid as $uid )
             TournamentParticipant::delete_cache_tournament_participant( "$dbgmsg($tid)", $tid, $uid );
       }
    }
@@ -351,7 +351,7 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
    // clear caches
    if ( $do_it )
    {
-      foreach( $upd_cache as $tid => $tmp )
+      foreach ( $upd_cache as $tid => $tmp )
          TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $tid );
    }
 
@@ -543,9 +543,9 @@ function fix_tournament_participant_last_moved( $arg_tid, $do_it )
    // clear caches
    if ( $do_it )
    {
-      foreach( $upd_cache as $tid => $arr_uid )
+      foreach ( $upd_cache as $tid => $arr_uid )
       {
-         foreach( $arr_uid as $uid )
+         foreach ( $arr_uid as $uid )
             TournamentParticipant::delete_cache_tournament_participant( "$dbgmsg($tid)", $tid, $uid );
       }
    }

@@ -245,7 +245,7 @@ function translations_query( $translate_lang, $translate_filter, $group, $from_r
    if ( is_array($filter_texts) && count($filter_texts) > 0 )
    {
       $q_out = array();
-      foreach( $filter_texts as $f_text )
+      foreach ( $filter_texts as $f_text )
          $q_out[] = mysql_addslashes($f_text);
       $query .= " AND TT.Text IN ('" . implode("','", $q_out) . "')";
    }

@@ -188,7 +188,7 @@ class Tournament
    // current-round / rounds|*
    public function formatRound( $short=false )
    {
-      switch( $this->Type )
+      switch ( $this->Type )
       {
          case TOURNEY_TYPE_ROUND_ROBIN:
             $rounds_str = ($this->Rounds > 0) ? $this->Rounds : '*';

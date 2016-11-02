@@ -331,7 +331,7 @@ class TournamentLadderHelper
 
       ta_begin();
       {//HOT-section to check and remove users with initiated withdrawals
-         foreach( $arr_proc as $arr )
+         foreach ( $arr_proc as $arr )
          {
             $tid = (int)$arr['tid'];
             $rid = (int)$arr['rid'];

@@ -705,7 +705,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       }
    }//!cond-moves
 
-   if( !is_null($game_score) )
+   if ( !is_null($game_score) )
    {
       GameScore::draw_score_box( $game_score, $Flags, $Ruleset );
       //FIXME for debugging show other ruleset:
@@ -1421,7 +1421,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    }
 
 
-   foreach( array( BLACK, WHITE ) as $color )
+   foreach ( array( BLACK, WHITE ) as $color )
    {
       $PFX = ($color == BLACK) ? 'Black' : 'White';
       $pfx = ($color == BLACK) ? 'black' : 'white';

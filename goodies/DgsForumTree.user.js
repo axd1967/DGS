@@ -321,7 +321,7 @@ alert('eu='+event.currentTarget);
          if ( lvl > 0 )
             continue;
          //var sub = xpathSingle("//table", row);
-         //if( !butState('_butGlue', row) )
+         //if ( !butState('_butGlue', row) )
             msgCollapse(row, true);
          nodHide(row, false); //show the whole row
       }

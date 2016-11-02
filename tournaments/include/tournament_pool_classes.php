@@ -1516,7 +1516,7 @@ class PoolSlicer
    /*! \brief Returns next pool-index for chosen slice-mode. */
    public function next_pool()
    {
-      switch( $this->slice_mode )
+      switch ( $this->slice_mode )
       {
          case TROUND_SLICE_SNAKE:
             $this->curr_pool += $this->arr_snaking[$this->idx_slicing % $this->mod_snaking];
@@ -1543,7 +1543,7 @@ class PoolSlicer
    public function count_visited_pools()
    {
       $cnt_pools = 0;
-      foreach( $this->arr_pools as $pool => $cnt )
+      foreach ( $this->arr_pools as $pool => $cnt )
       {
          if ( $cnt > 0 )
             $cnt_pools++;
