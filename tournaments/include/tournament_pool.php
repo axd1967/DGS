@@ -823,6 +823,7 @@ class TournamentPool
             $tround->Pools, $cnt_real_pools );
 
       // check for correct use of tier/pools
+      $invalid_pools = array();
       $p_parser = new PoolParser( $tourney_type, $tround );
       foreach ( $pool_summary as $tier_pool_key => $pse )
       {
@@ -830,8 +831,13 @@ class TournamentPool
          if ( $tier == 1 && $pool == 0 ) // skip unassigned-pool
             continue;
          if ( !$p_parser->is_valid_tier_pool( $tier, $pool ) )
+         {
             $pse->errors[] = T_('Invalid tier/pool combination');
+            $invalid_pools[] = PoolViewer::format_tier_pool( $tourney_type, $tier, $pool, true );
+         }
       }
+      if ( count($invalid_pools) )
+         $errors[] = sprintf( T_('Found invalid tier/pool combinations [%s]. Contact tournament-admin for assistance!'), join(', ', $invalid_pools) );
 
       // check that all registered users joined somewhere in the pools
       $arr_missing_users = array();

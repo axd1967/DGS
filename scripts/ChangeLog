@@ -13,6 +13,10 @@ ChangeLog
 
 2016-11-02 jug
 
+   * tournaments/include/tournament_pool.php (TournamentPool.check_pools):
+   - fix bug with pool-checking on round-status-change:
+     show error if invalid tier/pool found for league-tournament
+
    * tournaments/include/tournament_pool_classes.php (class TierSlicer, ~.init, ~.next_tier_pool),
      scripts/tests/TierSlicerTest.php:
    - fix TierSlicer for seeding tiered pools of league-tournament with TierFactor > 2
