@@ -183,7 +183,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
 
    if ( !is_null($arr_pool_summary) )
    {
-      $pool_sum = new PoolSummary( $page, $arr_pool_summary, $tform, $tourney->Type );
+      $pool_sum = new PoolSummary( $page, $arr_pool_summary, $tourney->Type, $tform );
       $pstable = $pool_sum->make_table_pool_summary();
       list( $count_pools, $count_users, $count_games, $count_started_games ) = $pool_sum->get_counts();
 
