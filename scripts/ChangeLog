@@ -13,6 +13,17 @@ ChangeLog
 
 2016-11-03 jug
 
+   * scripts/updates/1.20/database_changes.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt:
+   - optimize handling of tournament-pool-rank by combining index of TournamentPool.Rank with tid
+-----------
+-- index-optimization on handling tournament-pool-rank
+ALTER TABLE TournamentPool
+   DROP KEY Rank ;
+ALTER TABLE TournamentPool
+   ADD KEY tidRank (tid,Rank) ;
+-----------
+
    * tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
      tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
      tournaments/roundrobin/edit_round_props.php:

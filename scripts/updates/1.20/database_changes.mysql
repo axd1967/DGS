@@ -30,3 +30,10 @@ ALTER TABLE TournamentGames
    ADD Tier tinyint unsigned NOT NULL default '1' AFTER Round_ID ;
 
 
+-- index-optimization on handling tournament-pool-rank
+ALTER TABLE TournamentPool
+   DROP KEY Rank ;
+ALTER TABLE TournamentPool
+   ADD KEY tidRank (tid,Rank) ;
+
+

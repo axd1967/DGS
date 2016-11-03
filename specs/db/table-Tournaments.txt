@@ -878,7 +878,7 @@ Notes:
      is used as it is shorter.
 
      Also to note is, that the table is only in 2NF containing some redundancies (tid+Round_ID+Tier+Pool
-     could be extracted as FK for example), but these fields are kept out of performance-reasons.
+     could be extracted as FK for example), but these fields are kept due to performance reasons.
 
    - number of running tournament-games :
      restricted by const TROUND_MAX_POOLSIZE (=max. number of opponents for a pool-user + 1)
@@ -892,7 +892,7 @@ Notes:
 | Tier  | tinyint(3) unsigned  | NO   |     | 1       |                |
 | Pool  | smallint(5) unsigned | NO   |     | NULL    |                |
 | uid   | int(11)              | NO   | MUL | 0       |                |
-| Rank  | tinyint(4)           | NO   | MUL | -100    |                |
+| Rank  | tinyint(4)           | NO   |     | -100    |                |
 
 
 ## Fields:

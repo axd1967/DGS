@@ -1291,7 +1291,7 @@ CREATE TABLE IF NOT EXISTS `TournamentPool` (
   PRIMARY KEY  (`ID`),
   KEY `tidRoundPool` (`tid`,`Round`,`Pool`),
   KEY `uid` (`uid`),
-  KEY `Rank` (`Rank`)
+  KEY `tidRank` (`tid`,`Rank`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
