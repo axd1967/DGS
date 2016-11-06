@@ -675,7 +675,7 @@ class TournamentRoundHelper
             $rank_factor = ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN ) ? -1 : 1;
             foreach ( $arr_updates as $rank => $arr_tpool_ids )
             {
-               $count_done += TournamentPool::update_tournament_pool_ranks($tid, $tlog_type, 'fill_ranks',
+               $count_done += TournamentPool::update_tournament_pool_ranks( $tround, $tlog_type, 'fill_ranks',
                   $arr_tpool_ids, $rank_factor * $rank );
             }
          }

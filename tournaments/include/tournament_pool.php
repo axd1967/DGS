@@ -321,6 +321,17 @@ class TournamentPool
       return $arr;
    }//count_tournament_tiered_pool_users
 
+   public static function count_tournament_pool_users_by_id( $tpool_id )
+   {
+      $tpool_id = (int)$tpool_id;
+      $row = mysql_single_fetch( "TournamentPool:count_tournament_pool_users_by_id($tpool_id)",
+            "SELECT COUNT(TPOOL_CNT.ID) AS X_Count " .
+            "FROM TournamentPool AS TPOOL " .
+               "INNER JOIN TournamentPool AS TPOOL_CNT ON TPOOL_CNT.tid=TPOOL.tid AND TPOOL_CNT.Tier=TPOOL.Tier AND TPOOL_CNT.Pool=TPOOL.Pool " .
+            "WHERE TPOOL.ID=$tpool_id" );
+      return (int)@$row['X_Count'];
+   }//count_tournament_pool_users_by_id
+
    /*! \brief Returns array( rank => count ) for given tournament-id and round. */
    public static function count_tournament_pool_ranks( $tid, $round )
    {
@@ -956,14 +967,18 @@ class TournamentPool
    /*!
     * \brief Updates TournamentPool.Rank with given rank for specified TournamentPool.ID(s).
     * \param $tpool_id single ID or array with IDs to update rank
+    * \param $rank Rank in range of 1..$tround->PoolSize to be set for pool-user
     * \param $fix_rank if true, no update-restriction on Rank;
     *        otherwise expect Rank<TPOOLRK_RANK_ZONE to auto-fill rank
     * \return number of updated entries
     *
     * \note tournament-pool cache for cache-group CACHE_GRP_TPOOLS is NOT invalidated! must be done at calling side.
     */
-   public static function update_tournament_pool_ranks( $tid, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank=false )
+   public static function update_tournament_pool_ranks( $tround, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank=false )
    {
+      $tid = $tround->tid;
+
+      // check args
       if ( is_array($tpool_id) )
       {
          $cnt = count($tpool_id);
@@ -981,7 +996,11 @@ class TournamentPool
          error('invalid_args', "TournamentPool:update_tournament_pool_ranks.check.tpool($tid,$tpool_id,$rank)");
          return 0;
       }
+
+      $count_poolusers = self::count_tournament_pool_users_by_id( $tpool_id );
       $rank = (int)$rank;
+      if ( $rank < 1 || $rank > $tround->PoolSize || $rank > $count_poolusers )
+         error('invalid_args', "TournamentPool:update_tournament_pool_ranks.check.rank($tid,$tpool_id:$cnt,$rank,{$tround->PoolSize}:$count_poolusers)");
 
       $qpart_rank = ($fix_rank) ? '' : ' AND Rank<'.TPOOLRK_RANK_ZONE;
       $result = db_query( "TournamentPool:update_tournament_pool_ranks.update($tid,$tpool_id,$rank)",

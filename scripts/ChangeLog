@@ -13,6 +13,13 @@ ChangeLog
 
 2016-11-06 jug
 
+   * tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_users_by_id,
+       ~.update_tournament_pool_ranks),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.fill_ranks_tournament_pool),
+     tournaments/roundrobin/edit_ranks.php:
+   - prevent setting invalid TournamentPool.Rank
+     - verify target-rank with round-poolsize and actual number of pool-users in target-pool
+
    * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_pool_notes),
      tournaments/roundrobin/view_pools.php, tournaments/view_tournament.php:
    - adjust tournament-pool-notes on view-pools-page to reflect round-robin- or league-tournament
