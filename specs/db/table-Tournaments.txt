@@ -933,6 +933,7 @@ Notes:
      pool-user without PROMOTE or DEMOTE flag set but with Rank>0 will stay in same tier in the next cycle
    - 0x01 = TPOOL_FLAG_PROMOTE = TP is promoted to higher tier in next cycle of league-tournament
    - 0x02 = TPOOL_FLAG_DEMOTE = TP is demoted to lower tier in next cycle of league-tournament
+   - 0x04 = TPOOL_FLAG_TD_MANUAL = TD set relegation manually, do not overwrite by auto-filling
 
 
 ###########################################################################

@@ -232,6 +232,7 @@ define('TROUND_SLICE_MANUAL', 4);
 define('TPOOL_FLAG_PROMOTE',     0x01);
 define('TPOOL_FLAG_DEMOTE',      0x02);
 define('TPOOL_FLAG_RELEGATIONS', TPOOL_FLAG_PROMOTE|TPOOL_FLAG_DEMOTE);
+define('TPOOL_FLAG_TD_MANUAL',   0x04); // flags promote/demote manually set by TD, do not overwrite by auto-fill
 
 // TournamentPool.Rank-values
 define('TPOOLRK_NO_RANK', -100); // unset pool-rank

@@ -185,7 +185,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $trform->echo_string();
 
-   $notes = $tround->build_notes_props( 0, ($tourney->Type == TOURNEY_TYPE_ROUND_ROBIN) );
+   $notes = $tround->build_notes_props( 0, $tourney->Type );
    section( 'preview', T_('Tournament Round Info') );
    echo_notes( 'ttprops', $notes[0], $notes[1], false );
 

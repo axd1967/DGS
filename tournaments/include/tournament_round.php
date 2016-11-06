@@ -70,6 +70,8 @@ class TournamentRound
    // league-tournament specifics (const/not-saved for now)
 
    public $TierFactor = 2;
+   public $PromoteRanks = 2; // top ranks to promote
+   public $DemoteStartRank = 6; // Rank >= start-rank will be demoted
 
    /*! \brief Constructs TournamentRound-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
@@ -195,7 +197,7 @@ class TournamentRound
     * \brief Returns array( header, notes-array ) with this properties in textual form.
     * \param $games_factor factor for calculation of games per user; 0 = skip max-simul-games info
     */
-   public function build_notes_props( $games_factor=1, $incl_poolwinners=true, $full=true )
+   public function build_notes_props( $games_factor=1, $tourney_type, $full=true )
    {
       $arr_props = array();
 
@@ -221,7 +223,7 @@ class TournamentRound
       }
 
       // general conditions
-      if ( $incl_poolwinners )
+      if ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
       {
          if ( $this->PoolWinnerRanks > 0 )
             $arr_props[] = sprintf( T_('For the current round, the players with ranks %s are pool winners.'),
@@ -229,10 +231,23 @@ class TournamentRound
          else
             $arr_props[] = T_('For the current round, the pool winners settings is not configured yet.');
       }
+      else //if ( $tourney_type == TOURNEY_TYPE_LEAGUE )
+      {
+         $arr_props[] = array( 'text' => span('bold', make_html_safe($this->build_relegation_ranks_note(), 'line')) );
+      }
 
       return array( sprintf( T_('Configuration of the current tournament round #%s'), $this->Round )
             . ':', $arr_props );
    }//build_notes_props
+
+   public function build_relegation_ranks_note()
+   {
+      static $RANGE_FMT = '%s-%s';
+      return sprintf( T_('Promote ranks %s, stay in same league with ranks %s, demote ranks %s#tpool'),
+            build_range_text( 1, $this->PromoteRanks, $RANGE_FMT ),
+            build_range_text( $this->PromoteRanks + 1, $this->DemoteStartRank - 1, $RANGE_FMT ),
+            build_range_text( $this->DemoteStartRank, $this->PoolSize, $RANGE_FMT ) );
+   }
 
 
    // ------------ static functions ----------------------------

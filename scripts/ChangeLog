@@ -13,6 +13,25 @@ ChangeLog
 
 2016-11-06 jug
 
+   * tournaments/include/tournament_pool.php (TournamentPool.update_tournament_pool_set_relegations,
+       ~.execute_rank_action),
+     tournaments/include/tournament_round.php (class TournamentRound, ~.build_notes_props,
+       ~.build_relegation_ranks_note),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.fill_relegations_tournament_pool),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_fill_tournament_relegations),
+     tournaments/include/tournament_globals.php (TPOOL_FLAG_TD_MANUAL),
+     specs/db/table-Tournaments.txt,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/view_pools.php, tournaments/view_tournament.php:
+   - add auto-fill to set relegations on edit-ranks-page for league-tournaments
+     - add button to auto-fill relegations on edit-ranks-page
+       - control relegations by const-properties: PromoteRanks, DemoteStartRank
+       - promote pool-users with rank 1 - PromoteRanks, demote pool-users with rank >= DemoteStartRank,
+         pool-users with rank inbetween stays in same league in next cycle
+       - auto-filled relegations do not overwrite relegations set by T-director
+       - always show rank-summary after write operation
+     - add relegation notes in property-notes for view-tournament-, view-pools- & edit-ranks-page
+
    * tournaments/include/tournament_pool.php (class TournamentPool, ~.__construct, ~.build_result_info,
        ~.formatRank, ~.echoRankImage, ~.fillEntityData, ~.new_from_row,
        ~.count_tournament_pool_relegations, ~.execute_rank_action, ~.build_qpart_rank),

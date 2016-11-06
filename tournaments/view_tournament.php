@@ -288,7 +288,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // show tourney-type-specific properties
    $tt_notes = null;
    if ( !is_null($tt_props) )
-      $tt_notes = $tt_props->build_notes_props( $games_factor, ($tourney->Type == TOURNEY_TYPE_ROUND_ROBIN) );
+      $tt_notes = $tt_props->build_notes_props( $games_factor, $tourney->Type );
    if ( !is_null($tt_notes) )
       echo_notes( 'ttprops', $tt_notes[0], $tt_notes[1], false );
 

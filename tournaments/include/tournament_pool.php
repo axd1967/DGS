@@ -1025,6 +1025,37 @@ class TournamentPool
    }//update_tournament_pool_set_pool_winners
 
    /*!
+    * \brief Updates TournamentPool.Rank setting relegations determined by tround->PromoteRanks & tround->DemoteStartRank.
+    * \param $tround TournamentRound-object
+    * \return number of affected rows
+    *
+    * \note expecting TournamentPool.Rank already set, either manually by TD or TournamentRoundHelper::fill_ranks_tournament_pool()
+    * \note pool-entries on WITHDRAWN-rank are not touched
+    * \note already set relegations are not touched (if TPOOL_FLAG_TD_MANUAL set in db)
+    */
+   public static function update_tournament_pool_set_relegations( $tround )
+   {
+      $tid = (int)$tround->tid;
+      $promote_ranks = (int)$tround->PromoteRanks;
+      $demote_start_rank = (int)$tround->DemoteStartRank;
+      if ( $promote_ranks < 1 || $demote_start_rank < 1 )
+         return 0;
+
+      $sql_relegate_flags = "CASE WHEN (Rank BETWEEN 1 AND $promote_ranks) THEN ".TPOOL_FLAG_PROMOTE." " .
+              "WHEN (Rank >= $demote_start_rank) THEN ".TPOOL_FLAG_DEMOTE." " .
+              "ELSE 0 END";
+      $result = db_query( "TournamentPool:update_tournament_pool_set_relegations.update($tid,{$tround->ID})",
+         "UPDATE TournamentPool SET Flags=Flags & ~".TPOOL_FLAG_RELEGATIONS." | ($sql_relegate_flags) " .
+         "WHERE tid=$tid AND Round=1 AND Rank > 0 AND (Flags & ".TPOOL_FLAG_TD_MANUAL.") = 0" );
+      $upd_count = mysql_affected_rows();
+
+      if ( $upd_count > 0 )
+         self::delete_cache_tournament_pools( "TournamentPool:update_tournament_pool_set_relegations($tid)", $tid, 1 );
+
+      return $upd_count;
+   }//update_tournament_pool_set_relegations
+
+   /*!
     * \brief Executes rank-actions on TournamentPool.Rank for specified tournament-round.
     * \param $tourney Tournament-object to get ID & CurrentRound
     * \param $action one of RKACT_... to change TournamentPool.Rank+Flags with:
@@ -1089,7 +1120,7 @@ class TournamentPool
       {
          $rankval = '0';
          $change_unset = true; // allow overwriting unset-ranks for withdrawing (as it's a manual TD-operation)
-         $clear_flags = TPOOL_FLAG_RELEGATIONS;
+         $clear_flags = TPOOL_FLAG_RELEGATIONS | TPOOL_FLAG_TD_MANUAL;
       }
       elseif ( $action == RKACT_PROMOTE )
       {
@@ -1106,12 +1137,12 @@ class TournamentPool
       elseif ( $action == RKACT_CLEAR_RELEGATION )
       {
          $rankval = null;
-         $clear_flags = TPOOL_FLAG_RELEGATIONS;
+         $clear_flags = TPOOL_FLAG_RELEGATIONS | TPOOL_FLAG_TD_MANUAL;
       }
       else //if ( $action == RKACT_REMOVE_RANKS )
       {
          $rankval = TPOOLRK_NO_RANK;
-         $clear_flags = TPOOL_FLAG_RELEGATIONS;
+         $clear_flags = TPOOL_FLAG_RELEGATIONS | TPOOL_FLAG_TD_MANUAL;
       }
 
       // update
@@ -1119,7 +1150,11 @@ class TournamentPool
       if ( !is_null($rankval) )
          $qset_parts[] = "Rank=$rankval";
       if ( $set_flags || $clear_flags )
+      {
+         if ( $set_flags )
+            $set_flags |= TPOOL_FLAG_TD_MANUAL;
          $qset_parts[] = "Flags=Flags & ~$clear_flags | $set_flags";
+      }
       $query = "UPDATE TournamentPool SET " . join(', ', $qset_parts)
          . " WHERE tid=$tid AND Round=$round "
          . ( is_numeric($tier) && is_numeric($pool) ? " AND Tier=$tier AND Pool=$pool" : '' )

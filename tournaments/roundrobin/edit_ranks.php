@@ -65,6 +65,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
      t_stats&tid=                                  : show rank stats + pool-winners-check
      t_fillranks&tid=                              : fill ranks for all finished pools
      t_setpoolwinners&tid=                         : set pool winners for all finished pools (only for round-robin)
+     t_setrelegations&tid=                         : set relegations for all finished pools (only for league)
      t_exec&tid=&action=&rank_from=&rank_to=&tpk=  : execute action on ranks
      t_userexec&tid=&uid=&action=                  : execute action on rank of single pool-user
      t_setrank&tid=&uid=&rank=&poolwin=            : set rank / pool-win for single pool-user
@@ -157,11 +158,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       if ( $show_stats || @$_REQUEST['t_exec'] || @$_REQUEST['t_userexec'] || @$_REQUEST['t_setrank'] )
          $show_rank_sum = true;
       elseif ( @$_REQUEST['t_fillranks'] )
-         $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool(
-            $allow_edit_tourney, $tround, $tourney->Type );
+         $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
       elseif ( @$_REQUEST['t_setpoolwinners'] && !$is_league )
-         $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool(
-            $allow_edit_tourney, $tround, $tourney->Type );
+         $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
+      elseif ( @$_REQUEST['t_setrelegations'] && $is_league )
+         $result_notes = TournamentRoundHelper::fill_relegations_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
+      if ( !is_null($result_notes) )
+         $show_rank_sum = true;
    }
 
    $pw_errors = $pw_warnings = null;
@@ -238,13 +241,24 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          'CELL', 1, '',
          'TEXT', T_('Fill ranks for finished pools.'), ));
 
-   if ( !$is_league )
+   if ( $is_league )
+   {
+      $range_fmt = '%s-%s';
+      $tform->add_row( array(
+            'CELL', 1, '',
+            'SUBMITBUTTONX', 't_setrelegations', T_('Set Relegations#tpool'), $disable_submit,
+            'CELL', 1, '',
+            'TEXT', T_('Set relegations for finished pools.'), ));
+      $tform->add_row( array(
+            'TAB', 'TEXT', $tround->build_relegation_ranks_note(), ));
+   }
+   else
    {
       $tform->add_row( array(
             'CELL', 1, '',
             'SUBMITBUTTONX', 't_setpoolwinners', T_('Set Pool Winners'), $disable_submit,
             'CELL', 1, '',
-            'TEXT', sprintf( T_('Set pool winners with ranks %s for finished pools.'), '1..' . $tround->PoolWinnerRanks) ));
+            'TEXT', sprintf( T_('Set pool winners with ranks %s for finished pools.'), '1-' . $tround->PoolWinnerRanks) ));
    }
 
    if ( !$has_errors && (@$_REQUEST['t_stats'] || @$_REQUEST['t_exec']) && !$uid )

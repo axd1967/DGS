@@ -615,8 +615,16 @@ class TournamentLogHelper
    public static function log_fill_tournament_pool_winners( $tid, $tlog_type, $tround, $count )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOOL_Rank', TLOG_ACT_SET, 0,
-         sprintf('Fill pool-winners for round %s/#%s, PW-ranks=[%s]: %s users',
+         sprintf('Fill pool-winners for round-id %s/#%s, PW-ranks=[%s]: %s users',
             $tround->ID, $tround->Round, (int)$tround->PoolWinnerRanks, $count ));
+      $tlog->insert();
+   }
+
+   public static function log_fill_tournament_relegations( $tid, $tlog_type, $tround, $count_users )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOOL_Flags', TLOG_ACT_SET, 0,
+         sprintf('Fill relegations for round-id %s with ranks: promote=[1-%s], demote=[%s-]: %s users',
+            $tround->ID, $tround->PromoteRanks, $tround->DemoteStartRank, $count_users ));
       $tlog->insert();
    }
 

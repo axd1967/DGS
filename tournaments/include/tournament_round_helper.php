@@ -699,18 +699,36 @@ class TournamentRoundHelper
     */
    public static function fill_pool_winners_tournament_pool( $tlog_type, $tround, $tourney_type )
    {
-      $tid = $tround->tid;
-      $round = $tround->Round;
       $result = self::fill_ranks_tournament_pool( $tlog_type, $tround, $tourney_type );
 
       $cnt_upd = TournamentPool::update_tournament_pool_set_pool_winners( $tround );
       $result[] = sprintf( T_('%s players set as pool winners for finished pools.'), $cnt_upd );
 
       if ( $cnt_upd > 0 )
-         TournamentLogHelper::log_fill_tournament_pool_winners( $tid, $tlog_type, $tround, $cnt_upd );
+         TournamentLogHelper::log_fill_tournament_pool_winners( $tround->tid, $tlog_type, $tround, $cnt_upd );
 
       return $result;
    }//fill_pool_winners_tournament_pool
+
+   /*!
+    * \brief Sets relegations for finished pools updating TournamentPool.Rank+Flags for given tourney-round.
+    * \note also executes TournamentRoundHelper::fill_ranks_tournament_pool() to finish pools.
+    * \param $tround TournamentRound-object
+    * \return array of actions taken
+    */
+   public static function fill_relegations_tournament_pool( $tlog_type, $tround, $tourney_type )
+   {
+      $tid = $tround->tid;
+      $result = self::fill_ranks_tournament_pool( $tlog_type, $tround, $tourney_type );
+
+      $cnt_upd = TournamentPool::update_tournament_pool_set_relegations( $tround );
+      $result[] = sprintf( T_('Relegations of %s players have been set for finished pools.'), $cnt_upd );
+
+      if ( $cnt_upd > 0 )
+         TournamentLogHelper::log_fill_tournament_relegations( $tid, $tlog_type, $tround, $cnt_upd );
+
+      return $result;
+   }//fill_relegations_tournament_pool
 
    /*!
     * \brief Returns error-text if games per tournament-participant exceed wizard-type limit.
