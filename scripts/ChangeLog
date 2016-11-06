@@ -13,6 +13,11 @@ ChangeLog
 
 2016-11-06 jug
 
+   * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_pool_notes),
+     tournaments/roundrobin/view_pools.php, tournaments/view_tournament.php:
+   - adjust tournament-pool-notes on view-pools-page to reflect round-robin- or league-tournament
+     specific rank-images
+
    * tournaments/include/tournament_pool.php (TournamentPool.update_tournament_pool_set_relegations,
        ~.execute_rank_action),
      tournaments/include/tournament_round.php (class TournamentRound, ~.build_notes_props,

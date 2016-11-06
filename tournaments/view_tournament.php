@@ -250,7 +250,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    if ( !is_null($tpoints) )
    {
-      $notes = TournamentGuiHelper::build_tournament_pool_notes($tpoints, /*pool-view*/false );
+      $notes = TournamentGuiHelper::build_tournament_pool_notes( $tourney->Type, $tpoints, /*pool-view*/false );
       echo_notes( 'tpointsNotesTable', T_('Tournament Points Configuration'), $notes, /*sep*/false, false );
    }
 

@@ -144,13 +144,12 @@ class TournamentGuiHelper
 
 
    /*! \brief Returns array with notes about tournament pools. */
-   function build_tournament_pool_notes( $tpoints, $pool_view )
+   function build_tournament_pool_notes( $tourney_type, $tpoints, $pool_view )
    {
       $notes = array();
 
       $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
       $sep = ', ' . MED_SPACING;
-      $img_pool_winner = echo_image_tourney_pool_winner();
       $points_type_text = TournamentPoints::getPointsTypeText($tpoints->PointsType);
 
       if ( $pool_view )
@@ -208,16 +207,34 @@ class TournamentGuiHelper
 
       if ( $pool_view )
       {
+         $rank_images = array();
+         if ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+            $rank_images[0] = echo_image_tourney_pool_winner();
+         else //if ( $tourney_type == TOURNEY_TYPE_LEAGUE )
+         {
+            $rank_images[TPOOL_FLAG_PROMOTE] = echo_image_tourney_relegation(TPOOL_FLAG_PROMOTE);
+            $rank_images[0] = echo_image_tourney_relegation(0);
+            $rank_images[TPOOL_FLAG_DEMOTE] = echo_image_tourney_relegation(TPOOL_FLAG_DEMOTE);
+         }
+
          $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#tourney') );
-         $notes[] = array(
+
+         $arr = array(
             sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s"#tpool'),
-                     T_('Rank#tpool'), $img_pool_winner ),
+                     T_('Rank#tpool'), join(' | ', $rank_images) ),
             T_('R = (optional) rank set by tournament director, really final only at end of tournament round#tpool'),
             sprintf( T_('R = \'%s\' = user withdrawing from next round#tpool'), span('bold', NO_VALUE) ),
             T_('CR = preliminary calculated rank, omitted when it can\'t be calculated or identical to rank R#tpool'),
-            sprintf( T_('%s = marks user as pool winner (to advance to next round, or mark for final result)#tpool'),
-               $img_pool_winner ),
          );
+         if ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+            $arr[] = sprintf( T_('%s = marks user as pool winner (to advance to next round, or mark for final result)#tpool'),
+                  $rank_images[0] );
+         else //if ( $tourney_type == TOURNEY_TYPE_LEAGUE )
+         {
+            foreach( $rank_images as $tpool_flag => $img )
+               $arr[] = sprintf( '%s = %s', $img, echo_image_tourney_relegation($tpool_flag, true) );
+         }
+         $notes[] = $arr;
       }
 
       return $notes;
