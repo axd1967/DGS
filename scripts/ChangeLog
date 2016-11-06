@@ -13,6 +13,10 @@ ChangeLog
 
 2016-11-06 jug
 
+   * tournaments/roundrobin/edit_ranks.php:
+   - fix bug: do not show rank-summary after writing-operations as it overwrites action-results
+   - show number of pools for league-tournament
+
    * tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_users_by_id,
        ~.update_tournament_pool_ranks),
      tournaments/include/tournament_round_helper.php (TournamentRoundHelper.fill_ranks_tournament_pool),

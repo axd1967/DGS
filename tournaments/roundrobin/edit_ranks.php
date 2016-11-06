@@ -163,8 +163,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
       elseif ( @$_REQUEST['t_setrelegations'] && $is_league )
          $result_notes = TournamentRoundHelper::fill_relegations_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
-      if ( !is_null($result_notes) )
-         $show_rank_sum = true;
    }
 
    $pw_errors = $pw_warnings = null;
@@ -206,7 +204,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $tform->add_row( array(
          'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
-   if ( !$is_league )
+   if ( $is_league )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament Round'),
+            'TEXT', sprintf( T_('%s pools#tourney'), $tround->Pools ), ));
+   }
+   else
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Pool Winner Ranks'),
