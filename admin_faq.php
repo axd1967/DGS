@@ -614,9 +614,7 @@ $info_box = '<ul>
       echo "<tr><td>&nbsp;</td><tr>\n";
 
       echo "<tr><td colspan=2></td>", //for marks
-         TD_button( 'Add new category',
-               $page.URI_AMP."new=1".URI_AMP."type=c".URI_AMP."id=1",
-               'images/new.png', 'N'),
+         TD_button( 'Add new category', $page.URI_AMP."new=1".URI_AMP."type=c".URI_AMP."id=1", 'images/new.png', 'N'),
          '<td colspan=2>(first category)</td>',
          '<td colspan=', ($nbcol-5), '></td></tr>', "\n";
 
@@ -641,72 +639,53 @@ $info_box = '<ul>
          // anchor-label + td-start for cat/entry
          if ( $row['Level'] == 1 )
          {
-            echo '<td class=Category colspan=3><a name="e'.$eid.'"></a>',
+            echo '<td class=Category colspan=3>', name_anchor("e$eid"),
                anchor( $page_base.URI_AMP."view=$eid", image( 'images/expand.gif', 'E', 'Expand category', 'class=InTextImage' )),
                MINI_SPACING;
             $typechar = 'c'; //category
          }
          else
          {
-            echo '<td class=Indent></td>'
-               . '<td class=Entry colspan=2><a name="e'.$eid.'"></a>';
+            echo '<td class=Indent></td>', '<td class=Entry colspan=2>', name_anchor("e$eid");
             $typechar = 'e'; //entry
          }
 
          // question/answer (1 col)
          if ( $faqhidden )
             echo "(H) ";
-         echo "<A href=\"$page".URI_AMP."edit=1".URI_AMP."type=$typechar".URI_AMP."id=$eid"
-                  ."$url_term\" title=\"Edit\">$question</A>";
+         echo "<A href=\"$page".URI_AMP."edit=1".URI_AMP."type=$typechar".URI_AMP."id=$eid$url_term\" title=\"Edit\">$question</A>";
          echo "\n</td>";
 
          // move entry up/down (focus parent category)
-         echo TD_button( 'Move up',
-               $page.URI_AMP."move=u".URI_AMP."id=$eid".URI_AMP."dir={$movedist}$entry_ref",
-               'images/up.png', 'u');
-         echo TD_button( 'Move down',
-               $page.URI_AMP."move=d".URI_AMP."id=$eid".URI_AMP."dir={$movedist}$entry_ref",
-               'images/down.png', 'd');
+         echo TD_button( 'Move up', $page.URI_AMP."move=u".URI_AMP."id=$eid".URI_AMP."dir={$movedist}$entry_ref", 'images/up.png', 'u');
+         echo TD_button( 'Move down', $page.URI_AMP."move=d".URI_AMP."id=$eid".URI_AMP."dir={$movedist}$entry_ref", 'images/down.png', 'd');
 
          if ( $row['Level'] > 1 )
          {
             // move entry up/down to other category (focus current entry)
-            echo TD_button( 'Move to previous category',
-                  $page.URI_AMP."move=uu".URI_AMP."id=$eid$entry_ref",
-                  'images/up_up.png', 'U');
-            echo TD_button( 'Move to next category',
-                  $page.URI_AMP."move=dd".URI_AMP."id=$eid$entry_ref",
-                  'images/down_down.png', 'D');
+            echo TD_button( 'Move to previous category', $page.URI_AMP."move=uu".URI_AMP."id=$eid$entry_ref", 'images/up_up.png', 'U');
+            echo TD_button( 'Move to next category', $page.URI_AMP."move=dd".URI_AMP."id=$eid$entry_ref", 'images/down_down.png', 'D');
          }
          else
             echo '<td colspan=2></td>';
 
          // new entry
-         echo TD_button( ($typechar == 'e' ? 'Add new entry' : 'Add new category'),
-               $page.URI_AMP."new=1".URI_AMP."type=$typechar".URI_AMP."id=$eid",
-               'images/new.png', 'N');
+         $e_title = ( $typechar == 'e' ) ? 'Add new entry' : 'Add new category';
+         echo TD_button( $e_title, $page.URI_AMP."new=1".URI_AMP."type=$typechar".URI_AMP."id=$eid", 'images/new.png', 'N');
 
          // hide (focus parent category)
          if ( $faqhidden )
-            echo TD_button( 'Show',
-                  $page.URI_AMP."toggleH=N".URI_AMP."id=$eid$entry_ref",
-                  'images/hide_no.png', 'h');
+            echo TD_button( 'Show', $page.URI_AMP."toggleH=N".URI_AMP."id=$eid$entry_ref", 'images/hide_no.png', 'h');
          else
-            echo TD_button( 'Hide',
-                  $page.URI_AMP."toggleH=Y".URI_AMP."id=$eid$entry_ref",
-                  'images/hide.png', 'H');
+            echo TD_button( 'Hide', $page.URI_AMP."toggleH=Y".URI_AMP."id=$eid$entry_ref", 'images/hide.png', 'H');
 
          // translatable (focus parent category)
          if ( !$faqhidden && $transl )
          {
             if ( $transl == 'Y' )
-               echo TD_button( 'Make untranslatable',
-                     $page.URI_AMP."toggleT=N".URI_AMP."id=$eid$entry_ref",
-                     'images/transl.png', 'T');
+               echo TD_button( 'Make untranslatable', $page.URI_AMP."toggleT=N".URI_AMP."id=$eid$entry_ref", 'images/transl.png', 'T');
             else
-               echo TD_button( 'Make translatable',
-                     $page.URI_AMP."toggleT=Y".URI_AMP."id=$eid$entry_ref",
-                     'images/transl_no.png', 't');
+               echo TD_button( 'Make translatable', $page.URI_AMP."toggleT=Y".URI_AMP."id=$eid$entry_ref", 'images/transl_no.png', 't');
          }
          else
             echo '<td></td>';
@@ -719,9 +698,7 @@ $info_box = '<ul>
          // new category (below section-title)
          if ( $row['Level'] == 1 && ($view_all || $view == $eid) )
             echo "<tr><td colspan=2></td><td class=Indent></td>",
-               TD_button( 'Add new entry',
-                  $page.URI_AMP."new=1".URI_AMP."type=e".URI_AMP."id=$eid",
-                  'images/new.png', 'N'),
+               TD_button( 'Add new entry', $page.URI_AMP."new=1".URI_AMP."type=e".URI_AMP."id=$eid", 'images/new.png', 'N'),
                '<td>(first entry)</td>',
                '<td colspan=', ($nbcol-5), '></td></tr>';
       }
