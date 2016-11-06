@@ -1048,7 +1048,7 @@ class PoolViewer
             9 => $tpool->Wins . ' : ' . $tpool->Losses,
             10 => $tpool->SODOS,
             11 => $tpool->formatRank( /*incl-CalcRank*/true ),
-            12 => $tpool->echoRankImage(),
+            12 => $tpool->echoRankImage( $this->tourney_type ),
             13 => echo_user_online_vacation( @$user->urow['OnVacation'], ($show_online_icon ? $user->Lastaccess : 0) ),
             14 => TimeFormat::echo_time_diff( $NOW, $user->Lastaccess, 24, $timediff_fmt ),
             16 => TimeFormat::echo_time_diff( $NOW, (int)@$user->urow['TP_X_Lastmoved'], 24, $timediff_fmt ),
@@ -1299,7 +1299,7 @@ class PoolParser
       return $result;
    }//parse_tier_pool
 
-   /*! \brief Returns true, if given $tier/$pool are a valid pool for specific tournament (type + pool-count). */
+   /*! \brief Returns true, if given $tier/$pool are a valid tier/pool-combination. */
    public function is_valid_tier_pool( $tier, $pool )
    {
       if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
@@ -1318,6 +1318,38 @@ class PoolParser
 
       return false;
    }//is_valid_tier_pool
+
+   /*! \brief Returns true, if given $tier_pool_key is a valid tier/pool-combintation. */
+   public function is_valid_tier_pool_key( $tier_pool_key )
+   {
+      list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+      return $this->is_valid_tier_pool( $tier, $pool );
+   }
+
+   /*! \brief Builds arr( tier-pool-key => pool-name, ... ) to be used for selection-box with all valid pools. */
+   public function build_valid_tier_pools_selection()
+   {
+      $arr = array();
+
+      if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
+      {
+         foreach ( $this->get_valid_tier_pools() as $tier_pool_key => $tmp )
+         {
+            list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+            $arr[$tier_pool_key] = PoolViewer::format_tier_pool( $this->tourney_type, $tier, $pool, true );
+         }
+      }
+      else //if ( $this->tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         for ( $pool=1; $pool <= $this->tround->Pools; $pool++ )
+         {
+            $tier_pool_key = TournamentUtils::encode_tier_pool_key( 1, $pool );
+            $arr[$tier_pool_key] = $pool;
+         }
+      }
+
+      return $arr;
+   }//build_valid_tier_pools_selection
 
    private function add_error( $error_context, $error_msg )
    {
@@ -1566,16 +1598,23 @@ class PoolSlicer
   */
 class RankSummary
 {
+   private $tourney_type;
    private $rank_summary; // rank|TPOOLRK_NO_RANK/WITHDRAW => [ count, NextRound-count ]
+   private $relegation_summary; // Rank => [ relegation(=TPOOL_FLAG_PROMOTE|DEMOTE|0(=same-tier)) => count, ... ]
    private $tp_count;
    private $table; // Table-object
 
    /*!
     * \brief Constructs RankSummary.
     * \param $rank_counts [ TournamentPool.Rank => count, ... ]
+    * \param $relegation_counts [ TournamentPool.Rank => [ flag => count, ... ]]
     */
-   public function __construct( $page, $rank_counts, $tp_count=0 )
+   public function __construct( $page, $tourney_type, $rank_counts, $relegation_counts, $tp_count=0 )
    {
+      $this->tourney_type = $tourney_type;
+      $this->tp_count = (int)$tp_count;
+      $this->relegation_summary = $relegation_counts;
+
       $rstable = new Table( 'TPoolSummary', $page, null, 'rs',
          TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
 
@@ -1583,8 +1622,16 @@ class RankSummary
       $rstable->add_tablehead( 1, T_('Rank#tpool'), 'TRank' );
       $rstable->add_tablehead( 2, T_('Count#ranksum_header'), 'NumberC' );
       $rstable->add_tablehead( 3, T_('NR-Count#ranksum_header'), 'NumberC' );
+      if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
+      {
+         $rstable->add_tablehead( 4, new TableHeadImage(echo_image_tourney_relegation(TPOOL_FLAG_PROMOTE, true),
+            'images/promote.gif'), 'wider NumberC' );
+         $rstable->add_tablehead( 5, new TableHeadImage(echo_image_tourney_relegation(TPOOL_FLAG_DEMOTE, true),
+            'images/demote.gif'), 'wider NumberC' );
+      }
       $this->table = $rstable;
 
+      // build rank-summary
       $arr = array();
       foreach ( $rank_counts as $rank => $count )
       {
@@ -1596,7 +1643,6 @@ class RankSummary
             $arr[$key][1] += $count;
       }
       $this->rank_summary = $arr;
-      $this->tp_count = (int)$tp_count;
    }//__construct
 
    public function get_ranks()
@@ -1613,37 +1659,67 @@ class RankSummary
 
    public function build_notes_rank_summary()
    {
+      $is_trr = ( $this->tourney_type == TOURNEY_TYPE_ROUND_ROBIN );
       $notes = array();
-      $notes[] = T_('Rank \'TP\' = tournament-participants registered to start in next round');
-      $notes[] = sprintf( T_('Rank \'%s\' = pool-user has been withdrawn from next round (no pool-winner)'), TPOOLRK_WITHDRAW );
+
+      if ( $is_trr )
+      {
+         $notes[] = T_('Rank \'TP\' = tournament-participants registered to start in next round');
+         $notes[] = sprintf( T_('Rank \'%s\' = pool-user has been withdrawn from next round (no pool-winner)'), TPOOLRK_WITHDRAW );
+      }
+      else
+         $notes[] = sprintf( T_('Rank \'%s\' = pool-user has been withdrawn from next cycle'), TPOOLRK_WITHDRAW );
       $notes[] = sprintf( T_('Rank \'%s\' = rank not set yet for pool-users'), T_('unset#tpool') );
       $notes[] = sprintf( T_('%s = count of users with a set rank#tpool'), T_('Count#ranksum_header') );
-      $notes[] = sprintf( T_('%s = count of pool-winners (playing in next round, or marked for final result)#tourney'),
-         T_('NR-Count#ranksum_header') );
+
+      $txt_next_round = ( $is_trr )
+         ? T_('%s = count of pool-winners (playing in next round, or marked for final result)#tourney')
+         : T_('%s = count of pool-users to play in next cycle#tourney');
+      $notes[] = sprintf( $txt_next_round, T_('NR-Count#ranksum_header') );
+
+      if ( $this->tourney_type == TOURNEY_TYPE_LEAGUE )
+      {
+         $notes[] = array( 'text' => sprintf( '%s / %s = ',
+               echo_image_tourney_relegation(TPOOL_FLAG_PROMOTE), echo_image_tourney_relegation(TPOOL_FLAG_DEMOTE) )
+            . T_('count of pool-users promoted / demoted in the next cycle#tourney') );
+      }
+
       return $notes;
-   }
+   }//build_notes_rank_summary
 
    public function make_table_rank_summary()
    {
       uksort( $this->rank_summary, array($this, '_compare_ranks') );
 
-      // TP-count
-      $this->table->add_row( array(
-            1 => 'TP',
-            2 => NO_VALUE,
-            3 => ($this->tp_count ? $this->tp_count : ''),
-         ));
-      $count_nextround = $this->tp_count;
-      $count_users = 0;
+      if ( $this->tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         // TP-count
+         $this->table->add_row( array(
+               1 => 'TP',
+               2 => NO_VALUE,
+               3 => empty_if0($this->tp_count),
+               //4;5 only used for league-tournaments
+            ));
+      }
 
+      $count_nextround = $this->tp_count;
+      $count_users = $count_promotes = $count_demotes = 0;
       foreach ( $this->rank_summary as $rank => $arr ) // arr = count_rank, count_nextround
       {
+         $cnt_promote = (int)@$this->relegation_summary[$rank][TPOOL_FLAG_PROMOTE];
+         $cnt_demote  = (int)@$this->relegation_summary[$rank][TPOOL_FLAG_DEMOTE];
+
          $count_nextround += $arr[1];
          $count_users += $arr[0];
+         $count_promotes += $cnt_promote;
+         $count_demotes += $cnt_demote;
+
          $this->table->add_row( array(
                1 => ($rank < TPOOLRK_RANK_ZONE) ? T_('unset#tpool') : $rank,
                2 => $arr[0],
-               3 => ($arr[1] ? $arr[1] : ''),
+               3 => empty_if0($arr[1]),
+               4 => empty_if0($cnt_promote),
+               5 => empty_if0($cnt_demote),
             ));
       }
 
@@ -1652,6 +1728,8 @@ class RankSummary
             1 => T_('Sum'),
             2 => $count_users,
             3 => $count_nextround,
+            4 => $count_promotes,
+            5 => $count_demotes,
             'extra_class' => 'Sum', ));
 
       return $this->table;

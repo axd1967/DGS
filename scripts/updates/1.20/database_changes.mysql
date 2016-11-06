@@ -37,3 +37,8 @@ ALTER TABLE TournamentPool
    ADD KEY tidRank (tid,Rank) ;
 
 
+-- add flags to track tier-relegation for league-tournament
+ALTER TABLE TournamentPool
+   ADD Flags tinyint unsigned NOT NULL default '0' ;
+
+

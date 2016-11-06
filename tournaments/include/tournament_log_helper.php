@@ -577,21 +577,28 @@ class TournamentLogHelper
 
 
    public static function log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round, $action, $uid,
-         $rank_from, $rank_to, $tier_pool, $upd_count )
+         $criteria_ranks, $tier_pool, $upd_count )
    {
       if ( $action == RKACT_SET_POOL_WIN )
          $act_text = 'SetPoolWinner';
       elseif ( $action == RKACT_CLEAR_POOL_WIN )
          $act_text = 'ClearPoolWinner';
       elseif ( $action == RKACT_WITHDRAW )
-         $act_text = 'WithdrawPoolPlayer_ClearRank';
+         $act_text = 'WithdrawPoolPlayer_ClearRank_ClearRelegation';
+      elseif ( $action == RKACT_PROMOTE )
+         $act_text = 'PromotePlayer';
+      elseif ( $action == RKACT_DEMOTE )
+         $act_text = 'DemotePlayer';
+      elseif ( $action == RKACT_CLEAR_RELEGATION )
+         $act_text = 'ClearRelegation';
       else //if ( $action == RKACT_REMOVE_RANKS )
-         $act_text = 'RemoveRank';
+         $act_text = 'RemoveRank_ClearRelegation';
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOOL_Rank', TLOG_ACT_SET, 0,
-         sprintf('Exec rank-action [%s:%s] on round #%s for user [%s]: rank %s..%s, pool %s -> [%s] (%s entries updated)',
-            $action, $act_text, $round, $uid, $rank_from, $rank_to,
-            ((string)$tier_pool != '' ? $tier_pool : 'ALL'), ($upd_count ? 'OK' : 'FAILED'), $upd_count ));
+         sprintf('Exec rank-action [%s:%s] on round #%s for user [%s]: rank %s, pool %s -> [%s] (%s entries updated)',
+            $action, $act_text, $round, $uid, $criteria_ranks,
+            ((string)$tier_pool != '' ? $tier_pool : 'ALL'),
+            ($upd_count ? 'OK' : 'FAILED'), $upd_count ));
       $tlog->insert();
    }
 

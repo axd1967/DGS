@@ -35,6 +35,7 @@ require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_log_helper.php';
+require_once 'tournaments/include/tournament_utils.php';
 
  /*!
   * \file tournament_template_round_robin.php
@@ -242,25 +243,37 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       $tid = (int)$tourney->ID;
       $round = (int)$tround->Round;
 
-      $this->check_unset_pool_ranks( $tid, $round, $errors );
-      $this->check_auto_poolwinners( $tid, $tround, $errors, $warnings );
-      $this->check_minimum_poolwinners( $tid, $tround, $errors, $warnings );
+      $this->check_unset_pool_ranks( $tourney, $round, $errors );
+
+      if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         $this->check_auto_poolwinners( $tid, $tround, $errors, $warnings );
+         $this->check_minimum_poolwinners( $tid, $tround, $errors, $warnings );
+      }
+      else //if ( $tourney->Type == TOURNEY_TYPE_LEAGUE )
+      {
+         //TODO TODO TLG: add check_auto_relegations (here or overload in TournamentTemplateLeague.checkPoolWinners()):
+         // - add error if there are pools (list them) with missing relegations (except withdrawn);; needed to have some players, that go-on to next cycle? -> categorize into errors/warnings;; see method check_minimum_poolwinners()
+         // - add error if there are pools with -90<Rank<0 (list them) and how to fix them (report bug to T-admin)
+      }
 
       return array( $errors, $warnings );
    }//checkPoolWinners
 
 
    /*! \brief Checks that there is no unset TPool.Rank (<= TPOOLRK_RANK_ZONE). */
-   private function check_unset_pool_ranks( $tid, $round, &$errors )
+   protected function check_unset_pool_ranks( $tourney, $round, &$errors )
    {
+      $tid = (int)$tourney->ID;
+
       $result = db_query( "TournamentTemplateRoundRobin.check_unset_pool_ranks($tid,$round)",
-         "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
-         "WHERE tid=$tid AND Round=$round AND Rank <= ".TPOOLRK_RANK_ZONE." GROUP BY Pool" );
+         "SELECT SQL_SMALL_RESULT Tier, Pool, COUNT(*) AS X_Count FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round AND Rank <= ".TPOOLRK_RANK_ZONE." GROUP BY Tier, Pool" );
       $arr = array();
       $cnt = 0;
       while ( $row = mysql_fetch_assoc($result) )
       {
-         $arr[] = $row['Pool'];
+         $arr[] = PoolViewer::format_tier_pool( $tourney->Type, $row['Tier'], $row['Pool'], true );
          $cnt += $row['X_Count'];
       }
       mysql_free_result($result);
@@ -268,7 +281,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          $errors[] = sprintf( T_('Pool(s) [%s] have still %s unset ranks.'), implode(',', $arr), $cnt );
    }//check_unset_ranks
 
-   /*! \brief Checks that all "automatic" PoolWinnerRanks are set. */
+   /*! \brief Checks that all "automatic" PoolWinnerRanks are set (only for round-robin-tournaments). */
    private function check_auto_poolwinners( $tid, $tround, &$errors, &$warnings )
    {
       if ( $tround->PoolWinnerRanks > 0 )
@@ -311,7 +324,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       }
    }//check_auto_poolwinners
 
-   /*! \brief Checks that at least ONE PoolWinner is set per pool of current round. */
+   /*! \brief Checks that at least ONE PoolWinner is set per pool of current round (only for round-robin-tournaments). */
    private function check_minimum_poolwinners( $tid, $tround, &$errors, &$warnings )
    {
       $round = (int)$tround->Round;
@@ -389,7 +402,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
    }//checkClosingTournament
 
    /*! \brief Adds error, if not all tournament-rounds are on DONE-Status. */
-   private function check_unfinished_rounds( $tid, &$errors )
+   protected function check_unfinished_rounds( $tid, &$errors )
    {
       $iterator = new ListIterator( 'TournamentTemplateRoundRobin.check_unfinished_rounds',
          new QuerySQL( SQLP_WHERE, "Status<>'".TROUND_STATUS_DONE."'" ),

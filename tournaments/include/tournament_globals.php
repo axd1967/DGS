@@ -228,6 +228,11 @@ define('TROUND_SLICE_MANUAL', 4);
 
 // ---------- Tournament Pool Stuff -------------------------------
 
+// TournamentPool.Flags-values
+define('TPOOL_FLAG_PROMOTE',     0x01);
+define('TPOOL_FLAG_DEMOTE',      0x02);
+define('TPOOL_FLAG_RELEGATIONS', TPOOL_FLAG_PROMOTE|TPOOL_FLAG_DEMOTE);
+
 // TournamentPool.Rank-values
 define('TPOOLRK_NO_RANK', -100); // unset pool-rank
 define('TPOOLRK_RANK_ZONE', -90); // reserved rank-zone -100..-90, >-90 zone with ranks
@@ -241,5 +246,8 @@ define('RKACT_SET_POOL_WIN',   1); // mark user as pool-winner (to advance to ne
 define('RKACT_CLEAR_POOL_WIN', 2); // user will NOT be pool-winner
 define('RKACT_WITHDRAW',       3); // set Rank=0 for user, which mark pool-user as withdrawn (no next-round advance or no pool-winner-marking)
 define('RKACT_REMOVE_RANKS',   4); // unset Rank for user
+define('RKACT_PROMOTE',        5); // promote player in next league-cycle
+define('RKACT_DEMOTE',         6); // demote player in next league-cycle
+define('RKACT_CLEAR_RELEGATION', 7); // clear relegation (promote or demote)
 
 ?>

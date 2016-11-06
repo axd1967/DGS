@@ -399,6 +399,8 @@ class TournamentRoundHelper
    public static function add_new_tournament_round( $tlog_type, $tourney, $src_tround, &$errors,
          $check_only, $set_curr_round=false )
    {
+      if ( $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
+         error('invalid_args', "TRH:add_new_tournament_round.check.ttype_only_rr({$tourney->ID})");
       $tid = $tourney->ID;
       $ttype = TournamentFactory::getTournament($tourney->WizardType);
       $t_limits = $ttype->getTournamentLimits();
@@ -436,6 +438,8 @@ class TournamentRoundHelper
    /*! \brief Deletes tournament-round and updates Tournament.Rounds. */
    public static function remove_tournament_round( $tlog_type, $tourney, $tround, &$errors, $check_only )
    {
+      if ( $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
+         error('invalid_args', "TRH:remove_tournament_round.check.ttype_only_rr({$tourney->ID})");
       if ( !$tround )
          error('invalid_args', "TRH:remove_tournament_round.check.miss.t_round({$tourney->ID})");
 
@@ -477,6 +481,8 @@ class TournamentRoundHelper
    /*! \brief Sets current tournament-round updating Tournament.CurrentRound. */
    public static function set_tournament_round( $tlog_type, $tourney, $new_round, &$errors, $check_only )
    {
+      if ( $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
+         error('invalid_args', "TRH:set_tournament_round.check.ttype_only_rr({$tourney->ID})");
       $tid = $tourney->ID;
       $tround = TournamentCache::load_cache_tournament_round( 'TRH.set_tournament_round', $tid, $tourney->CurrentRound );
 
@@ -523,6 +529,9 @@ class TournamentRoundHelper
    public static function start_next_tournament_round( $tlog_type, $tourney, &$errors, $check_only )
    {
       static $ARR_TSTATUS = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
+
+      if ( $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
+         error('invalid_args', "TRH:start_next_tournament_round.check.ttype_only_rr({$tourney->ID})");
 
       $cnt_rounds = $tourney->Rounds;
       $curr_round = $tourney->CurrentRound;
@@ -663,10 +672,11 @@ class TournamentRoundHelper
          ta_begin();
          {//HOT-section to update user-ranks for finished pools
             $count_done = 0;
+            $rank_factor = ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN ) ? -1 : 1;
             foreach ( $arr_updates as $rank => $arr_tpool_ids )
             {
                $count_done += TournamentPool::update_tournament_pool_ranks($tid, $tlog_type, 'fill_ranks',
-                  $arr_tpool_ids, -$rank);
+                  $arr_tpool_ids, $rank_factor * $rank );
             }
          }
          ta_end();

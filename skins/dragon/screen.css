@@ -3382,6 +3382,7 @@ table#PoolViewerTable th.Matrix {
    border-right: 1px dotted black;
    width: 1em;
 }
+table#TPoolSummaryTable th.wider,
 table#PoolViewerTable th.wider {
    padding-left:  0.5em;
    padding-right: 0.5em;

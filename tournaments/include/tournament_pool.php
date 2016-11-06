@@ -58,7 +58,7 @@ global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
    FTYPE_PKEY,  'ID',
    FTYPE_AUTO,  'ID',
-   FTYPE_INT,   'ID', 'tid', 'Round', 'Tier', 'Pool', 'uid', 'Rank'
+   FTYPE_INT,   'ID', 'tid', 'Round', 'Tier', 'Pool', 'uid', 'Rank', 'Flags'
    );
 
 class TournamentPool
@@ -70,6 +70,7 @@ class TournamentPool
    public $Pool;
    public $uid;
    public $Rank;
+   public $Flags;
 
    // non-DB fields
 
@@ -82,7 +83,7 @@ class TournamentPool
    public $CalcRank = 0;
 
    /*! \brief Constructs TournamentPool-object with specified arguments. */
-   private function __construct( $id=0, $tid=0, $round=1, $tier=1, $pool=1, $uid=0, $rank=TPOOLRK_NO_RANK )
+   private function __construct( $id=0, $tid=0, $round=1, $tier=1, $pool=1, $uid=0, $rank=TPOOLRK_NO_RANK, $flags=0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -91,6 +92,7 @@ class TournamentPool
       $this->Pool = (int)$pool;
       $this->uid = (int)$uid;
       $this->Rank = (int)$rank;
+      $this->Flags = (int)$flags;
 
       // non-DB fields
       if ( $uid instanceof User )
@@ -112,13 +114,16 @@ class TournamentPool
       $rank_str = $this->formatRank(false, T_('unset#tpool'));
       $pool_label = PoolViewer::format_pool_label( $tourney_type, $this->Tier, $this->Pool );
       $tier_pool = PoolViewer::format_tier_pool( $tourney_type, $this->Tier, $this->Pool );
+      $def_ranktxt = ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+         ? T_('No Pool winner#tourney')
+         : echo_image_tourney_relegation($this->Flags, true);
       return
          echo_image_info( "tournaments/roundrobin/view_pools.php?tid={$this->tid}".URI_AMP."round={$this->Round}#$pool_label",
             T_('Tournament Pool') )
          . MINI_SPACING
          . span('bold', T_('Tournament Pool'), '%s: ')
          . sprintf( T_('%s, Rank [%s]#tourney'), $tier_pool, $rank_str )
-         . ',' . MED_SPACING . $this->echoRankImage( T_('No Pool winner#tourney') );
+         . ',' . MED_SPACING . $this->echoRankImage($tourney_type, $def_ranktxt);
    }
 
    public function get_cmp_rank()
@@ -133,7 +138,7 @@ class TournamentPool
    public function formatRank( $incl_calc_rank=false, $unset_rank='', $withdraw_rank=false )
    {
       if ( $this->Rank == TPOOLRK_WITHDRAW )
-         $s = NO_VALUE . ( $withdraw_rank ? sprintf(' (%s)', T_('player withdrawn#tpool')) : '' );
+         $s = NO_VALUE . ( $withdraw_rank ? sprintf(' (%s)', T_('withdrawing#tpool')) : '' );
       elseif ( $this->Rank > TPOOLRK_RANK_ZONE )
          $s = abs($this->Rank);
       else // rank unset
@@ -149,9 +154,12 @@ class TournamentPool
       return $this->formatRank( false, T_('unset#tpool'), true );
    }
 
-   public function echoRankImage( $default='' )
+   public function echoRankImage( $tourney_type, $default='' )
    {
-      return ( $this->Rank > 0 ) ? echo_image_tourney_pool_winner() : $default;
+      if ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+         return ( $this->Rank > 0 ) ? echo_image_tourney_pool_winner() : $default;
+      else //if ( $tourney_type == TOURNEY_TYPE_LEAGUE )
+         return ( $this->Rank > 0 ) ? echo_image_tourney_relegation( $this->Flags ) : $default;
    }
 
    /*! \brief Inserts or updates tournament-pool in database. */
@@ -196,6 +204,7 @@ class TournamentPool
       $data->set_value( 'Pool', $this->Pool );
       $data->set_value( 'uid', $this->uid );
       $data->set_value( 'Rank', $this->Rank );
+      $data->set_value( 'Flags', $this->Flags );
       return $data;
    }
 
@@ -232,7 +241,8 @@ class TournamentPool
             @$row['Tier'],
             @$row['Pool'],
             @$row['uid'],
-            @$row['Rank']
+            @$row['Rank'],
+            @$row['Flags']
          );
       return $tpool;
    }
@@ -328,6 +338,25 @@ class TournamentPool
 
       return $arr;
    }//count_tournament_pool_ranks
+
+   /*! \brief Returns array( Rank => arr( TPOOL_FLAG_PROMOTE|DEMOTE|0(=same-tier) => count, .. ) ) for given tournament-id. */
+   public static function count_tournament_pool_relegations( $tid )
+   {
+      $tid = (int)$tid;
+
+      $result = db_query( "TournamentPool:count_tournament_pool_relegations($tid)",
+         "SELECT SQL_SMALL_RESULT Rank, (Flags & ".TPOOL_FLAG_RELEGATIONS.") AS X_Flags, COUNT(*) AS X_Count " .
+         "FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=1 AND Rank > 0 AND (Flags & ".TPOOL_FLAG_RELEGATIONS.") " .
+         "GROUP BY Rank, Flags" );
+
+      $arr = array();
+      while ( $row = mysql_fetch_assoc($result) )
+         $arr[$row['Rank']][$row['X_Flags']] = $row['X_Count'];
+      mysql_free_result($result);
+
+      return $arr;
+   }//count_tournament_pool_relegations
 
    /*! \brief Returns expected sum of games for all tiered pools for given tournament and round. */
    public static function count_tournament_tiered_pool_games( $tid, $round )
@@ -997,23 +1026,39 @@ class TournamentPool
 
    /*!
     * \brief Executes rank-actions on TournamentPool.Rank for specified tournament-round.
-    * \param $action one of RKACT_... to set/clear pool-winner (=next-round-"flag"), clear/reset rank;
+    * \param $tourney Tournament-object to get ID & CurrentRound
+    * \param $action one of RKACT_... to change TournamentPool.Rank+Flags with:
+    *     for round-robin & league tournaments:
+    *        RKACT_WITHDRAW       = sets Rank=0, withdrawing pool-user from next-round and as pool-winner, clears relegation-flags
+    *        RKACT_REMOVE_RANKS   = sets Rank=TPOOLRK_NO_RANK, clears relegation-flags to allow filling ranks anew
+    *     only for round-robin-tournaments:
     *        RKACT_SET_POOL_WIN   = sets pool-winner = ABS(Rank) for Ranks < 0
     *        RKACT_CLEAR_POOL_WIN = clears pool-winner = -ABS(Rank) for Ranks > 0
-    *        RKACT_WITHDRAW       = sets Rank=0, withdrawing pool-user from next-round and as pool-winner
-    *        RKACT_REMOVE_RANKS   = sets Rank=TPOOLRK_NO_RANK to allow filling ranks anew
+    *     only for league-tournaments:
+    *        RKACT_PROMOTE        = sets Flags(mask) = TPOOL_FLAG_PROMOTE if Rank > 0
+    *        RKACT_DEMOTE         = sets Flags(mask) = TPOOL_FLAG_DEMOTE  if Rank > 0
+    *        RKACT_CLEAR_RELEGATION = clears Flags(mask) = TPOOL_FLAG_RELEGATIONS
+    * \param $uid 0=all users matching rank-criteriat; otherwise specific user
     * \param $rank_from ''=all ranks, otherwise numeric rank
     * \param $rank_to ''=same as rank_from (single rank), otherwise numeric rank
-    * \param $tier ''=all tiers, otherwise specific tier
-    * \param $pool ''=all pools, otherwise specific pool
+    * \param $tier_pool_key null=all tiers/pool, otherwise specific tier/pool
     * \return number of updated entries
     */
-   public static function execute_rank_action( $tlog_type, $tid, $round, $action, $uid, $rank_from=null, $rank_to=null,
-         $tier='', $pool='' )
+   public static function execute_rank_action( $tlog_type, $tourney, $tround, $action, $uid, $rank_from=null, $rank_to=null,
+         $tier_pool_key='' )
    {
-      if ( !is_numeric($action) && ($action < 1 || $action > 4) )
-         error('invalid_args', "TournamentPool:execute_rank_action.check.action($tid,$round,$action)");
-      if ( !is_numeric($uid) && $uid <= GUESTS_ID_MAX )
+      static $ALLOWED_ACTION = array(
+            TOURNEY_TYPE_ROUND_ROBIN => array( RKACT_SET_POOL_WIN, RKACT_CLEAR_POOL_WIN, RKACT_WITHDRAW, RKACT_REMOVE_RANKS ),
+            TOURNEY_TYPE_LEAGUE => array( RKACT_PROMOTE, RKACT_DEMOTE, RKACT_CLEAR_RELEGATION, RKACT_WITHDRAW, RKACT_REMOVE_RANKS ),
+         );
+      $tid = $tourney->ID;
+      $round = $tourney->CurrentRound;
+      $tier = $pool = '';
+
+      // check args
+      if ( !is_numeric($action) || !in_array( $action, $ALLOWED_ACTION[$tourney->Type] ) )
+         error('invalid_args', "TournamentPool:execute_rank_action.check.action($tid,{$tourney->Type},$round,$action)");
+      if ( !is_numeric($uid) || ($uid != 0 && $uid <= GUESTS_ID_MAX) )
          error('invalid_args', "TournamentPool:execute_rank_action.check.uid($tid,$round,$uid)");
       if ( $uid == 0 )
       {
@@ -1021,24 +1066,104 @@ class TournamentPool
             error('invalid_args', "TournamentPool:execute_rank_action.check.rank_from($tid,$round,$rank_from)");
          if ( (string)$rank_to != '' && ( !is_numeric($rank_to) || $rank_to < 0 ))
             error('invalid_args', "TournamentPool:execute_rank_action.check.rank_to($tid,$round,$rank_to)");
-         if ( (string)$tier != '' && !is_numeric($tier) )
-            error('invalid_args', "TournamentPool:execute_rank_action.check.tier($tid,$round,$tier,$pool)");
-         if ( (string)$pool != '' && !is_numeric($pool) )
-            error('invalid_args', "TournamentPool:execute_rank_action.check.pool($tid,$round,$tier,$pool)");
+         if ( (string)$tier_pool_key != '' )
+         {
+            if ( !is_numeric($tier_pool_key) )
+               error('invalid_args', "TournamentPool:execute_rank_action.check.tpk($tid,$round,$tier_pool_key)");
+            list( $tier, $pool ) = TournamentUtils::decode_tier_pool_key( $tier_pool_key );
+            $p_parser = new PoolParser( $tourney->Type, $tround );
+            if ( !$p_parser->is_valid_tier_pool( $tier, $pool ) )
+               error('invalid_args', "TournamentPool:execute_rank_action.check.tpk_valid($tid,{$tourney->Type},$round,$tier_pool_key,t$tier,p$pool)");
+         }
       }
+
+      list( $qpart_rank, $mod_rank_from, $mod_rank_to ) = self::build_qpart_rank( $action, $uid, $rank_from, $rank_to );
+
+      $change_unset = false; // unset-ranks are not allowed to be changed normally
+      $set_flags = $clear_flags = 0;
+      if ( $action == RKACT_SET_POOL_WIN )
+         $rankval = 'ABS(Rank)'; // where Rank < 0
+      elseif ( $action == RKACT_CLEAR_POOL_WIN )
+         $rankval = '-ABS(Rank)'; // where Rank > 0
+      elseif ( $action == RKACT_WITHDRAW )
+      {
+         $rankval = '0';
+         $change_unset = true; // allow overwriting unset-ranks for withdrawing (as it's a manual TD-operation)
+         $clear_flags = TPOOL_FLAG_RELEGATIONS;
+      }
+      elseif ( $action == RKACT_PROMOTE )
+      {
+         $rankval = null;
+         $clear_flags = TPOOL_FLAG_DEMOTE;
+         $set_flags = TPOOL_FLAG_PROMOTE;
+      }
+      elseif ( $action == RKACT_DEMOTE )
+      {
+         $rankval = null;
+         $clear_flags = TPOOL_FLAG_PROMOTE;
+         $set_flags = TPOOL_FLAG_DEMOTE;
+      }
+      elseif ( $action == RKACT_CLEAR_RELEGATION )
+      {
+         $rankval = null;
+         $clear_flags = TPOOL_FLAG_RELEGATIONS;
+      }
+      else //if ( $action == RKACT_REMOVE_RANKS )
+      {
+         $rankval = TPOOLRK_NO_RANK;
+         $clear_flags = TPOOL_FLAG_RELEGATIONS;
+      }
+
+      // update
+      $qset_parts = array();
+      if ( !is_null($rankval) )
+         $qset_parts[] = "Rank=$rankval";
+      if ( $set_flags || $clear_flags )
+         $qset_parts[] = "Flags=Flags & ~$clear_flags | $set_flags";
+      $query = "UPDATE TournamentPool SET " . join(', ', $qset_parts)
+         . " WHERE tid=$tid AND Round=$round "
+         . ( is_numeric($tier) && is_numeric($pool) ? " AND Tier=$tier AND Pool=$pool" : '' )
+         . ( $change_unset ? '' : " AND Rank >".TPOOLRK_RANK_ZONE ) // don't touch UNSET-ranks
+         . $qpart_rank
+         . ( $uid ? " AND uid=$uid LIMIT 1" : '' );
+      $criteria_ranks = "$rank_from..$rank_to>[$mod_rank_from..$mod_rank_to]";
+      $result = db_query( "TournamentPool:execute_rank_action.update($tid,$round,a$action,u$uid,$criteria_ranks"
+         . ",t$tier,p$pool:r=$rankval,f=-$clear_flags|$set_flags", $query );
+      $upd_count = mysql_affected_rows();
+
+      $pn_log = new PoolNameFormatter( 'T%t(num)P%p(num)' );
+      TournamentLogHelper::log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round, $action, $uid,
+         $criteria_ranks, $pn_log->format($tier, $pool), $upd_count );
+
+      if ( $upd_count > 0 )
+         self::delete_cache_tournament_pools( "TournamentPool:execute_rank_action($tid,$round)", $tid, $round );
+
+      return $upd_count;
+   }//execute_rank_action
+
+   /*!
+    * \brief Returns query-part with restriction on TournamentPool.Rank to allow given $action
+    *     for execute_rank_action()-method + modified rank_from/to.
+    */
+   private static function build_qpart_rank( $action, $uid, $rank_from, $rank_to )
+   {
+      $is_set_relegation_action = ( $action == RKACT_PROMOTE || $action == RKACT_DEMOTE );
 
       $qpart_rank = ''; // where-clause
       if ( $uid ) // has uid
       {
          if ( $action == RKACT_SET_POOL_WIN )
             $qpart_rank = " AND Rank < 0";
-         elseif ( $action == RKACT_CLEAR_POOL_WIN )
+         elseif ( $action == RKACT_CLEAR_POOL_WIN || $is_set_relegation_action )
             $qpart_rank = " AND Rank > 0";
       }
       else // no uid
       {
          if ( is_numeric($rank_from) && !is_numeric($rank_to) )
             $rank_to = $rank_from;
+         $rank_min = min( $rank_from, $rank_to );
+         $rank_max = max( $rank_from, $rank_to );
+
          if ( $action == RKACT_SET_POOL_WIN )
          {
             if ( !is_numeric($rank_from) )
@@ -1049,7 +1174,7 @@ class TournamentPool
                $rank_to = -$rank_to;
             }
          }
-         elseif ( $action == RKACT_CLEAR_POOL_WIN && !is_numeric($rank_from) )
+         elseif ( ($action == RKACT_CLEAR_POOL_WIN || $is_set_relegation_action) && !is_numeric($rank_from) )
             $qpart_rank = " AND Rank > 0";
          elseif ( ($action == RKACT_WITHDRAW || $action == RKACT_REMOVE_RANKS) && is_numeric($rank_from) )
          {
@@ -1057,11 +1182,9 @@ class TournamentPool
                $qpart_rank = " AND Rank IN (-$rank_from,$rank_from)";
             else
             {
-               $rank_min = min( $rank_from, $rank_to );
-               $rank_max = max( $rank_from, $rank_to );
                $qpart_rank = ' AND ' . build_query_in_clause('Rank',
                   array_merge( range($rank_min,$rank_max), range(-$rank_max,-$rank_min) ),
-                  /*is-str*/false );
+                  /*str*/false );
             }
          }
 
@@ -1070,50 +1193,17 @@ class TournamentPool
             if ( $rank_from == $rank_to )
                $qpart_rank = " AND Rank=$rank_from";
             else
-            {
-               $rank_min = min( $rank_from, $rank_to );
-               $rank_max = max( $rank_from, $rank_to );
                $qpart_rank = " AND Rank BETWEEN $rank_min AND $rank_max";
-            }
          }
       }//no uid
 
-      $change_unset = false; // unset-ranks are not allowed to be changed normally
-      if ( $action == RKACT_SET_POOL_WIN )
-         $rankval = 'ABS(Rank)'; // where Rank < 0
-      elseif ( $action == RKACT_CLEAR_POOL_WIN )
-         $rankval = '-ABS(Rank)'; // where Rank > 0
-      elseif ( $action == RKACT_WITHDRAW )
-      {
-         $rankval = '0';
-         $change_unset = true; // allow overwriting unset-ranks for withdrawing (as it's a manual TD-operation)
-      }
-      else //if ( $action == RKACT_REMOVE_RANKS )
-         $rankval = TPOOLRK_NO_RANK;
+      return array( $qpart_rank, $rank_from, $rank_to );
+   }//build_qpart_rank
 
-      $query = "UPDATE TournamentPool SET Rank=$rankval "
-         . "WHERE tid=$tid AND Round=$round "
-         . ( is_numeric($tier) ? " AND Tier=$tier" : '' )
-         . ( is_numeric($pool) ? " AND Pool=$pool" : '' )
-         . ( $change_unset ? '' : " AND Rank >".TPOOLRK_RANK_ZONE ) // don't touch UNSET-ranks
-         . $qpart_rank
-         . ( $uid ? " AND uid=$uid LIMIT 1" : '' );
-      $result = db_query( "TournamentPool:execute_rank_action.update("
-         . "$tid,$round,a$action,u$uid,$rank_from-$rank_to,t$tier,p$pool)", $query );
-      $upd_count = mysql_affected_rows();
-
-      $pn = new PoolNameFormatter( '%t(uc).%p(num)' );
-      TournamentLogHelper::log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round,
-         $action, $uid, $rank_from, $rank_to, $pn->format( $tier, $pool ), $upd_count );
-
-      if ( $upd_count > 0 )
-         self::delete_cache_tournament_pools( "TournamentPool:execute_rank_action($tid,$round)", $tid, $round );
-
-      return $upd_count;
-   }//execute_rank_action
-
-
-   /*! \brief Returns number of user marked as next-rounders/finalists for given tournament-id and round. */
+   /*!
+    * \brief Returns number of user marked as next-rounders/finalists for given tournament-id and round.
+    * \note only used by round-robin-tournaments!
+    */
    public static function count_tournament_pool_next_rounders( $tid, $round )
    {
       $tid = (int)$tid;
@@ -1124,7 +1214,10 @@ class TournamentPool
       return ($row) ? (int)@$row['X_Count'] : 0;
    }//count_tournament_pool_next_rounders
 
-   /*! \brief Returns number of users marked as next-rounders without set TP.NextRound for next-round. */
+   /*!
+    * \brief Returns number of users marked as next-rounders without set TP.NextRound for next-round.
+    * \note only used by round-robin-tournaments!
+    */
    public static function count_tournament_pool_missing_next_rounders( $tid, $round )
    {
       $tid = (int)$tid;
@@ -1140,7 +1233,11 @@ class TournamentPool
       return ($row) ? (int)@$row['X_Count'] : 0;
    }//count_tournament_pool_missing_next_rounders
 
-   /*! \brief Sets TournamentParticipant.NextRound to next-round (round+1) for missing users marked as finalists/next-rounders in current round. */
+   /*!
+    * \brief Sets TournamentParticipant.NextRound to next-round (round+1) for missing users marked
+    *    as finalists/next-rounders in current round.
+    * \note only used by round-robin-tournaments!
+    */
    public static function mark_next_round_participation( $tid, $round )
    {
       global $NOW, $player_row;

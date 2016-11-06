@@ -81,6 +81,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_rounds.need_rounds($tid)");
+   if ( $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
+      error('tournament_edit_rounds_not_allowed', "Tournament.edit_rounds.check.ttype_only_rr($tid)");
 
    // edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);

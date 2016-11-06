@@ -109,7 +109,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
             $tt_user_state = sprintf( T_('Rank %s in %s#rank_poolinfo'),
                $tpool->formatRankText(), $pn_formatter->format($tpool->Tier, $tpool->Pool) );
             if ( $tpool->Rank > 0 )
-               $tt_user_state .= SMALL_SPACING . '+ ' . $tpool->echoRankImage();
+               $tt_user_state .= SMALL_SPACING . '+ ' . $tpool->echoRankImage( $tourney->Type );
          }
       }
 

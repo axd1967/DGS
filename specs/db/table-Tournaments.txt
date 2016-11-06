@@ -893,6 +893,7 @@ Notes:
 | Pool  | smallint(5) unsigned | NO   |     | NULL    |                |
 | uid   | int(11)              | NO   | MUL | 0       |                |
 | Rank  | tinyint(4)           | NO   |     | -100    |                |
+| Flags | tinyint(3) unsigned  | NO   |     | 0       |                |
 
 
 ## Fields:
@@ -914,12 +915,24 @@ Notes:
    - one uid can only appear once in the same pool -> UNIQ(tid,Round,Pool,uid)
 
 * Rank : place of users within one pool
-   - -100 = Rank not set yet, not shown
-   -    0 = no rank, also "withdrawn" TP, shown as NO_VALUE
-   -   <0 = Rank, user is no pool-winner (so DOES NOT proceed to next round or appear in T-result),
-            shown as ABS(Rank)
-   -   >0 = Rank, user is a pool-winner (so DOES proceed to next round or appear in T-result)
-   - ABS(Rank) = 1 is highest rank
+   - -100 = Rank not set yet, not shown (show only calculated rank)
+   -    0 = no rank, also "withdrawn" TP, shown as NO_VALUE (show only calculated rank)
+   -   <0 = Rank, shown as ABS(Rank), user DOES NOT proceed to next round
+            - for ROUND-ROBIN-tournaments: user is no pool-winner, user does not appear in T-results
+            - for LEAGUE-tournaments: NOT-USED
+   -   >0 = Rank, normally indicator that pool-user WILL proceed to next round / cycle
+            - for ROUND-ROBIN-tournaments: pool-user is pool-winner and WILL proceed to the next round,
+              pool-user may appear in T-results
+            - for LEAGUE-tournaments: pool-user WILL proceed to the next cycle,
+              but filling ranks is only a pre-step, because at end of tournament a relegation-type
+              MUST BE set (with TournamentPool.Flags)
+   - NOTE: ABS(Rank) = 1 is highest rank
+
+* Flags : flags for pool-user
+   - NOTE for LEAGUE-tournaments:
+     pool-user without PROMOTE or DEMOTE flag set but with Rank>0 will stay in same tier in the next cycle
+   - 0x01 = TPOOL_FLAG_PROMOTE = TP is promoted to higher tier in next cycle of league-tournament
+   - 0x02 = TPOOL_FLAG_DEMOTE = TP is demoted to lower tier in next cycle of league-tournament
 
 
 ###########################################################################

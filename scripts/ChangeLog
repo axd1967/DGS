@@ -11,6 +11,48 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-11-06 jug
+
+   * tournaments/include/tournament_pool.php (class TournamentPool, ~.__construct, ~.build_result_info,
+       ~.formatRank, ~.echoRankImage, ~.fillEntityData, ~.new_from_row,
+       ~.count_tournament_pool_relegations, ~.execute_rank_action, ~.build_qpart_rank),
+     tournaments/include/tournament_pool_classes.php (PoolViewer.make_single_pool_table;
+       PoolParser.is_valid_tier_pool_key, ~.build_valid_tier_pools_selection;
+       class RankSummary, ~.__construct, ~.build_notes_rank_summary, ~.make_table_rank_summary),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.add_new_tournament_round,
+       ~.remove_tournament_round, ~.set_tournament_round, ~.start_next_tournament_round;
+       ~.fill_ranks_tournament_pool),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPoolWinners,
+       ~.check_unset_pool_ranks, ~.check_unfinished_rounds),
+     tournaments/include/tournament_globals.php (TPOOL_FLAG_PROMOTE|DEMOTE|RELEGATIONS,
+       RKACT_PROMOTE|DEMOTE|CLEAR_RELEGATION),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_execute_tournament_pool_rank_action),
+     include/gui_functions.php (empty_if0, echo_image_tourney_relegation),
+     include/globals.php (CSS_VERSION),
+     images/demote.gif, images/promote.gif,
+     scripts/updates/1.20/database_changes.mysql, scripts/updates/1.20/other_changes.txt,
+     specs/db/table-Tournaments.txt, skins/dragon/screen.css,
+     tournaments/roundrobin/edit_ranks.php (main; build_rank_actions_selection),
+     tournaments/roundrobin/edit_rounds.php,
+     tournaments/manage_tournament.php, tournaments/view_tournament.php:
+   - add relegations of pool-user for league-tournaments
+     - pool-user can be promoted or demoted or stay in same league in the next cycle
+       - add TournamentPool.Flags to store league-tournament relegation of pool-user
+       - adjust filling-ranks to set Rank>0 for league-tournament
+       - protect round-robin-tournament specific methods from being executed for league-tournament
+       - adjust formatting of rank-image with new icons for relegations
+       - adjust consistency-checks on round-status-changes
+     - adjust edit-ranks-page
+       - show rank-summary with relegations & appropriate notes
+       - add execution of new rank-actions to promote / demote / clear relegations
+       - hide pool-winners for league-tournaments
+     - minor changes (texts, docs to differ from round-robin-tournaments)
+-----------
+-- add flags to track tier-relegation for league-tournament
+ALTER TABLE TournamentPool
+   ADD Flags tinyint unsigned NOT NULL default '0' ;
+-----------
+
 2016-11-03 jug
 
    * scripts/updates/1.20/database_changes.mysql,

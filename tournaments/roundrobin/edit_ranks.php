@@ -57,12 +57,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $page = "edit_ranks.php";
 
 /* Actual REQUEST calls used:
+     NOTE: used for round-robin-tournaments
+     NOTE: used for league-tournaments (without pool-winners)
+
      tid=                                          : edit tournament pool ranks
      tid=&uid=                                     : edit rank of single user
      t_stats&tid=                                  : show rank stats + pool-winners-check
      t_fillranks&tid=                              : fill ranks for all finished pools
-     t_setpoolwinners&tid=                         : set pool winners for all finished pools
-     t_exec&tid=&action=&rank_from=&rank_to=&pool= : execute action on ranks
+     t_setpoolwinners&tid=                         : set pool winners for all finished pools (only for round-robin)
+     t_exec&tid=&action=&rank_from=&rank_to=&tpk=  : execute action on ranks
      t_userexec&tid=&uid=&action=                  : execute action on rank of single pool-user
      t_setrank&tid=&uid=&rank=&poolwin=            : set rank / pool-win for single pool-user
 */
@@ -76,6 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_ranks.need_rounds($tid)");
+   $is_league = ( $tourney->Type == TOURNEY_TYPE_LEAGUE );
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
@@ -123,22 +127,22 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $action    = (int)get_request_arg('action');
          $rank_from = get_request_arg('rank_from');
          $rank_to   = get_request_arg('rank_to');
-         $act_tier  = '';
-         $act_pool  = get_request_arg('pool');
-         $upd_count = TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, /*uid*/0,
-            $rank_from, $rank_to, $act_tier, $act_pool );
+         $act_tier_pool_key = trim(get_request_arg('tpk'));
+
+         $upd_count = TournamentPool::execute_rank_action( $allow_edit_tourney, $tourney, $tround, $action, /*uid*/0,
+            $rank_from, $rank_to, $act_tier_pool_key );
       }
       elseif ( $uid && @$_REQUEST['t_userexec'] ) // execute rank-actions on single user
       {
          $action = (int)get_request_arg('action');
-         $upd_count = TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, $uid );
+         $upd_count = TournamentPool::execute_rank_action( $allow_edit_tourney, $tourney, $tround, $action, $uid );
          $tpool_user = TournamentPool::load_tournament_pool_user( $tid, $round, $uid, TPOOL_LOADOPT_USER );
       }
       elseif ( $uid && @$_REQUEST['t_setrank'] ) // set rank for single user
       {
          $rank_value = (int)get_request_arg('rank');
          $pool_win = (bool)get_request_arg('poolwin');
-         if ( !$pool_win && $rank_value )
+         if ( !$is_league && !$pool_win && $rank_value )
             $rank_value = -abs($rank_value);
          $upd_count = TournamentPool::update_tournament_pool_ranks( $tid, $allow_edit_tourney, 'edit_ranks',
             $tpool_user->ID, $rank_value, /*fix-rank*/true );
@@ -155,7 +159,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       elseif ( @$_REQUEST['t_fillranks'] )
          $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool(
             $allow_edit_tourney, $tround, $tourney->Type );
-      elseif ( @$_REQUEST['t_setpoolwinners'] )
+      elseif ( @$_REQUEST['t_setpoolwinners'] && !$is_league )
          $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool(
             $allow_edit_tourney, $tround, $tourney->Type );
    }
@@ -163,12 +167,14 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $pw_errors = $pw_warnings = null;
    if ( $show_rank_sum || $show_stats )
    {
-      $tp_regcount =
-         TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER, $round + 1, /*NextR*/false );
+      $tp_regcount = ( $is_league )
+         ? 0
+         : TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER, $round + 1, /*NextR*/false );
 
       // count ranks for current round over all pools
       $rank_counts = TournamentPool::count_tournament_pool_ranks( $tid, $round );
-      $rank_summary = new RankSummary( $page, $rank_counts, $tp_regcount );
+      $relegation_counts = ( $is_league ) ? TournamentPool::count_tournament_pool_relegations( $tid ) : null;
+      $rank_summary = new RankSummary( $page, $tourney->Type, $rank_counts, $relegation_counts, $tp_regcount );
       $rstable = $rank_summary->make_table_rank_summary();
       $result_notes = $rank_summary->build_notes_rank_summary();
 
@@ -187,16 +193,22 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round'),
-         'TEXT',        $tourney->formatRound(), ));
+   if ( !$is_league )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament Round'),
+            'TEXT',        $tourney->formatRound(), ));
+   }
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Pool Winner Ranks'),
-         'TEXT',        $tround->PoolWinnerRanks, ));
+   if ( !$is_league )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Pool Winner Ranks'),
+            'TEXT',        $tround->PoolWinnerRanks, ));
+   }
 
    if ( count($errors) )
    {
@@ -210,12 +222,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    // Actions choices ------------------------
 
    $disable_submit = ($has_errors) ? 'disabled=1' : '';
-   $arr_actions = array(
-      RKACT_SET_POOL_WIN   => T_('Set Pool Winner'),
-      RKACT_CLEAR_POOL_WIN => T_('Clear Pool Winner'),
-      RKACT_WITHDRAW       => T_('Withdraw Player#tpool'),
-      RKACT_REMOVE_RANKS   => T_('Remove Rank#tpool'),
-   );
+   list( $arr_actions, $default_action ) = build_rank_actions_selection( $tourney->Type );
 
    $tform->add_row( array( 'HR' ));
 
@@ -223,7 +230,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          'CELL', 1, '',
          'SUBMITBUTTON', 't_stats', T_('Show Rank Stats#tourney'),
          'CELL', 1, '',
-         'TEXT', T_('Show counts of all ranks & rank-actions + Check Pool Winners.#tourney'), ));
+         'TEXT', T_('Show counts of all ranks & rank-actions.#tourney'), ));
 
    $tform->add_row( array(
          'CELL', 1, '',
@@ -231,28 +238,32 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          'CELL', 1, '',
          'TEXT', T_('Fill ranks for finished pools.'), ));
 
-   $tform->add_row( array(
-         'CELL', 1, '',
-         'SUBMITBUTTONX', 't_setpoolwinners', T_('Set Pool Winners'), $disable_submit,
-         'CELL', 1, '',
-         'TEXT', sprintf( T_('Set pool winners with ranks %s for finished pools.'), '1..' . $tround->PoolWinnerRanks) ));
+   if ( !$is_league )
+   {
+      $tform->add_row( array(
+            'CELL', 1, '',
+            'SUBMITBUTTONX', 't_setpoolwinners', T_('Set Pool Winners'), $disable_submit,
+            'CELL', 1, '',
+            'TEXT', sprintf( T_('Set pool winners with ranks %s for finished pools.'), '1..' . $tround->PoolWinnerRanks) ));
+   }
 
    if ( !$has_errors && (@$_REQUEST['t_stats'] || @$_REQUEST['t_exec']) && !$uid )
    {
+      $p_parser = new PoolParser( $tourney->Type, $tround );
       $arr_ranks = array_value_to_key_and_value( $rank_summary->get_ranks() );
       $arr_ranks_to = array( '' => '=' ) + $arr_ranks;
       $arr_ranks = array( '' => T_('All') ) + $arr_ranks;
-      $arr_pools = array( '' => T_('All') ) + array_value_to_key_and_value( range(1, $tround->Pools) );
+      $arr_pools = array( '' => T_('All') ) + $p_parser->build_valid_tier_pools_selection();
       $tform->add_empty_row();
       $tform->add_row( array(
             'CELL', 2, '',
-            'SELECTBOX', 'action', 1, $arr_actions, get_request_arg('action', RKACT_SET_POOL_WIN), false,
+            'SELECTBOX', 'action', 1, $arr_actions, get_request_arg('action', $default_action), false,
             'TEXT', T_('for all users with ranks#tpool') . MED_SPACING,
             'SELECTBOX', 'rank_from', 1, $arr_ranks, get_request_arg('rank_from',''), false,
             'TEXT', '...' . MED_SPACING,
             'SELECTBOX', 'rank_to', 1, $arr_ranks_to, get_request_arg('rank_to',''), false,
             'TEXT', T_('on pool') . MED_SPACING,
-            'SELECTBOX', 'pool', 1, $arr_pools, get_request_arg('pool'), false,
+            'SELECTBOX', 'tpk', 1, $arr_pools, get_request_arg('tpk'), false,
             'TEXT', ' ',
             'SUBMITBUTTONX', 't_exec', T_('Execute'), $disable_submit, ));
    }
@@ -267,30 +278,35 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
             'CELL', 2, '',
             'TEXT', sprintf( T_('Edit Rank of pool-user [ %s ] with rating [%s] in pool %s#tpool') . ':',
                              $user->user_reference(), echo_rating($user->Rating, true),
-                             $tpool_user->Pool ), ));
+                             PoolViewer::format_tier_pool( $tourney->Type, $tpool_user->Tier, $tpool_user->Pool, true)), ));
       $tform->add_row( array(
             'CELL', 2, '',
-            'TEXT', T_('Current Rank#tpool') . ': '
-                  . span('TRank', $tpool_user->formatRankText()), ));
-      $tform->add_row( array(
-            'CELL', 2, '',
-            'TEXT', T_('Current Pool-Winner Status#tourney') . ': '
-                  . span('TRank', $tpool_user->echoRankImage(NO_VALUE)), ));
+            'TEXT', sprintf( '%s (%s): %s', T_('User Result State#tourney'),
+                  T_('Rank#tpool') . ' & ' . ( $is_league ? T_('Relegation#tpool') : T_('Pool-Winner Status#tourney') ),
+                  span('TRank', $tpool_user->formatRankText() . MED_SPACING . '|' . MED_SPACING
+                        . $tpool_user->echoRankImage($tourney->Type, NO_VALUE)) ), ));
 
       $arr_set_ranks = array_value_to_key_and_value( range(1, $tround->PoolSize) );
       $rank_defval = ( $curr_rank != 0 && $curr_rank > TPOOLRK_RANK_ZONE ) ? abs($curr_rank) : 1;
-      $tform->add_row( array(
+
+      $arr_row = array(
             'CELL', 2, '',
-            'SELECTBOX', 'action', 1, $arr_actions, get_request_arg('action', RKACT_SET_POOL_WIN), false,
+            'SELECTBOX', 'action', 1, $arr_actions, get_request_arg('action', $default_action), false,
             'TEXT', ' ',
             'SUBMITBUTTONX', 't_userexec', T_('Execute'), $disable_submit,
             'TEXT', SMALL_SPACING.SMALL_SPACING . T_('or') . SMALL_SPACING.SMALL_SPACING,
             'TEXT', T_('Set Rank#tpool') . MED_SPACING,
             'SELECTBOX', 'rank', 1, $arr_set_ranks, $rank_defval, false,
-            'TEXT', ' ',
+            'TEXT', ' ' );
+      if ( !$is_league )
+      {
+         array_push( $arr_row,
             'CHECKBOX', 'poolwin', 1, T_('Pool Winner#tourney'), ($curr_rank > 0),
-            'TEXT', SMALL_SPACING,
-            'SUBMITBUTTONX', 't_setrank', T_('Execute'), $disable_submit, ));
+            'TEXT', SMALL_SPACING );
+      }
+      array_push( $arr_row,
+            'SUBMITBUTTONX', 't_setrank', T_('Execute'), $disable_submit );
+      $tform->add_row( $arr_row );
    }//single-user-edit
 
 
@@ -322,7 +338,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
             $out[] = "<tr>" . buildErrorListString(T_('Warnings'), $pw_warnings, 1, true, 'TInfo', 'WarnMsg') . "</tr>\n";
          if ( count($out) == 0 )
             $out[] = "<tr><td>" . T_('No errors or warnings found.#tourney') . "<br><br></td></tr>\n";
-         echo "<table>\n<tr><th>", T_('Pool Winners Check').':', "</th></tr>\n", implode('', $out), "</table>\n";
+         echo "<table>\n<tr><th>", T_('Check Result').':', "</th></tr>\n", implode('', $out), "</table>\n";
       }
    }
    if ( !is_null($result_notes) )
@@ -338,5 +354,28 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
+
+
+function build_rank_actions_selection( $tourney_type )
+{
+   $arr = array();
+   if ( $tourney_type == TOURNEY_TYPE_LEAGUE )
+   {
+      $default_action = RKACT_PROMOTE;
+      $arr[RKACT_PROMOTE] = T_('Promote Player#pool');
+      $arr[RKACT_DEMOTE] = T_('Demote Player#pool');
+      $arr[RKACT_CLEAR_RELEGATION] = T_('Clear Relegation#pool');
+   }
+   else //if ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+   {
+      $default_action = RKACT_SET_POOL_WIN;
+      $arr[RKACT_SET_POOL_WIN] = T_('Set Pool Winner');
+      $arr[RKACT_CLEAR_POOL_WIN] = T_('Clear Pool Winner');
+   }
+   $arr[RKACT_WITHDRAW] = T_('Withdraw Player#tpool');
+   $arr[RKACT_REMOVE_RANKS] = T_('Remove Rank#tpool');
+   return array( $arr, $default_action );
+}//build_rank_actions_selection
+
 ?>

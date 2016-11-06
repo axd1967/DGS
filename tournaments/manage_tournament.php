@@ -269,7 +269,7 @@ function make_links_ttype_specific( $tourney, $tstat )
             . subList( array( T_('End game, Add time#t_mng') ))
             . '<li>'
             . ( $is_league
-                  ? make_menu_link( T_('Edit ranks & relegations#tpool'), array( 'url' => "tournaments/league/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
+                  ? make_menu_link( T_('Edit ranks & relegations#tpool'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
                      . subList( array( T_('Set pool-ranks, relegations (next-cycle flagging)#t_mng') ))
                   : make_menu_link( T_('Edit ranks#tpool'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
                      . subList( array( T_('Set pool-ranks, pool-winners (next-round flagging)#t_mng') ))

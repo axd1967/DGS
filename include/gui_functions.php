@@ -115,6 +115,12 @@ function TD_button( $title, $href, $isrc, $ialt)
    return $str;
 }
 
+/*! \brief Returns '' if passed $value is empty/zero/null/false. */
+function empty_if0( $value )
+{
+   return ($value) ? $value : '';
+}
+
 /*! \brief Prints notes in formatted table if there are notes. */
 function echo_notes( $table_id, $title, $notes, $pre_sep=true, $html_safe=true )
 {
@@ -452,6 +458,28 @@ function echo_image_tourney_pool_winner()
 {
    global $base_path;
    return image( $base_path.'images/next.gif', T_('Pool Winner (advancing to next round, or mark for final result)#tourney'), null, 'class="InTextImage"' );
+}
+
+/*! \brief Returns image-tag for league-tournament relegation-icon. */
+function echo_image_tourney_relegation( $tpool_flags, $return_text=false )
+{
+   global $base_path;
+   if ( $tpool_flags & TPOOL_FLAG_PROMOTE )
+   {
+      $img = 'promote.gif';
+      $text = T_('Pool user will be promoted into higher league in the next cycle.#tourney');
+   }
+   elseif ( $tpool_flags & TPOOL_FLAG_DEMOTE )
+   {
+      $img = 'demote.gif';
+      $text = T_('Pool user will be demoted into lower league in the next cycle.#tourney');
+   }
+   else
+   {
+      $img = 'next.gif';
+      $text = T_('Pool user will stay in the same league in the next cycle.#tourney');
+   }
+   return ($return_text) ? $text : image( $base_path.'images/'.$img, $text, null, 'class="InTextImage"' );
 }
 
 /*! \brief Returns image-tag for MP-game (linked to game-players-page if game-id > 0 given). */
