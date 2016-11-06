@@ -464,7 +464,7 @@ function generate_translation_texts( $do_it, $echo=true )
 
    if ( $echo )
    {
-      echo "<a name=\"errors\"></a><hr><p>\n";
+      echo name_anchor('errors'), "<hr><p>\n";
       if ( $errcnt > 0 )
       {
          printf( "Found %s errors. Please correct them before going on!!!<br>\nErrors: ", $errcnt );

@@ -38,7 +38,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    $menu_array = array();
 
    echo "<table class=FAQ><tr><td>\n";
-   echo "<h3 class=Header align=left><a name=\"general\">", T_('Frequently Asked Questions'), "</a></h3>\n";
+   echo "<h3 class=Header align=left>", name_anchor('general', '', T_('Frequently Asked Questions')), "</h3>\n";
 
    // init vars
    $TW_ = 'T_'; // for non-const translation-texts

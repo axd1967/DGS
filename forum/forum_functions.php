@@ -752,7 +752,7 @@ class DisplayForum
          $hdrcols = $cols;
 
          echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>"
-            ,"<a name=\"preview\" class=\"PostSubject\">$sbj</a> $sbj_readonly</td></tr> "
+            , name_anchor('preview', 'PostSubject', $sbj), " $sbj_readonly</td></tr> "
             ,"\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>"
             ,T_('by'),' ' ,user_reference( REF_LINK, 1, '', $player_row)
             , ', ', echo_rating($player_row['Rating2'], /*show%*/false, $player_row['ID'], /*engl*/false, /*short*/true)
@@ -795,7 +795,7 @@ class DisplayForum
 
             //from revision_history or because, when edited, the link will be obsolete
             if ( $drawmode_type == DRAWPOST_EDIT || $post->thread_no_link )
-               echo "<a name=\"$pid\" class=\"PostSubject\">$subject_modstr</a> $sbj_readonly";
+               echo name_anchor($pid, 'PostSubject', $subject_modstr), " $sbj_readonly";
             else
                echo "<a name=\"$pid\" class=\"PostSubject\" href=\"", $thread_url, $term_url,
                   "#$pid\">$subject_modstr</a>", $sbj_readonly, $newstr;

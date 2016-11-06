@@ -74,9 +74,10 @@ function button_style( $button_nr=0 )
       "table.Table td.Button { background-image: url({$base_path}images/{$buttonfiles[$button_nr]}); }";
 }
 
-function name_anchor( $name )
+function name_anchor( $name, $class='', $text='' )
 {
-   return "<a name=\"$name\"></a>\n";
+   $class_str = ($class) ? " class=\"$class\"" : '';
+   return "<a name=\"$name\"$class_str>$text</a>\n";
 }
 
 /*!

@@ -1338,9 +1338,8 @@ function draw_add_time( $game_row, $colorToMove )
    $info = GameAddTime::make_add_time_info( $game_row, $colorToMove );
    $tabindex=10; // NOTE: fix this start value !?
 
-   echo '
-    <a name="addtime"></a>
-      <TABLE class=AddtimeForm>
+   echo name_anchor('addtime'),
+      '<TABLE class=AddtimeForm>
         <TR>
           <TD>', T_('Choose how much additional time you wish to give your opponent'), ':</TD>
         </TR>

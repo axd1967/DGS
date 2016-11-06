@@ -1007,7 +1007,7 @@ class PoolViewer
             ? T_('Users without pool assignment') :
             $this->pool_name_formatter->format($tier, $pool);
          $pool_label = self::format_pool_label( $this->tourney_type, $tier, $pool );
-         $this->table->add_row_title( "<a name=\"$pool_label\">$pool_title</a>" );
+         $this->table->add_row_title( name_anchor($pool_label, '', $pool_title) );
          if ( $this->first_pool )
             $this->table->add_row_thead();
          else

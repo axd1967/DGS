@@ -246,7 +246,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          $row_str = array();
 
          if ( $ltable->Is_Column_Displayed[ 1] )
-            $row_str[ 1] = "<a name=\"rank{$tladder->Rank}\">{$tladder->Rank}.</a>";
+            $row_str[ 1] = name_anchor("rank{$tladder->Rank}", '', $tladder->Rank);
          if ( $ltable->Is_Column_Displayed[ 2] )
             $row_str[ 2] = build_rank_change( $tladder );
          if ( $ltable->Is_Column_Displayed[ 3] )
