@@ -244,22 +244,19 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       $round = (int)$tround->Round;
 
       $this->check_unset_pool_ranks( $tourney, $round, $errors );
+      $this->check_pools_finish_tournament_type_specific( $tourney, $tround, $errors, $warnings );
 
+      return array( $errors, $warnings );
+   }//checkPoolFinish
+
+   protected function check_pools_finish_tournament_type_specific( $tourney, $tround, &$errors, &$warnings )
+   {
       if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
       {
          $this->check_auto_poolwinners( $tround, $errors, $warnings );
          $this->check_minimum_poolwinners( $tround, $errors, $warnings );
       }
-      else //if ( $tourney->Type == TOURNEY_TYPE_LEAGUE )
-      {
-         //TODO TODO TLG: add check_auto_relegations (here or overload in TournamentTemplateLeague.checkPoolWinners()):
-         // - add error if there are pools (list them) with missing relegations (except withdrawn);; needed to have some players, that go-on to next cycle? -> categorize into errors/warnings;; see method check_minimum_poolwinners()
-         // - add error if there are pools with -90<Rank<0 (list them) and how to fix them (report bug to T-admin)
-      }
-
-      return array( $errors, $warnings );
-   }//checkPoolFinish
-
+   }//check_pools_finish_tournament_type_specific
 
    /*! \brief Checks that there is no unset TPool.Rank (<= TPOOLRK_RANK_ZONE). */
    protected function check_unset_pool_ranks( $tourney, $round, &$errors )

@@ -13,6 +13,19 @@ ChangeLog
 
 2016-11-07 jug
 
+   * tournaments/include/tournament_template_league.php (TournamentTemplateLeague.check_pools_finish_tournament_type_specific,
+       ~.check_pools_invalid_ranks_flags),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPoolsFinish,
+       ~.check_pools_finish_tournament_type_specific):
+   - add consistency-checks for invalid rank/flags-combination of pool-users for league-tournaments
+   - extend rank-summary-check with consistency-check to prevent invalid TournamentPool.Rank/Flags combinations,
+     which shouldn't happen, but would mess up pool-finishing if occuring (which would be a bug)
+     - ensure filled Rank is >0 and <= allowed pool-size
+     - ensure withdrawal Rank is not mixed with set relegation flags
+     - ensure only one relegation-flag is set from amongst promote or demote
+   - refactored tournament-type-specific pools-finish checks for round-robin-tournaments into method
+     to overload for league-tournament
+
    * include/register_functions.php (UserRegistration.register_user):
    - write last-access with time of registration for admin-info in case of problems
 
