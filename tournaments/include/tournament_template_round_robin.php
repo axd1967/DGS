@@ -247,8 +247,8 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 
       if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
       {
-         $this->check_auto_poolwinners( $tid, $tround, $errors, $warnings );
-         $this->check_minimum_poolwinners( $tid, $tround, $errors, $warnings );
+         $this->check_auto_poolwinners( $tround, $errors, $warnings );
+         $this->check_minimum_poolwinners( $tround, $errors, $warnings );
       }
       else //if ( $tourney->Type == TOURNEY_TYPE_LEAGUE )
       {
@@ -282,10 +282,11 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
    }//check_unset_ranks
 
    /*! \brief Checks that all "automatic" PoolWinnerRanks are set (only for round-robin-tournaments). */
-   private function check_auto_poolwinners( $tid, $tround, &$errors, &$warnings )
+   private function check_auto_poolwinners( $tround, &$errors, &$warnings )
    {
       if ( $tround->PoolWinnerRanks > 0 )
       {
+         $tid = (int)$tround->tid;
          $round = (int)$tround->Round;
 
          $result = db_query( "TournamentTemplateRoundRobin.check_auto_poolwinners.miss_auto($tid,$round)",
@@ -325,8 +326,9 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
    }//check_auto_poolwinners
 
    /*! \brief Checks that at least ONE PoolWinner is set per pool of current round (only for round-robin-tournaments). */
-   private function check_minimum_poolwinners( $tid, $tround, &$errors, &$warnings )
+   private function check_minimum_poolwinners( $tround, &$errors, &$warnings )
    {
+      $tid = (int)$tround->tid;
       $round = (int)$tround->Round;
 
       // warning, if there are pools without pool-winners
