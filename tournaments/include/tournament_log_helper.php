@@ -620,7 +620,7 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
-   public static function log_fill_tournament_relegations( $tid, $tlog_type, $tround, $count_users )
+   public static function log_fill_tournament_pool_relegations( $tid, $tlog_type, $tround, $count_users )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOOL_Flags', TLOG_ACT_SET, 0,
          sprintf('Fill relegations for round-id %s with ranks: promote=[1-%s], demote=[%s-]: %s users',

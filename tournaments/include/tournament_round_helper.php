@@ -725,7 +725,7 @@ class TournamentRoundHelper
       $result[] = sprintf( T_('Relegations of %s players have been set for finished pools.'), $cnt_upd );
 
       if ( $cnt_upd > 0 )
-         TournamentLogHelper::log_fill_tournament_relegations( $tid, $tlog_type, $tround, $cnt_upd );
+         TournamentLogHelper::log_fill_tournament_pool_relegations( $tid, $tlog_type, $tround, $cnt_upd );
 
       return $result;
    }//fill_relegations_tournament_pool
