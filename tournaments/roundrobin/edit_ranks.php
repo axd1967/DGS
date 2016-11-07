@@ -304,7 +304,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
                   span('TRank', $tpool_user->formatRankText() . MED_SPACING . '|' . MED_SPACING
                         . $tpool_user->echoRankImage($tourney->Type, NO_VALUE)) ), ));
 
-      $arr_set_ranks = array_value_to_key_and_value( range(1, $tround->PoolSize) );
+      $count_poolusers = TournamentPool::count_tournament_pool_users_by_id( $tpool_user->ID );
+      $arr_set_ranks = array_value_to_key_and_value( range(1, $count_poolusers) );
       $rank_defval = ( $curr_rank != 0 && $curr_rank > TPOOLRK_RANK_ZONE ) ? abs($curr_rank) : 1;
 
       $arr_row = array(

@@ -11,6 +11,11 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-11-07 jug
+
+   * tournaments/roundrobin/edit_ranks.php:
+   - restrict target-ranks to only valid TournamentPool.Rank for single user edit on edit-ranks-page
+
 2016-11-06 jug
 
    * tournaments/roundrobin/edit_ranks.php:
