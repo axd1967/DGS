@@ -261,6 +261,7 @@ class UserRegistration
          if ( $this->email )
             $upd->upd_txt('Email', $this->email );
          $upd->upd_time('Registerdate', $NOW);
+         $upd->upd_time('Lastaccess', $NOW); // with time of registration
          $upd->upd_txt('Sessioncode', $code);
          $upd->upd_time('Sessionexpire', $NOW + SESSION_DURATION );
          if ( $ip )

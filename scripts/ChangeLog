@@ -13,6 +13,9 @@ ChangeLog
 
 2016-11-07 jug
 
+   * include/register_functions.php (UserRegistration.register_user):
+   - write last-access with time of registration for admin-info in case of problems
+
    * tournaments/roundrobin/edit_ranks.php:
    - restrict target-ranks to only valid TournamentPool.Rank for single user edit on edit-ranks-page
 
