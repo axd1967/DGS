@@ -165,7 +165,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $result_notes = TournamentRoundHelper::fill_relegations_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
    }
 
-   $pw_errors = $pw_warnings = null;
+   $pf_errors = $pf_warnings = null;
    if ( $show_rank_sum || $show_stats )
    {
       $tp_regcount = ( $is_league )
@@ -180,7 +180,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       $result_notes = $rank_summary->build_notes_rank_summary();
 
       if ( $show_stats )
-         list( $pw_errors, $pw_warnings ) = $ttype->checkPoolWinners( $tourney, $tround );
+         list( $pf_errors, $pf_warnings ) = $ttype->checkPoolsFinish( $tourney, $tround );
    }
 
    // --------------- Tournament-Pool-Ranks EDIT form --------------------
@@ -347,14 +347,14 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
       $rstable->echo_table();
 
-      if ( is_array($pw_errors) || is_array($pw_warnings) )
+      if ( is_array($pf_errors) || is_array($pf_warnings) )
       {
          $out = array();
-         if ( count(@$pw_errors) )
-            $out[] = "<tr>" . buildErrorListString(T_('Errors'), $pw_errors, 1) . "</tr>\n";
+         if ( count(@$pf_errors) )
+            $out[] = "<tr>" . buildErrorListString(T_('Errors'), $pf_errors, 1) . "</tr>\n";
          echo "</tr></table>\n";
-         if ( count(@$pw_warnings) )
-            $out[] = "<tr>" . buildErrorListString(T_('Warnings'), $pw_warnings, 1, true, 'TInfo', 'WarnMsg') . "</tr>\n";
+         if ( count(@$pf_warnings) )
+            $out[] = "<tr>" . buildErrorListString(T_('Warnings'), $pf_warnings, 1, true, 'TInfo', 'WarnMsg') . "</tr>\n";
          if ( count($out) == 0 )
             $out[] = "<tr><td>" . T_('No errors or warnings found.#tourney') . "<br><br></td></tr>\n";
          echo "<table>\n<tr><th>", T_('Check Result').':', "</th></tr>\n", implode('', $out), "</table>\n";

@@ -222,7 +222,7 @@ class TournamentRoundStatus
          $this->errors[] = sprintf( T_('There are still %s unfinished tournament games in round %d.'),
             $cnt_tgames, $this->Round );
 
-      list( $errors, $warnings ) = $this->ttype->checkPoolWinners( $this->tourney, $this->tround );
+      list( $errors, $warnings ) = $this->ttype->checkPoolsFinish( $this->tourney, $this->tround );
       if ( count($errors) )
          $this->errors = array_merge( $this->errors, $errors );
       if ( count($warnings) )

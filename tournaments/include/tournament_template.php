@@ -180,12 +180,12 @@ abstract class TournamentTemplate
    abstract public function checkGamesStarted( $tid );
 
    /*!
-    * \brief Returns list with warnings and errors from checking if pool-winners are set correctly after all pool-games
-    *        for a round have been finished.
+    * \brief Returns list with warnings and errors from checking if all pools-processing is done
+    *       and current round can be finished (for status-change to TROUND_STATUS_DONE).
     * \param $tround TournamentRound-object
     * \return array( errors, warnings )
     */
-   abstract public function checkPoolWinners( $tourney, $tround );
+   abstract public function checkPoolsFinish( $tourney, $tround );
 
    /*!
     * \brief Saves given TournamentParticipant in HOT-section and joins (running) tournament if not already joined.

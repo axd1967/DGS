@@ -235,7 +235,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
    }//checkGamesStarted
 
 
-   public function checkPoolWinners( $tourney, $tround )
+   public function checkPoolsFinish( $tourney, $tround )
    {
       $errors = array();
       $warnings = array();
@@ -258,7 +258,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       }
 
       return array( $errors, $warnings );
-   }//checkPoolWinners
+   }//checkPoolFinish
 
 
    /*! \brief Checks that there is no unset TPool.Rank (<= TPOOLRK_RANK_ZONE). */
