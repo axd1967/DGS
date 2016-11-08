@@ -24,6 +24,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Messages:
       * Jump to "current" message on opening message-thread-view with all messages expanded
+      * Added "Delete"-button on single message-view to move it to Trashcan-folder with one click
       * Added "Empty trashcan"-button on message-list of Trashcan-folder
 
    Bug fixes:

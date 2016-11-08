@@ -811,6 +811,9 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
          else
             echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
 
+         if ( !$deleted )
+            echo SMALL_SPACING, SMALL_SPACING, $form->print_insert_submit_button('trash_msg', T_('Delete#msg'));
+
          echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
          if ( $folder_nr > FOLDER_ALL_RECEIVED )
             echo $form->print_insert_hidden_input("current_folder", $folder_nr) ;

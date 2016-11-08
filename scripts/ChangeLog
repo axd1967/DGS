@@ -13,6 +13,10 @@ ChangeLog
 
 2016-11-08 jug
 
+   * include/message_functions.php (message_info_table),
+     message.php (handle_send_message_selector):
+   - add button to delete single message moving it to trashcan with one-click
+
    * include/message_functions.php (empty_trashcan_folder_messages),
      include/classlib_profile.php (SearchProfile.save_profile),
      include/quick_common.php (set_sysmessage),

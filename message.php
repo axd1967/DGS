@@ -40,6 +40,7 @@ define('MSGBOXROWS_INVITE', 6);
                   || @$_REQUEST['send_accept']
                   || @$_REQUEST['send_decline']
                   || @$_REQUEST['foldermove']
+                  || @$_REQUEST['trash_msg']
                   || @$_REQUEST['save_template'] );
    $preview = @$_REQUEST['preview'];
    $handle_msg_action = $send_message && !$preview;
@@ -604,13 +605,11 @@ function handle_send_message_selector( &$msg_control, $arg_to, $msg_type )
    $new_folder = (int)get_request_arg('folder');
 
    if ( isset($_REQUEST['foldermove']) )
-   {
       handle_change_folder( $my_id, $folders, $new_folder, $msg_type );
-   }
+   elseif ( isset($_REQUEST['trash_msg']) )
+      handle_change_folder( $my_id, $folders, FOLDER_DELETED, $msg_type );
    elseif ( isset($_REQUEST['save_template']) )
-   {
       handle_save_template( $my_id, $msg_type );
-   }
    else
    {
       if ( @$_REQUEST['send_accept'] )
