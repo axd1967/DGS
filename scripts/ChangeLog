@@ -13,6 +13,12 @@ ChangeLog
 
 2016-11-08 jug
 
+   * tournaments/include/tournament_template_league.php (TournamentTemplateLeague.check_pools_finish_tournament_type_specific,
+       ~.check_pools_invalid_ranks_flags),
+     tournaments/include/tournament_pool.php (TPOOL_LOADOPT_USER_HANDLE;
+       TournamentPool.load_tournament_pools, ~.new_tournament_pool_from_cache_row):
+   - optimize pools-finish consistency-checks for league-tournament by using only one db-query for 3 checks
+
    * include/message_functions.php (message_info_table),
      message.php (handle_send_message_selector):
    - add button to delete single message moving it to trashcan with one-click

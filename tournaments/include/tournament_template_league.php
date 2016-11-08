@@ -76,70 +76,60 @@ abstract class TournamentTemplateLeague extends TournamentTemplateRoundRobin
    {
       if ( $tourney->Type == TOURNEY_TYPE_LEAGUE )
       {
-         $this->check_pools_invalid_ranks_flags( $tourney, $tround, $errors );
+         $tid = $tourney->ID;
+         $tpool_iterator = new ListIterator( "TLG:check_pools_finish_tournament_type_specific.load_tpool($tid)" );
+         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, 1, 0, TPOOL_LOADOPT_USER_HANDLE );
+
+         $this->check_pools_invalid_ranks_flags( $tid, $tround, $tpool_iterator, $errors );
       }
    }//check_pools_finish_tournament_type_specific
 
    /*! \brief Checks that there is no invalid rank/flags-combination (which shouldn't happen, but would mess up pool-finishing if present). */
-   protected function check_pools_invalid_ranks_flags( $tourney, $tround, &$errors )
+   protected function check_pools_invalid_ranks_flags( $tid, $tround, $tpool_iterator, &$errors )
    {
       global $base_path;
-      $tid = (int)$tourney->ID;
       $uri_edit_user = $base_path . "tournaments/roundrobin/edit_ranks.php?tid=$tid&uid=%s";
 
-      // check if there are invalid -90<=Rank<0, or Rank > allowed pool-size
-      $result = db_query( "TournamentTemplateLeague.check_pools_invalid_ranks_flags.find_negative_ranks($tid)",
-         "SELECT SQL_SMALL_RESULT TPOOL.uid, P.Handle, COUNT(*) AS X_Count " .
-         "FROM TournamentPool AS TPOOL " .
-            "INNER JOIN Players AS P ON P.ID=TPOOL.uid " .
-         "WHERE TPOOL.tid=$tid AND TPOOL.Round=1 AND ((TPOOL.Rank BETWEEN ".TPOOLRK_RANK_ZONE." AND -1) OR TPOOL.Rank > {$tround->PoolSize}) " .
-         "GROUP BY TPOOL.uid" );
-      $arr_users = array();
-      while ( $row = mysql_fetch_assoc($result) )
-         $arr_users[] = anchor( sprintf($uri_edit_user, $row['uid']), $row['Handle'] );
-      mysql_free_result($result);
-      if ( count($arr_users) )
+      $arr_users_invalid_ranks = array();
+      $arr_users_invalid_withdrawals = array();
+      $arr_users_invalid_relegations = array();
+
+      $tpool_iterator->resetListIterator();
+      while ( list(,$arr_item) = $tpool_iterator->getListIterator() )
       {
-         $errors[] = sprintf( T_('Pool-users [%s] have invalid ranks (<0 or >%s). Try removing their ranks and re-process them.'),
-            implode(', ', $arr_users), $tround->PoolSize);
+         list( $tpool, $orow ) = $arr_item;
+         $uid = $tpool->uid;
+         $handle = $tpool->User->Handle;
+
+         // check if there are invalid -90<=Rank<0, or Rank > allowed pool-size
+         if ( ( $tpool->Rank >= TPOOLRK_RANK_ZONE && $tpool->Rank < 0 ) || $tpool->Rank > $tround->PoolSize )
+            $arr_users_invalid_ranks[] = anchor( sprintf($uri_edit_user, $uid), $handle );
+
+         // check if there are withdrawals with relegation-flags set
+         if ( $tpool->Rank == TPOOLRK_WITHDRAW && ($tpool->Flags & TPOOL_FLAG_RELEGATIONS) )
+            $arr_users_invalid_withdrawals[] = anchor( sprintf($uri_edit_user, $uid), $handle );
+
+         // check if invalid relegations set (promote + demote at the same time)
+         if ( $tpool->Rank > 0 && ($tpool->Flags & TPOOL_FLAG_RELEGATIONS) == TPOOL_FLAG_RELEGATIONS )
+            $arr_users_invalid_relegations[] = anchor( sprintf($uri_edit_user, $uid), $handle );
       }
 
-      // check if there are withdrawals with relegation-flags set
-      $result = db_query( "TournamentTemplateLeague.check_pools_invalid_ranks_flags.find_withdrawal_with_relegations($tid)",
-         "SELECT SQL_SMALL_RESULT TPOOL.uid, P.Handle, COUNT(*) AS X_Count " .
-         "FROM TournamentPool AS TPOOL " .
-            "INNER JOIN Players AS P ON P.ID=TPOOL.uid " .
-         "WHERE TPOOL.tid=$tid AND TPOOL.Round=1 " .
-            "AND TPOOL.Rank=".TPOOLRK_WITHDRAW." AND (TPOOL.Flags & ".TPOOL_FLAG_RELEGATIONS.") " .
-         "GROUP BY TPOOL.uid" );
-      $arr_users = array();
-      while ( $row = mysql_fetch_assoc($result) )
-         $arr_users[] = anchor( sprintf($uri_edit_user, $row['uid']), $row['Handle'] );
-      mysql_free_result($result);
-      if ( count($arr_users) )
+      if ( count($arr_users_invalid_ranks) )
+      {
+         $errors[] = sprintf( T_('Pool-users [%s] have invalid ranks (<0 or >%s). Try removing their ranks and re-process them.'),
+            implode(', ', $arr_users_invalid_ranks), $tround->PoolSize);
+      }
+      if ( count($arr_users_invalid_withdrawals) )
       {
          $errors[] = sprintf( T_('Pool-users [%s] have invalid state with withdrawing and relegation flags. ' .
                'Try removing their ranks and re-process them.'),
-            implode(', ', $arr_users));
+            implode(', ', $arr_users_invalid_withdrawals));
       }
-
-      // check if invalid relegations set (promote + demote at the same time)
-      $result = db_query( "TournamentTemplateLeague.check_pools_invalid_ranks_flags.find_both_relegations($tid)",
-         "SELECT SQL_SMALL_RESULT TPOOL.uid, P.Handle, COUNT(*) AS X_Count " .
-         "FROM TournamentPool AS TPOOL " .
-            "INNER JOIN Players AS P ON P.ID=TPOOL.uid " .
-         "WHERE TPOOL.tid=$tid AND TPOOL.Round=1 " .
-            "AND TPOOL.Rank>0 AND (TPOOL.Flags & ".TPOOL_FLAG_RELEGATIONS.")=".TPOOL_FLAG_RELEGATIONS." " .
-         "GROUP BY TPOOL.uid" );
-      $arr_users = array();
-      while ( $row = mysql_fetch_assoc($result) )
-         $arr_users[] = anchor( sprintf($uri_edit_user, $row['uid']), $row['Handle'] );
-      mysql_free_result($result);
-      if ( count($arr_users) )
+      if ( count($arr_users_invalid_relegations) )
       {
          $errors[] = sprintf( T_('Pool-users [%s] have invalid relegation flags (both set). ' .
                'Try removing their ranks and re-process them.'),
-            implode(', ', $arr_users));
+            implode(', ', $arr_users_invalid_relegations));
       }
    }//check_pools_invalid_ranks_flags
 

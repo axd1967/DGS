@@ -53,6 +53,7 @@ define('TPOOL_LOADOPT_REGTIME', 0x08 ); // load TournamentParticipant.Created (=
 define('TPOOL_LOADOPT_TP_LASTMOVED', 0x10 ); // load TournamentParticipant.Lastmoved
 define('TPOOL_LOADOPT_ONLY_RATING', 0x20 ); // only load Rating2 from Players-table
 define('TPOOL_LOADOPT_UROW_RATING', 0x40 ); // additionally set TPool->User->urow['Rating2']
+define('TPOOL_LOADOPT_USER_HANDLE', 0x80 ); // load Players.Handle
 
 global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
@@ -469,6 +470,13 @@ class TournamentPool
          if ( !($load_opts & TPOOL_LOADOPT_REGTIME) )
             $qsql->add_part( SQLP_FIELDS, '0 AS TP_X_RegisterTime' );
       }
+      elseif ( $load_opts & TPOOL_LOADOPT_USER_HANDLE )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'TPU.Handle AS TPU_Handle' );
+         $qsql->add_part( SQLP_FROM,
+            'INNER JOIN Players AS TPU ON TPU.ID=TPOOL.uid' );
+      }
 
       if ( $needs_tp )
       {
@@ -521,6 +529,10 @@ class TournamentPool
          if ( $load_opts & TPOOL_LOADOPT_UROW_RATING ) // User- or TP-rating dependent on load-opts TPOOL_LOADOPT_TRATING
             $user->urow['Rating2'] = $user->urow['TP_Rating'];
          $tpool->User = $user;
+      }
+      elseif ( $load_opts & TPOOL_LOADOPT_USER_HANDLE )
+      {
+         $tpool->User = new User( $row['uid'], '', @$row['TPU_Handle'] );
       }
       return $tpool;
    }//new_tournament_pool_from_cache_row
