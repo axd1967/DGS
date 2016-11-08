@@ -24,6 +24,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Messages:
       * Jump to "current" message on opening message-thread-view with all messages expanded
+      * Added "Empty trashcan"-button on message-list of Trashcan-folder
 
    Bug fixes:
 

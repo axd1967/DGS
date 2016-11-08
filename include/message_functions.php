@@ -1540,14 +1540,31 @@ function change_folders_for_marked_messages($uid, $folders)
    }
 
    return change_folders($uid, $folders, $message_ids, $new_folder, @$_GET['current_folder']);
-}
+}//change_folders_for_marked_messages
+
+function empty_trashcan_folder_messages( $uid )
+{
+   $uid = (int)$uid;
+
+   ta_begin();
+   {//HOT-section to empty trashcan
+      db_query( "empty_trashcan_folder_messages.update($uid)",
+         "UPDATE MessageCorrespondents SET Folder_nr=".FOLDER_DESTROYED." " .
+         "WHERE uid=$uid AND Folder_nr=".FOLDER_DELETED ); // destroy'ing only allowed from Trashcan-folder
+      $rows_updated = mysql_affected_rows() ;
+   }
+   ta_end();
+
+   return $rows_updated;
+}//empty_trashcan_folder_messages
 
 // return >0 success (messages moved), 0 = no messages to move or no (new-)target-folder specified
+// \param $message_ids array with Message.IDs to change folder for
 // \param $need_replied false = change only messages that have been replied,
 //                      true = change only message that need NO reply
 function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false, $quick_suite=false)
 {
-   if ( count($message_ids) <= 0 || $new_folder == FOLDER_NONE )
+   if ( (is_array($message_ids) && count($message_ids) == 0) || $new_folder == FOLDER_NONE )
       return 0;
 
    if ( $new_folder == FOLDER_DESTROYED )
@@ -1588,10 +1605,10 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
       $msg_id_str = implode(',', $message_ids);
       db_query( "change_folders.update($uid,$new_folder,[$msg_id_str])",
          "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
-                  "WHERE uid='$uid' $where_clause" .
-                  'AND Folder_nr > '.FOLDER_ALL_RECEIVED.' ' .
-                  "AND mid IN ($msg_id_str) " .
-                  "LIMIT " . count($message_ids) );
+         "WHERE uid='$uid' $where_clause" .
+            'AND Folder_nr > '.FOLDER_ALL_RECEIVED.' ' .
+            "AND mid IN ($msg_id_str) " .
+         "LIMIT " . count($message_ids) );
       $rows_updated = mysql_affected_rows() ;
 
       if ( $rows_updated > 0 )

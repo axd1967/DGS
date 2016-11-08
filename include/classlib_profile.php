@@ -598,16 +598,8 @@ class SearchProfile
       $profile->save_profile();
       $this->profile = $profile;
 
-      $this->set_sysmessage( (bool)$save_default
-         ? T_('Profile saved as default!')
-         : T_('Profile saved!') );
+      set_sysmessage( ($save_default ? T_('Profile saved as default!') : T_('Profile saved!')) );
    }//save_profile
-
-   /*! \brief Sets sys-message. */
-   public function set_sysmessage( $msg )
-   {
-      $_REQUEST['sysmsg'] = ( get_magic_quotes_gpc() ) ? addslashes($msg) : $msg;
-   }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
    public function to_string()

@@ -491,4 +491,9 @@ function quick_suite_add_quota( &$arr )
    }
 }
 
+function set_sysmessage( $msg )
+{
+   $_REQUEST['sysmsg'] = ( get_magic_quotes_gpc() ) ? addslashes($msg) : $msg;
+}
+
 ?>

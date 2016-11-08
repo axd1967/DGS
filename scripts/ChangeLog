@@ -11,6 +11,15 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-11-08 jug
+
+   * include/message_functions.php (empty_trashcan_folder_messages),
+     include/classlib_profile.php (SearchProfile.save_profile),
+     include/quick_common.php (set_sysmessage),
+     list_messages.php:
+   - add button on trashcan-folder message-list-page to empty-trashcan completely
+   - refactor SearchProfile.set_sysmessage() into global function-scope
+
 2016-11-07 jug
 
    * tournaments/include/tournament_template_league.php (TournamentTemplateLeague.check_pools_finish_tournament_type_specific,

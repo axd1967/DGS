@@ -42,6 +42,13 @@ require_once 'include/filter.php';
    $my_folders = get_folders($my_id);
 
 /*
+   Actions:
+      toggle_marks      : toggle marks
+      move_marked       : change folder for marked messages
+      empty_trash       : destroy all messages in Trashcan-folder (aka 'empty trashcan')
+      follow            : true to switch into target folder after move
+      folder            : target-folder for changing folder
+
    *folder* args rules:
 
    - &folder= not set, and &current_folder= not set:
@@ -59,8 +66,6 @@ require_once 'include/filter.php';
    - $folder: destination folder for move queries,
        effective on a *move_marked* click
        kept if != $current_folder
-
-   *follow* : true to switch into target folder after move
 */
    $folder = (int)@$_GET['folder']; // 0 if unset
    if ( $folder < FOLDER_ALL_RECEIVED )
@@ -79,23 +84,26 @@ require_once 'include/filter.php';
 
    $follow = (bool)@$_GET['follow']; // follow into target folder?
 
-   if ( isset($_GET['toggle_marks']) )
-      $toggle_marks= true;
-   else
+   $toggle_marks = false;
+   if ( @$_REQUEST['empty_trash'] )
    {
-      $toggle_marks= false;
-      if ( change_folders_for_marked_messages($my_id, $my_folders) > 0 )
+      $cnt = empty_trashcan_folder_messages( $my_id );
+      if ( $cnt > 0 )
+         set_sysmessage( sprintf( T_('Destroyed %s messages from trashcan folder!'), $cnt ) );
+   }
+   elseif ( isset($_GET['toggle_marks']) )
+      $toggle_marks = true;
+   elseif ( change_folders_for_marked_messages($my_id, $my_folders) > 0 )
+   {
+      if ( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED && $follow )
       {
-         if ( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED && $follow )
-         {
-            // follow the move if one
-            $current_folder= $folder;
+         // follow the move if one
+         $current_folder= $folder;
 
-            // first page if a move. keep $mtable prefix
-            // WARNING: it should be better to follow the message but
-            // we don't know its page in the new folder+sorting.
-            $_REQUEST['from_row'] = $_GET['from_row'] = 0;
-         }
+         // first page if a move. keep $mtable prefix
+         // WARNING: it should be better to follow the message but
+         // we don't know its page in the new folder+sorting.
+         $_REQUEST['from_row'] = $_GET['from_row'] = 0;
       }
    }
 
@@ -187,9 +195,10 @@ require_once 'include/filter.php';
 
       if ( $current_folder == FOLDER_DELETED )
       {
-         echo $marked_form->print_insert_submit_button( 'destroy_marked',
-                  T_('Destroy marked messages')),
-              "&nbsp;&nbsp;",
+         echo $marked_form->print_insert_submit_button( 'destroy_marked', T_('Destroy marked messages') ),
+              MED_SPACING,
+              $marked_form->print_insert_submit_button( 'empty_trash', T_('Empty trashcan#msg') ),
+              MED_SPACING,
               $elem_toggle_marks;
       }
       else
