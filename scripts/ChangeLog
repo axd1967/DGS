@@ -11,6 +11,16 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-11-09 jug
+
+   * tournaments/include/tournament_template_league.php (TournamentTemplateLeague.check_pools_finish_tournament_type_specific,
+       ~.check_pools_relegations):
+   - extend rank-summary checks for correct relegations of pool-users for league-tournaments
+     - check for double-ranks that may need tie-breaking
+     - check for users with rank-based relegations that doesn't match the league-configuration
+     - check for too many relegations with promoted, demoted or staying pool-users
+     - reporting incorrect relegations as warnings to allow T-director to overwrite
+
 2016-11-08 jug
 
    * tournaments/include/tournament_template_league.php (TournamentTemplateLeague.check_pools_finish_tournament_type_specific,
