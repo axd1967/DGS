@@ -1,0 +1,240 @@
+This file explains the format of TODO-files of JUG: 'specs/TODO-jug' & 'specs/FAQ-jug'       vi:set et ts=4:
+
+# ------------ TODO-jug ----------------------------------------------------------------------------
+
+This TODO-file was started by me (JUG) in Jan-2007 after I joined the developer-team.
+Being a supporter of Agile principles, the file was originally a collection of user-stories
+comprising a backlog you may know from the Scrum agile development process.
+
+Over the years it grew and was extended into a more generalized format comprising a collection
+of issues of various types and purposes (user-stories, tasks, bugs, documentation, informal notes, etc).
+I kept this file only locally over the years, as it also contained sensitive info, but it was requested
+to publish it on various occasions.  So after some tedious cleanups it's publically available now and
+under remote version control.
+
+
+# ------------ SECTIONS
+
+The TODO-file starts with a header containing some condensed info repeated from this README.
+
+The main part of the TODO-file is separated into several sections:
+
+    "# SECTION-NAME [optional comment]"
+
+Currently there are the following sections:
+
+    CURRENT                - tracking of current work, contains most often used / important info
+    PLAN                   - planned for upcoming release
+    DISCUSSION             - unresolved discussions on http://www.dragongoserver.net/forum/
+    RELEASE-WORK           - pre- and post-work of releases
+    CHECK ISSUES / BUGS    - issues to check / investigate / bugs
+    FEATURES               - features with votes on http://www.dragongoserver.net/features/list_votes.php
+    ADMIN FEATURES         - features for admins & DGS-executives
+    TOURNAMENT FEATURES    - features for tournaments
+    EVALUATIONS / FUTURE   - considerations for new technology
+    GENERAL FEATURES       - idea / feature pool
+    ARCHIVES               - docu / bookmarks / refs / db-queries, for admins & developers
+
+    RELEASE-LOG            - issues that needs a release / have been released;
+                             might use different line-format (see respective issue-group comment)
+
+# ------------ ISSUE-GROUPS
+
+Each SECTION consists of a list of issue-groups.  The name of a group are Word in camel-case,
+which express what the group contains.  Parts of its name are separated with '_' and can
+represent a hierarchy or list of terms:
+
+    "Issue_Group_Name:  [group-short-notation] group-specific comment"
+
+The group-short-notation is optional.  It can be used here and on other sections & groups as well.
+For example: "TRR:" referring to the issue-group "Tournament_Round_Robin:  [TRR]"
+
+# ------------ ISSUES
+
+Each ISSUE-GROUP contains a list of issues, one line per issue with the line-format:
+
+    "- prio type: [category] PRIV: EVAL: [group] (id) descr"
+
+Legend:
+
+   prio     - importance, priority:  0 (recent), 1 (high), 9 (low), ? (needs prio)
+   type     - next action-type (see 'ISSUE TYPES' below); format (always 4 chars): "XXXX:" or "XXX: "
+   category - list of categories of issue (see 'ISSUE CATEGORIES' below); multiple allowed
+   PRIV     - expressing private issue (has been split away into separate file); optional
+   EVAL     - indicating that issue is an evaluation, SPIKE-story; optional
+   group    - upper-case short-notation group; optional
+   id       - issue-ID, declaration with (id), referenced with {id}; optional; multiple allowed;
+              next-id-sequence tracked in issue-group comments (mainly in CURRENT-section):
+              - (A023)  = admin
+              - (B015)  = bug
+              - (C04)   = consistency
+              - (D02)   = discussion
+              - (DB001) = database
+              - (E22)   = game-editor
+              - (EV01)  = evaluation
+              - (F024)  = feature
+              - (R004)  = refactoring
+              - (S078)  = story
+              - (T035)  = tournament
+              - (V016)  = voted feature, sub-id
+   descr    - issue-description, references, conclusions
+
+An issue-group can contain sub-groups, that start with a separating header-line:
+
+    "#--------------- [optional comment]"
+
+# ------------ ISSUE TYPES
+
+Types are used to express the next main action(-type) for an issue.
+
+Available TYPES (in alphabetical order):
+
+ADM   - admin-stuff to be done by admins
+ASK   - to-ask-some person per forum, mail or other channel
+BUG   - is-sure bug, needs fix
+CHK   - analyze first (type unknown; often used for BUG or ADM; also for IDEA if feasibility unclear)
+DATA  - info / data / example
+DBG   - is-sure bug, but needs further debugging/evaluation if fix is needed
+DEV   - to-implement / develop, the HOW is pretty clear
+DISC  - discuss issue further before continuing on it
+DOC   - to-document / documentation / info
+IDEA  - idea (but might need feasibility-check first)
+PRJ   - project-related
+SPEC  - to-specify / clarify the HOW (check feasibility)
+TRY   - try-out specific stuff
+TST   - to-test
+TXT   - text change
+VOTE  - to-vote (add feature to vote)
+WAIT  - wait for answer / event
+
+# ------------ ISSUE CATEGORIES
+
+Categories are used to finer categorize what an issue is about.
+Similar to tags multiple categories can be given, but at least one must be present.
+
+[adm]           - administrative feature
+[arch]          - architecture
+[bot]           - robot-related
+[bulletin]      - bulletin
+[cfg]           - configuration
+[cleanup]       - code-cleanup
+[clock]         - clock-related / game time / crons
+[consistency]   - admin consistency-scripts
+[data]          - data / examples
+[db]            - database
+[dev]           - developer-stuff
+[doc]           - documentation
+[error]         - error-related
+[faq]           - FAQ
+[feature]       - feature-voting
+[filter]        - search-filters
+[forum]         - forum
+[game]          - game-related / playing / board / rules
+[gedit]         - game-editor
+[goban]         - goban
+[gview]         - game-viewer
+[help]          - help, more general than FAQ
+[icons]         - icons
+[info]          - information
+[invite]        - game invitation (using message-system)
+[markup]        - DGS markup tags
+[merge]         - code-merge / merge-request
+[mpg]           - multi-player-game
+[msg]           - messages / messaging / notifications
+[newgame]       - game settings
+[news]          - news
+[PHP]           - PHP-language-specific
+[profile]       - user-profile / user-configuration
+[quick]         - quick-suite, quick-status, alternative interface
+[rating]        - user-rating
+[register]      - user-registration / account-verification
+[review]        - code-review
+[rss]           - RSS / WAP
+[SECURITY]      - security issue
+[site]          - DGS-website / general issue regarding all pages of the site
+[stats]         - statistics
+[test]          - test
+[ticket]        - ticket / issue system
+[todo]          - TODO-file
+[tourney]       - tournament
+[transl]        - translations
+[user]          - user / account
+[wiki]          - SLs (http://senseis.xmp.net/), external documentation resources
+[wishlist]      - wishlist on SL (http://senseis.xmp.net/?DGSWishlist)
+[wroom]         - waiting-room
+
+# ------------ ISSUE LIFECYCLE / ISSUE RULES
+
+Rough lifecycle & rules for new issues:
+
+    - new issue:
+      - add in CURRENT-section group 'New_Issues' with reference to source,
+      - keep until issue is clear enough
+      - often it's not processed further, but waiting till a few issues are piled up before further processing
+
+    - reject issue: either not add, or documentation of decision wanted, then append '-> NOT_DONE (+reason)',
+      then commit. Then later remove it some time, so in the logs it can be found searching for "NOT_DONE"
+
+    - add ID on issue:
+      - an issue-id is not always added, especially not if it's unclear, if it is or can be done at all
+      - an issue-id is added if other issues need to reference it
+      - check issue-group comments to know which id comes next for the respective group
+        and increase the sequence for the next one
+      - an issue-id can use nested IDs, which switches between numbers and letters, e.g. "(S123.1a.7c.3)"
+      - an issue-id is declared as "(..)" but referenced with curly braces "[see [also]] {..}"
+      - an issue can have more than one issue-id
+      - the position of an issue-id in the lines may vary a bit
+
+    - refine issue:
+      - refine description, identify type, categories, importance/prio, set group (optional),
+        reference with other issues
+      - an issue-group can have a short-notation mentioned after the issue-group-name, e.g. "[TRR]"
+
+    - categorize issue into proper section & issue-group & maybe order in relation to others,
+      can be sorted into an intermediate 'New_..'-group,
+      or sub-group separated with '#---------------' within issue-group (often used in CURRENT-section)
+
+    - depending on importance: pick now or later, move into RELEASE-WORK
+
+    - do issue: pick, move into 'Open_Tasks_Stack...' to do; might be re-prioritized or refined at any time;
+      then do
+
+    - done issue: move at end of last section & last issue-group "Done + ToDoc ..."
+      for archive / to-release / to-hotfix
+
+    - depending on the urgency of a change: make a hotfix or normal release
+      in both cases, the change should be announced (after the fact) in the DGS-News-forum,
+      and if available in specific original forum-threads
+
+    - if released, add a release-line and move to 'FAQ-jug' for documentation
+
+
+Some UNIX shell commands to extract certain information from the TODO-file:
+
+- extract sections:
+
+    grep '^# ' TODO-jug
+
+- extract issue-groups:
+
+    tail -n +6 TODO-jug | sed '/^Done/Q' | grep -v ^- | grep -v ^# | cut -d: -f1  | grep .
+
+- list bugs / potential bugs
+
+    grep -E '(BUG|DBG)' TODO-jug
+
+
+# ------------ FAQ-jug -----------------------------------------------------------------------------
+
+Outline of 'FAQ-jug' is similar to the 'TODO-jug' file (with header, sections, issue-groups & issues),
+but a simpler process is utilized:
+
+    - new issue on itself, or moved from change from 'TODO-jug'
+
+    - do issue (by extending / changing FAQ & help pages)
+
+    - move done issue to bottom group for native-review
+
+    - if completed, remove eventually from the TODO-files
+
+

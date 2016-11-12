@@ -3,6 +3,7 @@ Version: $Id: FAQ-DGS,v 1.2 2013/08/09 21:14:19 jug Exp jug $
 ==========================================================================
 
 New_Issues:   set prio + sort into sections
+- 1 DOC:  [faq][tourney] explain area-scoring "Chinese ruleset" for tournament-users -> write FAQ-entry to refer to + write TP-news/bulletin to remind about area-scoring and dame!
 - 2 DOC:  [faq] http://www.dragongoserver.net/forum/read.php?forum=2&thread=38167#38190 : add doc about time-formats -> done already?
 - 3 DOC:  [faq] FAQ for admin-functions (non-translatable), different admin-levels (ADMIN_*)
 - 7 DOC:  [faq] improve sleep-time description?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47174#47174;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47174#47208
