@@ -11,6 +11,11 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-11-12 jug
+
+   * include/std_functions.php (is_logged_in):
+   - prevent session-expire on POST-requests to avoid losing user-input-data
+
 2016-11-09 jug
 
    * tournaments/include/tournament_template_league.php (TournamentTemplateLeague.check_pools_finish_tournament_type_specific,

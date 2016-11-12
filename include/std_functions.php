@@ -2563,6 +2563,7 @@ define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
  * \note else fill the $player_row array with its characteristics,
  *    load the player language definitions, set his timezone
  *    and finally returns his ID (i.e. >0)
+ * \note skip expire-login check on POST-request-method
  */
 function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_OPTS ) //must be called from main dir
 {
@@ -2572,6 +2573,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       $login_opts |= LOGIN_QUICK_SUITE;
    $is_quick_suite = ($login_opts & LOGIN_QUICK_SUITE);
    $skip_update = ($login_opts & LOGIN_SKIP_UPDATE);
+   $is_post = ( $_SERVER['REQUEST_METHOD'] == 'POST' ); // note: count($_POST)>0 might work too
 
    $player_row = array( 'ID' => 0 );
 
@@ -2635,7 +2637,8 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    setTZ( $player_row['Timezone']);
 
 
-   $session_expired= ( $player_row['Sessioncode'] != $scode || $player_row['Expire'] < $NOW );
+   // skip expire-check on POST-request
+   $session_expired = !$is_post && ( $player_row['Sessioncode'] != $scode || $player_row['Expire'] < $NOW );
 
    $upd = new UpdateQuery('Players');
    $upd->upd_raw('Hits', 'Hits+1' );

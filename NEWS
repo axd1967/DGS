@@ -29,6 +29,8 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Bug fixes:
 
+   * Prevent session-expire on POST-requests to avoid losing user-input-data
+
    Code improvements:
 
    Administrative changes:

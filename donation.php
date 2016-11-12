@@ -77,7 +77,7 @@ require_once 'include/std_functions.php';
       "<center>\n",
       // NOTE: form-elements MUST NOT be changed!
       //       They has been created by PayPal-integration-service
-     '<form action="'.$donate_url.'" method="post">',
+     '<form action="'.$donate_url.'" method="POST">',
         '<input type="hidden" name="cmd" value="_s-xclick">',
         '<input type="hidden" name="hosted_button_id" value="3262396">',
         T_('The following link will take you to PayPal#donate'), "<br><br>\n",
