@@ -13,8 +13,10 @@ ChangeLog
 
 2016-11-12 jug
 
-   * include/std_functions.php (is_logged_in):
+   * include/std_functions.php (is_logged_in),
+     edit_email.php, edit_profile.php:
    - prevent session-expire on POST-requests to avoid losing user-input-data
+   - prevent losing input-data on session-expire by replacing GET-form with POST-form
 
 2016-11-09 jug
 

@@ -127,7 +127,7 @@ require_once 'include/gui_bulletin.php';
 
    start_page(T_("Edit profile"), true, $logged_in, $player_row );
 
-   $profile_form = new Form( 'profileform', 'edit_profile.php', FORM_GET );
+   $profile_form = new Form( 'profileform', 'edit_profile.php', FORM_POST );
 
 
    $profile_form->add_row( array( 'HEADER', T_('Personal settings') ) );

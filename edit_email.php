@@ -74,7 +74,7 @@ require_once 'include/table_columns.php';
    // ----- Email Edit Form ------------------------------
 
    $page = 'edit_email.php';
-   $form = new Form( 'emailform', $page, FORM_GET );
+   $form = new Form( 'emailform', $page, FORM_POST );
 
    if ( count($errors) )
    {
