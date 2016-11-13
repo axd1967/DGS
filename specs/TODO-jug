@@ -1,4 +1,4 @@
-TODO JUG: LineFMT "- prio type: [category] PRIV: EVAL: (id) descr" ('PRIV'=sensitive issues split into ~/TODO-PRIV_DGS); see 'specs/README.todo'
+TODO JUG: LineFMT "- prio type: [category] PRIV: EVAL: [group] (id) descr" ('PRIV'=sensitive issues split into ~/TODO-PRIV_DGS); see 'specs/README.todo'
 Version:  $Id: TODO-jug,v 1.106 2016/08/20 18:31:06 jug Exp jug $
 Legend:   [ 0-recent, 1-high, 9-low, ?-needs prio];; types: ADM=admin-stuff (for/by admins), ASK=ask-someone, WAIT=wait, IDEA=idea (check feasability), PRJ=project, TRY=try-out, DATA=info/data/example,
           CHK=analyze 1st, SPEC=to-spec, DEV=to-impl, DOC=to-doc, BUG=is-sure-bug, DBG=needs debug, TST=needs test, TXT=text change, VOTE=to-vote, DISC=discuss
@@ -11,9 +11,8 @@ New_Issues:   set prio + sort into sections
 - 5 DISC: [msg] send 2nd "thread-linked" message: A>A>B http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47921 -> clarify; feasible (sounds very complex)?
 
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S078) (T035) (A023) (C04) (D02) (B015) (F024) (V016)
-- 1 PRJ:  [todo] (A008.2c) cleanup TODO/FAQ before publish; correct/add sections/PRIV/category/type/prio/sort; see ~/DGS-data/project/(types|categories|sections);; started 28Jun2015, PUBLISH latest at 17-Jan-2016 -> strike that: http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#46054 -> 6-pass cleanup (1 split-rel>FAQ, 2 PRIV/desc/type/cats, 3 sections/sort, 4 order/prio, 5 split-PRIV, 6 ids); write README.todo
-#--------------- TEMP-STASH:
 - 2 PRJ:  [todo] (A008.2d) cleanup TODO/FAQ after publish: pass-7 cleanup (mark NOT_DONE + commit 1st, then remove to be able to search for not-done stuff)
+#--------------- TEMP-STASH:
 - 4 PRJ:  [todo] (A008.2) new code-project-structure: add JUG-TODO/FAQ into specs-dir as TODO-jug/FAQ-jug under version-control (PRIV-mark sensitive-stuff), cleanup before publish -> see {A008.2c}
 #--------------- STASH:
 - 2 DISC: [site] chk/eval/answer private-DGS-folders: LATER #24, TODO #16, CHECK #42
@@ -24,7 +23,6 @@ Open_Tasks_Stack_League:  first=next
 - 3 IDEA: [tourney] copy existing T on T-creation-wizard?
 #--------------- DONE:
 #--------------- OPEN:
-- 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quote-inc for T-director-operations
 - 3 SPEC: [tourney] (T029.4a) TLeague: spawn next cycle: add new page (link in T-mng PLAY-phase instead of edit-rounds); spawn-button w/ confirm to "spawn new T with next cycle": create new T + copy props/data w/o state {see T029.4b}
 - 3 SPEC: [tourney] (T029.4b) TLeague: spawn next cycle: create new T + COPY data from: T.scope/type/wiztype/title/descr/owner/flags(some), all TDirs, TProps.all[-RegEndTime], TRules.all, TRnd.all[-runtime], TPoints.all
 - 3 SPEC: [tourney] (T029.4c) TLeague: spawn next cycle: chain-link src/trg Ts; show tid-links for user/t-dirs on T-info(title-section)/view-pools(below-title)/T-mng(above 1.Setup) as link to "prev/next cycle" (if existing);; store where? likely in T-table
@@ -82,6 +80,9 @@ Tournaments_Running:
 Backlog_1_20_0:
 - 1 SPEC: [tourney] (T034.0) break down title-T-feature into stories (only TRR-types), collect reqs: best-of-oddX; start with connect to TLeague (other TRR-types later)
 - 3 SPEC: [msg] add rows-selection on message-list/search: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911
+- 1 SPEC: [user][adm] regenerate verification-mail + fix/handle verifications for admin + handle old-unused-verification -> cleanup !?
+- 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quota-inc for admin-operations
+- 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quota-inc for T-director-operations
 - 4 SPEC: [tourney] TRR: allow T-director to start next round with open games, that will not change pool-winners: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2984586;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3308359;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41787#47809
 - 5 SPEC: [forum] (S037) replace [markread] by [add-tag] to: label post, public tags (agree/ad/disagree), private customized tags? <-> only static list ;; tag-cloud (public, private-only?);; for reply-notifies; maybe use <tags>-element for allowed;; TODO-tag;; allow to tag a forum: file-based approach perhaps; or table with file-based cache;; add JS-tagging on forums!?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=31759#31791;; (admin-forum) http://www.dragongoserver.net/forum/read.php?forum=9&thread=24845;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=45025#45104 -> later tag ref'ed posts from TODO (archive)
 - 4 SPEC: [site] (A008.1) new code-project-structure: ~/src|doc|specs|examples|plugins|tests|the-like|etc; use some auto-build/test/deploy(envs:sf/prod)
@@ -420,8 +421,6 @@ Feature_F011_UTF8:  http://www.dragongoserver.net/features/vote_feature.php?fid=
 # ADMIN FEATURES
 
 Ideas_Issues_Admin:
-- 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quote-inc for admin-operations
-- 1 SPEC: [user][adm] regenerate verification-mail + fix/handle verifications for admin + handle old-unused-verification -> cleanup !?
 - 3 SPEC: [adm][user] (A022) add admin-script to delete users with safety-checks: Running-games, email-verified, reg-activated? ; incl. deletion of Verification -> started: see ADMOPT_CANDIDATE_USER_DEL;; ADM del-user(?): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3318782
 - 3 SPEC: [adm] (A022.2) extend admin-users-page to handle warnings of user-deletion-checks
 - 3 SPEC: [adm] (A022.3) add way/script/page to actually delete users (with safety-checks)
@@ -958,4 +957,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 5 SPEC: [tourney] (T029.17i.1) TLeague: rank-summary check: (1) WARN if counting too many users to-be-relegated (w/o withdrawn TPs);; too many if #promotes > PromoteRanks; too many if #same > (DemoteStartRank - PromoteRanks - 1); too many if #demotes > (pool[i].poolsize - DemoteStartRank + 1)
 - 1 IDEA: [site] (S077.1) avoid expire-login-check on POSTs (potentially losing input-data): check "count($_POST)"(?) or "$_SERVER['REQUEST_METHOD'] == 'POST'": http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47914
 - 1 IDEA: [site] (S077.3) avoid expire-login-check on some POSTs (edit-email/profile): check/replace GET-forms with POST-forms?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47914 -> checked others -> split {S077.2}, {S077.5}
+- 1 PRJ:  [todo] (A008.2c) cleanup TODO/FAQ before publish; correct/add sections/PRIV/category/type/prio/sort; see ~/DGS-data/project/(types|categories|sections);; started 28Jun2015, PUBLISH latest at 17-Jan-2016 -> strike that: http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#46054 -> 6-pass cleanup (1 split-rel>FAQ, 2 PRIV/desc/type/cats, 3 sections/sort, 4 order/prio, 5 split-PRIV, 6 ids); write README.todo
 
