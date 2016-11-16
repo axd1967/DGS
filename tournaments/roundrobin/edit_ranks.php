@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_league_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
@@ -162,7 +163,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       elseif ( @$_REQUEST['t_setpoolwinners'] && !$is_league )
          $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
       elseif ( @$_REQUEST['t_setrelegations'] && $is_league )
-         $result_notes = TournamentRoundHelper::fill_relegations_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
+         $result_notes = TournamentLeagueHelper::fill_relegations_tournament_pool( $allow_edit_tourney, $tround, $tourney->Type );
    }
 
    $pf_errors = $pf_warnings = null;

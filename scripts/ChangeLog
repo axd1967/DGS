@@ -11,6 +11,14 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-11-16 jug
+
+   * tournaments/include/tournament_league_helper.php (class TournamentLeagueHelper,
+       ~.fill_relegations_tournament_pool),
+     tournaments/include/tournament_round_helper.php (class TournamentRoundHelper),
+     tournaments/roundrobin/edit_ranks.php:
+   - refactor TournamentRoundHelper.fill_relegations_tournament_pool() into new TournamentLeagueHelper
+
 2016-11-12 jug
 
    * specs/README.todo, specs/TODO-jug, specs/FAQ-jug:
