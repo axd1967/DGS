@@ -25,6 +25,7 @@ require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_gui_helper.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_round_helper.php';
@@ -60,16 +61,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
      tre_set&tid=&round=            : sets selected round as the current round (need confirmation)
      tre_set_confirm&tid=&round=    : sets selected round as the current round (confirmed)
      tre_stat&tid=&round=           : changes round status (forward to separate edit-round-status page)
-     tre_cancel&tid=&round=         : cancel previous action
      tre_next&tid=                  : start next round (needs confirmation)
      tre_next_confirm&tid=          : start next round (confirmed)
+     cancel&tid=&round=             : cancel previous action
 */
 
    $tid = (int) @$_REQUEST['tid'];
    $round = (int) @$_REQUEST['round'];
    if ( $tid < 0 ) $tid = 0;
 
-   if ( @$_REQUEST['tre_cancel'] ) // cancel action
+   if ( @$_REQUEST['cancel'] ) // cancel action
       jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round");
    elseif ( @$_REQUEST['tre_edit'] ) // edit-data
       jump_to("tournaments/roundrobin/edit_round_props.php?tid=$tid".URI_AMP."round=$round");
@@ -223,7 +224,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             'SUBMITBUTTON', 'tre_next', T_('Start Next Round#tourney'),
             'TEXT', sptext( T_('Prepare next round, Switch tournament-status, Add & set new round#tourney'), 1), ));
       if ( @$_REQUEST['tre_next'] && !$has_action_error )
-         echo_confirm( $tform, T_('Please confirm starting next tournament round'), 'tre_next', T_('Confirm') );
+         TournamentGuiHelper::build_form_confirm( $tform,
+            T_('Please confirm starting next tournament round'), 'tre_next', T_('Confirm') );
    }
 
    if ( $is_admin )
@@ -235,8 +237,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
                'TAB',
                'SUBMITBUTTON', 'tre_add', T_('Add Round#tourney'), ));
          if ( @$_REQUEST['tre_add'] && !$has_action_error )
-            echo_confirm( $tform, T_('Please confirm adding of a new tournament round'),
-               'tre_add', T_('Confirm add') );
+            TournamentGuiHelper::build_form_confirm( $tform,
+               T_('Please confirm adding of a new tournament round'), 'tre_add', T_('Confirm add') );
       }
 
       if ( $tourney->Rounds > 1 ) // valid to remove T-round
@@ -245,7 +247,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
                'TAB',
                'SUBMITBUTTON', 'tre_del', T_('Remove Round#tourney'), ));
          if ( @$_REQUEST['tre_del'] && !$has_action_error )
-            echo_confirm( $tform, sprintf( T_('Please confirm deletion of selected tournament round #%s'), $round ),
+            TournamentGuiHelper::build_form_confirm( $tform,
+               sprintf( T_('Please confirm deletion of selected tournament round #%s'), $round ),
                'tre_del', T_('Confirm deletion') );
       }
 
@@ -256,10 +259,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
                'SUBMITBUTTON', 'tre_set', T_('Set Current Round#tourney'),
                'TEXT', sptext(T_('Switch to selected round#tourney'), 1), ));
          if ( @$_REQUEST['tre_set'] && !$has_action_error )
-            echo_confirm( $tform,
+         {
+            TournamentGuiHelper::build_form_confirm( $tform,
                sprintf( T_('Please confirm setting the current tournament round from #%s to #%s'),
                         $tourney->CurrentRound, $round ),
                'tre_set', T_('Confirm setting#tround') );
+         }
       }
    }//T-admin
 
@@ -311,19 +316,4 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
    end_page(@$menu_array);
 }//main
-
-
-function echo_confirm( &$tform, $message, $confirm_action, $confirm_text )
-{
-   $tform->add_empty_row();
-   $tform->add_row( array(
-         'TAB',
-         'TEXT', span('TWarning', $message.':'), ));
-   $tform->add_row( array(
-         'TAB',
-         'SUBMITBUTTON', $confirm_action.'_confirm', $confirm_text,
-         'TEXT', SMALL_SPACING,
-         'SUBMITBUTTON', 'tre_view', T_('Cancel') ));
-   $tform->add_empty_row();
-}//echo_confirm
 ?>
