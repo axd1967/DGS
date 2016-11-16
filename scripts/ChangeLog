@@ -13,6 +13,16 @@ ChangeLog
 
 2016-11-16 jug
 
+   * include/message_functions.php (MessageListBuilder.message_list_query, ~.load_cache_message_list),
+     include/table_columns.php (Table.handle_show_rows, ~.make_show_rows),
+     include/config.php (ENABLE_MESSAGE_NAVIGATION),
+     scripts/updates/1.20/other_changes.txt,
+     list_messages.php, search_messages.php, status.php:
+   - add navigation & entries-count & show-rows-selection for message-list & message-search
+     - add global-config 'ENABLE_MESSAGE_NAVIGATION' to control navigation/entries-count
+       for message-list & message-search, and control show-rows for message-list
+     - Table-class: allow manual adding of show-rows form-elements
+
    * tournaments/include/tournament.php (class Tournament, ~.__construct, ~.copyCleanup,
        ~.hasLinkedTournaments, ~.fillEntityData, ~.new_from_row, ~.update_tournament_links),
      tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament,

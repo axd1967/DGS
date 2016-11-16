@@ -158,7 +158,8 @@ if ( (string)$folder_nr_querystr != '' )
    $order = $mtable->current_order_string();
    $limit = 20;
 
-   $arr_msg = MessageListBuilder::load_cache_message_list('status', $my_id, $folder_nr_querystr, $order, $limit + 1);
+   list( $arr_msg, $num_rows, $found_rows ) =
+      MessageListBuilder::load_cache_message_list('status', $my_id, $folder_nr_querystr, $order, $limit + 1);
    $cnt_msg = count($arr_msg);
    if ( $cnt_msg > 0 )
    {

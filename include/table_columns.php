@@ -866,9 +866,9 @@ class Table
    }//add_or_del_column
 
    /*! \brief Sets Rows_Per_Page (according to changed Show-Rows-form-element or else cookie or players-row). */
-   private function handle_show_rows()
+   public function handle_show_rows( $enforce=false )
    {
-      if ( !$this->Use_Show_Rows )
+      if ( !$enforce && !$this->Use_Show_Rows )
          return;
 
       $rows = (int)$this->get_saved_arg(TFORM_VAL_SHOWROWS); // nr of rows
@@ -1579,7 +1579,7 @@ class Table
          if ( $ex_string ) $arr[]= $ex_string; // custom-extension
 
          $string = "<div id='{$this->Prefix}tableFAC'>";
-         $string .= implode( '&nbsp;&nbsp;&nbsp;', $arr );
+         $string .= implode( SMALL_SPACING, $arr );
          $string .= '</div>';
       }
 
@@ -1594,9 +1594,9 @@ class Table
    }//_compare_removed_column_names
 
    /*! \brief Builds select-box and submit-button to be able to change 'show-max-rows' */
-   private function make_show_rows( &$form )
+   public function make_show_rows( &$form, $enforce=false )
    {
-      if ( !$this->Use_Show_Rows )
+      if ( !$enforce && !$this->Use_Show_Rows )
          return '';
 
       $rows = $this->Rows_Per_Page;

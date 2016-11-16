@@ -16,16 +16,17 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Minor changes:
 
+   * <home list_messages.php>Messages</home> & <home search_messages.php>Search messages</home>:
+      * Jump to "current" message on opening message-thread-view with all messages expanded
+      * Added "Delete"-button on single message-view to move it to Trashcan-folder with one click
+      * Added "Empty trashcan"-button on message-list of Trashcan-folder
+      * Added navigation, entries count & show-rows-selection for message-list & message-search (if enabled)
+
    * Game info page:
       * Added link for round-robin-tournaments to tournament-game-pool
 
    * Forum:
       * Added check to prevent use of server-configured offensive terms
-
-   * Messages:
-      * Jump to "current" message on opening message-thread-view with all messages expanded
-      * Added "Delete"-button on single message-view to move it to Trashcan-folder with one click
-      * Added "Empty trashcan"-button on message-list of Trashcan-folder
 
    Bug fixes:
 
@@ -38,6 +39,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
    Server config:
       * Added config-switches:
          * FORUM_POST_FORBIDDEN_TERMS        - regex with offensive terms
+         * ENABLE_MESSAGE_NAVIGATION         - disabled
 
 #release DGS_1_19 [2014-Oct-29] - DGS 1.19.x  (Tournament, Markup, Forum, Games changes)
 

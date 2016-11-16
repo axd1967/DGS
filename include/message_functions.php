@@ -2283,11 +2283,16 @@ class MessageListBuilder
    /*!
     * \brief Read message-list.
     * \param $order (default sort on me.mid equals to sort on date) !!
+    * \param $calc_rows true = return selected mysql-num-rows & found-rows; false = return count of msg-rows & -1 (for found-rows)
     * \param $extra_querysql QuerySQL-object to extend query
-    * \return arr( msg-row, ... )
+    * \return [ [ msg-row, ... ], num_rows, found_rows ] ; see also $calc_rows argument
     */
-   public static function message_list_query( $my_id, $folderstring='all', $order=' ORDER BY me.mid', $limit='', $extra_querysql=null )
+   public static function message_list_query( $my_id, $folderstring='all', $order=' ORDER BY me.mid', $limit='',
+         $calc_rows=false, $extra_querysql=null )
    {
+      if ( !ENABLE_MESSAGE_NAVIGATION )
+         $calc_rows = false;
+
       /**
        * N.B.: On 2007-10-15, we have found, in the DGS database,
        *  30 records of MessageCorrespondents with .mid == 0
@@ -2299,6 +2304,8 @@ class MessageListBuilder
        *  .mid from 0 to -9999 (directly in the database) to move them apart.
        **/
       $qsql = new QuerySQL();
+      if ( $calc_rows )
+         $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
       $qsql->add_part( SQLP_FIELDS,
          'M.Type', 'M.Flags', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID', 'M.ReplyTo',
          'UNIX_TIMESTAMP(M.Time) AS Time',
@@ -2325,25 +2332,36 @@ class MessageListBuilder
       $arr_msg = array();
       while ( $row = mysql_fetch_assoc($result) )
          $arr_msg[] = $row;
+      if ( $calc_rows )
+      {
+         $num_rows = mysql_num_rows($result);
+         $found_rows = mysql_found_rows('MLB.message_list_query.found_rows');
+      }
+      else
+      {
+         $num_rows = count($arr_msg);
+         $found_rows = -1;
+      }
       mysql_free_result($result);
 
-      return $arr_msg;
+      return array( $arr_msg, $num_rows, $found_rows );
    }//message_list_query
 
-   public static function load_cache_message_list( $dbgmsg, $uid, $folderstring='all', $order=' ORDER BY me.mid', $arg_limit=0 )
+   public static function load_cache_message_list( $dbgmsg, $uid, $folderstring='all', $order=' ORDER BY me.mid',
+         $arg_limit=0, $calc_rows=false )
    {
-      $dbgmsg .= ".MLB:load_cache_message_list($uid,$folderstring,$order,$arg_limit)";
+      $dbgmsg .= ".MLB:load_cache_message_list($uid,$folderstring,$order,$arg_limit,$calc_rows)";
       $key = "Messages.$uid";
 
       $arr_msg = DgsCache::fetch( $dbgmsg, CACHE_GRP_MSGLIST, $key );
       if ( is_null($arr_msg) )
       {
          $limit = ( $arg_limit ) ? ' LIMIT '.((int)$arg_limit) : '';
-         $arr_msg = self::message_list_query( $uid, $folderstring, $order, $limit );
+         $arr_msg_result = self::message_list_query( $uid, $folderstring, $order, $limit, $calc_rows );
          DgsCache::store( $dbgmsg, CACHE_GRP_MSGLIST, $key, $arr_msg, 4*SECS_PER_HOUR );
       }
 
-      return $arr_msg;
+      return $arr_msg_result;
    }//load_cache_message_list
 
 } // end of 'MessageListBuilder'

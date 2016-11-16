@@ -268,6 +268,9 @@ define('ALLOW_QUICK_DO', true);
 // Allow conditional moves
 define('ALLOW_CONDITIONAL_MOVES', false);
 
+// Allow table-navigation & rows for message-list & message-search
+define('ENABLE_MESSAGE_NAVIGATION', false);
+
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
 

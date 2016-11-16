@@ -70,7 +70,8 @@ require_once 'include/classlib_profile.php';
    $smfilter = new SearchFilter( 's', $search_profile );
    $mfilter = new SearchFilter( '', $search_profile );
    //#$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
-   $mtable = new Table( 'message', $page, '', 'msgSearch', TABLE_NO_HIDE); //no-found-rows: |TABLE_ROWS_NAVI );
+   $mtable = new Table( 'message', $page, '', 'msgSearch',
+      TABLE_NO_HIDE | ( ENABLE_MESSAGE_NAVIGATION ? TABLE_ROWS_NAVI : 0 ) );
    $mtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -167,9 +168,10 @@ require_once 'include/classlib_profile.php';
    // only std- & user-folders, i.e. non-deleted
    $qsql->add_part( SQLP_WHERE, 'me.Folder_Nr > '.FOLDER_ALL_RECEIVED );
 
-   $arr_msg = MessageListBuilder::message_list_query( $my_id, '', $order, $limit, $qsql );
-   $show_rows = count($arr_msg);
-   $show_rows = $mtable->compute_show_rows( $show_rows );
+   list( $arr_msg, $num_rows, $found_rows ) =
+      MessageListBuilder::message_list_query( $my_id, '', $order, $limit, ENABLE_MESSAGE_NAVIGATION, $qsql );
+   $show_rows = $mtable->compute_show_rows( $num_rows );
+   $mtable->set_found_rows( $found_rows );
 
 
    $title = T_('Message search');

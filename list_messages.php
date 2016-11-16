@@ -138,8 +138,10 @@ require_once 'include/filter.php';
    $rx_term = get_request_arg('xterm');
 
    $mtable = new Table( 'message', 'list_messages.php'.$page, '', '',
-      TABLE_NO_HIDE|TABLE_NO_SIZE ); //no-found-rows: |TABLE_ROWS_NAVI );
+      TABLE_NO_HIDE | TABLE_NO_SIZE | ( ENABLE_MESSAGE_NAVIGATION ? TABLE_ROWS_NAVI : 0 ) );
    //$mtable->add_or_del_column();
+   if ( ENABLE_MESSAGE_NAVIGATION )
+      $mtable->handle_show_rows( true );
 
    $marked_form = new Form('messageMove','list_messages.php#action', FORM_GET, true, 'FormTable');
    $marked_form->set_tabindex(1);
@@ -152,17 +154,16 @@ require_once 'include/filter.php';
    $limit = $mtable->current_limit_string();
 
    $qsql->merge( $mtable->get_query() ); // include found-rows-stuff, may need adjustment for filters
-   $arr_msg = MessageListBuilder::message_list_query($my_id, $folderstring, $order, $limit, $qsql);
-   $show_rows = count($arr_msg);
+   list( $arr_msg, $num_rows, $found_rows ) =
+      MessageListBuilder::message_list_query( $my_id, $folderstring, $order, $limit, ENABLE_MESSAGE_NAVIGATION, $qsql );
+   $show_rows = $mtable->compute_show_rows( $num_rows );
+   $mtable->set_found_rows( $found_rows ); // might be too slow for so many msgs
 
    if ( $find_answers && $show_rows == 1 )
    {
       $mid = $arr_msg[0]['mid'];
       jump_to( "message.php?mode=ShowMessage".URI_AMP."mid=$mid".URI_AMP."xterm=".urlencode($rx_term) );
    }
-
-   $show_rows = $mtable->compute_show_rows( $show_rows);
-   //$mtable->set_found_rows( mysql_found_rows('list_messages.found_rows') ); // too slow for so many msgs
 
 
    echo echo_folders($my_folders, $current_folder);
@@ -224,6 +225,9 @@ require_once 'include/filter.php';
                  $marked_form->print_insert_checkbox( 'follow', '1', T_('Follow moving'), $follow ),
               "</td>\n<td>",
                  $elem_toggle_marks,
+                 ( ENABLE_MESSAGE_NAVIGATION
+                     ? SMALL_SPACING . SMALL_SPACING . $mtable->make_show_rows( $marked_form, true )
+                     : '' ),
               "</td>\n",
               "</tr></table>\n";
       }

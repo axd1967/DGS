@@ -11,19 +11,19 @@ New_Issues:   set prio + sort into sections
 - 5 DISC: [msg] send 2nd "thread-linked" message: A>A>B http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47921 -> clarify; feasible (sounds very complex)?
 
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S078) (T035) (A023) (C04) (D02) (B015) (F024) (V016)
-- 2 PRJ:  [todo] (A008.2d) cleanup TODO/FAQ after publish: pass-7 cleanup (mark NOT_DONE + commit 1st, then remove to be able to search for not-done stuff)
 #--------------- TEMP-STASH:
-- 4 PRJ:  [todo] (A008.2) new code-project-structure: add JUG-TODO/FAQ into specs-dir as TODO-jug/FAQ-jug under version-control (PRIV-mark sensitive-stuff), cleanup before publish -> see {A008.2c}
+#--------------- OPEN:
+- 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quota-inc for admin-operations
+- 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quota-inc for T-director-operations
 #--------------- STASH:
+- 2 PRJ:  [todo] (A008.2d) cleanup TODO/FAQ after publish: pass-7 cleanup (mark NOT_DONE + commit 1st, then remove to be able to search for not-done stuff)
 - 2 DISC: [site] chk/eval/answer private-DGS-folders: LATER #24, TODO #16, CHECK #42
 - 2 ADM:  [dev] git-stash: check and if needed move local stash (~Apr2014..Jun2015??) with cond-moves-changes into WORK-branch
 
 Open_Tasks_Stack_League:  first=next
-- 2 DEV:  [cleanup][site][tourney] site-map: add missing tournament-pages
-#--------------- STASH:
-- 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
 #--------------- DONE:
 #--------------- OPEN:
+- 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
 - 4 SPEC: [tourney] (T029.19a) TLeague: sync TPs from prev-cycle: at any time? {see T029.19b}; sync/merge TPs with prev-cycle-TPs (skip drop-outs, auto-withdrawn TPs == opt-out);; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47647;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47634;; see also {T029.18} tie-breaker extras?
 - 4 SPEC: [tourney] (T029.19b) TLeague: sync TPs from prev-cycle: conditions when to allow TP-sync
 - 4 SPEC: [tourney] (T029.19c) TLeague: sync TPs from prev-cycle: adj TP/TD-TP-reg-edit to add flag/marker to prevent overwrite in sync
@@ -77,17 +77,14 @@ Tournaments_Running:
 
 Backlog_1_20_0:
 - 1 SPEC: [tourney] (T034.0) break down title-T-feature into stories (only TRR-types), collect reqs: best-of-oddX; start with connect to TLeague (other TRR-types later)
-- 3 SPEC: [msg] add rows-selection on message-list/search: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911
 - 1 SPEC: [user][adm] regenerate verification-mail + fix/handle verifications for admin + handle old-unused-verification -> cleanup !?
-- 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quota-inc for admin-operations
-- 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quota-inc for T-director-operations
 - 3 IDEA: [tourney] copy existing T on T-creation-wizard? -> see code copyTournament()
 - 4 SPEC: [tourney] TRR: allow T-director to start next round with open games, that will not change pool-winners: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2984586;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3308359;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41787#47809
 - 5 SPEC: [forum] (S037) replace [markread] by [add-tag] to: label post, public tags (agree/ad/disagree), private customized tags? <-> only static list ;; tag-cloud (public, private-only?);; for reply-notifies; maybe use <tags>-element for allowed;; TODO-tag;; allow to tag a forum: file-based approach perhaps; or table with file-based cache;; add JS-tagging on forums!?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=31759#31791;; (admin-forum) http://www.dragongoserver.net/forum/read.php?forum=9&thread=24845;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=45025#45104 -> later tag ref'ed posts from TODO (archive)
-- 4 SPEC: [site] (A008.1) new code-project-structure: ~/src|doc|specs|examples|plugins|tests|the-like|etc; use some auto-build/test/deploy(envs:sf/prod)
 - 4 SPEC: [profile] (S075) Bookmarks: add/edit bookmarks in bookmark-menu, show list for selection on separate page (to avoid reload on every page)
 - 4 DEV:  [profile] (S075) Bookmarks: Add/edit; customizable, maybe num-restricted on non-admins(?);; http://www.dragongoserver.net/forum/read.php?forum=2&thread=33119
 - 4 DEV:  [profile] (S075) Bookmarks: php-cache bookmarks in secret-tempdir maybe or in APC-cache!;; optimization/cleanup: hide bookmark with option to save db-selects
+- 4 SPEC: [site] (A008.1) new code-project-structure: ~/src|doc|specs|examples|plugins|tests|the-like|etc; use some auto-build/test/deploy(envs:sf/prod)
 #---------------
 - 3 IDEA: [tourney] convenience for TD: invite players from other tournament with filters (all / specific round / next-round-mark): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3277209
 
@@ -747,7 +744,6 @@ Ideas_Issues_Help_Text_Related:
 
 Ideas_Issues_Messaging_Notification_Related:
 - 3 IDEA: [msg] show system-flags reject-message/invite when writing message (on preview + saving)
-- 4 CHK:  [msg] add navigation on message-list/search
 - 4 IDEA: [profile] turn-off notifications (join-waiting-room-game): http://www.dragongoserver.net/forum/read.php?forum=4&thread=20235
 - 5 IDEA: [msg] allow message "quote"-reply (similar to forum-post-quoting);; a bit uncool because links are replaced?
 - 5 IDEA: [msg] other default-target-folder for message-actions: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2745942 !?
@@ -957,8 +953,12 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 1 IDEA: [site] (S077.1) avoid expire-login-check on POSTs (potentially losing input-data): check "count($_POST)"(?) or "$_SERVER['REQUEST_METHOD'] == 'POST'": http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47914
 - 1 IDEA: [site] (S077.3) avoid expire-login-check on some POSTs (edit-email/profile): check/replace GET-forms with POST-forms?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47914 -> checked others -> split {S077.2}, {S077.5}
 - 1 PRJ:  [todo] (A008.2c) cleanup TODO/FAQ before publish; correct/add sections/PRIV/category/type/prio/sort; see ~/DGS-data/project/(types|categories|sections);; started 28Jun2015, PUBLISH latest at 17-Jan-2016 -> strike that: http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#46054 -> 6-pass cleanup (1 split-rel>FAQ, 2 PRIV/desc/type/cats, 3 sections/sort, 4 order/prio, 5 split-PRIV, 6 ids); write README.todo
+- 4 PRJ:  [todo] (A008.2) new code-project-structure: add JUG-TODO/FAQ into specs-dir as TODO-jug/FAQ-jug under version-control (PRIV-mark sensitive-stuff), cleanup before publish -> see {A008.2c}
 - 3 SPEC: [tourney] (T029.4a) TLeague: spawn next cycle: add new page 'manage_linked.php' (link in T-mng PLAY-phase); spawn-button w/ confirm to "spawn new T with next cycle": create new T + copy props/data w/o state {see T029.4b}
 - 3 SPEC: [tourney] (T029.4c) TLeague: spawn next cycle: chain-link src/trg Ts; show tid-links for user/t-dirs on T-info(title-section)/view-pools(below-title)/T-mng(above 1.Setup) as link to "prev/next cycle" (if existing);; store in T-table; term "Linked Tournaments"
 - 3 SPEC: [tourney] (T029.4b) TLeague: spawn next cycle: create new T + COPY data from: T.scope/type/wiztype/title/descr/owner/flags(some), all TDirs, TProps.all[-RegEndTime], TRules.all, TRnd.all[-runtime], TPoints.all
 - 2 DEV:  [cleanup][tourney] T-log: not only log title, but type/wiz-type/scope as well; perhaps even more?
+- 2 DEV:  [cleanup][site][tourney] site-map: add missing tournament-pages -> checked -> no change required (tournament-specific pages are not included)
+- 3 SPEC: [msg][cfg] add navigation & entries-count & rows-selection on message-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
+- 3 SPEC: [msg][cfg] add navigation & entries-count on message-search: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
 
