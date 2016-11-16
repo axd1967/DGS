@@ -946,7 +946,7 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 5 SPEC: [tourney] (T029.17i.5) TLeague: rank-summary check: (5) ERR: check for Rank=0 (withdrawing) for TLG and with promote/demote-flag set -> list bad users
 - 5 SPEC: [tourney] (T029.17i.6) TLeague: rank-summary check: (6) ERR: check for both relegation-flags set (promote+demote) -> list bad users
 - 5 SPEC: [msg] list-msg of trashcan-folder: add button to "empty trashcan" completely: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47902;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47898;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
-- 5 SPEC: [msg] one-click-delete: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
+- 5 SPEC: [msg] one-click-delete for viewing-single-msg: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
 - 5 SPEC: [tourney] (T029.17i.4) TLeague: rank-summary check: (4) WARN if there are double-ranks -> may need tie-breaking {T029.18}
 - 5 SPEC: [tourney] (T029.17i.3) TLeague: rank-summary check: (3) WARN if rank of promoted/demoted/staying pool-users doesn't match up with TRound-props PromoteRanks/DemoteStartRank
 - 5 SPEC: [tourney] (T029.17i.1) TLeague: rank-summary check: (1) WARN if counting too many users to-be-relegated (w/o withdrawn TPs);; too many if #promotes > PromoteRanks; too many if #same > (DemoteStartRank - PromoteRanks - 1); too many if #demotes > (pool[i].poolsize - DemoteStartRank + 1)
@@ -961,4 +961,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 2 DEV:  [cleanup][site][tourney] site-map: add missing tournament-pages -> checked -> no change required (tournament-specific pages are not included)
 - 3 SPEC: [msg][cfg] add navigation & entries-count & rows-selection on message-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
 - 3 SPEC: [msg][cfg] add navigation & entries-count on message-search: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
+- 5 SPEC: [msg] one-click-delete for msg-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
 

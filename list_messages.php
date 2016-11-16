@@ -45,6 +45,7 @@ require_once 'include/filter.php';
    Actions:
       toggle_marks      : toggle marks
       move_marked       : change folder for marked messages
+      trash_marked      : move marked messages into Trashcan-folder
       empty_trash       : destroy all messages in Trashcan-folder (aka 'empty trashcan')
       follow            : true to switch into target folder after move
       folder            : target-folder for changing folder
@@ -198,9 +199,9 @@ require_once 'include/filter.php';
       {
          echo $marked_form->print_insert_submit_button( 'destroy_marked', T_('Destroy marked messages') ),
               MED_SPACING,
-              $marked_form->print_insert_submit_button( 'empty_trash', T_('Empty trashcan#msg') ),
-              MED_SPACING,
-              $elem_toggle_marks;
+              $elem_toggle_marks,
+              SMALL_SPACING, SMALL_SPACING,
+              $marked_form->print_insert_submit_button( 'empty_trash', T_('Empty trashcan#msg') );
       }
       else
       {
@@ -228,6 +229,8 @@ require_once 'include/filter.php';
                  ( ENABLE_MESSAGE_NAVIGATION
                      ? SMALL_SPACING . SMALL_SPACING . $mtable->make_show_rows( $marked_form, true )
                      : '' ),
+                 SMALL_SPACING, SMALL_SPACING,
+                 $marked_form->print_insert_submit_button('trash_marked', T_('Delete marked#msg')),
               "</td>\n",
               "</tr></table>\n";
       }

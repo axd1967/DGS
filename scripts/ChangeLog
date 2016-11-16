@@ -13,6 +13,11 @@ ChangeLog
 
 2016-11-16 jug
 
+   * include/message_functions.php (change_folders_for_marked_messages),
+     list_messages.php:
+   - add button on message-list to move marked messages into Trashcan-folder with one-click
+   - changed button-order for empty-trashcan on message-list
+
    * include/message_functions.php (MessageListBuilder.message_list_query, ~.load_cache_message_list),
      include/table_columns.php (Table.handle_show_rows, ~.make_show_rows),
      include/config.php (ENABLE_MESSAGE_NAVIGATION),

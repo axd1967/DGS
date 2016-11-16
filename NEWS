@@ -19,6 +19,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
    * <home list_messages.php>Messages</home> & <home search_messages.php>Search messages</home>:
       * Jump to "current" message on opening message-thread-view with all messages expanded
       * Added "Delete"-button on single message-view to move it to Trashcan-folder with one click
+      * Added "Delete marked"-button on message-list to move marked messages to Trashcan-folder with one click
       * Added "Empty trashcan"-button on message-list of Trashcan-folder
       * Added navigation, entries count & show-rows-selection for message-list & message-search (if enabled)
 

@@ -1530,7 +1530,9 @@ function change_folders_for_marked_messages($uid, $folders)
          return -1; //i.e. no move query
       $new_folder = (int)$_GET['folder'];
    }
-   else if ( isset($_GET['destroy_marked'] ) )
+   elseif ( isset($_GET['trash_marked'] ) )
+      $new_folder = FOLDER_DELETED;
+   elseif ( isset($_GET['destroy_marked'] ) )
       $new_folder = FOLDER_DESTROYED;
    else
       return -1; //i.e. no move query
