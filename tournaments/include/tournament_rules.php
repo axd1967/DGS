@@ -767,26 +767,6 @@ class TournamentRules
       return $result;
    }//load_tournament_rule
 
-   /*! \brief Returns enhanced (passed) ListIterator with Tournament-objects for given tournament-id. */
-   public static function load_tournament_rules( $iterator, $tid )
-   {
-      $qsql = self::build_query_sql( $tid );
-      $iterator->setQuerySQL( $qsql );
-      $query = $iterator->buildQuery();
-      $result = db_query( "TournamentRules:load_tournament_rules($tid)", $query );
-      $iterator->setResultRows( mysql_num_rows($result) );
-
-      $iterator->clearItems();
-      while ( $row = mysql_fetch_array( $result ) )
-      {
-         $tourney = self::new_from_row( $row );
-         $iterator->addItem( $tourney, $row );
-      }
-      mysql_free_result($result);
-
-      return $iterator;
-   }//load_tournament_rules
-
    /*! \brief Returns flags-text for given int-bitmask or all flags-texts (if arg=null). */
    public static function getFlagsText( $flags=null )
    {
