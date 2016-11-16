@@ -62,6 +62,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    // init
    $page = "manage_tournament.php";
    $title = T_('Tournament Manager');
+   $is_league = ( $tourney->Type == TOURNEY_TYPE_LEAGUE );
 
 
    // ---------- Tournament Info -----------------------------------
@@ -111,6 +112,12 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       $tform->add_row( array(
             'DESCRIPTION', T_('Rounds#tourney'),
             'TEXT', $tourney->formatRound(), ));
+   }
+   if ( $is_league )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament Links'),
+            'TEXT', TournamentGuiHelper::build_tournament_links($tourney, 'tournaments/manage_tournament.php'), ));
    }
 
 
@@ -166,10 +173,15 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       make_header( 4, T_('Play phase#tourney'), TOURNEY_STATUS_PLAY ), //------------------------
       '<ul class="TAdminLinks">',
          make_links_ttype_specific( $tourney, TOURNEY_STATUS_PLAY ),
-         '<li>', make_menu_link( T_('Edit results#tourney'), "tournaments/edit_results.php?tid=$tid" ),
+         '<li>', make_menu_link( T_('Edit results#tourney'), array( 'url' => "tournaments/edit_results.php?tid=$tid", 'class' => 'TAdmin' )),
                  SEP_SPACING,
                  make_menu_link( T_('Show all tournament results'), "tournaments/list_results.php?tid=$tid" ),
                  subList( array( T_('Add, edit, delete tournament results'), )),
+         ( $is_league )
+            ? '<li>'
+                  . make_menu_link( T_('Manage linked tournaments#t_mng'), array( 'url' => "tournaments/league/manage_linked.php?tid=$tid", 'class' => 'TAdmin' ))
+                  . subList( array( T_('Spawn next cycle#t_mng') ))
+            : '',
       '</ul>',
 
       '</tr></td></table>',

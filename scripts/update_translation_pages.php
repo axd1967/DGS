@@ -37,6 +37,7 @@ function find_php_files( )
          , 'rss/'
          , 'tournaments/'
          , 'tournaments/ladder/'
+         , 'tournaments/league/'
          , 'tournaments/roundrobin/'
          , 'tournaments/include/'
          , 'tournaments/include/types/'

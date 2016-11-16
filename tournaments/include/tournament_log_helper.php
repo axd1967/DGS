@@ -58,6 +58,13 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+   public static function log_copy_tournament( $src_tid, $trg_tid, $tlog_type, $tourney )
+   {
+      $tlog = new Tournamentlog( 0, $trg_tid, 0, 0, $tlog_type, 'T_Data', TLOG_ACT_COPY, 0,
+         "COPY T#$src_tid; {$tourney->Title}" );
+      $tlog->insert();
+   }
+
    public static function log_change_tournament_status( $tid, $tlog_type, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Status', TLOG_ACT_CHANGE, 0, $msg );
@@ -740,6 +747,25 @@ class TournamentLogHelper
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRES_Data', TLOG_ACT_CREATE, 0, implode("\n", $msg) );
       $tlog->insert();
    }//log_create_tournament_result_pool_winners
+
+
+   public static function log_spawn_next_cycle( $tid, $tlog_type, $new_tid, $link_success )
+   {
+      $success = true;
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Data', TLOG_ACT_COPY, 0,
+         sprintf('Spawned new tournament T#%s [%s], linking [%s]',
+            $new_tid,
+            ($success ? 'OK' : 'FAILED'),
+            ($link_success ? 'OK' : 'FAILED')
+            ));
+      $tlog->insert();
+   }//log_spawn_next_cycle
+
+   public static function log_link_tournament( $tlog_type, $tid, $log_msg )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Data', TLOG_ACT_LINK, 0, $log_msg );
+      $tlog->insert();
+   }
 
 } // end of 'TournamentLogHelper'
 ?>

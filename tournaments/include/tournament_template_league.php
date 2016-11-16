@@ -67,6 +67,42 @@ abstract class TournamentTemplateLeague extends TournamentTemplateRoundRobin
       // DemoteStartRank := 6
    }
 
+
+   public function copyTournament( $tlog_type, $src_tid )
+   {
+      $src_tid = (int)$src_tid;
+
+      // load all relevant tables to copy
+      $tourney = Tournament::load_tournament( $src_tid );
+      $tprops  = TournamentProperties::load_tournament_properties( $src_tid );
+      $trule   = TournamentRules::load_tournament_rule( $src_tid );
+      $tpoints = TournamentPoints::load_tournament_points( $src_tid );
+      $tround  = TournamentRound::load_tournament_round( $src_tid, 1 );
+
+      // standard reset for copy
+      $tourney->copyCleanup();
+      $tprops->copyCleanup();
+      $trule->copyCleanup();
+      $tpoints->copyCleanup();
+      $tround->copyCleanup();
+
+      // special reset for copy
+      $tourney->Title = sprintf( '[%s] %s', T_('COPY#tourney'), $tourney->Title );
+      $tround->Pools = 0;
+
+      ta_begin();
+      {//HOT-section to copy relevant tables for new tournament
+         $trg_tid = $this->_persistTournamentData( $tourney, $tprops, $trule, $tpoints, $tround );
+         if ( $trg_tid )
+            TournamentDirector::copy_tournament_directors( $src_tid, $trg_tid );
+
+         TournamentLogHelper::log_copy_tournament( $src_tid, $trg_tid, $tlog_type, $tourney );
+      }
+      ta_end();
+
+      return $trg_tid;
+   }//copyTournament
+
    public function getDefaultPoolNamesFormat()
    {
       return '%t(uc)-%L, %P %t(uc)%p(num)';

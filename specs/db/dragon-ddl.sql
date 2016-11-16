@@ -1064,6 +1064,8 @@ CREATE TABLE IF NOT EXISTS `Tournament` (
   `CurrentRound` tinyint(3) unsigned NOT NULL default '1',
   `RegisteredTP` smallint(6) NOT NULL default '0',
   `LockNote` varchar(255) NOT NULL default '',
+  `Prev_tid` int(11) NOT NULL default '0',
+  `Next_tid` int(11) NOT NULL default '0',
   PRIMARY KEY  (`ID`),
   KEY `Status` (`Status`),
   KEY `StartTime` (`StartTime`)

@@ -26,6 +26,7 @@ require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
 
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -34,6 +35,7 @@ require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -66,50 +68,18 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
    }
 
    /*!
-    * \brief Function to persist create tournament-tables for round-robin tournament.
+    * \brief Function to persist create tournament-tables for round-robin tournament,
+    *       and add some defaults for pool-names-format and initial tournament-director.
     * \internal
     */
-   protected function _createTournament( $tourney, $tprops, $trules, $tpoints, $tround )
+   protected function _createTournament( $tourney, $tprops, $trule, $tpoints, $tround )
    {
-      global $NOW;
-
       ta_begin();
       {//HOT-section to create various tables for new tournament
-         // check args
-         if ( !($tourney instanceof Tournament) )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.tourney.check(%s)");
-         if ( !($tprops instanceof TournamentProperties) )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.tprops.check(%s)");
-         if ( !($trules instanceof TournamentRules) )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.check(%s)");
-         if ( !($tpoints instanceof TournamentPoints) )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.tpoints.check(%s)");
-         if ( !($tround instanceof TournamentRound) )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.check(%s)");
-
          // enrich tournament-related objects
          $tround->PoolNamesFormat = $this->getDefaultPoolNamesFormat();
 
-         // insert tournament-related tables
-         if ( !$tourney->persist() )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.tourney.insert(%s)");
-         $tid = $tourney->ID;
-
-         $tprops->tid = $tid;
-         if ( !$tprops->insert() )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.tprops.insert(%s,$tid)");
-
-         $trules->tid = $tid;
-         if ( !$trules->insert() )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.insert(%s,$tid)");
-
-         $tpoints->tid = $tid;
-         if ( !$tpoints->insert() )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.tpoints.insert(%s,$tid)");
-
-         $tround->tid = $tid;
-         if ( !$tround->insert() )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.insert(%s,$tid)");
+         $tid = $this->_persistTournamentData( $tourney, $tprops, $trule, $tpoints, $tround );
 
          $this->create_default_tournament_director( $tid );
 
@@ -119,6 +89,55 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 
       return $tid;
    }//_createTournament
+
+   /*!
+    * \brief Function to persist create tournament-tables for round-robin tournament.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    * \internal
+    */
+   protected function _persistTournamentData( &$tourney, &$tprops, &$trule, &$tpoints, &$tround )
+   {
+      // check args
+      if ( !($tourney instanceof Tournament) )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.tourney.check(%s)");
+      if ( !($tprops instanceof TournamentProperties) )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.tprops.check(%s)");
+      if ( !($trule instanceof TournamentRules) )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.trules.check(%s)");
+      if ( !($tpoints instanceof TournamentPoints) )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.tpoints.check(%s)");
+      if ( !($tround instanceof TournamentRound) )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.tround.check(%s)");
+
+      // insert tournament-related tables
+      if ( !$tourney->persist() )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.tourney.insert(%s)");
+      $tid = $tourney->ID;
+
+      $tprops->tid = $tid;
+      if ( !$tprops->insert() )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.tprops.insert(%s,$tid)");
+
+      $trule->tid = $tid;
+      if ( !$trule->insert() )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.trules.insert(%s,$tid)");
+
+      $tpoints->tid = $tid;
+      if ( !$tpoints->insert() )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.tpoints.insert(%s,$tid)");
+
+      $tround->tid = $tid;
+      if ( !$tround->insert() )
+         $this->create_error("TournamentTemplateRoundRobin._persistTournamentData.tround.insert(%s,$tid)");
+
+      return $tid;
+   }//_persistTournamentData
+
+
+   public function copyTournament( $tlog_type, $src_tid )
+   {
+      error('not_implemented', "TournamentTemplateRoundRobin.copyTournament($tlog_type,$src_tid)");
+   }//copyTournament
 
    public function getDefaultPoolNamesFormat()
    {

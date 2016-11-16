@@ -142,6 +142,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
                sprintf( T_('View Pools (Round #%s)'), $r ));
          echo implode(', ', $out), "<br><br>\n";
       }
+      if ( $tourney->hasLinkedTournaments() )
+      {
+         echo '<div class="Links">',
+            TournamentGuiHelper::build_tournament_links($tourney, 'tournaments/roundrobin/view_pools.php', ''),
+            "</div><br>\n";
+      }
 
       $poolViewer = new PoolViewer( $tid, $page, $tourney->Type, $poolTables, $tround->PoolNamesFormat, $games_factor,
          ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) | ($use_pool_cache ? PVOPT_NO_ONLINE : 0) );

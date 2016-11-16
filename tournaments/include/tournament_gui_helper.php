@@ -240,6 +240,42 @@ class TournamentGuiHelper
       return $notes;
    }//build_tournament_pool_notes
 
+   /*!
+    * \brief Returns link to previous and next cycle (if existing).
+    * \param $tourney Tournament-object
+    * \param $link_path base-path for anchor-links (without $base_path or query-params); default is link to view-tournament-page
+    */
+   public static function build_tournament_links( $tourney, $link_path='', $defval=NO_VALUE )
+   {
+      global $base_path;
+
+      $out = array();
+      if ( $tourney->Type == TOURNEY_TYPE_LEAGUE )
+      {
+         $base_view = $base_path . ($link_path ? $link_path : 'tournaments/view_tournament.php') . '?tid=';
+         if ( $tourney->Prev_tid > 0 )
+            $out[] = anchor( $base_view . $tourney->Prev_tid, T_('View previous cycle#tourney') );
+         if ( $tourney->Next_tid > 0 )
+            $out[] = anchor( $base_view . $tourney->Next_tid, T_('View next cycle#tourney') );
+      }
+      return count($out) ? join(SEP_SPACING, $out) : $defval;
+   }//build_tournament_links
+
+   public static function build_form_confirm( &$tform, $message, $confirm_action, $confirm_text, $cancel_action='cancel' )
+   {
+      $tform->add_empty_row();
+      $tform->add_row( array(
+            'TAB',
+            'TEXT', span('TWarning', $message.':'), ));
+      $tform->add_row( array(
+            'TAB',
+            'CELL', 1, '',
+            'SUBMITBUTTON', $confirm_action.'_confirm', $confirm_text,
+            'TEXT', SMALL_SPACING,
+            'SUBMITBUTTON', $cancel_action, T_('Cancel') ));
+      $tform->add_empty_row();
+   }//build_form_confirm
+
 } // end of 'TournamentGuiHelper'
 
 ?>

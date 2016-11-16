@@ -19,13 +19,12 @@ Open_Tasks_Stack:  (max. 2 WIP), first=next  (S078) (T035) (A023) (C04) (D02) (B
 - 2 ADM:  [dev] git-stash: check and if needed move local stash (~Apr2014..Jun2015??) with cond-moves-changes into WORK-branch
 
 Open_Tasks_Stack_League:  first=next
+- 2 DEV:  [cleanup][tourney] T-log: not only log wiz-type, but type as well; perhaps even more?
+- 2 DEV:  [cleanup][site][tourney] site-map: add missing tournament-pages
+#--------------- STASH:
 - 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
-- 3 IDEA: [tourney] copy existing T on T-creation-wizard?
 #--------------- DONE:
 #--------------- OPEN:
-- 3 SPEC: [tourney] (T029.4a) TLeague: spawn next cycle: add new page (link in T-mng PLAY-phase instead of edit-rounds); spawn-button w/ confirm to "spawn new T with next cycle": create new T + copy props/data w/o state {see T029.4b}
-- 3 SPEC: [tourney] (T029.4b) TLeague: spawn next cycle: create new T + COPY data from: T.scope/type/wiztype/title/descr/owner/flags(some), all TDirs, TProps.all[-RegEndTime], TRules.all, TRnd.all[-runtime], TPoints.all
-- 3 SPEC: [tourney] (T029.4c) TLeague: spawn next cycle: chain-link src/trg Ts; show tid-links for user/t-dirs on T-info(title-section)/view-pools(below-title)/T-mng(above 1.Setup) as link to "prev/next cycle" (if existing);; store where? likely in T-table
 - 4 SPEC: [tourney] (T029.19a) TLeague: sync TPs from prev-cycle: at any time? {see T029.19b}; sync/merge TPs with prev-cycle-TPs (skip drop-outs, auto-withdrawn TPs == opt-out);; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47647;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47634;; see also {T029.18} tie-breaker extras?
 - 4 SPEC: [tourney] (T029.19b) TLeague: sync TPs from prev-cycle: conditions when to allow TP-sync
 - 4 SPEC: [tourney] (T029.19c) TLeague: sync TPs from prev-cycle: adj TP/TD-TP-reg-edit to add flag/marker to prevent overwrite in sync
@@ -58,7 +57,7 @@ Tournament_League:  (T029).25 http://www.dragongoserver.net/forum/read.php?forum
 
 Admin_Todo:
 - 1 ADM:  [tourney] DELETE tournament #43 and all related TGs and games and related tables + run player consistency-check; TPs: 8053, 34841, 48875, 49421, 66065, 75058, 86163, 86286, 88303;; Games.ToMove_ID set to -ToMove_ID to prevent players from players; 3 games already FINISHED (changed to unrated)
-- 1 ADM:  [adm] handle recent spammers 18Feb2016
+- 1 ADM:  [adm] handle recent spammers 18Feb2016; 14Nov2016 (see administrated-users admin-notes)
 - 3 ADM:  [site] answer Q: check file-backup of web-server: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39135#39389
 - 3 ADM:  [tourney] handle multi-account-participation on ladders: http://www.dragongoserver.net/view_bulletin.php?bid=110;; see ~/DGS-fixes/multi-entry-ladders-2014-05-07/
 - 3 PRJ:  [todo][feature] collect "ripe"-enough features/ideas to put up for feature-voting (from forums / todo) -> chg TYPE to 'VOTE'
@@ -83,6 +82,7 @@ Backlog_1_20_0:
 - 1 SPEC: [user][adm] regenerate verification-mail + fix/handle verifications for admin + handle old-unused-verification -> cleanup !?
 - 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quota-inc for admin-operations
 - 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quota-inc for T-director-operations
+- 3 IDEA: [tourney] copy existing T on T-creation-wizard? -> see code copyTournament()
 - 4 SPEC: [tourney] TRR: allow T-director to start next round with open games, that will not change pool-winners: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2984586;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3308359;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41787#47809
 - 5 SPEC: [forum] (S037) replace [markread] by [add-tag] to: label post, public tags (agree/ad/disagree), private customized tags? <-> only static list ;; tag-cloud (public, private-only?);; for reply-notifies; maybe use <tags>-element for allowed;; TODO-tag;; allow to tag a forum: file-based approach perhaps; or table with file-based cache;; add JS-tagging on forums!?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=31759#31791;; (admin-forum) http://www.dragongoserver.net/forum/read.php?forum=9&thread=24845;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=45025#45104 -> later tag ref'ed posts from TODO (archive)
 - 4 SPEC: [site] (A008.1) new code-project-structure: ~/src|doc|specs|examples|plugins|tests|the-like|etc; use some auto-build/test/deploy(envs:sf/prod)
@@ -958,4 +958,7 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 1 IDEA: [site] (S077.1) avoid expire-login-check on POSTs (potentially losing input-data): check "count($_POST)"(?) or "$_SERVER['REQUEST_METHOD'] == 'POST'": http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47914
 - 1 IDEA: [site] (S077.3) avoid expire-login-check on some POSTs (edit-email/profile): check/replace GET-forms with POST-forms?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47914 -> checked others -> split {S077.2}, {S077.5}
 - 1 PRJ:  [todo] (A008.2c) cleanup TODO/FAQ before publish; correct/add sections/PRIV/category/type/prio/sort; see ~/DGS-data/project/(types|categories|sections);; started 28Jun2015, PUBLISH latest at 17-Jan-2016 -> strike that: http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#46054 -> 6-pass cleanup (1 split-rel>FAQ, 2 PRIV/desc/type/cats, 3 sections/sort, 4 order/prio, 5 split-PRIV, 6 ids); write README.todo
+- 3 SPEC: [tourney] (T029.4a) TLeague: spawn next cycle: add new page 'manage_linked.php' (link in T-mng PLAY-phase); spawn-button w/ confirm to "spawn new T with next cycle": create new T + copy props/data w/o state {see T029.4b}
+- 3 SPEC: [tourney] (T029.4c) TLeague: spawn next cycle: chain-link src/trg Ts; show tid-links for user/t-dirs on T-info(title-section)/view-pools(below-title)/T-mng(above 1.Setup) as link to "prev/next cycle" (if existing);; store in T-table; term "Linked Tournaments"
+- 3 SPEC: [tourney] (T029.4b) TLeague: spawn next cycle: create new T + COPY data from: T.scope/type/wiztype/title/descr/owner/flags(some), all TDirs, TProps.all[-RegEndTime], TRules.all, TRnd.all[-runtime], TPoints.all
 

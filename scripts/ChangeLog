@@ -13,6 +13,46 @@ ChangeLog
 
 2016-11-16 jug
 
+   * tournaments/include/tournament.php (class Tournament, ~.__construct, ~.copyCleanup,
+       ~.hasLinkedTournaments, ~.fillEntityData, ~.new_from_row, ~.update_tournament_links),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament,
+       ~._persistTournamentData, ~.copyTournament)
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_copy_tournament,
+       ~.log_spawn_next_cycle, ~.log_link_tournament),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_links,
+       ~.build_form_confirm),
+     tournaments/include/tournament_league_helper.php (TournamentLeagueHelper.spawn_next_cycle,
+       ~.link_tournaments),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.copyTournament),
+     tournaments/include/tournament_template_league.php (TournamentTemplateLeague.copyTournament),
+     tournaments/include/tournament_director.php (TournamentDirector.copy_tournament_directors),
+     tournaments/include/tournament_properties.php (TournamentProperties.copyCleanup),
+     tournaments/include/tournament_template.php (TournamentTemplate.copyTournament),
+     tournaments/include/tournament_points.php (TournamentPoints.copyCleanup),
+     tournaments/include/tournament_round.php (TournamentRound.copyCleanup),
+     tournaments/include/tournament_rules.php (TournamentRules.copyCleanup),
+     tournaments/include/tournament_log.php (TLOG_ACT_COPY, TLOG_ACT_LINK),
+     include/db_classes.php (Entity.get_sql_copy_fields),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.20/database_changes.mysql, scripts/update_translation_pages.php,
+     skins/dragon/screen.css, specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/roundrobin/view_pools.php, tournaments/manage_tournament.php,
+     tournaments/show_tournament_log.php, tournaments/view_tournament.php,
+     tournaments/league/manage_linked.php:
+   - add spawning of new league-cycle tournament and link source with newly created tournament
+     - add new managed_linked-page to spawn new tournament as copy and link them
+     - add Tournament.Prev_tid/Next_tid to store links to previous/next cycle-tournament
+     - add links to previous/next cycle-tournament on view-tournament-, view-pools-, managed-linked-,
+       manage-tournament-page
+     - add copying of tournament used for spawning next league-cycle,
+       prepare for later copy-tournament-feature
+-----------
+-- add previous/next cycle tournament for league-tournament
+ALTER TABLE Tournament
+   ADD Prev_tid int NOT NULL default '0',
+   ADD Next_tid int NOT NULL default '0' ;
+-----------
+
    * tournaments/include/tournament_league_helper.php (class TournamentLeagueHelper,
        ~.fill_relegations_tournament_pool),
      tournaments/include/tournament_round_helper.php (class TournamentRoundHelper),

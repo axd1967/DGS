@@ -739,7 +739,8 @@ table.Links td {
    font-weight: bold;
 }
 
-table.Links a {
+table.Links a,
+div.Links a {
    color: blue;
    font-weight: bold;
 }

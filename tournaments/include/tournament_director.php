@@ -261,6 +261,22 @@ class TournamentDirector
       return $out;
    }//load_tournament_directors_uid
 
+   /*! \brief Copies all tournament-directors from source to target tournament. */
+   public static function copy_tournament_directors( $src_tid, $trg_tid )
+   {
+      global $ENTITY_TOURNAMENT_DIRECTOR;
+
+      $src_tid = (int)$src_tid;
+      $trg_tid = (int)$trg_tid;
+
+      $fields = $ENTITY_TOURNAMENT_DIRECTOR->get_sql_copy_fields('tid');
+      $result = db_query( "TournamentDirector:copy_tournament_directors($src_tid,$trg_tid).copy",
+         "INSERT TournamentDirector (tid, $fields) " .
+         "SELECT $trg_tid, $fields FROM TournamentDirector WHERE tid=$src_tid" );
+
+      return mysql_affected_rows();
+   }//copy_tournament_directors
+
    /*!
     * \brief Identify user from given user-info (uid or handle).
     * \return row-array with ID/Name/Handle/Rating/X_Lastaccess; null if nothing found

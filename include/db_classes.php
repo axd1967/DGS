@@ -166,6 +166,29 @@ class Entity
       return (strcmp($this->field_autoinc, $field) == 0);
    }
 
+   /*!
+    * \brief Returns SQL-select-part with all fields except specified (optional) skip-fields & some standard fields.
+    * \param $skip_fields string with ','-separated field-names to skip; '' = skip only FIELD_CHANGEDBY & FIELD_LOCKVERSION
+    */
+   public function get_sql_copy_fields( $skip_fields='' )
+   {
+      static $ARR_SKIP_FIELDS = array( FIELD_CHANGEDBY => 1, FIELD_LOCKVERSION => 1 );
+
+      if ( !preg_match("/^[a-z0-9_,]+$/i", $skip_fields) )
+         error('invalid_args', "Entity.get_sql_copy_fields.check.skip_fields({$this->table},$skip_fields)");
+      $map_skip_fields = ( $skip_fields )
+         ? array_value_to_key_and_value(explode(',', $skip_fields)) + $ARR_SKIP_FIELDS
+         : $ARR_SKIP_FIELDS;
+
+      $out = array();
+      foreach ( $this->fields as $field => $type )
+      {
+         if ( !isset($map_skip_fields[$field]) )
+            $out[] = $field;
+      }
+      return join(',', $out);
+   }//get_sql_copy_fields
+
    /*! \brief Returns db-fields to be used for query of entity. */
    public function newQuerySQL( $table_alias='' )
    {

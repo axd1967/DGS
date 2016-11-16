@@ -46,6 +46,7 @@ $ENTITY_TOURNAMENT = new Entity( 'Tournament',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
       FTYPE_INT,  'ID', 'Owner_ID', 'WizardType', 'Flags', 'Rounds', 'CurrentRound', 'RegisteredTP',
+                  'Prev_tid', 'Next_tid',
       FTYPE_TEXT, 'Title', 'Description', 'LockNote',
       FTYPE_DATE, 'Created', 'Lastchanged', 'StartTime', 'EndTime',
       FTYPE_ENUM, 'Scope', 'Type', 'Status'
@@ -73,6 +74,8 @@ class Tournament
    public $CurrentRound;
    public $RegisteredTP;
    public $LockNote;
+   public $Prev_tid;
+   public $Next_tid;
 
    // non-DB vars
 
@@ -83,7 +86,7 @@ class Tournament
          $wizard_type=TOURNEY_WIZTYPE_PUBLIC_LADDER, $title='', $description='',
          $owner_id=0, $status=TOURNEY_STATUS_NEW, $flags=0,
          $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
-         $rounds=1, $current_round=1, $registeredTP=0, $lock_note='' )
+         $rounds=1, $current_round=1, $registeredTP=0, $lock_note='', $prev_tid=0, $next_tid=0 )
    {
       $this->ID = (int)$id;
       $this->setScope( $scope );
@@ -103,7 +106,23 @@ class Tournament
       $this->CurrentRound = (int)$current_round;
       $this->RegisteredTP = (int)$registeredTP;
       $this->LockNote = $lock_note;
+      $this->Prev_tid = (int)$prev_tid;
+      $this->Next_tid = (int)$next_tid;
    }//__construct
+
+   /*! \brief Cleanup for copying tournament. */
+   public function copyCleanup()
+   {
+      $this->ID = 0;
+      $this->setStatus( TOURNEY_STATUS_NEW );
+      $this->Flags &= ~(TOURNEY_FLAG_LOCK_CRON|TOURNEY_FLAG_LOCK_CLOSE);
+      $this->Created = $this->Lastchanged = 0;
+      $this->ChangedBy = '';
+      $this->StartTime = $this->EndTime = 0;
+      $this->Rounds = $this->CurrentRound = 1;
+      $this->RegisteredTP = 0;
+      $this->Prev_tid = $this->Next_tid = 0;
+   }//copyCleanup
 
    public function to_string()
    {
@@ -143,6 +162,11 @@ class Tournament
    public function isFlagSet( $flag )
    {
       return ($this->Flags & $flag);
+   }
+
+   public function hasLinkedTournaments()
+   {
+      return ( $this->Prev_tid > 0 || $this->Next_tid > 0 );
    }
 
    public function formatFlags( $zero_val='', $intersect_flags=0, $short=false, $class=null, $html=true, $flags_val=null )
@@ -263,6 +287,8 @@ class Tournament
       $data->set_value( 'CurrentRound', $this->CurrentRound );
       $data->set_value( 'RegisteredTP', $this->RegisteredTP );
       $data->set_value( 'LockNote', $this->LockNote );
+      $data->set_value( 'Prev_tid', $this->Prev_tid );
+      $data->set_value( 'Next_tid', $this->Next_tid );
       return $data;
    }
 
@@ -519,7 +545,9 @@ class Tournament
             @$row['Rounds'],
             @$row['CurrentRound'],
             @$row['RegisteredTP'],
-            @$row['LockNote']
+            @$row['LockNote'],
+            @$row['Prev_tid'],
+            @$row['Next_tid']
          );
       return $tournament;
    }
@@ -577,6 +605,37 @@ class Tournament
          self::delete_cache_tournament( 'Tournament.update_tournament_registeredTP', $tid );
       }
    }
+
+   /*!
+    * \brief Updates tournament-link for given tournament.
+    * \param $chg_prev_tid <0 = no change; otherwise updates Tournament.Prev_tid to this value;
+    * \param $chg_next_tid <0 = no change; otherwise updates Tournament.Next_tid to this value;
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    * \return true on success; otherwise false
+    */
+   public static function update_tournament_links( $tid, $chg_prev_tid, $chg_next_tid )
+   {
+      if ( !is_numeric($tid) || !is_numeric($chg_prev_tid) || !is_numeric($chg_next_tid) )
+         error('invalid_args', "Tournament:update_tournament_links.check($tid,$chg_prev_tid,$chg_next_tid)");
+
+      $upd_query = array();
+      if ( $chg_prev_tid >= 0 )
+         $upd_query[] = "Prev_tid=$chg_prev_tid";
+      if ( $chg_next_tid >= 0 )
+         $upd_query[] = "Next_tid=$chg_next_tid";
+
+      $result = false;
+      if ( count($upd_query) )
+      {
+         $result = db_query( "Tournament:update_tournament_links($tid,$chg_prev_tid,$chg_next_tid).update",
+            "UPDATE Tournament SET " . join(', ', $upd_query) . " WHERE ID=$tid LIMIT 1" );
+
+         self::delete_cache_tournament( 'Tournament.update_tournament_links', $tid );
+      }
+
+      return $result;
+   }//update_tournament_links
 
    /*! \brief Returns true if given status represents "active" tournament-status. */
    public static function is_active_tournament( $status )

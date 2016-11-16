@@ -176,6 +176,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       "<h2 class=Header>" . make_html_safe($tourney->Title, true) . "</h2>\n",
       make_html_safe($tourney->Description, true),
       "\n";
+   if ( $tourney->hasLinkedTournaments() )
+      echo "<br><br>\n", '<div class="Links center">', TournamentGuiHelper::build_tournament_links($tourney), "</div>\n";
 
    // --------------- News ----------------------
 

@@ -150,6 +150,12 @@ abstract class TournamentTemplate
    /*! \brief Returns inserted Tournament.ID if successful; 0 otherwise. */
    abstract public function createTournament();
 
+   /*!
+    * \brief Copies all relevant tournament-tables into new tournament for given source tournament.
+    * \return inserted Tournament.ID if successful; 0 otherwise.
+    */
+   abstract public function copyTournament( $tlog_type, $src_tid );
+
    abstract public function getDefaultPoolNamesFormat();
 
    /*!

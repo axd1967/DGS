@@ -204,7 +204,7 @@ require_once 'tournaments/include/tournament_log.php';
       'Data, Game, Lock, News, NextRound, Pool, Props (=Properties), Rank, Reg (=Registration), Round, Status, User',
       );
    $notes[] = array( 'Actions:',
-      'Add, Change, Clear, Create, Remove, Seed, Set, Start',
+      'Add, AddTime, Change, Copy, Create, Link, Remove, Seed, Set, Start',
       );
    echo_notes( 'tournamentlog', T_('Tournament Log notes'), $notes );
 

@@ -42,3 +42,8 @@ ALTER TABLE TournamentPool
    ADD Flags tinyint unsigned NOT NULL default '0' ;
 
 
+-- add previous/next cycle tournament for league-tournament
+ALTER TABLE Tournament
+   ADD Prev_tid int NOT NULL default '0',
+   ADD Next_tid int NOT NULL default '0' ;
+

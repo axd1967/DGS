@@ -93,6 +93,15 @@ class TournamentRound
       $this->ChangedBy = $changed_by;
    }
 
+   /*! \brief Cleanup for copying tournament. */
+   public function copyCleanup()
+   {
+      $this->ID = $this->tid = 0;
+      $this->setStatus( TROUND_STATUS_INIT );
+      $this->Lastchanged = 0;
+      $this->ChangedBy = '';
+   }//copyCleanup
+
    public function setStatus( $status, $check_only=false )
    {
       if ( !preg_match( "/^(".CHECK_TROUND_STATUS.")$/", $status ) )

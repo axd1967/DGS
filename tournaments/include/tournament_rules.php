@@ -139,6 +139,14 @@ class TournamentRules
       $this->ShapeSnapshot = $shape_snapshot;
    }//__construct
 
+   /*! \brief Cleanup for copying tournament. */
+   public function copyCleanup()
+   {
+      $this->ID = $this->tid = 0;
+      $this->Lastchanged = 0;
+      $this->ChangedBy = '';
+   }//copyCleanup
+
    public function setRuleset( $ruleset )
    {
       if ( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )

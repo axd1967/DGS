@@ -44,6 +44,8 @@ Description:
 | CurrentRound | tinyint(3) unsigned                                  | NO   |     | 1                   |                |
 | RegisteredTP | smallint(6)                                          | NO   |     | 0                   |                |
 | LockNote     | varchar(255)                                         | NO   |     |                     |                |
+| Prev_tid     | int(11)                                              | NO   |     | 0                   |                |
+| Next_tid     | int(11)                                              | NO   |     | 0                   |                |
 
 
 ## Fields:
@@ -121,6 +123,9 @@ Description:
      because of set players for later rounds
 
 * LockNote : note for other TDs/T-Admins when tournament-locks are set
+
+* Prev_tid, Next_tid : FK to Tournament.ID
+   - previous & next league-tournament linked with current league-tournament
 
 
 ###########################################################################

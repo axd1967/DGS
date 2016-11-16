@@ -109,6 +109,12 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       return $tid;
    }//_createTournament
 
+
+   public function copyTournament( $tlog_type, $src_tid )
+   {
+      error('not_implemented', "TournamentTemplateLadder.copyTournament($tlog_type,$src_tid)");
+   }//copyTournament
+
    public function getDefaultPoolNamesFormat()
    {
       return '';

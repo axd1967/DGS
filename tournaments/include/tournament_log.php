@@ -54,9 +54,11 @@ $ENTITY_TOURNAMENT_LOG = new Entity( 'Tournamentlog',
 
 // actions:
 define('TLOG_ACT_ADD',     'Add');
-define('TLOG_ACT_CREATE',  'Create');
-define('TLOG_ACT_CHANGE',  'Change');
 define('TLOG_ACT_ADDTIME', 'AddTime');
+define('TLOG_ACT_CHANGE',  'Change');
+define('TLOG_ACT_COPY',    'Copy');
+define('TLOG_ACT_CREATE',  'Create');
+define('TLOG_ACT_LINK',    'Link');
 define('TLOG_ACT_REMOVE',  'Remove');
 define('TLOG_ACT_SEED',    'Seed');
 define('TLOG_ACT_SET',     'Set');

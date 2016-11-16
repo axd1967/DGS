@@ -97,6 +97,15 @@ class TournamentProperties
       $this->UserMinGamesRated = (int)$user_min_games_rated;
    }
 
+   /*! \brief Cleanup for copying tournament. */
+   public function copyCleanup()
+   {
+      $this->tid = 0;
+      $this->Lastchanged = 0;
+      $this->ChangedBy = '';
+      $this->RegisterEndTime = 0;
+   }//copyCleanup
+
    public function setRatingUseMode( $use_mode )
    {
       if ( !is_null($use_mode) && !preg_match( "/^(".CHECK_TPROP_RUMODE.")$/", $use_mode ) )

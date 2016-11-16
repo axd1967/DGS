@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'include/std_classes.php';
 require_once 'include/db/bulletin.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_pool.php';
@@ -64,6 +65,80 @@ class TournamentLeagueHelper
 
       return $result;
    }//fill_relegations_tournament_pool
+
+
+   /*!
+    * \brief Spawns tournament for next cycle of league-tournament.
+    * \return new Tournament.ID on success; 0 on failure
+    */
+   public static function spawn_next_cycle( $tlog_type, $tourney, &$errors, $check_only )
+   {
+      static $ARR_TSTATUS = array( TOURNEY_STATUS_PLAY );
+      global $base_path;
+
+      $src_tid = (int)$tourney->ID;
+      if ( $tourney->Type != TOURNEY_TYPE_LEAGUE )
+         error('invalid_args', "TLH:spawn_next_cycle.check.ttype_only_league($src_tid)");
+      $ttype = TournamentFactory::getTournament($tourney->WizardType);
+
+      $errors = array();
+      if ( !in_array($tourney->Status, $ARR_TSTATUS) )
+         $errors[] = sprintf( T_('Spawning tournament for next cycle of league-tournament is only allowed on tournament status [%s].'),
+            build_text_list('Tournament::getStatusText', $ARR_TSTATUS) );
+      if ( $tourney->Next_tid > 0 )
+         $errors[] = sprintf( T_('Spawning tournament for next cycle is not allowed. It already has a next cycle (%s).'),
+            anchor( $base_path."tournaments/manage_tournament.php?tid={$tourney->Next_tid}", "#{$tourney->Next_tid}" ) );
+
+      if ( count($errors) || $check_only )
+         return 0;
+
+      ta_begin();
+      {//HOT-section to spawn next cycle (tournament)
+         $new_tid = $ttype->copyTournament( $tlog_type, $src_tid );
+         if ( $new_tid > 0 ) // success
+         {
+            $link_success = self::link_tournaments( $tlog_type, $src_tid, $new_tid );
+
+            TournamentLogHelper::log_spawn_next_cycle( $src_tid, $tlog_type, $new_tid, $link_success );
+
+            if ( $link_success )
+            {
+               $log_msg = "Link tournaments T#$src_tid -> T#$new_tid";
+               TournamentLogHelper::log_link_tournament( $tlog_type, $src_tid, $log_msg );
+               TournamentLogHelper::log_link_tournament( $tlog_type, $new_tid, $log_msg );
+            }
+            else
+               $errors[] = sprintf( T_('Linking with successfully spawned tournament (#%s -> #%s) failed. Please contact a tournament-admin.'),
+                  $src_tid, $new_tid );
+         }
+         else
+            $errors[] = T_('Spawning tournament for next cycle of league-tournament failed.');
+      }
+      ta_end();
+
+      return $new_tid;
+   }//spawn_next_cycle
+
+   /*!
+    * \brief Links tournaments (on T-source set T.Next_tid, on T-target set T.Prev_tid).
+    * \return true = success; false otherwise
+    */
+   private static function link_tournaments( $tlog_type, $src_tid, $trg_tid )
+   {
+      $src_tid = (int)$src_tid;
+      $trg_tid = (int)$trg_tid;
+
+      ta_begin();
+      {//HOT-section to link tournaments
+         $success = Tournament::update_tournament_links( $src_tid, -1, $trg_tid );
+         if ( $success )
+            $success = Tournament::update_tournament_links( $trg_tid, $src_tid, -1 );
+      }
+      ta_end();
+
+      return $success;
+   }//link_tournaments
+
 
 } // end of 'TournamentLeagueHelper'
 

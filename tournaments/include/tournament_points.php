@@ -97,6 +97,14 @@ class TournamentPoints
       $this->ChangedBy = $changed_by;
    }
 
+   /*! \brief Cleanup for copying tournament. */
+   public function copyCleanup()
+   {
+      $this->tid = 0;
+      $this->Lastchanged = 0;
+      $this->ChangedBy = '';
+   }//copyCleanup
+
    public function setPointsType( $points_type )
    {
       if ( !preg_match( "/^(".CHECK_TPOINTS_TYPE.")$/", $points_type ) )
