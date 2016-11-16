@@ -53,7 +53,7 @@ For example: "TRR:" referring to the issue-group "Tournament_Round_Robin:  [TRR]
 
 Each ISSUE-GROUP contains a list of issues, one line per issue with the line-format:
 
-    "- prio type: [category] PRIV: EVAL: [group] (id) descr"
+    "- prio type: [category] PRIV: EVAL: group (id) descr"
 
 Legend:
 

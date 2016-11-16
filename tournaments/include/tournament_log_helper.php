@@ -52,9 +52,11 @@ class TournamentLogHelper
    // ------------ static functions ----------------------------
    //new Tournamentlog( $id=0, $tid=0, $uid=0, $date=0, $type='', $object='T', $action='', $actuid=0, $message='' )
 
-   public static function log_create_tournament( $tid, $wiz_type, $title )
+   public static function log_create_tournament( $tid, $tourney )
    {
-      $tlog = new Tournamentlog( 0, $tid, 0, 0, 0, 'T_Data', TLOG_ACT_CREATE, 0, $title );
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, 0, 'T_Data', TLOG_ACT_CREATE, 0,
+         sprintf( 'Type[%s], WizType[%s], Scope[%s]: %s',
+            $tourney->Type, $tourney->WizardType, $tourney->Scope, $tourney->Title ));
       $tlog->insert();
    }
 

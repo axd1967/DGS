@@ -83,7 +83,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 
          $this->create_default_tournament_director( $tid );
 
-         TournamentLogHelper::log_create_tournament( $tid, $tourney->WizardType, $tourney->Title );
+         TournamentLogHelper::log_create_tournament( $tid, $tourney );
       }
       ta_end();
 
