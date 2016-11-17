@@ -174,7 +174,7 @@ class Entity
    {
       static $ARR_SKIP_FIELDS = array( FIELD_CHANGEDBY => 1, FIELD_LOCKVERSION => 1 );
 
-      if ( !preg_match("/^[a-z0-9_,]+$/i", $skip_fields) )
+      if ( !preg_match("/^[a-z0-9_,]*$/i", $skip_fields) )
          error('invalid_args', "Entity.get_sql_copy_fields.check.skip_fields({$this->table},$skip_fields)");
       $map_skip_fields = ( $skip_fields )
          ? array_value_to_key_and_value(explode(',', $skip_fields)) + $ARR_SKIP_FIELDS
