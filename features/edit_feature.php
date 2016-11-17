@@ -29,10 +29,9 @@ require_once 'features/lib_votes.php';
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_ADM_OPS );
    if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_feature');
-
    if ( !ALLOW_FEATURE_VOTE )
       error('feature_disabled', 'edit_feature');
 

@@ -31,7 +31,7 @@ define('MAX_PATTERN_SIZE',51);
 
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_ADM_OPS );
    if ( !$logged_in )
       error('not_logged_in', 'scripts.make_handicap_pattern');
 

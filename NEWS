@@ -37,6 +37,9 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Administrative changes:
 
+   * Changes for Admins & tournament-directors:
+      * Avoid session-expire login-check and quota-decrement for admin and tournament-director operations
+
    Server config:
       * Added config-switches:
          * FORUM_POST_FORBIDDEN_TERMS        - regex with offensive terms

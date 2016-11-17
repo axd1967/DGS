@@ -13,8 +13,6 @@ New_Issues:   set prio + sort into sections
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S078) (T035) (A023) (C04) (D02) (B015) (F024) (V016)
 #--------------- TEMP-STASH:
 #--------------- OPEN:
-- 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quota-inc for admin-operations
-- 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quota-inc for T-director-operations
 #--------------- STASH:
 - 2 PRJ:  [todo] (A008.2d) cleanup TODO/FAQ after publish: pass-7 cleanup (mark NOT_DONE + commit 1st, then remove to be able to search for not-done stuff)
 - 2 DISC: [site] chk/eval/answer private-DGS-folders: LATER #24, TODO #16, CHECK #42
@@ -84,9 +82,9 @@ Backlog_1_20_0:
 - 4 SPEC: [profile] (S075) Bookmarks: add/edit bookmarks in bookmark-menu, show list for selection on separate page (to avoid reload on every page)
 - 4 DEV:  [profile] (S075) Bookmarks: Add/edit; customizable, maybe num-restricted on non-admins(?);; http://www.dragongoserver.net/forum/read.php?forum=2&thread=33119
 - 4 DEV:  [profile] (S075) Bookmarks: php-cache bookmarks in secret-tempdir maybe or in APC-cache!;; optimization/cleanup: hide bookmark with option to save db-selects
-- 4 SPEC: [site] (A008.1) new code-project-structure: ~/src|doc|specs|examples|plugins|tests|the-like|etc; use some auto-build/test/deploy(envs:sf/prod)
 #---------------
 - 3 IDEA: [tourney] convenience for TD: invite players from other tournament with filters (all / specific round / next-round-mark): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3277209
+- 4 SPEC: [site] (A008.1) new code-project-structure: ~/src|doc|specs|examples|plugins|tests|the-like|etc; use some auto-build/test/deploy(envs:sf/prod)
 
 Tournaments_New_Candidates:
 - 3 ADM:  [tourney] NEW dgs tournament 13x13 (with ALTERNATE): http://www.dragongoserver.net/forum/read.php?forum=11&thread=44999#44999;; Open/Handicap division, F:14d+1d
@@ -962,4 +960,6 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 3 SPEC: [msg][cfg] add navigation & entries-count & rows-selection on message-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
 - 3 SPEC: [msg][cfg] add navigation & entries-count on message-search: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
 - 5 SPEC: [msg] one-click-delete for msg-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
+- 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quota-dec for admin-operations
+- 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quota-dec for T-director-operations
 

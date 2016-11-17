@@ -33,7 +33,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    // may need to be adjusted for large game-count fixed as load_profiles_gamesetup() loads all games in one step
    @ini_set('memory_limit', '320M');
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_ADM_OPS );
    if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.fix_default_max_handi-1_0_16');
    if ( $player_row['ID'] <= GUESTS_ID_MAX )

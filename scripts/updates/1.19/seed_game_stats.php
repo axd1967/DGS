@@ -41,7 +41,7 @@ define('COL_FIN', 1);
    // may need to be adjusted for large game-queries
    @ini_set('memory_limit', '320M');
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_ADM_OPS );
    if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.seed_game_stats');
    if ( $player_row['ID'] <= GUESTS_ID_MAX )

@@ -29,7 +29,7 @@ require_once 'include/std_functions.php';
 
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row); // NOTE: used by users & admins
    if ( !$logged_in )
       error('not_logged_in', 'change_password');
    if ( $player_row['ID'] <= GUESTS_ID_MAX )

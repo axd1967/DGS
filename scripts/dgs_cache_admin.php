@@ -29,7 +29,7 @@ require_once 'include/time_functions.php';
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_ADM_OPS );
    if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.dgs_cache_admin');
    if ( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )

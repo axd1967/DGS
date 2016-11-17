@@ -40,7 +40,7 @@ define('FIXTYPE_SEQWINS_TRESULT', 2);
    connect2mysql();
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_ADM_OPS );
    if ( !$logged_in )
       error('login_if_not_logged_in', 'scrips.fix_ladder_seq_wins');
    if ( $player_row['ID'] <= GUESTS_ID_MAX )

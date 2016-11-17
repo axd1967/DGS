@@ -35,7 +35,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_TDIR_OPS );
    if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.edit_lock');
    if ( !ALLOW_TOURNAMENTS )

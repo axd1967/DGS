@@ -28,7 +28,7 @@ require_once 'include/std_functions.php';
 
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row); // NOTE: used by users & admins
    $my_id = @$player_row['ID'];
 
    if ( isset($_POST['goback']) )

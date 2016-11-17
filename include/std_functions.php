@@ -2554,7 +2554,10 @@ define('LOGIN_SKIP_UPDATE',  0x08); // skips update & other checks for Players-t
 define('LOGIN_QUICK_PLAY',   0x10);
 define('LOGIN_NO_QUOTA_HIT', 0x20);
 define('LOGIN_SKIP_VFY_CHK', 0x40); // skip verify-checks to avoid redirect-loop
+define('LOGIN_SKIP_EXP_CHK', 0x80); // skip expire-checks to avoid losing input-data
 define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
+define('LOGIN_DEFAULT_OPTS_ADM_OPS', (LOGIN_DEFAULT_OPTS|LOGIN_NO_QUOTA_HIT|LOGIN_SKIP_EXP_CHK)); // for admin-operations
+define('LOGIN_DEFAULT_OPTS_TDIR_OPS', (LOGIN_DEFAULT_OPTS|LOGIN_NO_QUOTA_HIT|LOGIN_SKIP_EXP_CHK)); // for tournament-director-operations
 
 /*!
  * \brief Check if the player $handle can be logged in
@@ -2637,8 +2640,9 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    setTZ( $player_row['Timezone']);
 
 
-   // skip expire-check on POST-request
-   $session_expired = !$is_post && ( $player_row['Sessioncode'] != $scode || $player_row['Expire'] < $NOW );
+   // skip expire-check on POST-request & skip-flag
+   $session_expired = !$is_post && !($login_opts & LOGIN_SKIP_EXP_CHK)
+         && ( $player_row['Sessioncode'] != $scode || $player_row['Expire'] < $NOW );
 
    $upd = new UpdateQuery('Players');
    $upd->upd_raw('Hits', 'Hits+1' );

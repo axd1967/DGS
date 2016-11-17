@@ -33,7 +33,7 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
    connect2mysql();
    set_time_limit(SECS_PER_MIN); //max. 1min
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_ADM_OPS );
    if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.translation_consistency');
    if ( $player_row['ID'] <= GUESTS_ID_MAX )

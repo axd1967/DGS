@@ -63,7 +63,7 @@ function retry_admin( $msg)
    }
 
    jump_to("admin_translators.php" . $tmp);
-}
+}//retry_admin
 
 
 {
@@ -71,7 +71,7 @@ function retry_admin( $msg)
 
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS_ADM_OPS );
    if ( !$logged_in )
       error('not_logged_in', 'admin_do_translators');
    if ( $player_row['ID'] <= GUESTS_ID_MAX )
