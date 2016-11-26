@@ -172,7 +172,7 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 //
 // return: $result if $simul==false; otherwise: arr( $result, $result2 ) with:
 //    $result: -1=error, or: RATEDSTATUS_...: 0=..RATED=rated-game, 1=..DELETABLE=not-rated, 2=..UNRATED=not-rated
-//    $result2: arr( 'b/wRating' => new-calculated rating-elements for B|W )
+//    $result2: arr( '(b/w)(Rating|RatingMin|RatingMax)' => new-calculated rating-elements for B|W )
 //
 // IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 //
@@ -365,7 +365,11 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
       $result = array( $result,
          array(
             'bRating' => $bRating,
+            'bRatingMin' => $bRatingMin,
+            'bRatingMax' => $bRatingMax,
             'wRating' => $wRating,
+            'wRatingMin' => $wRatingMin,
+            'wRatingMax' => $wRatingMax,
          ));
    }
    return $result;
