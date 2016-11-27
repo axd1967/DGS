@@ -253,6 +253,8 @@ function calculate_rating_change_prediction( $data, $score )
 
 function rdiff( $diff, $fmt )
 {
+   if ( abs($diff) < 0.01 )
+      $fmt = '%f';
    $diff = sprintf( $fmt, $diff );
    return ($diff < 0) ? $diff : ($diff > 0 ? '+'.$diff : 0 );
 }

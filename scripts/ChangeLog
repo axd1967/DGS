@@ -11,6 +11,11 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2016-11-27 jug
+
+   * rating_changes.php:
+   - show full precision if diff-value < 0.01
+
 2016-11-26 jug
 
    * include/rating.php (update_rating2),
