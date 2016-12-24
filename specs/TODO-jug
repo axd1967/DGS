@@ -962,4 +962,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 5 SPEC: [msg] one-click-delete for msg-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
 - 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quota-dec for admin-operations
 - 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quota-dec for T-director-operations
+- 5 SPEC: [markup] dot '.' should end a http-autolink: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248
 

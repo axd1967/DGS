@@ -2026,7 +2026,7 @@ $html_safe_preg = array(
          . '"'.ALLOWED_LT."/a".ALLOWED_GT.'"',
 
 // ( |>)http(s)?://...( |<)     ; simple auto-link without <...>
- '%'."(^|\s|".ALLOWED_GT.")(http(s)?://[^\\r\\n]+?)"."($|\s|".ALLOWED_LT.")".'%is'
+ '%'."(^|\s|".ALLOWED_GT.")(http(s)?://[^\\r\\n]+?)($|\.?\s|".ALLOWED_LT.")".'%is'
   => "\\1" . ALLOWED_LT.'a class='.ALLOWED_QUOT.'linkmarkup'.ALLOWED_QUOT
          . ' href='.ALLOWED_QUOT."\\2".ALLOWED_QUOT.ALLOWED_GT
          . "\\2" . ALLOWED_LT."/a".ALLOWED_GT . "\\4",
