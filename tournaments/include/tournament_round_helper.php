@@ -747,7 +747,7 @@ class TournamentRoundHelper
       $bulletin->Subject = sprintf( T_('[Notification by CRON]: Last game in round %s finished#tourney'), $round );
       $bulletin->Text = sprintf( T_('To all tournament directors of this tournament,
 
-this is an automatic notification informing you, that all games in round %s of this tournament has been processed.
+this is an automatic notification informing you, that all games in round %s of this tournament have been processed.
 Next step for you is to finish the tournament round, and then either start a new round or end the tournament.'), $round );
 
       ta_begin();
