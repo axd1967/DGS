@@ -13,6 +13,10 @@ ChangeLog
 
 2017-01-08 jug
 
+   * include/std_functions.php ($html_safe_preg):
+   - stop parsing of auto-link on more punctuation and word-boundary chars if followed by white-space
+     - stop auto-link at space-followed chars: . , : ; ! ? ( ) [ ] { } ' ` " & |
+
    * include/std_functions.php ($html_safe_preg, $html_safe_preg_tag_clash; make_html_safe),
      include/globals.php (CSS_VERSION),
      skins/dragon/screen.css:

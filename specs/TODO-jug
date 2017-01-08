@@ -12,7 +12,6 @@ Open_Tasks_Stack:  (max. 2 WIP), first=next  (S079) (T035) (A023) (C04) (D02) (B
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
 - 1 ADM:  [adm][site][msg] chk failed_query.sql on server with locking query
 #--------------- OPEN:
-- 5 CHK:  [markup] some more chars should end a http-autolink: follow-up from http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248#48301;; LOCAL http://localhost/dev/forum/read.php?forum=2&thread=26745#26762
 - 1 BUG:  [forum][SECURITY] EVAL: (B016) guest can see moderated posts from other guest-user-logins with emails :-( .. CHECKED -> it's actually worse: hidden(Approved=N) & pending(Approved=P) posts are visible if forum & post-ID known (viewing manually built URL directly) or if one thread-post with non-shown is visible -> solution unclear yet (EVAL): 1. restrict viewing old guest-posts(?); maybe from different IPs (not totally safe though); easiest perhaps to add Approved=Y if guest-user (sufficient though?);; 2. use ticket-system for support-request? or private-mail with email-back-channel?;; 3. more?
 - 2 DOC:  [register] (S60a) register: make email mandatory at registration ?? ;; add passus to inform about mail and that "using" the notifications includes receiving mails !? -> already done?
 - 2 TXT:  [user] add text on registration: "if no mail within 24h -> something fishy"
@@ -973,4 +972,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 5 SPEC: [markup] dot '.' should end a http-autolink: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248
 - 8 TXT:  [tourney] fix typo: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48454
 - 3 SPEC: [markup] shrink-to-fit issue of <code/pre>-tag (add new tag for mono-spaced font -> perhaps use <tt> -> <div font-family:monospaced> -> no): http://www.dragongoserver.net/forum/read.php?forum=4&thread=41807#41909;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#41256;; http://www.dragongoserver.net/forum/read.php?forum=3&thread=48442#48474;; -> no new tag, no scrollbars, but fixed with pre with display:inline-block within div to break lines
+- 5 SPEC: [markup] more chars ending a http-autolink: excerpt from [:punc:]-regex-class, that may end a URL: ".,:;!?()[]{}'`\"&|": follow-up from http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248#48301;; LOCAL http://localhost/dev/forum/read.php?forum=2&thread=26745#26762
 
