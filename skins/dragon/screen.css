@@ -78,8 +78,8 @@ pre {
    display: block;
    width: 100%;
    border-width: 0px;
-   margin: 0.5em;
-   padding: 0.5em;
+   margin: 0.3em 0.5em 0.3em 0.5em;
+   padding: 0.3em 0.8em 0.3em 0.5em;
    text-align: left;
 }
 
@@ -3897,15 +3897,14 @@ div.Survey td { border: 1px solid green; }*/
 /* message allowed tags */
 /* ------------------------- */
 
-pre.code {
-   background: #dddddd;
-   margin: 0.3em 2px 0.3em 0.5em;
-   padding: 0.3em 0em 0.3em 0.5em;
+pre.orig {
+   display: inline-block;
    width: auto;
-/*
-   padding: 8px;
-   margin-right: auto;
-*/
+}
+pre.code {
+   display: inline-block;
+   width: auto;
+   background: #dddddd;
 }
 
 div.quote {

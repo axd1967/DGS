@@ -2072,10 +2072,19 @@ $html_safe_preg = array(
 
 //<code>...</code> =>translated to <pre class=code>...</pre>
 // see also parse_tags_safe() for the suppression of inner html codes
+// NOTE: need special replacement-tag '#PRE#' which will be compensated with $html_safe_preg_tag_clash
  '%'.ALLOWED_LT."code([^`\\n\\t]*)".ALLOWED_GT.'%is'
-  => ALLOWED_LT."pre class=code \\1".ALLOWED_GT,
+  => ALLOWED_LT."div".ALLOWED_GT.ALLOWED_LT."#PRE# class=code \\1".ALLOWED_GT,
  '%'.ALLOWED_LT."/code *".ALLOWED_GT.'%is'
-  => ALLOWED_LT."/pre".ALLOWED_GT,
+  => ALLOWED_LT."/#PRE#".ALLOWED_GT.ALLOWED_LT."/div".ALLOWED_GT,
+
+//<pre>...</pre> =>translated to <pre class=orig>...</pre>
+// see also parse_tags_safe() for the suppression of inner html codes
+// NOTE: need special replacement-tag '#PRE#' which will be compensated with $html_safe_preg_tag_clash
+ '%'.ALLOWED_LT."pre([^`\\n\\t]*)".ALLOWED_GT.'%is'
+  => ALLOWED_LT."div".ALLOWED_GT.ALLOWED_LT."#PRE# class=orig \\1".ALLOWED_GT,
+ '%'.ALLOWED_LT."/pre *".ALLOWED_GT.'%is'
+  => ALLOWED_LT."/#PRE#".ALLOWED_GT.ALLOWED_LT."/div".ALLOWED_GT,
 
 //<quote>...</quote> =>translated to <div class=quote>...</div>
  '%'.ALLOWED_LT."quote([^`\\n\\t]*)".ALLOWED_GT.'%is'
@@ -2099,20 +2108,20 @@ $html_safe_preg = array(
       ." src=".ALLOWED_QUOT.HOSTBASE
       ."\".('\\1'?'17':'images').\"/\\2".ALLOWED_QUOT.ALLOWED_GT.'"',
 
-//<tt>...</tt> =>translated to <pre>...</pre>
-// see also parse_tags_safe() for the suppression of inner html code
-/*
- "%".ALLOWED_LT."tt([^`\\n\\t]*)".ALLOWED_GT
-  => ALLOWED_LT."pre\\1".ALLOWED_GT,
- "%".ALLOWED_LT."/tt *".ALLOWED_GT
-  => ALLOWED_LT."/pre".ALLOWED_GT,
-*/
-
 //reverse (=escape) bad skipped (faulty) tags; keep them alphabetic here
- '%'.ALLOWED_LT."(/?_?(bgcolor|code|color|feature|ftp|game|home|https?|image|mailto|news|note|quote|send|survey|ticket|tourney|user).*?)"
+ '%'.ALLOWED_LT."(/?_?(bgcolor|code|color|feature|ftp|game|home|https?|image|mailto|news|note|pre|quote|send|survey|ticket|tourney|user).*?)"
     .ALLOWED_GT.'%is'
   => "&lt;\\1&gt;",
 ); //$html_safe_preg
+
+// NOTE: special replacement-tag '#PRE#' for replacements with self-replacing tags otherwise: code -> pre -> pre
+global $html_safe_preg_tag_clash; //PHP5
+$html_safe_preg_tag_clash = array(
+   '%'.ALLOWED_LT."(#PRE#)( class.*?)".ALLOWED_GT.'%s'
+   => ALLOWED_LT."pre\\2".ALLOWED_GT,
+   '%'.ALLOWED_LT."(/#PRE#)".ALLOWED_GT.'%s'
+   => ALLOWED_LT."/pre".ALLOWED_GT,
+);
 
 
 
@@ -2208,6 +2217,8 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
    if ( $some_html || $mark_terms )
    {
       // change back to <, > from ALLOWED_LT, ALLOWED_GT
+      global $html_safe_preg_tag_clash; // revert replacement for would-be-self-replacing tags
+      $msg = preg_replace( array_keys($html_safe_preg_tag_clash), $html_safe_preg_tag_clash, $msg);
       $msg= reverse_allowed( $msg);
 
       if ( $some_html && $some_html != 'cell' && $some_html != 'line' )
@@ -3566,8 +3577,7 @@ function split_RGBA($color, $alpha=NULL)
    return array(base_convert(substr($color, 0, 2), 16, 10),
                 base_convert(substr($color, 2, 2), 16, 10),
                 base_convert(substr($color, 4, 2), 16, 10),
-                strlen($color)<7 ? $alpha :
-                base_convert(substr($color, 6, 2), 16, 10),
+                strlen($color)<7 ? $alpha : base_convert(substr($color, 6, 2), 16, 10),
          );
 }
 

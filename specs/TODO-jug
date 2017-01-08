@@ -724,7 +724,6 @@ Ideas_Issues_Forum_Related:
 - 6 IDEA: [forum] lock-forum-thread feature -> needed?
 - 6 IDEA: [forum] spoiler-tag, that is hidden at first but can be shown by click on button (needs JS): http://www.dragongoserver.net/forum/read.php?forum=2&thread=42911#42915 -> needed?
 - 7 CHK:  [forum] show "hidden" post somehow, if there are responses or unconditionally !?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=45025#45183
-- 7 CHK:  [forum] <pre/code>-tag width-issue -> use scroll-bars !?; add new tag for mono-spaced font -> perhaps use <tt> -> <div font-family:monospaced>: http://www.dragongoserver.net/forum/read.php?forum=4&thread=41807#41909 !? -> perhaps need vote?
 - 8 IDEA: [forum] forum-post-view add expand/collapse (details? server-based/cookie-based/JS-based !?);; http://www.dragongoserver.net/forum/read.php?forum=4&thread=25885#26037 + follow-ups
 - 8 IDEA: [forum] (S36c.2) add survey in forum (attached by survey-admin to thread), <survey> referencing survey
 - 9 CHK:  [forum] improve post edit viewer with a true diff output: https://sourceforge.net/p/dragongoserver/feature-requests/5 -> likely not !?
@@ -973,4 +972,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 4 SPEC: [faq] FAQ without quota? http://www.dragongoserver.net/forum/read.php?forum=4&thread=38491#38496 -> already done 03Aug2013, live 11Aug2013 -> note in forum
 - 5 SPEC: [markup] dot '.' should end a http-autolink: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248
 - 8 TXT:  [tourney] fix typo: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48454
+- 3 SPEC: [markup] shrink-to-fit issue of <code/pre>-tag (add new tag for mono-spaced font -> perhaps use <tt> -> <div font-family:monospaced> -> no): http://www.dragongoserver.net/forum/read.php?forum=4&thread=41807#41909;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#41256;; http://www.dragongoserver.net/forum/read.php?forum=3&thread=48442#48474;; -> no new tag, no scrollbars, but fixed with pre with display:inline-block within div to break lines
 
