@@ -2092,9 +2092,9 @@ $html_safe_preg = array(
  '%'.ALLOWED_LT."/quote *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/div".ALLOWED_GT,
 
-//<home page>...</home>, <home_ ...> =>translated to <a href="{HOSTBASE}$page">...</a>
+//<home page|#jump>...</home>, <home_ ...> =>translated to <a href="{HOSTBASE}$page|#jump">...</a>
  '%'.ALLOWED_LT."home(_)?[\\n\\s]+((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT.'%ise'
-  => '"'.ALLOWED_LT."a href=".ALLOWED_QUOT.HOSTBASE."\\2".ALLOWED_QUOT
+  => '"'.ALLOWED_LT."a href=".ALLOWED_QUOT."\".( substr('\\2',0,1) == '#' ? '' : '".HOSTBASE."' ).\""."\\2".ALLOWED_QUOT
       ."\".('\\1'?' target=".ALLOWED_QUOT.'_blank'.ALLOWED_QUOT."':'').\""
       .ALLOWED_GT.'"',
  '%'.ALLOWED_LT."/home *".ALLOWED_GT.'%is'

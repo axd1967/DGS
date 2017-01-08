@@ -14,6 +14,9 @@ ChangeLog
 2017-01-08 jug
 
    * include/std_functions.php ($html_safe_preg):
+   - extend markup "<home #jump>" with jump to anchor within local page
+
+   * include/std_functions.php ($html_safe_preg):
    - stop parsing of auto-link on more punctuation and word-boundary chars if followed by white-space
      - stop auto-link at space-followed chars: . , : ; ! ? ( ) [ ] { } ' ` " & |
 
