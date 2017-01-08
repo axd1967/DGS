@@ -644,7 +644,6 @@ ToDo_FAQ_1_0_18_FROM_TODO_CLEANUP_RELEASED: Done + ToDoc (REL 1.0.18): (L=later,
 - 2 BUG:  [tourney] consecutive-wins wrong (no), but timeout-processing seems off: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39107#39107;; should a timeout count for CWs? CAN it count for only one (chall or def)?;; analysis: fix-script ignores annulled games, but CW-count is done BEFORE game-end-processing setting annull-flag;; so, how should it be? -> inc CW AFTER game-end-processing -> annull
 - 5 BUG:  [tourney] TRR: view-pools: rank-display for ties (1,2,2,4 instead of 1,2,2,3): http://www.dragongoserver.net/forum/read.php?forum=11&thread=38674#39265 -> announced
 ---------------------- ^^^ server-upgrade 30-Jul-2014 branch [main]
-- 1 BUG:  [game] skip to next game fails: confirm.GAH.init_globals(664628).miss_init0;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47272#47274
 - 1 BUG:  [wroom] join WR-game, wrong table-alias used for hero-ratio-check
 ---------------------- ^^^ bug-fix 30-Jul-2014 03:00 branch [main] chg#02
 - 1 BUG:  [site] forbid refs to external-images used in <image>-tag: http://www.dragongoserver.net/forum/read.php?forum=4&thread=39593#39712;; it only works b/c <image> is supported by some browser it seems, the <image> is not correctly escaped by DGS

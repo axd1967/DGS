@@ -7,21 +7,30 @@ Legend:   [ 0-recent, 1-high, 9-low, ?-needs prio];; types: ADM=admin-stuff (for
 Bookmarks_Admin:
 
 New_Issues:   set prio + sort into sections
-- 4 CHK:  [site] (S077.4) check cookie-expire <-> session-expire; why is cookie-handle-expire 5x normal expire (1month)? -> use longer expire; use auto-extend-expire!? as {S077.1} only partly solves the problem.  If cookie expires, might still be a problem losing data on POSTs ?;; also http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47924
-- 5 DISC: [msg] send 2nd "thread-linked" message: A>A>B http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47921 -> clarify; feasible (sounds very complex)?
 
-Open_Tasks_Stack:  (max. 2 WIP), first=next  (S078) (T035) (A023) (C04) (D02) (B015) (F024) (V016)
-#--------------- TEMP-STASH:
+Open_Tasks_Stack:  (max. 2 WIP), first=next  (S079) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
+- 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
+- 1 ADM:  [adm][site][msg] chk failed_query.sql on server with locking query
 #--------------- OPEN:
+- 5 CHK:  [markup] some more chars should end a http-autolink: follow-up from http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248#48301;; LOCAL http://localhost/dev/forum/read.php?forum=2&thread=26745#26762
+- 1 BUG:  [forum][SECURITY] EVAL: (B016) guest can see moderated posts from other guest-user-logins with emails :-( .. CHECKED -> it's actually worse: hidden(Approved=N) & pending(Approved=P) posts are visible if forum & post-ID known (viewing manually built URL directly) or if one thread-post with non-shown is visible -> solution unclear yet (EVAL): 1. restrict viewing old guest-posts(?); maybe from different IPs (not totally safe though); easiest perhaps to add Approved=Y if guest-user (sufficient though?);; 2. use ticket-system for support-request? or private-mail with email-back-channel?;; 3. more?
+- 2 DOC:  [register] (S60a) register: make email mandatory at registration ?? ;; add passus to inform about mail and that "using" the notifications includes receiving mails !? -> already done?
+- 2 TXT:  [user] add text on registration: "if no mail within 24h -> something fishy"
+- 2 IDEA: [feature][adm] add FeatureLog for changes by feature-admin
+- 3 IDEA: [msg][wishlist] (S078.4) add shortcut for "trashing" message + return to status-page -> generalized: "trash" + return to calling-page (HTTP_REFERER): http://www.dragongoserver.net/forum/read.php?forum=4&thread=37144#37144
+- 3 IDEA: [forum] add regular list-navigation first/last/prev/next/total-entries for forum-search;; also related (but came much later): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3291722
+- 3 IDEA: [site][user][stats] show info of registered-users/active-users/online-users on login-page !?
+- 2 IDEA  [help][faq] add images with snapshots for FAQ/help !?
+- 3 DATA: [user] sync countries with ISO-3166-1 changes since 2009: http://www.dragongoserver.net/forum/read.php?forum=7&thread=44553#46545
 #--------------- STASH:
 - 2 PRJ:  [todo] (A008.2d) cleanup TODO/FAQ after publish: pass-7 cleanup (mark NOT_DONE + commit 1st, then remove to be able to search for not-done stuff)
 - 2 DISC: [site] chk/eval/answer private-DGS-folders: LATER #24, TODO #16, CHECK #42
 - 2 ADM:  [dev] git-stash: check and if needed move local stash (~Apr2014..Jun2015??) with cond-moves-changes into WORK-branch
 
 Open_Tasks_Stack_League:  first=next
+- 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
 #--------------- DONE:
 #--------------- OPEN:
-- 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
 - 4 SPEC: [tourney] (T029.19a) TLeague: sync TPs from prev-cycle: at any time? {see T029.19b}; sync/merge TPs with prev-cycle-TPs (skip drop-outs, auto-withdrawn TPs == opt-out);; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47647;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47634;; see also {T029.18} tie-breaker extras?
 - 4 SPEC: [tourney] (T029.19b) TLeague: sync TPs from prev-cycle: conditions when to allow TP-sync
 - 4 SPEC: [tourney] (T029.19c) TLeague: sync TPs from prev-cycle: adj TP/TD-TP-reg-edit to add flag/marker to prevent overwrite in sync
@@ -74,7 +83,7 @@ Tournaments_Running:
 # PLAN
 
 Backlog_1_20_0:
-- 1 SPEC: [tourney] (T034.0) break down title-T-feature into stories (only TRR-types), collect reqs: best-of-oddX; start with connect to TLeague (other TRR-types later)
+- 1 SPEC: [tourney] (T034.0) break down title-T-feature into stories (only TRR-types), collect reqs: best-of-oddX; start with connect to TLeague (other TRR-types later);; IDEA: might be done with invite-games with multiple-numbers (from wishlist) but with some twists on the params (like alternate color or similar)
 - 1 SPEC: [user][adm] regenerate verification-mail + fix/handle verifications for admin + handle old-unused-verification -> cleanup !?
 - 3 IDEA: [tourney] copy existing T on T-creation-wizard? -> see code copyTournament()
 - 4 SPEC: [tourney] TRR: allow T-director to start next round with open games, that will not change pool-winners: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2984586;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3308359;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41787#47809
@@ -98,6 +107,7 @@ New_Discussions:   set prio + sort into sections
 - 4 DISC: [clock][game] eval thread fpoto (sleeptime): http://www.dragongoserver.net/forum/read.php?forum=2&thread=47174
 - 2 DISC: [tourney] eval thread gokillsjob (cheating-tourney): http://www.dragongoserver.net/forum/read.php?forum=11&thread=47472
 - 3 DISC: [msg][game] continue game-discussion after game-ended, follow-up / reply on game-result-message; could utilize game-review-comments feature#5; or just add FAQ-entry describing situation and "workaround" of how to do it manually: http://www.dragongoserver.net/forum/read.php?forum=2&thread=46387#46387
+- 5 DISC: [msg] send 2nd "thread-linked" message: A>A>B http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47921 -> clarify; feasible (sounds very complex)?
 
 To_Check_Discuss_Answer:
 - 3 DOC:  [tourney] adjust DOCS how to manage T about "define pools" on Pool-status(!?) than Init-status like it's described wrongly right now in: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729&edit=39803#39803;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2820302
@@ -197,14 +207,14 @@ ForumsToAnswer_AfterRelease:  (L=later, x=announced-in-forum, N=not-done-posted,
 # CHECK ISSUES / BUGS
 
 New_Check_Issues:  BUG (=sure-bug needs fix), DBG (=is-bug, investigate if fix needed), CHK (=type unknown, investigate), TRY (=something specific)
-- 3 CHK:  [msg] add shortcut for "trashing" message (+ return to status-page): http://www.dragongoserver.net/forum/read.php?forum=4&thread=37144#37144 ;; dgs-wishlist not-implemented -> use bulk-toggle -> implemented already w/ one-click-delete -> see http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904 !?
 
 Check_If_Bug:
-- 2 CHK:  [site][SECURITY] guest can edit forum-posts so see moderated posts from guest-user with emails :-( !!! really !? -> ticket-system, re-assign guest-posts
 - 3 DBG:  [clock][game] weekend: timezone bug? or feature? http://www.dragongoserver.net/forum/read.php?forum=2&thread=24197#25278 -> may get rid of sleep-time !? (search doubles)
+- 4 CHK:  [site] (S077.4) check cookie-expire <-> session-expire; why is cookie-handle-expire 5x normal expire (1month)? -> use longer expire; use auto-extend-expire!? as {S077.1} only partly solves the problem.  If cookie expires, might still be a problem losing data on POSTs ?;; also http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47924
 - 5 CHK:  [game] check proper work of move-numbering (after latest change): http://www.dragongoserver.net/forum/read.php?forum=2&thread=44024#44472;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=44726#44726
 - 5 CHK:  [game] change/fix(?) mark-last-move-capture AFTER selected move (capturing stone) but BEFORE submitted move !?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=45687#45757;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=31951#31951
 - 5 DBG:  [game] cut-off for max-handicap in proper-handicap-calculus: http://www.dragongoserver.net/forum/read.php?forum=2&thread=42559#43044;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=42559#43098 -> still a bug?
+- 6 DBG:  [msg] investigate + fix(?) folder-colors / transparency / alpha-channel in: (a) table-list (list_messages), (b) other places: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48422#48431;; http://stackoverflow.com/questions/1419448/hex-representation-of-a-color-with-alpha-channel
 - 7 CHK:  [game] (F021) pass-stones or prohibit pass after resume-playing on disputes !?: http://www.dragongoserver.net/features/vote_feature.php?fid=21 ;; CHK if bug, that opponent of last-moved player must resume playing !? -> redesign?
 - 7 CHK:  [msg][quick] send-mail/notify is wrong when asked via quick-suite b/c Players.Lastaccess is used (QuickLastaccess is not taken into consideration) !?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=32185#32258;; -> is this a bug ??
 - 7 CHK:  [quick][game] check if a bug or misuse of white-robot: QuickHandlerGame.process.GAH.prepare_game_action_score(917685,done).no_dispute_but_miss_agree(0) happens a LOT in Errorlog; checked in Apr-2015
@@ -222,6 +232,7 @@ Check_Issues:
 - 5 DBG:  [site][rating] from web-err-log: PHP Notice:  A non well formed numeric value encountered in /home/www/gowww/html/ratingpng.php on line 91, referer: http://rusgolib.iponweb.net/PavelStribuk.html; http://senseis.xmp.net/?Tderz -> fix parsing of URL-args
 - 6 DBG:  [clock] weekend-clock should run on users-timezone (not UTC): http://www.dragongoserver.net/forum/read.php?forum=2&thread=34661#34687 -> no, wait for Tim -> still needed?
 - 6 DBG:  [game] clear/optimize Chrome-CSS for game-board to prevent extra-board-lines (see 08-Dec-2015 mail with screenshots): http://www.dragongoserver.net/forum/read.php?forum=2&thread=46206#46216;; http://stackoverflow.com/questions/13097027/white-space-between-image-and-td-when-zooming-in-or-out-in-the-browser ;; http://stackoverflow.com/questions/5285811/why-isnt-this-html-table-working-properly-in-chrome
+- 7 CHK:  [forum][site] different table-row-colors for Table-lists & forum-thread-overview !? http://www.dragongoserver.net/forum/read.php?forum=4&thread=48422#48482
 - 7 CHK:  [site] add MISS-stats for APC if enabled with config !?;; - bugfix: show APC-cache-misses only for SUM
 - 7 DBG:  [game][wishlist] wrong scoring!? see wishlist: http://www.dragongoserver.net/forum/read.php?forum=5&thread=30341#30405, http://www.dragongoserver.net/forum/read.php?forum=5&thread=30341#30412 ;; pass stone: http://www.dragongoserver.net/forum/read.php?forum=5&thread=30341#33702;; (S11.2) ASK pass-stone ?
 
@@ -255,6 +266,7 @@ KnownBugs:
 - 9 DBG:  [game] game-calc: why is rating-diff off for fin-games?;; wrong game-current if rating-change-admin done inbetween;; add fields to enter other starting-values;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=33180#34046
 
 KnownBugs_Not_Reproducable:
+- 2 DBG:  [game] skip to next game fails: confirm.GAH.init_globals(664628).miss_init0;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47272#47274;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47272#47937
 - 8 DBG:  [tourney] (B015.2b) T-info does not reload newly saved T-news (cache-expire/removal wrong?): cannot reproduce -> perhaps caching effect see {B015.2};; T-news cache-invalidation not working for add-T-news + view on T-info-page: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#47731
 
 
@@ -623,7 +635,7 @@ DeveloperStuff_Potentially_Useful:
 Frameworks_Potentially_Useful:
 - 2 CHK:  [game] game-board JS HTML5: http://www.lifein19x19.com/forum/viewtopic.php?f=18&t=11239&sid=cdd36e9c925ee7e4e427158856e2bf58
 - 4 CHK:  [dev] mock lib: http://code.google.com/p/yaymock/  ;; http://maintainable.com test-framework
-- 5 CHK:  [dev] JS-framework: mochikit, checkout igoogle (moving windows around as you please)
+- 5 CHK:  [dev] JS-framework: checkout igoogle (moving windows around as you please)
 - 9 CHK:  [dev][site] check ember.js: http://emberjs.com/guides/concepts/core-concepts/
 - 9 DOC:  [dev] Chats: http://css-tricks.com/jquery-php-chat/
 
@@ -678,6 +690,7 @@ Ideas_Issues_Game_Related:
 - 3 SPEC: [game] (S66.2) board/CSS/img: use <td>-background-images (a la old OGS) for grid OR for texts on images: http://www.dragongoserver.net/forum/read.php?forum=4&thread=34307#34413
 - 3 SPEC: [game] (S66.2) board/CSS/img: use <td>-background-images (a la old OGS) for grid, replacing special markers with grids (34 instead of 94 images), GRID-12(hoshi -|+ 4corner 4side), TERR-4(red,green,w,b), MARK-4(circle,square,triangle,cross), STONEMARK-14(B|W plain,last-move,4xMark,terr); STONENUM-18(B|W 1-9); extra LETT-26(a-z)
 - 3 IDEA: [game] thumbnail-board: create corners/edges
+- 3 IDEA: [profile][game] customize SGF-download on games-list sgf-column (with comments): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48069#48069
 - 4 CHK:  [game] better mark game in scoring-mode to differ from finished-game: http://www.dragongoserver.net/forum/read.php?forum=5&thread=41924#41980 -> what is this?
 - 4 IDEA: [game] games-list my-running-games sort by same order as status-games (skip-to-next-game): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3042739
 - 4 IDEA: [game] don't allow to click on point, that would be an illegal ko-move (by priv-msg goplayerd in 2011)
@@ -700,7 +713,6 @@ Ideas_Issues_Game_Related:
 - 9 IDEA: [game][feature] message-"chat" with open/public/private comments; open to all/players/hidden; later for Rengo-chat/game-pre-chat/game-post-chat: http://www.dragongoserver.net/features/vote_feature.php?fid=6 => file-based to avoid too much db => feat-vote-rejected
 
 Ideas_Issues_Forum_Related:
-- 3 IDEA: [forum] add regular list-navigation first/last/prev/next/total-entries for forum-search;; also related (but came much later): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3291722
 - 4 CHK:  [forum] re-work NEW-handling by changing what is "NEW" perhaps!?  other forum-software use posts-created-since-last-visit regardless if posts seen or not -> better not like this as DGS is no pure forum-software;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=33381#46345
 - 4 CHK:  [forum] NEW-flag: seems there can be race-conditions if read and post happens within the same second (granularity of datetime);; needed ?
 - 4 IDEA: [forum] [wishlist] selective NEW-handling: (a) in either forum/search, (b) selective RSS-feed, (c) selective NEW per forums/thread?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=40323#40323
@@ -722,12 +734,10 @@ Ideas_Issues_Forum_Related:
 Ideas_Issues_Help_Text_Related:
 - 2 DOC:  [wiki] SL's Go-servers page: update entries for DGS;; http://senseis.xmp.net/?GoServer#toc10
 - 2 DOC:  [wiki] SL's DGS-page: update entries for DGS
-- 2 IDEA  [help][faq] add images with snapshots for FAQ/help !?
 - 3 TXT:  [profile] (S073.4) rating-graph: improve "Games"-text for x-axis (it's expressionless)
 - 3 DOC:  [game][bot][site] Go-playing programs, see bookmarks: Aga, Fuego, Pachi, MoGo, Zen, CrazyStone; http://senseis.xmp.net/?GoPlayingPrograms -> asking users to run some?
 - 3 CHK:  [site] edit-tool, input-help for textareas w/ JS to surround text with tags <home|i|u|b|...> -> check feasibility;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=45025#45110
 - 3 TXT:  [error] Rod: fever-vault -> fever-Fault
-- 4 SPEC: [faq] FAQ without quota? http://www.dragongoserver.net/forum/read.php?forum=4&thread=38491#38496
 - 5 IDEA: [help] <faq label=...>..</faq> or just <faq [label=]name/>, better yet use <help>-name or <doc> to be used for all help/faq/docs: (in posts, messages, in FAQ) to avoid absolute-links; further for context-sensitive help-system,
 - 5 IDEA: [help] FAQ/Help: context-based help, use labels to be able to reference from other pages, marked with (?);; [help] Help: Filter: FC_HELP with some info how to link to help/faq-page, showing as '?' near input-element (with JS-help?)
 - 5 IDEA: [help] Help: Help-system; see also specs/Text-elements.txt;; only adding if solution for UTF8 found !?
@@ -751,6 +761,7 @@ Ideas_Issues_Messaging_Notification_Related:
 - 6 CHK:  [rss] rss/wap-status: replace using caching with quota-warning similar of mix of current RSS/QST;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2419165 ;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=34024#34923 ;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=34024#34580
 - 6 ADM:  [msg] cleanup: delete old server-messages (2 years)
 - 7 IDEA: [msg] overcome rejected-message by allowing direct-reply within X-days (x=14d): http://www.dragongoserver.net/forum/read.php?forum=11&thread=44338#44523 !?
+- 7 CHK:  [msg][game] send notifications about moves in observed games: http://www.dragongoserver.net/forum/read.php?forum=2&thread=47965#47972 -> feasible ?
 - 7 CHK:  [cleanup][msg] merge msg-list & search-msg later; Table-Col: TableMaxRows: for msg-list !?; add table-max-rows for list_messages.php; also RodsREQ;; msg-list max-rows or combine with search-msg
 - 7 CHK:  [rss] (S64) dgs-FILE-cache: replace RSS/WAP-caching with better caching (file-cache, no violation but warning !?)
 - 8 CHK:  [msg] optimize/replace slow-query on private-msg with full-text-search: http://www.dragongoserver.net/forum/read.php?forum=10&thread=40598#40600;; http://www.dragongoserver.net/forum/read.php?forum=10&thread=40598#40614 !?
@@ -766,7 +777,6 @@ Ideas_Issues_QuickApi_Related:
 - 9 IDEA: [quick] add storage-object for clients: uid,key,date,binblob; obj=storage, cmds=list->[key,date,bin-size], get(key)->date+binblob, put(key,blob), del(key);; handle encoding!!
 
 Ideas_Issues_Statistics_Related:
-- 3 IDEA: [site][user][stats] show info of registered-users/active-users/online-users on login-page !?
 - 3 CHK:  [site] (S47) improve site-stats (informative + attracting new-players); user-registered-count-stats with filters (time-range, total, user-online within X time);; OGS-stats: http://nbviewer.ipython.org/gist/thouis/0f93643a8f14ff802f92;; https://gist.github.com/0f93643a8f14ff802f92
 - 3 SPEC: [stats] from wishlist: (server-stats) present, active, total number of users/games: -> rework statistics page
 - 5 SPEC: [stats] from wishlist: (server-stats) number of running games per day for all players together: -> enhance statistics-page by absolute-numbers instead of percentages
@@ -783,18 +793,15 @@ Ideas_Issues_Translation_Related:
 - 9 CHK:  [site][transl] add translations using Transifex-external-site !? -> (-) has no DGS-tag-previewing -> !?
 
 Ideas_Issues_User_Profile_Related:
-- 2 DOC:  [register] (S60a) register: make email mandatory at registration ?? ;; add passus to inform about mail and that "using" the notifications includes receiving mails !? -> already done?
-- 2 TXT:  [user] add text on registration: "if no mail within 24h -> something fishy"
 - 2 DEV:  [adm][user] show on user-info if restricted (forum-post, etc): 1. ADMOPT_DENY_TOURNEY_REGISTER, 2. ADMOPT_FORUM_NO_POST
 - 3 CHK:  [register][user] reg-user: email mandatory for quota-block-notify;; invalid-mail on sending marks mail 'inactive';; similar check USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL !?
-- 3 DATA: [user] sync countries with ISO-3166-1 changes since 2009: http://www.dragongoserver.net/forum/read.php?forum=7&thread=44553#46545
 - 3 IDEA: [user] show that email is missing or invalid;; show on more pages? status? every page?
 - 4 IDEA: [profile][clock] configure user-specific time-span considering others as "online" (default 10min) -> user-profile; store in ConfigPages for users/contact/opps
 - 4 IDEA: [user] Users/Bio: Show/Search Bios (ok by Erik); (wishlist) search by language; search for KGS-id -> feat-vote
 - 4 IDEA: [user] overwrite browser-profile with db-version in user-profile
 - 5 IDEA: [register] (S60b) existing users: add passphrase + Q, ask for optional email if not set with hint to password-forgetting, hint to privacy-rules in policy about email
 - 5 IDEA: [register] (S60c) registration: add user-Q to authenticate (when forgetting password);; mandatory for each user!?;; make it 1. hard to guess, 2. easy to remember and type accurately, 3. will be stored in clear-text unencrypted, 4. shown to other users, 5. not secure against dictionary-attacks
-- 5 IDEA: [user] add text on registration: "if not activated within X days" -> account freed/deleted;; + impl that it is freed/deleted
+- 5 IDEA: [user] add text on registration: "if not activated within X days" -> account freed/deleted;; + impl that it is freed/deleted -> see also {A022*}
 - 5 IDEA: [user] login with Google/Twitter/Facebook (for password-forgot-bypass) ? -> security-concerns (user-tracking) !?
 - 6 IDEA: [user] variable notification-interval (30min steps, >30min); create feature-request: http://www.dragongoserver.net/forum/read.php?forum=4&thread=45255#45259
 - 6 IDEA: [profile] rating-graph: number of games-line in the graph will be get bigger and bigger (for both displays: by time and by number) -> add option "cummulate games" to be able to turn off a cummulation of the game-numbers. Then it's also much easier to see, how many games a user plays within a certain period.
@@ -943,8 +950,8 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 5 SPEC: [tourney] (T029.17i.2) TLeague: rank-summary check: (2) ERR: check for Rank<0 for TLG -> auto-fix (by remove-rank + clear relegations), contact T-admin (shouldn't happen) -> list bad users
 - 5 SPEC: [tourney] (T029.17i.5) TLeague: rank-summary check: (5) ERR: check for Rank=0 (withdrawing) for TLG and with promote/demote-flag set -> list bad users
 - 5 SPEC: [tourney] (T029.17i.6) TLeague: rank-summary check: (6) ERR: check for both relegation-flags set (promote+demote) -> list bad users
-- 5 SPEC: [msg] list-msg of trashcan-folder: add button to "empty trashcan" completely: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47902;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47898;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
-- 5 SPEC: [msg] one-click-delete for viewing-single-msg: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
+- 5 SPEC: [msg] (S078.1) list-msg of trashcan-folder: add button to "empty trashcan" completely: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47902;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47898;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
+- 5 SPEC: [msg] (S078.2a) one-click-delete for viewing-single-msg: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
 - 5 SPEC: [tourney] (T029.17i.4) TLeague: rank-summary check: (4) WARN if there are double-ranks -> may need tie-breaking {T029.18}
 - 5 SPEC: [tourney] (T029.17i.3) TLeague: rank-summary check: (3) WARN if rank of promoted/demoted/staying pool-users doesn't match up with TRound-props PromoteRanks/DemoteStartRank
 - 5 SPEC: [tourney] (T029.17i.1) TLeague: rank-summary check: (1) WARN if counting too many users to-be-relegated (w/o withdrawn TPs);; too many if #promotes > PromoteRanks; too many if #same > (DemoteStartRank - PromoteRanks - 1); too many if #demotes > (pool[i].poolsize - DemoteStartRank + 1)
@@ -957,11 +964,13 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 3 SPEC: [tourney] (T029.4b) TLeague: spawn next cycle: create new T + COPY data from: T.scope/type/wiztype/title/descr/owner/flags(some), all TDirs, TProps.all[-RegEndTime], TRules.all, TRnd.all[-runtime], TPoints.all
 - 2 DEV:  [cleanup][tourney] T-log: not only log title, but type/wiz-type/scope as well; perhaps even more?
 - 2 DEV:  [cleanup][site][tourney] site-map: add missing tournament-pages -> checked -> no change required (tournament-specific pages are not included)
-- 3 SPEC: [msg][cfg] add navigation & entries-count & rows-selection on message-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
-- 3 SPEC: [msg][cfg] add navigation & entries-count on message-search: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
-- 5 SPEC: [msg] one-click-delete for msg-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
+- 3 SPEC: [msg][cfg] (S078.3a) add navigation & entries-count & rows-selection on message-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
+- 3 SPEC: [msg][cfg] (S078.3b) add navigation & entries-count on message-search: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47911 -> configurable ENABLE_MESSAGE_NAVIGATION
+- 5 SPEC: [msg] (S078.2b) one-click-delete for msg-list: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904
+- 3 DOC:  [msg][wishlist] (S078.2c) add shortcut for "trashing" message (+ return to status-page -> split into {S078.4}): http://www.dragongoserver.net/forum/read.php?forum=4&thread=37144#37144 ;; dgs-wishlist not-implemented -> use bulk-toggle -> implemented already w/ one-click-delete -> see http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47894;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47894#47904 -> adjusted SL-wishlist/not-implemented (added note)
 - 1 IDEA: [adm][site] (S077.2) avoid expire-login-check and quota-dec for admin-operations
 - 2 IDEA: [tourney] (S077.5) GEN: avoid expire-login-check and quota-dec for T-director-operations
+- 4 SPEC: [faq] FAQ without quota? http://www.dragongoserver.net/forum/read.php?forum=4&thread=38491#38496 -> already done 03Aug2013, live 11Aug2013 -> note in forum
 - 5 SPEC: [markup] dot '.' should end a http-autolink: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248
 - 8 TXT:  [tourney] fix typo: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48454
 
