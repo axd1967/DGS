@@ -159,7 +159,7 @@ define('DAYS_MIN_REG_ENDTIME', 3);
             'TEXTINPUT',   'min_rat_start_round', 12, 12, ( $rating == NO_RATING
                   ? ''
                   : ( !$valid_rat ? $rating : echo_rating($rating, 1, 0, true, 1) ) ),
-            'TEXT', ( $valid_rat ? sprintf(' (=%s %s), ', T_('ELO#rating'), echo_rating_elo($rating)) : '' ),
+            'TEXT', ( $valid_rat ? sprintf(' (=%s %s), ', T_('Elo rating'), echo_rating_elo($rating)) : '' ),
             'TEXT', T_('empty = forbid user to change start-round#tourney'), ));
    }
 

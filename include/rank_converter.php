@@ -50,8 +50,8 @@ class RankConverter
          $conv_newrating = convert_to_rating($conv_rating, $conv_ratingtype, MAX_ABS_RATING);
          $converted_rank = ($conv_newrating != NO_RATING)
             ? sprintf( "=> %s: %s<br>\n=> %s: %d",
-                       T_('DGS-rank'), echo_rating($conv_newrating, true, 0, true),
-                       T_('DGS-ELO'), $conv_newrating )
+                       T_('DGS rank'), echo_rating($conv_newrating, true, 0, true),
+                       T_('DGS Elo rating'), $conv_newrating )
             : T_('No valid rating');
       }
       $rcform->add_empty_row();

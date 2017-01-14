@@ -404,7 +404,7 @@ function load_tournament_info( $tourney, $user, &$uvars, $is_new )
             . MINI_SPACING
             . span('bold', T_('User info'), '%s: ')
                . $user->user_reference() . ', ' . echo_rating($user->Rating, true, $uid)
-               . sprintf(', %s %1.2f', T_('ELO#rating'),$user->Rating );
+               . sprintf(', %s %1.2f', T_('Elo rating'),$user->Rating );
       if ( !is_null($tp) )
          $info[] = str_replace("\n", "<br>\n", $tp->build_result_info() );
       if ( !is_null($tladder) )

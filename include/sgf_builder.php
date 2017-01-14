@@ -704,7 +704,7 @@ class SgfBuilder
                $mpg_general_comment .= "\n";
             $last_order = $gr_order;
             $mpg_general_comment .=
-               sprintf( "\n   %d. %s: %s (%s), %s - ELO %d", $gr_order, $gr_col, $arr['Name'], $arr['Handle'],
+               sprintf( "\n   %d. %s: %s (%s), %s - Elo rating %d", $gr_order, $gr_col, $arr['Name'], $arr['Handle'],
                         self::sgf_echo_rating($arr['Rating2'],true), $arr['Rating2'] );
          }
          if ( $GameType == GAMETYPE_ZEN_GO )
@@ -732,22 +732,22 @@ class SgfBuilder
          . ( ($Flags & GAMEFLAGS_ADMIN_RESULT) ? "\nNote: game-result set by admin" : '' )
          . "\n"
          . ( is_valid_rating($White_Start_Rating)
-               ? sprintf( "\nWhite Start Rating: %s - ELO %d",
+               ? sprintf( "\nWhite Start Rating: %s - Elo rating %d",
                             self::sgf_echo_rating($White_Start_Rating,true), $White_Start_Rating )
                : "\nWhite Start Rating: ?" )
          . ( is_valid_rating($Black_Start_Rating)
-               ? sprintf( "\nBlack Start Rating: %s - ELO %d",
+               ? sprintf( "\nBlack Start Rating: %s - Elo rating %d",
                             self::sgf_echo_rating($Black_Start_Rating,true), $Black_Start_Rating )
                : "\nBlack Start Rating: ?" );
       if ( $Status == GAME_STATUS_FINISHED && isset($Score) )
       {
          $general_comment .=
             ( is_valid_rating($White_End_Rating)
-               ? sprintf( "\nWhite End Rating: %s - ELO %d",
+               ? sprintf( "\nWhite End Rating: %s - Elo rating %d",
                             self::sgf_echo_rating($White_End_Rating,true), $White_End_Rating )
                : "\nWhite End Rating: ?" )
             . ( is_valid_rating($Black_End_Rating)
-               ? sprintf( "\nBlack End Rating: %s - ELO %d",
+               ? sprintf( "\nBlack End Rating: %s - Elo rating %d",
                             self::sgf_echo_rating($Black_End_Rating,true), $Black_End_Rating )
                : "\nBlack End Rating: ?" );
       }

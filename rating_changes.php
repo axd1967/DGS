@@ -175,13 +175,13 @@ function fill_user_rating_changes( $data, &$rform, &$itable, $b_id, $w_id )
          ($has_b_rating ? echo_rating(@$userb->Rating, true, $userb->ID, false) : NO_VALUE),
          ($has_w_rating ? echo_rating(@$userw->Rating, true, $userw->ID, false) : NO_VALUE),
          '' ) );
-   $itable->add_sinfo( T_('ELO Rating#ratchg'), array(
+   $itable->add_sinfo( T_('Elo Rating'), array(
          ($has_b_rating ? echo_rating_elo(@$userb->Rating, true) : NO_VALUE),
          ($has_w_rating ? echo_rating_elo(@$userw->Rating, true) : NO_VALUE),
          ($has_b_rating && $has_w_rating
             ? T_('DIFF#ratchg') . echo_rating_elo(abs(@$userb->Rating - @$userw->Rating), true, ': ')
             : '' )) );
-   $itable->add_sinfo( T_('ELO Rating Min - Max#ratchg'), array(
+   $itable->add_sinfo( T_('Elo Rating Min - Max'), array(
          ($has_b_rating ? echo_rating_elo(@$userb->urow['RatingMin'], true) : NO_VALUE) . ' - ' .
             ($has_b_rating ? echo_rating_elo(@$userb->urow['RatingMax'], true) : NO_VALUE),
          ($has_w_rating ? echo_rating_elo(@$userw->urow['RatingMin'], true) : NO_VALUE) . ' - ' .
@@ -228,8 +228,8 @@ function fill_user_rating_changes( $data, &$rform, &$itable, $b_id, $w_id )
          list( $b_ratdiff_jigo, $w_ratdiff_jigo ) = calculate_rating_change_prediction( $data, 0 ); // jigo
          list( $b_ratdiff_lost, $w_ratdiff_won ) = calculate_rating_change_prediction( $data, 1 ); // black lost
 
-         $itable->add_scaption( T_('Rating changes (ELO)') );
-         $diff_note = T_('100 ELO points = 1 kyu#ratchg');
+         $itable->add_scaption( T_('Rating changes (Elo)') );
+         $diff_note = T_('100 Elo points = 1 kyu#ratchg');
          $itable->add_sinfo( T_('Rating diff on Win') . MED_SPACING
             . image('images/yes.gif', T_('Yes'), null, 'class=InTextImage'),
             array( rdiff($b_ratdiff_won, $fmt_elo), rdiff($w_ratdiff_won, $fmt_elo), $diff_note ) );

@@ -631,7 +631,7 @@ Commands:
                "name" : "black-name",
                "country" : "de",
                "rating" : "3k (-7%)",             # current DGS rating | "" (=no rating)
-               "rating_elo" : "1792.59326171875", # current DGS elo-rating | "" (=no rating)
+               "rating_elo" : "1792.59326171875", # current DGS Elo rating | "" (=no rating)
                "last_access" : "YYYY-MM-DD hh:mm:ss",
             },
             "black_gameinfo" : {    # game-info of black-user
@@ -639,12 +639,12 @@ Commands:
                "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status, see [4.QST]);
                                                         # - field only filled for started games for black and white user
                                                         # - field empty for finished games
-               "rating_start" : "3k (-7%)",             # start-rating
-               "rating_start_elo" : "1792.59326171875", # start-rating ELO
+               "rating_start" : "3k (-7%)",             # start rating
+               "rating_start_elo" : "1792.59326171875", # start Elo rating
 
                # the following 3 fields are only included if the game is finished, omitted otherwise
-               "rating_end" : "3k (-7%)",               # end-rating
-               "rating_end_elo" : "1792.59326171875",   # start-rating ELO
+               "rating_end" : "3k (-7%)",               # end rating
+               "rating_end_elo" : "1792.59326171875",   # end Elo rating
                "rating_diff" : "+0.23",                 # rating-diff, field only included if WITH-option contains 'ratingdiff'
             },
 
@@ -1083,7 +1083,7 @@ Commands:
             "last_move" : "YYYY-MM-DD hh:mm:ss",   # date of last move (in users time-zone; can be empty)
             "rating_status" : "RATED",         # NONE | INIT | RATED
             "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
-            "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
+            "rating_elo" : "1643.88952636719", # DGS Elo rating | "" (=no rating)
             "rank" : "5k EGF",                 # user rank-info (contains HTML)
             "open_match" : "ask later",        # user open-for-match-info (contains HTML)
             "hits" : 100,            # number of access-hits on web-site (since user-registration); only for own user
@@ -1225,7 +1225,7 @@ Commands:
                "handle" : "user1",  # USER_HANDLE
                "name" : "name1",    # user name
                "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
-               "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
+               "rating_elo" : "1643.88952636719", # DGS Elo rating | "" (=no rating)
             },
             "user_to" : {
                "id" : 222,          # user-id of receiver
@@ -1233,7 +1233,7 @@ Commands:
                "handle" : "user2",  # USER_HANDLE
                "name" : "name2",    # user name
                "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
-               "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
+               "rating_elo" : "1643.88952636719", # DGS Elo rating | "" (=no rating)
             },
             "type" : "NORMAL", # message-type (see specs/db/): NORMAL | INVITATION | DISPUTED | RESULT
             "flags" : "",      # flags (comma-separated): BULK (multi-receiver bulk-message)
@@ -1658,7 +1658,7 @@ Commands:
                "name" : "name1",    # user name
                "country" : "xe",    # country-code
                "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
-               "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
+               "rating_elo" : "1643.88952636719", # DGS Elo rating | "" (=no rating)
             },
             "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of waitingroom-entry
             "count_offers" : 3,      # remaining number of offers with same characteristics
@@ -2097,19 +2097,19 @@ Response (SGF-properties):
          Rated: Y                      # values: Y | N
          Note: game-result set by admin   # Note-lines 0..n
 
-         White Start Rating: 7k (-29%) - ELO 1371
-         Black Start Rating: 8k (-18%) - ELO 1282
-         White End Rating: 6k (-4%) - ELO 1496
-         Black End Rating: 6k (-2%) - ELO 1497
+         White Start Rating: 7k (-29%) - Elo rating 1371
+         Black Start Rating: 8k (-18%) - Elo rating 1282
+         White End Rating: 6k (-4%) - Elo rating 1496
+         Black End Rating: 6k (-2%) - Elo rating 1497
 
          # only for shape-game:
          Shape #3 (W-First): Sunjang Baduk
 
          # only for multi-player-game (Team-/Zen-Go)
          Game Players (Order. Color: Name (Handle), Current Rating):
-            1. B JUG (jug), 6k (-2%) - ELO 1497             # group:  B | W | BW
+            1. B JUG (jug), 6k (-2%) - Elo rating 1497             # group:  B | W | BW
 
-            1. W Ba_alza (Ba_alza), 6k (-4%) - ELO 1496     # player: Name (Handle), current rating
+            1. W Ba_alza (Ba_alza), 6k (-4%) - Elo rating 1496     # player: Name (Handle), current rating
          ]
 
       OT[90 days + 1 day per move and 10 extra periods]

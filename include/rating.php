@@ -438,7 +438,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    if ( $graph_uid > 0 )
    {
       global $base_path;
-      $elo_str = T_('ELO#rating') . echo_rating_elo($rating, true, ' ');
+      $elo_str = T_('Elo rating') . echo_rating_elo($rating, true, ' ');
       $string = anchor( $base_path."ratinggraph.php?uid=$graph_uid", $string, $elo_str, 'class="Rating"' );
    }
    return $string;

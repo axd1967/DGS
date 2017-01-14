@@ -170,7 +170,7 @@ class TournamentParticipant
    public function build_result_info()
    {
       $rating_str = ( is_valid_rating($this->Rating) )
-         ? sprintf( T_(", T-Rating [%s][ELO %1.2f]"), echo_rating($this->Rating), $this->Rating )
+         ? sprintf( T_(", T-Rating [%s][Elo rating %1.2f]"), echo_rating($this->Rating), $this->Rating )
          : '';
       return
          echo_image_info( "tournaments/edit_participant.php?tid={$this->tid}".URI_AMP."uid={$this->uid}",

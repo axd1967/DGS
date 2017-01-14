@@ -293,7 +293,7 @@ function load_old_rating_changes( $uid )
             1 => ($rca->Created > 0) ? date(DATE_FMT2, $rca->Created) : '',
             2 => format_ratingchangeadmin_changes($rca->Changes, ' + '),
             3 => ($rca->Changes & RCADM_CHANGE_RATING )
-                    ? sprintf( '%s = ELO %f', echo_rating($rca->Rating, true, 0, false), $rca->Rating )
+                    ? sprintf( '%s = Elo rating %f', echo_rating($rca->Rating, true, 0, false), $rca->Rating )
                     : NO_VALUE,
             'extra_class' => 'TCells',
          ));

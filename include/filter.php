@@ -2284,7 +2284,7 @@ class FilterRating extends Filter
    }//__construct
 
    /*!
-    * \brief Returns integer ELO-rating converted from rank-spec (7k, 3d).
+    * \brief Returns integer Elo rating converted from rank-spec (7k, 3d).
     * \note sets errormsg and resets filter-values on parse-error
     */
    private function convert_rank($rank)
