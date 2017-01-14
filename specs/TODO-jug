@@ -7,8 +7,17 @@ Legend:   [ 0-recent, 1-high, 9-low, ?-needs prio];; types: ADM=admin-stuff (for
 Bookmarks_Admin:
 
 New_Issues:   set prio + sort into sections
+- 6 IDEA: [game] SGF-download: add option to add player-info in nodes; currently it's always added; but keep for MPGs (or also only enabled with the option?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48188#48688
+- 8 IDEA: [game] SGF-download: add way to specify what downloaded SGF should contain (comments, notes, check other options of sgf.php): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48277#48283
+- 7 CHK:  [forum] eval embedding of eidogo in forums: http://www.dragongoserver.net/forum/read.php?forum=4&thread=33700#33974;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48237
+- 7 CHK:  [user] user-info-page: grouping of data in profile-related, server-tracked, game-related? etc:
+- 8 CHK:  [user] user-info: change name of "Last quick access" -> "last client access" (really?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48660
+- 1 IDEA: [site] (S079) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveymonkey.com or the like)
+- 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
+- 6 IDEA: [goban] goban-editor: add textarea-input to paste SGF-raw-data: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48241
+- 6 IDEA: [goban] add lenient-option on SGF-parser to merge already existing SGF-properties: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48548#48680
 
-Open_Tasks_Stack:  (max. 2 WIP), first=next  (S079) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
+Open_Tasks_Stack:  (max. 2 WIP), first=next  (S080) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
 - 1 ADM:  [adm][site][msg] chk failed_query.sql on server with locking query
 #--------------- OPEN:
@@ -16,6 +25,7 @@ Open_Tasks_Stack:  (max. 2 WIP), first=next  (S079) (T035) (A023) (C04) (D02) (B
 - 2 DOC:  [register] (S60a) register: make email mandatory at registration ?? ;; add passus to inform about mail and that "using" the notifications includes receiving mails !? -> already done?
 - 2 TXT:  [user] add text on registration: "if no mail within 24h -> something fishy"
 - 2 IDEA: [feature][adm] add FeatureLog for changes by feature-admin
+- 3 SPEC: [tourney] inform TD by sending bulletin if all TPs are on REGISTER reg-status: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48590#48590
 - 3 IDEA: [msg][wishlist] (S078.4) add shortcut for "trashing" message + return to status-page -> generalized: "trash" + return to calling-page (HTTP_REFERER): http://www.dragongoserver.net/forum/read.php?forum=4&thread=37144#37144
 - 3 IDEA: [forum] add regular list-navigation first/last/prev/next/total-entries for forum-search;; also related (but came much later): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3291722
 - 3 IDEA: [site][user][stats] show info of registered-users/active-users/online-users on login-page !?
@@ -472,7 +482,7 @@ Bugs_Tournaments:
 Tournament_General_Ideas:
 - 3 IDEA: [tourney] bulk-invite TPs from other Ts to assist T-dir {see also TLeague-sync T029.19a}
 - 3 IDEA: [tourney] T-list: filter out tournaments from T-list on which user registered but has been eliminated in higher rounds: http://www.dragongoserver.net/forum/read.php?forum=11&thread=41783#47403
-- 3 IDEA: [tourney][cleanup] (T031) cleanup!?: replace T-scope with different model to "restrict" T-settings?; change T-scope Public/Private to User (later Groups can be supported -> see (T032)); implement "invite-only" T as T-feature: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#46750
+- 3 IDEA: [tourney][cleanup] (T031) cleanup!?: replace T-scope with different model to "restrict" T-settings?; change T-scope Public/Private to User (later Groups can be supported -> see (T032)); implement "invite-only" T as T-feature: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#46750;; check against tournament-title http://www.dragongoserver.net/forum/read.php?forum=7&thread=48573
 - 3 IDEA: [tourney] (T027) T-list: show only "open" (ie joinable) Ts per default; add bottom-links for all Ts
 - 3 CHK:  [tourney] (T027) T-list: adjust T-list to only tournament as "new", that logged-in user can join: http://www.dragongoserver.net/forum/read.php?forum=4&thread=47392#47393
 - 4 CHK:  [tourney] T-wizard (create-T): only show T-types that user is allowed to create -> really?
@@ -974,4 +984,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 3 SPEC: [markup] shrink-to-fit issue of <code/pre>-tag (add new tag for mono-spaced font -> perhaps use <tt> -> <div font-family:monospaced> -> no): http://www.dragongoserver.net/forum/read.php?forum=4&thread=41807#41909;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#41256;; http://www.dragongoserver.net/forum/read.php?forum=3&thread=48442#48474;; -> no new tag, no scrollbars, but fixed with pre with display:inline-block within div to break lines
 - 5 SPEC: [markup] more chars ending a http-autolink: excerpt from [:punc:]-regex-class, that may end a URL: ".,:;!?()[]{}'`\"&|": follow-up from http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248#48301;; LOCAL http://localhost/dev/forum/read.php?forum=2&thread=26745#26762
 - 9 TXT:  [transl] change ELO -> Elo (rating): http://www.dragongoserver.net/forum/read.php?forum=2&thread=48298#48325 -> adjust FAQ-entries after LIVE-deploy: http://www.dragongoserver.net/faq.php?read=t&cat=105&e=107  http://www.dragongoserver.net/faq.php?read=t&cat=105&e=106  http://www.dragongoserver.net/faq.php?read=t&cat=12&e=421
+- 9 TXT:  [transl] use separate translatable text for status-page page-title: Status -> Status#pagetitle: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48293#48293
 

@@ -80,7 +80,7 @@ $GLOBALS['ThePage'] = new Page('Status');
    $gtable = new Table( 'game', $page, $cfg_tblcols, '', $table_mode|TABLE_ROWS_NAVI );
    $cnt_game_rows = load_games_to_move( $my_id, $gtable );
 
-   $title = sprintf( '%s (%s)', T_('Status'), $cnt_game_rows );
+   $title = sprintf( '%s (%s)', T_('Status#pagetitle'), $cnt_game_rows );
    start_page( $title, true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    section( 'Status',
