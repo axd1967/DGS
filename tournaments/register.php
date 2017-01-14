@@ -61,8 +61,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
      tp_delete&tid=&rid=            : remove registration (need confirm)
      tp_delete&confirm=1&tid=&rid=  : remove registration (confirmed)
      tp_cancel&tid=&rid=            : cancel remove-confirmation
-     tp_ack_invite&tid=             : approve invitation by TD
-     tp_edit_invite&tid=            : reject invitation by TD, transforming to user-application
+     tp_ack_invite&tid=             : approve invitation by TP
+     tp_edit_invite&tid=            : reject invitation by TP, transforming to user-application
 */
 
    $tid = (int) @$_REQUEST['tid'];

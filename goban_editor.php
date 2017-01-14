@@ -326,6 +326,7 @@ function update_igoban( $board_text, $goban_operation )
 function load_igoban_from_sgf( $file_sgf_arr )
 {
    global $do_preview;
+   $board_text = '';
 
    // upload SGF and parse into Goban
    list( $errors, $sgf_data ) = FileUpload::load_data_from_file( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
