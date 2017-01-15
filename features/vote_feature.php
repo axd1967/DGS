@@ -130,7 +130,7 @@ require_once 'features/lib_votes.php';
       'DESCRIPTION',  T_('Created'),
       'TEXT',         date(DATEFMT_FEATURE, $feature->created) ));
    $fform->add_row( array(
-      'DESCRIPTION',  T_('Lastchanged'),
+      'DESCRIPTION',  T_('Last changed'),
       'TEXT',         date(DATEFMT_FEATURE, $feature->lastchanged) ));
    $fform->add_row( array(
       'DESCRIPTION', T_('Subject'),

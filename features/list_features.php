@@ -114,7 +114,7 @@ require_once 'features/lib_votes.php';
    $ftable->add_tablehead(10, T_('Size#feature'),       'Enum', 0, 'F.Size+');
    $ftable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'F.Subject+');
    $ftable->add_tablehead( 8, T_('My Vote#featheader'), 'NumberC', TABLE_NO_HIDE, 'FV.Points-');
-   $ftable->add_tablehead( 9, T_('Lastvoted#header'),   'Date', 0, 'FV.Lastchanged+');
+   $ftable->add_tablehead( 9, T_('Last voted#header'),   'Date', 0, 'FV.Lastchanged+');
    $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'F.Created+');
    $ftable->add_tablehead( 6, T_('Last changed#header'), 'Date', 0, 'F.Lastchanged+');
 

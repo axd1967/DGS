@@ -183,7 +183,7 @@ require_once 'features/lib_votes.php';
    if ( $feature->lastchanged )
    {
       $fform->add_row( array(
-         'DESCRIPTION',  T_('Lastchanged'),
+         'DESCRIPTION',  T_('Last changed'),
          'TEXT',         date(DATEFMT_FEATURE, $feature->lastchanged) ));
    }
 
