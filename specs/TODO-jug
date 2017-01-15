@@ -16,7 +16,6 @@ New_Issues:   set prio + sort into sections
 - 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
 - 6 IDEA: [goban] goban-editor: add textarea-input to paste SGF-raw-data: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48241
 - 6 IDEA: [goban] add lenient-option on SGF-parser to merge already existing SGF-properties: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48548#48680
-- 3 TXT:  [tourney] change edit-view-pools link: 'View Pools' -> 'Edit-View Pools': http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48604
 
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S080) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
@@ -989,4 +988,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 9 TXT:  [transl] change ELO -> Elo (rating): http://www.dragongoserver.net/forum/read.php?forum=2&thread=48298#48325 -> adjust FAQ-entries after LIVE-deploy: http://www.dragongoserver.net/faq.php?read=t&cat=105&e=107  http://www.dragongoserver.net/faq.php?read=t&cat=105&e=106  http://www.dragongoserver.net/faq.php?read=t&cat=12&e=421
 - 9 TXT:  [transl] use separate translatable text for status-page page-title: Status -> Status#pagetitle: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48293#48293
 - 7 IDEA: [game] game-page: add online-icon if user "online": http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3378370
+- 3 TXT:  [tourney] change edit-view-pools link: 'View Pools' -> 'Edit-View Pools': http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48604
 

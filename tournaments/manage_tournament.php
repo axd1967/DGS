@@ -273,7 +273,7 @@ function make_links_ttype_specific( $tourney, $tstat )
 
       if ( $tstat == TOURNEY_STATUS_PLAY )
          return '<li>'
-            . make_menu_link( T_('View Pools'), "tournaments/roundrobin/view_pools.php?tid=$tid" )
+            . make_menu_link( T_('Edit-View Pools'), "tournaments/roundrobin/view_pools.php?tid=$tid".URI_AMP."edit=1" )
             . SEP_SPACING
             . make_menu_link( T_('Show all running tournament games'), "show_games.php?tid=$tid".URI_AMP."uid=all" )
             . '<li>'
