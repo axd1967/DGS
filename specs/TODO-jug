@@ -7,14 +7,12 @@ Legend:   [ 0-recent, 1-high, 9-low, ?-needs prio];; types: ADM=admin-stuff (for
 Bookmarks_Admin:
 
 New_Issues:   set prio + sort into sections
-- 6 IDEA: [game] SGF-download: add option to add player-info in nodes; currently it's always added; but keep for MPGs (or also only enabled with the option?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48188#48688
 - 8 IDEA: [game] SGF-download: add way to specify what downloaded SGF should contain (comments, notes, check other options of sgf.php): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48277#48283
-- 7 CHK:  [forum] eval embedding of eidogo in forums: http://www.dragongoserver.net/forum/read.php?forum=4&thread=33700#33974;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48237
-- 7 CHK:  [user] user-info-page: grouping of data in profile-related, server-tracked, game-related? etc:
 - 1 IDEA: [site] (S079) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveyplanet.com or Google-Forms ... check if respondents need account)
 - 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
 - 6 IDEA: [goban] goban-editor: add textarea-input to paste SGF-raw-data: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48241
 - 6 IDEA: [goban] add lenient-option on SGF-parser to merge already existing SGF-properties: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48548#48680
+- 8 BUG:  [game] SGF-download for MPG: merging text on SCORE by falsely trimming LFs: http://localhost/dev/sgf.php?gid=646952&owned_comments=1&no_cache=1
 
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S080) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
@@ -30,6 +28,7 @@ Open_Tasks_Stack:  (max. 2 WIP), first=next  (S080) (T035) (A023) (C04) (D02) (B
 - 3 IDEA: [site][user][stats] show info of registered-users/active-users/online-users on login-page !?
 - 2 IDEA  [help][faq] add images with snapshots for FAQ/help !?
 - 3 DATA: [user] sync countries with ISO-3166-1 changes since 2009: http://www.dragongoserver.net/forum/read.php?forum=7&thread=44553#46545
+- 7 CHK:  [forum] eval embedding of eidogo in forums: http://www.dragongoserver.net/forum/read.php?forum=4&thread=33700#33974;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48237
 #--------------- STASH:
 - 2 PRJ:  [todo] (A008.2d) cleanup TODO/FAQ after publish: pass-7 cleanup (mark NOT_DONE + commit 1st, then remove to be able to search for not-done stuff)
 - 2 DISC: [site] chk/eval/answer private-DGS-folders: LATER #24, TODO #16, CHECK #42
@@ -813,6 +812,7 @@ Ideas_Issues_User_Profile_Related:
 - 5 IDEA: [user] login with Google/Twitter/Facebook (for password-forgot-bypass) ? -> security-concerns (user-tracking) !?
 - 6 IDEA: [user] variable notification-interval (30min steps, >30min); create feature-request: http://www.dragongoserver.net/forum/read.php?forum=4&thread=45255#45259
 - 6 IDEA: [profile] rating-graph: number of games-line in the graph will be get bigger and bigger (for both displays: by time and by number) -> add option "cummulate games" to be able to turn off a cummulation of the game-numbers. Then it's also much easier to see, how many games a user plays within a certain period.
+- 7 CHK:  [user] user-info-page: grouping of data in profile-related, server-tracked, game-related? etc
 - 7 IDEA: [profile] split user-profile & site-prefs & more;; browser-settings (GUI); add load profile from DB (delete cookies);; personal-settings and GUI-settings !?
 - 7 IDEA: [user] download rating-info/log for specific user (as CSV): http://www.dragongoserver.net/forum/read.php?forum=4&thread=7759#47167;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=7759#47223
 - 7 IDEA: [profile] save rating-graph settings for own user: http://www.dragongoserver.net/forum/read.php?forum=4&thread=7759#46965
@@ -989,4 +989,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 7 IDEA: [game] game-page: add online-icon if user "online": http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3378370
 - 3 TXT:  [tourney] change edit-view-pools link: 'View Pools' -> 'Edit-View Pools': http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48604
 - 8 CHK:  [user] user-info: change name of "Last quick access" -> "last client access" (really?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48660
+- 6 IDEA: [game] SGF-download: add option 'pinfo' to add player-info in nodes; currently it's always added; but keep for MPGs (or also only enabled with the option?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48188#48688
 

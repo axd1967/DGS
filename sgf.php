@@ -28,7 +28,9 @@ require_once 'include/sgf_builder.php';
       owned_comments=0|1|N : 1 = if set try to return private comments (for game-players only) including private notes on game,
                              0 = return only public comments (default)
                              N = return NO comments or notes
-      mpg=<INT>            : flags for multi-player-game: 0 = default, 1 (bit #0) = no-user-per-node
+      pinfo=<INT>          : '' = default = without player-info for standard-game, with player-info for multi-player-game,
+                             1 = player-info on each move-node (for standard-game only if there's text, and for multi-player-game),
+                             0 = no player-info on move-nodes (for standard-game and multi-player-game)
       inline=0|1           : 1 = use Content-Disposition type of "inline" to directly start assigned application
       bulk=0|1             : 1 = use special filename-pattern (omit handicap if =0 and result if unfinished game):
                              DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
@@ -75,14 +77,13 @@ else
       $no_comments = true;
    }
 
-   $opt_mpg = (int)@$_REQUEST['mpg'];
+   $opt_pinfo = trim(@$_REQUEST['pinfo']);
    $opt_cond_moves = @$_REQUEST['cm'];
 
    $sgf = new SgfBuilder( $gid, /*use_buf*/false );
    $sgf->set_file_format( @$_REQUEST['filefmt'] );
    $sgf->set_include_conditional_moves( $opt_cond_moves );
-   if ( $opt_mpg & 1 )
-      $sgf->set_mpg_node_add_user(false);
+   $sgf->set_mode_player_info($opt_pinfo);
 
    $row = $sgf->load_game_info();
    extract($row);

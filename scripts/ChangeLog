@@ -11,6 +11,16 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2017-01-16 jug
+
+   * include/sgf_builder.php (PLAYER_INFO_STD, PLAYER_INFO_MPG; class SgfBuilder, ~.set_mode_player_info),
+     specs/quick_suite.txt, sgf.php:
+   - add option on SGF-download to include & exclude player-info on move-nodes
+     replace option 'mpg' with new option 'pinfo' to control including player-info on each move-node
+     - default is to include player-info for MPG, and no player-info for std-game
+     - option can enable or disable player-info for std-game and MPG
+     - enabling for std-game only includes player-info on nodes with text-comment
+
 2017-01-15 jug
 
    * include/game_functions.php (GameHelper.load_game_row),

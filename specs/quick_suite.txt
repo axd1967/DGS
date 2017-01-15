@@ -1947,7 +1947,7 @@ Purpose:
 
 Request:
 
-   sgf.php?gid=<GAME_ID>&owned_comments=<CMODE>&mpg=<MPG>&quick_mode=<QMODE>&inline=<INLINE>&no_cache=<CACHE>&bulk=<BULK>&filefmt=<FILEFORMAT>&cm=<CONDMOVES>
+   sgf.php?gid=<GAME_ID>&owned_comments=<CMODE>&pinfo=<PINFO>&quick_mode=<QMODE>&inline=<INLINE>&no_cache=<CACHE>&bulk=<BULK>&filefmt=<FILEFORMAT>&cm=<CONDMOVES>
 
 Important Notes:
 
@@ -1974,8 +1974,10 @@ Options:
         including private notes on game
       - N = return NO comments or notes at all
 
-   <MPG> = int          ; default = 0, flags for multi-player-game only
-      - 1 (bit 0) = don't include user-info on each move-node
+   <PINFO> = '' | 0 | 1 ; default = '', flags for including player-info ("Name (Handle), Rank") in move-nodes
+      - '' = no player-info for standard-game, include player-info for multi-player-game
+      - 1 = include player-info on each move-node (for standard-game only if there's a comment, always for multi-player-game)
+      - 0 = no player-info on move-nodes (for standard-game and multi-player-game)
 
    <QMODE> = 0 | 1      ; default = 0
       - 0 = exit on error (default)
@@ -2184,6 +2186,9 @@ Examples:
 
    # download SGF (e.g. for robot, no comments)
    sgf.php?gid=557175&owned_comments=N&quick_mode=1&no_cache=1
+
+   # download SGF with player-info on all move-nodes
+   sgf.php?gid=557175&owned_comments=1&pinfo=1
 
    # download SGF with conditional-moves of both players
    sgf.php?gid=557175&cm=3

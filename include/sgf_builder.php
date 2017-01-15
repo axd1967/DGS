@@ -115,6 +115,10 @@ XM    move_id              game-info   see specs/quick_suite.txt (3a)
 */
 
 
+// bits for SgfBuilder.mode_player_info
+define('PLAYER_INFO_STD', 0x01);
+define('PLAYER_INFO_MPG', 0x02);
+
 
  /*!
   * \class SgfBuilder
@@ -145,13 +149,13 @@ class SgfBuilder
 
    private $include_games_notes = true; // && owned_comments set
    private $include_node_name = false;
+   private $mode_player_info = PLAYER_INFO_MPG; // default (on for MPG, off for STD-game)
 
    //0=no highlight, 1=with Name property, 2=in comments, 3=both
    private $sgf_pass_highlight = 0;
    private $sgf_score_highlight = 0;
 
    // multi-player-game options
-   private $mpg_node_add_user = true;
    private $mpg_users = array();
    public $mpg_active_user = null; // arr with Players-fields, see GamePlayers::load_users_for_mpgame()
    private $is_mpgame = false;
@@ -201,9 +205,12 @@ class SgfBuilder
       return $this->include_games_notes;
    }
 
-   public function set_mpg_node_add_user( $mpg_node_add_user )
+   public function set_mode_player_info( $opt_player_info )
    {
-      $this->mpg_node_add_user = $mpg_node_add_user;
+      if ( is_numeric($opt_player_info) )
+         $this->mode_player_info = ($opt_player_info) ? PLAYER_INFO_STD|PLAYER_INFO_MPG : 0;
+      elseif ( (string)$opt_player_info == '' )
+         $this->mode_player_info = PLAYER_INFO_MPG;
    }
 
    /*!
@@ -902,17 +909,30 @@ class SgfBuilder
                   $Text = $gc_helper->filter_comment( $Text, $MoveNr, $Stone, $owned_comments, /*html*/false );
                   if ( $this->is_mpgame )
                   {
-                     $player_txt = self::formatPlayerName( $gc_helper->get_mpg_user() );
-
-                     if ( (string)$Text != '' )
-                        $this->node_com .= "\n$player_txt: $Text";
-                     else if ( $this->mpg_node_add_user )
-                        $this->node_com .= "\n$player_txt";
+                     if ( $this->mode_player_info & PLAYER_INFO_MPG )
+                     {
+                        $this->node_com .= "\n" . self::formatPlayerName( $gc_helper->get_mpg_user() );
+                        if ( (string)$Text != '' )
+                           $this->node_com .= ": $Text";
+                     }
+                     else
+                     {
+                        if ( (string)$Text != '' )
+                           $this->node_com .= "\n$Text";
+                     }
                   }
                   else // std-game
                   {
-                     if ( (string)$Text != '' )
-                        $this->node_com .= "\n" . $this->buildPlayerName($Stone, false) . ': ' . $Text;
+                     if ( $this->mode_player_info & PLAYER_INFO_STD )
+                     {
+                        if ( (string)$Text != '' )
+                           $this->node_com .= "\n" . $this->buildPlayerName($Stone, false) . ": $Text";
+                     }
+                     else
+                     {
+                        if ( (string)$Text != '' )
+                           $this->node_com .= "\n$Text";
+                     }
                   }
                   $Text = '';
                }//move-msg
