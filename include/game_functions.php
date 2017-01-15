@@ -1398,11 +1398,13 @@ class GameHelper
            "black.Rank AS Blackrank, " .
            "black.Rating2 AS Blackrating, " .
            "black.RatingStatus AS Blackratingstatus, " .
+           "UNIX_TIMESTAMP(black.Lastaccess) AS Black_Lastaccess, " .
            "white.Name AS Whitename, " .
            "white.ClockUsed AS White_ClockUsed, " .
            "white.Rank AS Whiterank, " .
            "white.Rating2 AS Whiterating, " .
-           "white.RatingStatus AS Whiteratingstatus, "
+           "white.RatingStatus AS Whiteratingstatus, " .
+           "UNIX_TIMESTAMP(white.Lastaccess) AS White_Lastaccess, "
          : '';
       $grow = mysql_single_fetch( "GameHelper.load_game_row($gid).$dbgmsg",
             "SELECT G.*, " .

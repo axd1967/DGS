@@ -11,6 +11,12 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2017-01-15 jug
+
+   * include/game_functions.php (GameHelper.load_game_row),
+     game.php (draw_game_info):
+   - show online-icon on game-page for other player if "online"
+
 2017-01-08 jug
 
    * include/std_functions.php ($html_safe_preg):

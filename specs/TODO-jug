@@ -12,10 +12,11 @@ New_Issues:   set prio + sort into sections
 - 7 CHK:  [forum] eval embedding of eidogo in forums: http://www.dragongoserver.net/forum/read.php?forum=4&thread=33700#33974;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48237
 - 7 CHK:  [user] user-info-page: grouping of data in profile-related, server-tracked, game-related? etc:
 - 8 CHK:  [user] user-info: change name of "Last quick access" -> "last client access" (really?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48660
-- 1 IDEA: [site] (S079) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveymonkey.com or the like)
+- 1 IDEA: [site] (S079) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveyplanet.com or Google-Forms ... check if respondents need account)
 - 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
 - 6 IDEA: [goban] goban-editor: add textarea-input to paste SGF-raw-data: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48241
 - 6 IDEA: [goban] add lenient-option on SGF-parser to merge already existing SGF-properties: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48548#48680
+- 3 TXT:  [tourney] change edit-view-pools link: 'View Pools' -> 'Edit-View Pools': http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48604
 
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S080) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
@@ -40,6 +41,7 @@ Open_Tasks_Stack_League:  first=next
 - 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
 #--------------- DONE:
 #--------------- OPEN:
+- 0 CHK:  [tourney] (T029.X) TLeague: re-spec withdrawals, split away from ranks to Flags perhaps;; separate page for withdrawing?;; allow withdrawing also for TRR for normal user?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48749
 - 4 SPEC: [tourney] (T029.19a) TLeague: sync TPs from prev-cycle: at any time? {see T029.19b}; sync/merge TPs with prev-cycle-TPs (skip drop-outs, auto-withdrawn TPs == opt-out);; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47647;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47634;; see also {T029.18} tie-breaker extras?
 - 4 SPEC: [tourney] (T029.19b) TLeague: sync TPs from prev-cycle: conditions when to allow TP-sync
 - 4 SPEC: [tourney] (T029.19c) TLeague: sync TPs from prev-cycle: adj TP/TD-TP-reg-edit to add flag/marker to prevent overwrite in sync
@@ -892,6 +894,7 @@ DocsArchive_Misc_Developer:
 - 2 DOC:  [doc] online-book "Continuous delivery": http://it-ebooks.info/book/2616/
 - 2 DOC:  [test] browser-tests: http://browsershots.org/
 - 3 DOC:  [adm] SF: user dedec0 = Avic DGS-developer started Feb-2014
+- 3 DOC:  [site] check browser compatibility: https://browsershots.org/
 - 3 DOC:  [site] setup Jira: 09-Dec-2013 requested OnDemand free license; 11-Dec-2013 created dragongoserver.atlassian.net -> learn it + config it ;; discuss it: http://www.dragongoserver.net/forum/read.php?forum=2&thread=32667#32870; http://www.dragongoserver.net/forum/read.php?forum=4&thread=35136#35774; http://www.dragongoserver.net/forum/read.php?forum=2&thread=35416#35428 (!) ;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=39223#39223 -> not used -> local TODO
 - 5 DEV:  [site] fix position of main-menu: http://selfhtml.schlund.de/css/layouts/fixbereiche.htm#definieren
 - 5 DOC:  [site] main-menu: http://de.selfhtml.org/dhtml/beispiele/anzeige/navigation.htm
@@ -985,4 +988,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 5 SPEC: [markup] more chars ending a http-autolink: excerpt from [:punc:]-regex-class, that may end a URL: ".,:;!?()[]{}'`\"&|": follow-up from http://www.dragongoserver.net/forum/read.php?forum=4&thread=48248#48301;; LOCAL http://localhost/dev/forum/read.php?forum=2&thread=26745#26762
 - 9 TXT:  [transl] change ELO -> Elo (rating): http://www.dragongoserver.net/forum/read.php?forum=2&thread=48298#48325 -> adjust FAQ-entries after LIVE-deploy: http://www.dragongoserver.net/faq.php?read=t&cat=105&e=107  http://www.dragongoserver.net/faq.php?read=t&cat=105&e=106  http://www.dragongoserver.net/faq.php?read=t&cat=12&e=421
 - 9 TXT:  [transl] use separate translatable text for status-page page-title: Status -> Status#pagetitle: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48293#48293
+- 7 IDEA: [game] game-page: add online-icon if user "online": http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3378370
 

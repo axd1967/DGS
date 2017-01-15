@@ -1383,7 +1383,7 @@ function draw_add_time( $game_row, $colorToMove )
 
 function draw_game_info( $game_row, $game_setup, $board, $tourney )
 {
-   global $base_path, $show_game_tools, $gc_helper;
+   global $base_path, $show_game_tools, $gc_helper, $my_id;
 
    echo '<table class=GameInfos>', "\n";
 
@@ -1432,6 +1432,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
       $user_off_time = echo_off_time( ($to_move == $color), $game_row["{$PFX}_OnVacation"],
          $game_row["{$PFX}_ClockUsed"], $game_row['WeekendClock'] );
       if ( !$user_off_time ) $user_off_time = '';
+      $user_online = ( $my_id != $col_uid ) ? SMALL_SPACING . echo_user_online_vacation( false, $game_row["{$PFX}_Lastaccess"] ) : '';
       $user_rating = echo_rating(
          ($game_is_finished) ? $game_row["{$PFX}_End_Rating"] : $game_row["{$PFX}rating"],
          true, $col_uid );
@@ -1453,7 +1454,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
       // name-info + to-move + off-time + rating
       echo "<tr class={$pfx}Info>\n", // blackInfo/whiteInfo
          "<td class=Color>", $icon_col, "</td>\n",
-         "<td class=Name>", $user_ref, $user_tomove_img, $user_off_time, "</td>\n",
+         "<td class=Name>", $user_ref, $user_tomove_img, $user_off_time, $user_online, "</td>\n",
          "<td class=\"Ratings right\">", $user_rating, "</td>\n", $td_prisoners, "</tr>\n";
 
       if ( $game_is_started )
