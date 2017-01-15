@@ -11,7 +11,6 @@ New_Issues:   set prio + sort into sections
 - 8 IDEA: [game] SGF-download: add way to specify what downloaded SGF should contain (comments, notes, check other options of sgf.php): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48277#48283
 - 7 CHK:  [forum] eval embedding of eidogo in forums: http://www.dragongoserver.net/forum/read.php?forum=4&thread=33700#33974;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48237
 - 7 CHK:  [user] user-info-page: grouping of data in profile-related, server-tracked, game-related? etc:
-- 8 CHK:  [user] user-info: change name of "Last quick access" -> "last client access" (really?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48660
 - 1 IDEA: [site] (S079) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveyplanet.com or Google-Forms ... check if respondents need account)
 - 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
 - 6 IDEA: [goban] goban-editor: add textarea-input to paste SGF-raw-data: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48241
@@ -989,4 +988,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 9 TXT:  [transl] use separate translatable text for status-page page-title: Status -> Status#pagetitle: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48293#48293
 - 7 IDEA: [game] game-page: add online-icon if user "online": http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3378370
 - 3 TXT:  [tourney] change edit-view-pools link: 'View Pools' -> 'Edit-View Pools': http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48604
+- 8 CHK:  [user] user-info: change name of "Last quick access" -> "last client access" (really?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48660
 

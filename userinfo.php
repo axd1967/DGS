@@ -196,7 +196,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable1->add_sinfo( T_('Rank info'), make_html_safe(@$row['Rank'],INFO_HTML) );
       $itable1->add_sinfo( T_('Registration date'), $registerdate );
       $itable1->add_sinfo( T_('Last access'), $lastaccess );
-      $itable1->add_sinfo( T_('Last quick access'), $lastquickaccess );
+      $itable1->add_sinfo( T_('Last client access'), $lastquickaccess );
       $itable1->add_sinfo( T_('Last move'),   $lastmove );
 
       $str_vac_days = T_('Vacation days left');
