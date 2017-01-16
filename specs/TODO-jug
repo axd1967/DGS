@@ -10,9 +10,9 @@ New_Issues:   set prio + sort into sections
 - 8 IDEA: [game] SGF-download: add way to specify what downloaded SGF should contain (comments, notes, check other options of sgf.php): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48277#48283
 - 1 IDEA: [site] (S079) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveyplanet.com or Google-Forms ... check if respondents need account)
 - 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
-- 6 IDEA: [goban] goban-editor: add textarea-input to paste SGF-raw-data: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48241
+- 6 CHK:  [goban] add better parse-errors on SGF-parsing; feasible?
 - 6 IDEA: [goban] add lenient-option on SGF-parser to merge already existing SGF-properties: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48548#48680
-- 8 BUG:  [game] SGF-download for MPG: merging text on SCORE by falsely trimming LFs: http://localhost/dev/sgf.php?gid=646952&owned_comments=1&no_cache=1
+- 9 TXT:  [transl][msg] check why msg-types untranslatable; perhaps make translatable?: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48757#48761
 
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S080) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
@@ -266,8 +266,8 @@ KnownBugs:
 - 6 DBG:  [site] prevent XSS for translation-texts included in JS-vars
 - 6 BUG:  [mpg][game][clock] time-remaining wrong for MPGs in games-list of my-running-games -> hm, so what? (difficult to circumvent) -> accept?
 - 6 BUG:  [feature] switching feature-status from WORK->VOTE activates NEW in main-menu: -> activate NEW only if zero-votes put on that feature yet
+- 7 BUG:  [quick][game] SGF-download with comment in last-move for finished games: put comment not in 2nd C[] SGF-prop;; due to skipped handling of SCORE-moves!?;; note as well in http://www.dragongoserver.net/forum/read.php?forum=10&thread=45783#45783;; CHK: http://localhost/dev/game.php?gid=565858;; local-example http://localhost/dev/sgf.php?gid=646952&owned_comments=1&no_cache=1
 - 7 BUG:  [site] fix parse_tags()/parse_atbs_safe() to allow style/javascript/etc as args in URL, but still protect against malice: probably something wrong to parse a LINK and/or attributes of a tag: http://www.dragongoserver.net/forum/read.php?forum=4&thread=41927#41957;; debug with: http://localhost/dev/forum/read.php?forum=2&thread=26748
-- 7 BUG:  [quick][game] SGF-download with comment in last-move for finished games: put comment not in 2nd C[] SGF-prop;; note as well in http://www.dragongoserver.net/forum/read.php?forum=10&thread=45783#45783;; CHK: http://localhost/dev/game.php?gid=565858
 - 7 DBG:  [msg] empty (no move) email-notifications: http://www.dragongoserver.net/forum/read.php?forum=2&thread=33022#34335;; tegais empty notifications: http://www.dragongoserver.net/forum/read.php?forum=2&thread=33022#34550 + see mails
 - 8 DBG:  [site] check max-length fields, because browser allow input of longer but cuts on sending data: http://www.dragongoserver.net/forum/read.php?forum=10&thread=35610#35621
 - 9 DBG:  [markup] <note>-tag not catched everywhere with html_safe !!
@@ -990,4 +990,5 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 3 TXT:  [tourney] change edit-view-pools link: 'View Pools' -> 'Edit-View Pools': http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48604
 - 8 CHK:  [user] user-info: change name of "Last quick access" -> "last client access" (really?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48660
 - 6 IDEA: [game] SGF-download: add option 'pinfo' to add player-info in nodes; currently it's always added; but keep for MPGs (or also only enabled with the option?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48188#48688
+- 6 IDEA: [goban] goban-editor: add textarea-input to paste SGF-raw-data; 30KB max size (like SGF-upload): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48241
 

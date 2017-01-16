@@ -53,7 +53,8 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
      (no args)                : new goban
      gob_new&width=&height=   : make new goban of given size (width x height)
      gob_load&gid=&move=      : load DGS-game as goban for game-id and move (default last-move)
-     gob_load_sgf&file_sgf=   : load SGF and flatten into Goban-object
+     gob_load_sgf&file_sgf=   : load SGF from file-upload and flatten into Goban-object
+     gob_text_sgf&text_sgf=   : create from SGF-text input and flatten into Goban-object
      gob_preview&board=       : preview given goban from 'board'-text
      gob_swcol&...            : switch Black/White colors
      gob_flatten&...          : flatten Goban into B/W-stones alone for Shape-game
@@ -96,7 +97,11 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
    }
    elseif ( @$_REQUEST['gob_load_sgf'] && isset($_FILES['file_sgf']) )
    {
-      list( $errors, $board_text ) = load_igoban_from_sgf( $_FILES['file_sgf'] ); // GLOBALS $do_preview, $width, $height
+      list( $errors, $board_text, $do_preview ) = load_igoban_from_sgf( $_FILES['file_sgf'] ); // GLOBALS $width, $height
+   }
+   elseif ( @$_REQUEST['gob_text_sgf'] && $_REQUEST['text_sgf'] )
+   {
+      list( $errors, $board_text, $do_preview ) = create_igoban_from_sgf_text( $_REQUEST['text_sgf'] ); // GLOBALS $width, $height
    }
    elseif ( @$_REQUEST['gob_swcol'] ) // switch colors
    {
@@ -168,14 +173,21 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
 
       $gobform->add_empty_row();
       $gobform->add_row( array(
-            'CHAPTER', T_('Load board from SGF#gobedit'), ));
+            'CHAPTER', T_('Create board from SGF#gobedit'), ));
       $gobform->add_empty_row();
       $gobform->add_row( array(
-            'DESCRIPTION', T_('SGF-file#gobedit'),
+            'DESCRIPTION', T_('Load from file#gobedit'),
             'FILE',        'file_sgf', 40, SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ));
       $gobform->add_row( array(
             'TAB', 'CELL', 1, '',
-            'SUBMITBUTTON', 'gob_load_sgf', T_('Upload SGF#gobedit'), ));
+            'SUBMITBUTTON', 'gob_load_sgf', T_('Upload SGF-file#gobedit'), ));
+      $gobform->add_row( array( 'TAB', 'TEXT', T_('or'), ));
+      $gobform->add_row( array(
+            'DESCRIPTION', T_('Create from text#gobedit'),
+            'TEXTAREA',    'text_sgf', 60, 6, get_request_arg('text_sgf'), '', ));
+      $gobform->add_row( array(
+            'TAB', 'CELL', 1, '',
+            'SUBMITBUTTON', 'gob_text_sgf', T_('Upload SGF-text#gobedit'), ));
    }
    else
    {
@@ -323,17 +335,28 @@ function update_igoban( $board_text, $goban_operation )
    return array( $board_text, true ); // text, do-preview
 }//update_igoban
 
+// return [ errors|[], board_text, do_preview=true|false ]
 function load_igoban_from_sgf( $file_sgf_arr )
 {
-   global $do_preview;
-   $board_text = '';
-
    // upload SGF and parse into Goban
    list( $errors, $sgf_data ) = FileUpload::load_data_from_file( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
-   if ( is_null($errors) )
+   return ( is_null($errors) )
+      ? create_igoban_from_sgf_text( $sgf_data )
+      : array( $errors, '', false );
+}//load_igoban_from_sgf
+
+// return [ errors|[], board_text, do_preview=true|false ]
+function create_igoban_from_sgf_text( $sgf_data )
+{
+   $errors = array();
+   if ( strlen($sgf_data) > SGF_MAXSIZE_UPLOAD )
    {
-      $errors = array();
-      $do_preview = true;
+      $errors[] = sprintf( T_('The SGF-data exceeds the max. allowed size of [%s bytes].'),
+         SGF_MAXSIZE_UPLOAD );
+   }
+   else
+   {
+      // parse into Goban
       $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
       $err = $game_sgf_parser->get_error();
       if ( $err )
@@ -343,11 +366,13 @@ function load_igoban_from_sgf( $file_sgf_arr )
          list( $board_text, $err ) = create_igoban_from_parsed_sgf( $game_sgf_parser );
          if ( $err )
             $errors[] = $err;
+         else
+            return array( $errors, $board_text, true );
       }
    }
 
-   return array( $errors, $board_text );
-}//load_igoban_from_sgf
+   return array( $errors, '', false );
+}//create_igoban_from_sgf_text
 
 // create <igoban>-tag from parsed-SGF
 // return [ board_text, error|'' ]

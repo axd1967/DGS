@@ -11,6 +11,14 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2017-01-17 jug
+
+   * goban_editor.php (load_igoban_from_sgf, create_igoban_from_sgf_text):
+   - create <igoban> from SGF-text-format in goban-editor
+     - add textarea-input to paste raw SGF-format to create goban from
+     - restrict max-size of SGF-input to 30KB
+     - show goban-preview only if no error
+
 2017-01-16 jug
 
    * include/sgf_builder.php (PLAYER_INFO_STD, PLAYER_INFO_MPG; class SgfBuilder, ~.set_mode_player_info),
