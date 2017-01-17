@@ -25,6 +25,7 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * <home goban_editor.php>Goban Editor</home>:
       * Create goban by parsing raw SGF-data
+      * Enable more lenient parsing of SGF-data for double SGF-node-properties
 
    * Game info page:
       * Added link for round-robin-tournaments to tournament-game-pool

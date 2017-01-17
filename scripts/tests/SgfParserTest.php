@@ -124,7 +124,7 @@ class SgfParserTest extends PHPUnit_Framework_TestCase {
 
       $sgf = '(;B[aa];W[dd]MA[x]W[hh])';
       $parser = SgfParser::sgf_parser( $sgf, SGFP_OPT_SKIP_ROOT_NODE );
-      $this->assertEquals( 'Property not unique', $parser->error_msg );
+      $this->assertEquals( 'Property [W] not unique', $parser->error_msg );
 
       $sgf = '(;B[aa];W[dd] 123)';
       $parser = SgfParser::sgf_parser( $sgf, SGFP_OPT_SKIP_ROOT_NODE );

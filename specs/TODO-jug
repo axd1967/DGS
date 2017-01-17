@@ -5,16 +5,13 @@ Legend:   [ 0-recent, 1-high, 9-low, ?-needs prio];; types: ADM=admin-stuff (for
 # CURRENT ==========================================================================
 
 Bookmarks_Admin:
+- 1 ADM:  [adm] game-dispute: http://www.dragongoserver.net/forum/read.php?forum=5&thread=48768#48774 -> sent msg to players 17-Jan-2017 -> WAIT
 
 New_Issues:   set prio + sort into sections
-- 8 IDEA: [game] SGF-download: add way to specify what downloaded SGF should contain (comments, notes, check other options of sgf.php): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48277#48283
 - 1 IDEA: [site] (S079) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveyplanet.com or Google-Forms ... check if respondents need account)
 - 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
-- 6 CHK:  [goban] add better parse-errors on SGF-parsing; feasible?
-- 6 IDEA: [goban] add lenient-option on SGF-parser to merge already existing SGF-properties: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48548#48680
-- 9 TXT:  [transl][msg] check why msg-types untranslatable; perhaps make translatable?: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48757#48761
 
-Open_Tasks_Stack:  (max. 2 WIP), first=next  (S080) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
+Open_Tasks_Stack:  (max. 2 WIP), first=next  (S081) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
 - 1 ADM:  [adm][site][msg] chk failed_query.sql on server with locking query
 #--------------- OPEN:
@@ -35,10 +32,10 @@ Open_Tasks_Stack:  (max. 2 WIP), first=next  (S080) (T035) (A023) (C04) (D02) (B
 - 2 ADM:  [dev] git-stash: check and if needed move local stash (~Apr2014..Jun2015??) with cond-moves-changes into WORK-branch
 
 Open_Tasks_Stack_League:  first=next
+- 1 SPEC: [tourney] (T029.0) TLeague: re-spec withdrawals, split away from ranks to Flags perhaps;; separate page for withdrawing?;; allow withdrawing also for TRR for normal user?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48749
 - 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
 #--------------- DONE:
 #--------------- OPEN:
-- 0 CHK:  [tourney] (T029.X) TLeague: re-spec withdrawals, split away from ranks to Flags perhaps;; separate page for withdrawing?;; allow withdrawing also for TRR for normal user?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48749
 - 4 SPEC: [tourney] (T029.19a) TLeague: sync TPs from prev-cycle: at any time? {see T029.19b}; sync/merge TPs with prev-cycle-TPs (skip drop-outs, auto-withdrawn TPs == opt-out);; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47647;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47634;; see also {T029.18} tie-breaker extras?
 - 4 SPEC: [tourney] (T029.19b) TLeague: sync TPs from prev-cycle: conditions when to allow TP-sync
 - 4 SPEC: [tourney] (T029.19c) TLeague: sync TPs from prev-cycle: adj TP/TD-TP-reg-edit to add flag/marker to prevent overwrite in sync
@@ -699,6 +696,7 @@ Ideas_Issues_Game_Related:
 - 3 SPEC: [game] (S66.2) board/CSS/img: use <td>-background-images (a la old OGS) for grid, replacing special markers with grids (34 instead of 94 images), GRID-12(hoshi -|+ 4corner 4side), TERR-4(red,green,w,b), MARK-4(circle,square,triangle,cross), STONEMARK-14(B|W plain,last-move,4xMark,terr); STONENUM-18(B|W 1-9); extra LETT-26(a-z)
 - 3 IDEA: [game] thumbnail-board: create corners/edges
 - 3 IDEA: [profile][game] customize SGF-download on games-list sgf-column (with comments): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48069#48069
+- 4 IDEA: [game] SGF-download: add way (profile?) to specify what downloaded SGF should contain (comments, notes, check other options of sgf.php): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48277#48283
 - 4 CHK:  [game] better mark game in scoring-mode to differ from finished-game: http://www.dragongoserver.net/forum/read.php?forum=5&thread=41924#41980 -> what is this?
 - 4 IDEA: [game] games-list my-running-games sort by same order as status-games (skip-to-next-game): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3042739
 - 4 IDEA: [game] don't allow to click on point, that would be an illegal ko-move (by priv-msg goplayerd in 2011)
@@ -793,6 +791,7 @@ Ideas_Issues_Statistics_Related:
 Ideas_Issues_Translation_Related:
 - 2 IDEA: [site][transl] related to {B014}: language-specific server-messages (like "Game-result"/etc): http://www.dragongoserver.net/forum/read.php?forum=7&thread=44553#46444 -> VOTE?
 - 6 SPEC: [adm][transl] add show-translation-log (allow for translators & admins, with links to translated-texts)
+- 7 TXT:  [transl][msg] check why msg-types untranslatable; perhaps make translatable?: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48757#48761
 - 7 IDEA: [transl][site] translation-editing based on JavaScript: add translator-mode -> adding control on each T_(..)-text/intro/links/buttons/etc showing "original" English + current translation + input for new/changed text + Update/Close-action
 - 8 CHK:  [site][transl] different orig-texts for 'preview' (noun/verb or so, dep. on context): http://www.dragongoserver.net/forum/read.php?forum=7&thread=44659#44674
 - 9 ADM:  [site][transl] add seed-data for translations for local server: http://www.dragongoserver.net/forum/read.php?forum=10&thread=40664#40671
@@ -991,4 +990,7 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 8 CHK:  [user] user-info: change name of "Last quick access" -> "last client access" (really?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48660
 - 6 IDEA: [game] SGF-download: add option 'pinfo' to add player-info in nodes; currently it's always added; but keep for MPGs (or also only enabled with the option?): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48188#48688
 - 6 IDEA: [goban] goban-editor: add textarea-input to paste SGF-raw-data; 30KB max size (like SGF-upload): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48237#48241
+- 6 SPEC: [goban] (S080.1) add better parse-errors on SGF-parsing; feasible? -> yes: added better errors/error-context/error-location
+- 6 IDEA: [goban] (S080.2) add lenient-option on SGF-parser to merge already existing SGF-properties: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48548#48680
+- 5 BUG:  [goban] (S080.3) adjust SGF-parsing to default to Go-game if "GM[1]"-properties missing according to SGF-specs
 

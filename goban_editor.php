@@ -357,7 +357,7 @@ function create_igoban_from_sgf_text( $sgf_data )
    else
    {
       // parse into Goban
-      $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
+      $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data, SGFP_OPT_MERGE_PROPS );
       $err = $game_sgf_parser->get_error();
       if ( $err )
          $errors[] = $err;

@@ -11,6 +11,17 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2017-01-18 jug
+
+   * include/sgf_parser.php (SGFP_OPT_MERGE_PROPS; SgfParser.parse_sgf, ~.parse_sgf_game_tree,
+       ~.sgf_parse_node, ~.parse_sgf_game),
+     scripts/tests/GameSgfParserTest.php, scripts/tests/SgfParserTest.php,
+     goban_editor.php (create_igoban_from_sgf_text):
+   - add option for lenient SGF-parsing by merging certain SGF-node-properties
+     - merge SGF-node-properties on lenient SGF-parsing: C AB AW LB
+     - add better location & error-context on SGF-parse-errors
+   - adjust SGF-parsing to assume Go-Game default, if "GM[1]"-property is missing
+
 2017-01-17 jug
 
    * goban_editor.php (load_igoban_from_sgf, create_igoban_from_sgf_text):

@@ -86,6 +86,7 @@ define('SGF_ARG_END', ']');
 define('SGF_NOD_BEG', ';');
 
 define('SGFP_OPT_SKIP_ROOT_NODE', 0x01); // don't read root-node and simplify game-tree if possible
+define('SGFP_OPT_MERGE_PROPS',    0x02); // lenient-mode: merge certain non-unique properties; see sgf_parse_node()
 
 
 /*! \brief Helper-class to parse SGF-data. */
@@ -131,15 +132,16 @@ class SgfParser
    {
       $this->init_parser( $sgf );
 
-      $this->error_msg = $this->parse_sgf_game_tree();
+      list( $idx_error, $this->error_msg ) = $this->parse_sgf_game_tree();
 
       if ( $this->error_msg )
       {
-         $tmp = max(0, $this->idx-20);
-         $this->error_loc = "SGF: {$this->error_msg}, near: "
-            . ltrim(substr( $this->sgf, $tmp, $this->idx-$tmp))
-            . '<' . substr( $this->sgf, $this->idx, 1) . '>'
-            . rtrim(substr( $this->sgf, $this->idx+1, 20));
+         $sgf_start = substr( $this->sgf, 0, $idx_error );
+         $err_line = substr_count( $sgf_start, "\n" ) + 1;
+         $pos_last_lf = strrpos( $sgf_start, "\n" );
+         $err_col = ($pos_last_lf !== false) ? $idx_error - $pos_last_lf : $idx_error;
+         $this->error_loc = sprintf( 'SGF: error [%s] occured at line %s, column %s >>> "%s ..."',
+            $this->error_msg, $err_line, $err_col, substr( $this->sgf, $idx_error, 20) );
       }
 
       return ( (string)$this->error_msg == '' );
@@ -164,18 +166,21 @@ class SgfParser
          if ( !$skip_root_node )
          {
             if ( !$this->sgf_skip_space() )
-               return T_('Bad end of file#sgf');
+               return array( $this->idx, T_('Bad end of file#sgf') );
 
             if ( $this->sgf[$this->idx] != SGF_NOD_BEG )
-               return T_('Bad root node#sgf');
+               return array( $this->idx, T_('Bad root node#sgf') );
 
             $this->idx++;
-            $err = $this->sgf_parse_node( $node );
+            $idx_node = $this->idx;
+            list( $idx_error, $err ) = $this->sgf_parse_node( $node );
             if ( $err )
-               return $err;
+               return array( $idx_error, $err );
 
-            if ( !isset($node->props['GM']) || @$node->props['GM'][0] != 1 )
-               return T_('Not a Go game (GM[1])#sgf');
+            if ( isset($node->props['GM']) && @$node->props['GM'][0] != 1 )
+               return array( $idx_node, T_('Not a Go game (GM[1])#sgf') );
+            elseif ( !isset($node->props['GM']) ) // SGF-specs: default = 1 (Go)
+               $node->props['GM'] = 1;
 
             foreach ( self::$ARR_ROOT_DEFAULT_VALUES as $key => $arg ) // set defaults
             {
@@ -199,7 +204,7 @@ class SgfParser
                case SGF_VAR_BEG:
                   $this->idx++;
                   if ( $this->sgf_skip_space() != SGF_NOD_BEG )
-                     return T_('Bad node start#sgf');
+                     return array( $this->idx, T_('Bad node start#sgf') );
 
                   $idx_var++;
                   $vars[$idx_var] = new SgfGameTree();
@@ -208,20 +213,20 @@ class SgfParser
                case SGF_NOD_BEG:
                   $this->idx++;
                   if ( $vars[$idx_var]->has_vars() )
-                     return T_('Bad node position outside variation#sgf');
-                  $err = $this->sgf_parse_node( $node );
+                     return array( $this->idx, T_('Bad node position outside variation#sgf') );
+                  list( $idx_error, $err ) = $this->sgf_parse_node( $node );
                   $vars[$idx_var]->nodes[] = $node;
                   if ( $err )
-                     return $err;
+                     return array( $idx_error, $err );
                   break;
 
                default:
-                  return T_('Game-Tree syntax error#sgf');
+                  return array( $this->idx, T_('Game-Tree syntax error#sgf') );
             }
          }
 
          if ( $idx_var >= ($skip_root_node ? 1 : 0) )
-            return T_('Missing right parenthesis#sgf');
+            return array( $this->idx, T_('Missing right parenthesis#sgf') );
 
          // simplify if only one variation with empty root-node
          if ( $skip_root_node )
@@ -234,7 +239,7 @@ class SgfParser
       }
       unset($vars);
 
-      return ''; // no-error
+      return array( 0, '' ); // no-error
    }//parse_sgf_game_tree
 
 
@@ -255,7 +260,7 @@ class SgfParser
 
    /*!
     * \brief Parses "Node" in SGF-data.
-    * \note Example: 'MN[0][1]C[note]' into $node = SgfNote( props: arr( 'MN' => arr( 0, 1 ), 'C' => arr( 'note' )) )
+    * \note Example: 'MN[0][1]C[note]' into $node = SgfNode( props: arr( 'MN' => arr( 0, 1 ), 'C' => arr( 'note' )) )
     * \note node from sgf-data must end with one of: "; ( )"
     *
     * \param $node SgfNode-object passed via back-reference with parsed nodes
@@ -263,19 +268,32 @@ class SgfParser
     */
    private function sgf_parse_node( &$node )
    {
+      $merge_props = ($this->options & SGFP_OPT_MERGE_PROPS);
+
       $node = new SgfNode( $this->idx - 1 );
+      $idx_prop = $this->idx;
       while ( $key = $this->sgf_parse_key() )
       {
          $err = $this->sgf_parse_args( $args );
          if ( $err )
-            return $err;
+            return array( $idx_prop, $err );
          if ( isset($node->props[$key]) )
-            return T_('Property not unique#sgf');
-         $node->props[$key] = $args;
+         {
+            if ( $merge_props && stristr("-C-AB-AW-LB-", "-$key-") )
+               $node->props[$key] = array_merge( $node->props[$key], $args );
+            else
+               return array( $idx_prop, sprintf( T_('Property [%s] not unique#sgf'), $key ) );
+         }
+         else
+            $node->props[$key] = $args;
+
+         $idx_prop = $this->idx;
       }
 
       $c = $this->sgf[$this->idx]; //sgf_skip_space()
-      return ( $c != SGF_NOD_BEG && $c != SGF_VAR_BEG && $c != SGF_VAR_END ) ? T_('Node syntax error#sgf') : '';
+      return ( $c != SGF_NOD_BEG && $c != SGF_VAR_BEG && $c != SGF_VAR_END )
+         ? array( $this->idx, T_('Node syntax error#sgf') )
+         : array( 0, '' );
    }//sgf_parse_args
 
    /*!
@@ -632,9 +650,9 @@ class GameSgfParser
     *       <0 = no collecting of game-tree
     * \return GameSgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
     */
-   public static function parse_sgf_game( $sgf_data, $last_move_nr=-1 )
+   public static function parse_sgf_game( $sgf_data, $parse_options=0, $last_move_nr=-1 )
    {
-      $sgf_parser = SgfParser::sgf_parser( $sgf_data );
+      $sgf_parser = SgfParser::sgf_parser( $sgf_data, $parse_options );
       $game_sgf_parser = new GameSgfParser( $sgf_parser );
       if ( $sgf_parser->error_msg )
          return $game_sgf_parser;

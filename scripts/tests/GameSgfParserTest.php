@@ -104,16 +104,24 @@ class GameSgfParserTest extends PHPUnit_Framework_TestCase {
    /** Tests GameSgfParser.parse_sgf_game(). */
    public function test_parse_sgf_game() {
       $sgf = '(;GM[1];B[aa];W[bb])';
-      $gp = GameSgfParser::parse_sgf_game( $sgf, 1 );
+      $gp = GameSgfParser::parse_sgf_game( $sgf, 0, 1 );
       $this->assertEquals( '', $gp->get_error() );
       $this->assertEquals( '(;B[aa];W[bb])', $gp->sgf_game_tree->to_string() );
 
-      $gp = GameSgfParser::parse_sgf_game( $sgf, 2 );
+      $gp = GameSgfParser::parse_sgf_game( $sgf, 0, 2 );
       $this->assertEquals( '(;W[bb])', $gp->sgf_game_tree->to_string() );
 
       $sgf = '(;GM[1];B[aa];';
       $gp = GameSgfParser::parse_sgf_game( $sgf );
       $this->assertTrue( (bool)$gp->get_error() );
+   }
+
+   /** Tests GameSgfParser.parse_sgf_game(). */
+   public function test_parse_sgf_game_double_props() {
+      $sgf = '(;GM[1];B[aa];W[dd]LB[lb]C[text1]AB[ab]AW[aw]C[text2]AW[wa]AB[ba]LB[bl])';
+      $gp = GameSgfParser::parse_sgf_game( $sgf, SGFP_OPT_MERGE_PROPS, 0 );
+      $this->assertEquals( '', $gp->get_error() );
+      $this->assertEquals( '(;B[aa];W[dd]LB[lb][bl]C[text1][text2]AB[ab][ba]AW[aw][wa])', $gp->sgf_game_tree->to_string() );
    }
 
 }

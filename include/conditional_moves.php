@@ -57,7 +57,7 @@ class ConditionalMoves
       else
       {
          // parse SGF and identify start of cond-moves
-         $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data, $grow['Moves'] );
+         $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data, 0, $grow['Moves'] );
          $parse_err = $game_sgf_parser->get_error();
          if ( $parse_err )
             $errors[] = sprintf( T_('SGF-Parse error found: %s'), $parse_err );
