@@ -47,7 +47,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
        The date is shown in red color if the text is new or has been updated and need
        a re-translation.
        <br><br>
-  <li> If a translated <b>word is the same</b> as in english, leave it blank and click
+  <li> If a translated <b>word is the same</b> as in English, leave it blank and click
        the \'untranslated\' box to the right.
        <br><br>
   <li> If you need to know the <b>context</b> of a phrase to translate (where it appears on DGS),
