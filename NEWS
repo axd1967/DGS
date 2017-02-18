@@ -27,6 +27,9 @@ Copyright (C) 2001-  Erik Ouchterlony, Jens-Uwe Gaspar
       * Create goban by parsing raw SGF-data
       * Enable more lenient parsing of SGF-data for double SGF-node-properties
 
+   * Game page:
+      * Jump to next game after komi-bid on fair-komi negotiation (unless being next to move in started game)
+
    * Game info page:
       * Added link for round-robin-tournaments to tournament-game-pool
 

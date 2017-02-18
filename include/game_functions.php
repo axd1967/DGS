@@ -1914,7 +1914,9 @@ class FairKomiNegotiation
    /*!
     * \brief Saves and process komi-bid dependent on handi-type.
     * \brief $komibid komi, or else color B|W for divide&choose
-    * \return 0=saved-komi, 1=saved+started-game; otherwise text-error-code
+    * \return array( result, next_to_move_id )
+    *    result: 0=saved-komi, 1=saved+started-game; otherwise text-error-code
+    *    next_to_move_id: user-id of player that has to do something on the game (bid, play)
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    public function save_komi( $game_row, $komibid, $is_start_game=false )
@@ -1994,24 +1996,26 @@ class FairKomiNegotiation
       db_query( "FKN.save_komi.upd_activity({$this->gid},$my_id)",
          "UPDATE Players SET " . $upd_player->get_query() . " WHERE ID=$my_id LIMIT 1" );
 
+      $result_next_to_move_uid = $next_tomove_id;
       if ( $start_game_new_black > 0 )
       {
-         $this->start_fairkomi_game( $start_game_new_black );
-         $result = 1; // komi-bid saved + started game
+         $result_next_to_move_uid = $this->start_fairkomi_game( $start_game_new_black );
+         $result_bid_saved = 1; // komi-bid saved + started game
       }
       else
-         $result = 0; // komi-bid saved
+         $result_bid_saved = 0; // komi-bid saved
 
       // clear caches
-      clear_cache_quick_status( array( $this->tomove_id, $next_tomove_id ), QST_CACHE_GAMES );
-      GameHelper::delete_cache_status_games( "FKN.save_komi.update2({$this->gid})", $this->tomove_id, $next_tomove_id );
+      clear_cache_quick_status( array( $this->black_id, $this->white_id ), QST_CACHE_GAMES );
+      GameHelper::delete_cache_status_games( "FKN.save_komi.update2({$this->gid})", $this->black_id, $this->white_id );
       GameHelper::delete_cache_game_row( "FKN.save_komi.update3({$this->gid})", $this->gid );
 
-      return $result;
+      return array( $result_bid_saved, $result_next_to_move_uid );
    }//save_komi
 
    /*!
     * \brief Starts fairkomi-game by updating existing game on KOMI-status.
+    * \return next_to_move_id (uid)
     *
     * \see also create_game()-func in "include/make_game.php"
     * \note clearing game-caches is done outside -> see save_komi()
@@ -2079,6 +2083,8 @@ class FairKomiNegotiation
 
       db_query( "$dbgmsg.update",
          "UPDATE Games SET " . $upd_game->get_query() . " WHERE ID=$gid AND Status='{$this->game_status}' LIMIT 1" );
+
+      return $next_tomove_id;
    }//start_fairkomi_game
 
 } // end 'FairKomiNegotiation'

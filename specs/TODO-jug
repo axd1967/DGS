@@ -5,11 +5,14 @@ Legend:   [ 0-recent, 1-high, 9-low, ?-needs prio];; types: ADM=admin-stuff (for
 # CURRENT ==========================================================================
 
 Bookmarks_Admin:
-- 1 ADM:  [adm] game-dispute: http://www.dragongoserver.net/forum/read.php?forum=5&thread=48768#48774 -> sent msg to players 17-Jan-2017 -> WAIT
 
 New_Issues:   set prio + sort into sections
-- 1 IDEA: [site] (S079) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveyplanet.com or Google-Forms ... check if respondents need account)
+- 1 IDEA: [site] (S079.0) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveyplanet.com or Google-Forms ... check if respondents need account)
+- 2 IDEA: [feature] (S079.1) more community-participation? enable feature(-to-vote) creation for every user
 - 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
+- 4 IDEA: [tourney] allow edit T-ladder-props in T-status REG/PAIR/PLAY as well if TD has admin-edit-rights: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3380971
+- 7 IDEA: [tourney] copy TPs to other tournaments (see also copyTournament-issue): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48856#48913
+- 5 IDEA: [tourney] reserve TP-slots not to be taken for normal registrations: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48856#48914
 
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S081) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
@@ -32,10 +35,11 @@ Open_Tasks_Stack:  (max. 2 WIP), first=next  (S081) (T035) (A023) (C04) (D02) (B
 - 2 ADM:  [dev] git-stash: check and if needed move local stash (~Apr2014..Jun2015??) with cond-moves-changes into WORK-branch
 
 Open_Tasks_Stack_League:  first=next
-- 1 SPEC: [tourney] (T029.0) TLeague: re-spec withdrawals, split away from ranks to Flags perhaps;; separate page for withdrawing?;; allow withdrawing also for TRR for normal user?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48749
-- 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
+- 1 SPEC: [tourney] (T029.25x) TLeague: withdraw-by-TD NEWly implemented with TPOOL.Flags & 0x80; migrate/cleanup existing TPool.Rank=0 later
 #--------------- DONE:
 #--------------- OPEN:
+- 1 SPEC: [tourney] (T029.0) TLeague: re-spec withdrawals, split away from ranks to Flags perhaps;; separate page for withdrawing?;; allow withdrawing also for TRR for normal user?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729#48749
+- 2 SPEC: [tourney] (T029.4a.0) TLeague: design combination: {T029.4x} spawn next cycle; {T029.19x} sync TPs from prev-cycle; {T029.20x} seeding/relegations of next cycle; {T029.18} extra tie-breaker
 - 4 SPEC: [tourney] (T029.19a) TLeague: sync TPs from prev-cycle: at any time? {see T029.19b}; sync/merge TPs with prev-cycle-TPs (skip drop-outs, auto-withdrawn TPs == opt-out);; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47647;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47634;; see also {T029.18} tie-breaker extras?
 - 4 SPEC: [tourney] (T029.19b) TLeague: sync TPs from prev-cycle: conditions when to allow TP-sync
 - 4 SPEC: [tourney] (T029.19c) TLeague: sync TPs from prev-cycle: adj TP/TD-TP-reg-edit to add flag/marker to prevent overwrite in sync
@@ -81,7 +85,7 @@ Tournaments_Running:
 - 0 ADM:  [tourney] T#11 SDK division 2015: 234 TP: 26x9 -> 26x1PW = 26 PW: 3x9 (2x9+1x8) -> 3x3PW = 9 PW -> 1x9 => 3 PW in 3 rounds
 - 0 ADM:  [tourney] T#47 Sunjang 2016: REG-period till 07-Mar-2016, started: 191 TP: 24x8 -> 24x2 = 48 PW; 05-Oct-2016: 8x6 -> 8 PW:
 - 0 ADM:  [tourney] T#48 DDK division 2016: REG-period till 06-Mar-2016, started: 187 TP: 24x8 -> 24 = 24 PW: -> 3x8 (1..3)
-- 0 ADM:  [tourney] T#58 SDK division 2016: REG-period till 28-May-2016, started: 232 TP: 29x8 -> 29 = 29 PW:
+- 0 ADM:  [tourney] T#58 SDK division 2016: REG-period till 28-May-2016, started: 232 TP: 29x8 -> 29 = 29 PW (33x1) (1..1) -> 4x9 (3x8+1x9) = 33 PW (1..2)
 - 0 ADM:  [tourney] T#63 Dan division 2016: REG-period till 04-Sep-2016, started: 62 TP: 8x8 ->
 
 #-------------------------------------------------------------------------
@@ -92,7 +96,7 @@ Backlog_1_20_0:
 - 1 SPEC: [user][adm] regenerate verification-mail + fix/handle verifications for admin + handle old-unused-verification -> cleanup !?
 - 3 IDEA: [tourney] copy existing T on T-creation-wizard? -> see code copyTournament()
 - 4 SPEC: [tourney] TRR: allow T-director to start next round with open games, that will not change pool-winners: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2984586;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3308359;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=41787#47809
-- 5 SPEC: [forum] (S037) replace [markread] by [add-tag] to: label post, public tags (agree/ad/disagree), private customized tags? <-> only static list ;; tag-cloud (public, private-only?);; for reply-notifies; maybe use <tags>-element for allowed;; TODO-tag;; allow to tag a forum: file-based approach perhaps; or table with file-based cache;; add JS-tagging on forums!?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=31759#31791;; (admin-forum) http://www.dragongoserver.net/forum/read.php?forum=9&thread=24845;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=45025#45104 -> later tag ref'ed posts from TODO (archive)
+- 5 SPEC: [forum] (S037) replace [markread] by [add-tag] to: label post, public tags (agree/ad/disagree), private customized tags? <-> only static list ;; tag-cloud (public, private-only?);; for reply-notifies; maybe use <tags>-element for allowed;; TODO-tag;; allow to tag a forum: file-based approach perhaps; or table with file-based cache;; add JS-tagging on forums!?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=31759#31791;; (admin-forum) http://www.dragongoserver.net/forum/read.php?forum=9&thread=24845;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=45025#45104 -> later tag ref'ed posts from TODO (archive);; http://www.dragongoserver.net/forum/read.php?forum=2&thread=36890#48959
 - 4 SPEC: [profile] (S075) Bookmarks: add/edit bookmarks in bookmark-menu, show list for selection on separate page (to avoid reload on every page)
 - 4 DEV:  [profile] (S075) Bookmarks: Add/edit; customizable, maybe num-restricted on non-admins(?);; http://www.dragongoserver.net/forum/read.php?forum=2&thread=33119
 - 4 DEV:  [profile] (S075) Bookmarks: php-cache bookmarks in secret-tempdir maybe or in APC-cache!;; optimization/cleanup: hide bookmark with option to save db-selects
@@ -212,6 +216,7 @@ ForumsToAnswer_AfterRelease:  (L=later, x=announced-in-forum, N=not-done-posted,
 # CHECK ISSUES / BUGS
 
 New_Check_Issues:  BUG (=sure-bug needs fix), DBG (=is-bug, investigate if fix needed), CHK (=type unknown, investigate), TRY (=something specific)
+- 4 CHK:  [site] (B015.2) to avoid some race-conditions with the caching by premature user-interaction, do cache deletion before db-delete-operation: http://www.dragongoserver.net/forum/read.php?forum=2&thread=47509#47510 -> re-occuring http://www.dragongoserver.net/forum/read.php?forum=2&thread=47509#48837 (chk use-case)
 
 Check_If_Bug:
 - 3 DBG:  [clock][game] weekend: timezone bug? or feature? http://www.dragongoserver.net/forum/read.php?forum=2&thread=24197#25278 -> may get rid of sleep-time !? (search doubles)
@@ -470,7 +475,7 @@ Check_Tournaments:
 
 Bugs_Tournaments:
 - 4 BUG:  [tourney] TRR: allow edit-ranks after setting all ranks (currently not possible !?)
-- 4 BUG:  [tourney] TL: ladder send challenge-notification in language of challenger (not defender): 1. use orig-English first, 2. fix it for real: http://www.dragongoserver.net/forum/read.php?forum=2&thread=36890#36890;; see specs/Notifications-EVAL.txt ;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=39411#39420;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=44695#44695
+- 4 BUG:  [tourney] (B014) TL: ladder send challenge-notification in language of challenger (not defender): 1. use orig-English first, 2. fix it for real: http://www.dragongoserver.net/forum/read.php?forum=2&thread=36890#36890;; see specs/Notifications-EVAL.txt ;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=39411#39420;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=44695#44695
 - 5 BUG:  [tourney] TL: ladder send challenge-notification with DGS-tags per email -> replace with send_refs(): http://www.dragongoserver.net/forum/read.php?forum=2&thread=36885#36885
 - 7 BUG:  [tourney] TL: sending out "user-removed-mail" to opponents after game timed-out, but running-game-list empty (probably unavoidable if game just ended): http://www.dragongoserver.net/forum/read.php?forum=11&thread=38773#38773
 - 7 BUG:  [tourney] TL: ladder-start-period-rank seems very wrong, see user "parker" (rank 1)
@@ -504,7 +509,7 @@ Tournament_General_Ideas:
 - 9 CHK:  [user][tourney] (S54) ? : real team-accounts: team-tournaments(complex)=league (tournament then specifies board-num)?, team-sensei (without need to login as team-account but from your account), can keep master-user(s) sharing passwords; study-groups; allows to note user, that made the move instead of the shared-user(!) = good for sensei; setup by admins possible to mark as team-account!? what could be more features ? BASE for Rengo !? handicap? play multiple games at once? is team-account a user OR other concept beside user (user vs. team-grouping)? how un-shared game notes? Teams-discussion-played Rengo (=studygroup-play).; TEAM-flag -> wanted?
 - 9 IDEA: [tourney] (S54) team-tourney: team=list of users of fixed team-size, pairing is teamA.x vs teamB.x, team with higher score wins (loss=-1, win=+1, jigo=0), tie? -> probably no T-tourneys (too many cancellations expected);; MPG+tourney: team-go-tournaments: http://www.dragongoserver.net/forum/read.php?forum=4&thread=34183
 
-Tournament_League:  (T029).25 [TLG] http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47515
+Tournament_League:  (T029).26 [TLG] http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47515
 
 Tournament_Relegation:  (T033).1 [TRL]
 - 1 SPEC: [tourney] TRL: (T033.0) new T-type Relegation (collect reqs); special League with TierFactor=1): http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47668;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=47515#47651
@@ -652,7 +657,6 @@ New_General_Issues:   set prio + sort into backlogs
 
 Ideas_Server_Issues:
 - 3 CHK:  [adm][site] (A019) use TXT-SPF record?; re-config mail-forward/inbox + add forward on dragongoserver.info + server-alias;; SPF-RR http://www.zytrax.com/books/dns/ch9/spf.html -> ASKED 12-Sep-2015 (SamurajData) -> WAIT[ADM], but now DNS/mail under JUG-control
-- 4 SPEC: [site] (B015.2) to avoid some race-conditions with the caching by premature user-interaction, do cache deletion before db-delete-operation: http://www.dragongoserver.net/forum/read.php?forum=2&thread=47509#47510
 - 5 CHK:  [site][SECURITY] avoid cross-site-scripting: cookie-set on client-side used to do some nasty unwanted stuff
 
 Ideas_Issues_General_Site_Related:
@@ -789,7 +793,7 @@ Ideas_Issues_Statistics_Related:
 - 7 SPEC: [stats] from wishlist: (server-stats) physical data (eg MySql disc space consumption): for admin "show table status", for user show only sum of all tables
 
 Ideas_Issues_Translation_Related:
-- 2 IDEA: [site][transl] related to {B014}: language-specific server-messages (like "Game-result"/etc): http://www.dragongoserver.net/forum/read.php?forum=7&thread=44553#46444 -> VOTE?
+- 2 IDEA: [site][transl] related to {B014}: language-specific server-messages (like "Game-result"/etc): http://www.dragongoserver.net/forum/read.php?forum=2&thread=36890#36910;; http://www.dragongoserver.net/forum/read.php?forum=7&thread=49038#49038;; http://www.dragongoserver.net/forum/read.php?forum=7&thread=44553#46444 -> VOTE?
 - 6 SPEC: [adm][transl] add show-translation-log (allow for translators & admins, with links to translated-texts)
 - 7 TXT:  [transl][msg] check why msg-types untranslatable; perhaps make translatable?: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48757#48761
 - 7 IDEA: [transl][site] translation-editing based on JavaScript: add translator-mode -> adding control on each T_(..)-text/intro/links/buttons/etc showing "original" English + current translation + input for new/changed text + Update/Close-action
@@ -993,4 +997,6 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 6 SPEC: [goban] (S080.1) add better parse-errors on SGF-parsing; feasible? -> yes: added better errors/error-context/error-location
 - 6 IDEA: [goban] (S080.2) add lenient-option on SGF-parser to merge already existing SGF-properties: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48548#48680
 - 5 BUG:  [goban] (S080.3) adjust SGF-parsing to default to Go-game if "GM[1]"-properties missing according to SGF-specs
+- 1 ADM:  [adm] game-dispute: http://www.dragongoserver.net/forum/read.php?forum=5&thread=48768#48774 -> sent msg to players 17-Jan-2017 -> WAIT -> done
+- 5 SPEC: [game] fairkomi-bidding/start-game: jump to next game if other player to "move/bid", but stay on game if started and to play next: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49039#49039
 

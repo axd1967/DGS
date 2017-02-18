@@ -223,7 +223,7 @@ function do_add_time( $game_row, $my_id)
       . '#boardInfos');
 }//do_add_time
 
-function jump_to_next_game($uid, $Lastchanged, $moves, $TimeOutDate, $gid)
+function jump_to_next_game( $uid, $Lastchanged, $moves, $TimeOutDate, $gid, $sysmsg='' )
 {
    global $player_row;
 
@@ -268,11 +268,17 @@ function jump_to_next_game($uid, $Lastchanged, $moves, $TimeOutDate, $gid)
          break;
    }
 
+   $url_args = array();
+   if ( $sysmsg )
+      $url_args['sysmsg'] = $sysmsg;
    $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)", $qsql->get_select() );
-   if ( !$row )
-      jump_to("status.php");
-
-   jump_to("game.php?gid=" . $row['ID']);
+   if ( $row )
+   {
+      $url_args['gid'] = $row['ID'];
+      jump_to( make_url('game.php', $url_args) );
+   }
+   else
+      jump_to( make_url('status.php', $url_args) );
 }//jump_to_next_game
 
 
@@ -309,20 +315,29 @@ function do_komi_save( $game_row, $my_id, $start_game=false )
 
    ta_begin();
    {//HOT-section to process komi-bid-saving (and starting-game)
-      $fk_result = $fk->save_komi( $game_row, $req_komibid, $start_game );
+      list( $fk_result, $next_to_move_uid ) = $fk->save_komi( $game_row, $req_komibid, $start_game );
    }
    ta_end();
 
    if ( $fk_result == 0 )
-      $sysmsg = T_('Komi-Bid saved successfully!#fairkomi');
+      $sysmsg = sprintf( T_('Komi-Bid for previous game %s saved successfully!#fairkomi'), $gid );
    elseif ( $fk_result == 1 )
-      $sysmsg = T_('Komi-Bid saved successfully, komi & color determined and game started!#fairkomi');
+      $sysmsg = sprintf( T_('Komi-Bid for previous game %s saved successfully, komi & color determined and game started!#fairkomi'), $gid );
    else
       $sysmsg = '';
-   if ( $sysmsg )
-      $sysmsg = 'sysmsg='.urlencode($sysmsg);
 
-   jump_to("game.php?gid=$gid".URI_AMP.$sysmsg);
+   if ( $next_to_move_uid == $my_id )
+   {
+      $url_args = array( 'gid' => $gid );
+      if ( $sysmsg )
+         $url_args['sysmsg'] = $sysmsg;
+      jump_to( make_url('game.php', $url_args) );
+   }
+   else
+   {
+      global $Lastchanged, $TimeOutDate, $gah;
+      jump_to_next_game( $my_id, $Lastchanged, $gah->get_moves(), $TimeOutDate, $gid, $sysmsg );
+   }
 }//do_komi_save
 
 ?>

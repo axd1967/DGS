@@ -11,6 +11,14 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2017-02-18 jug
+
+   * include/game_functions.php (FairKomiNegotiation.save_komi, ~.start_fairkomi_game),
+     confirm.php (jump_to_next_game, do_komi_save):
+   - jump to next game after change to fair-komi negotiation
+     - keep game if fair-komi game started and player is first to move, otherwise jump to next game
+     - show komi-bid-save info on according "next" page with previous game-id
+
 2017-01-18 jug
 
    * include/sgf_parser.php (SGFP_OPT_MERGE_PROPS; SgfParser.parse_sgf, ~.parse_sgf_game_tree,
