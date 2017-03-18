@@ -1,0 +1,5 @@
+to run a VM, do following:
+
+1. install Vagrant (https://www.vagrantup.com/)
+2. open a shell on the vagrant/ directory
+3. run "vagrant up"
