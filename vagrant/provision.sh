@@ -6,11 +6,11 @@ cd /vagrant
 
 source my.config
 
-apt-get update
+apt-get -q update
 
 # MySQL
 
-apt-get install -y \
+apt-get install -y -q \
     debconf-utils \
     \
 

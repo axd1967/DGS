@@ -85,6 +85,6 @@ Vagrant.configure(2) do |config|
 
    end
 
-   config.vm.post_up_message = "now, try \n http://localhost:8080\n http://localhost:8080/info.php \n http://localhost:8080/dgs/"
+   config.vm.post_up_message = "now, try \n\n  http://localhost:8080\n  http://localhost:8080/info.php \n  http://localhost:8080/dgs/ \nwhen finished, run `vagrant suspend`. to resume, run `vagrant up`."
 
 end
