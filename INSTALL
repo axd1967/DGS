@@ -219,7 +219,7 @@ NOTE: order of the following items is not strict. You may need to re-edit the
   the proper user/groups and rights, so that your web-server
   can read and write that directory.
 
-  # Create the CACHE_FOLDER-directory (example):
+  # Create the /tmp/dgs-cache-directory (example):
   mkdir temp
   chmod 775 temp
   su -c 'chgrp www-data temp'

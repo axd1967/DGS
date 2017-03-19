@@ -6,6 +6,8 @@
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
 
+load 'my.config'
+
 Vagrant.configure(2) do |config|
 
   # makes host SSH keys available on the guest machine
@@ -31,7 +33,8 @@ Vagrant.configure(2) do |config|
       # Create a forwarded port mapping which allows access to a specific port
       # within the machine from a port on the host machine. In the example below,
       # accessing "localhost:8080" will access port 80 on the guest machine.
-      # dev.vm.network "forwarded_port", guest: 80, host: 8080
+
+      dev.vm.network "forwarded_port", guest: 80, host: 8080
 
       # Create a private network, which allows host-only access to the machine
       # using a specific IP.
@@ -47,6 +50,9 @@ Vagrant.configure(2) do |config|
       # the path on the guest to mount the folder. And the optional third
       # argument is a set of non-required options.
       # dev.vm.synced_folder "../data", "/vagrant_data"
+
+      #dev.vm.synced_folder "..", DGS_ROOT
+      dev.vm.synced_folder "..", "/var/www/dgs"
 
       # Provider-specific configuration so you can fine-tune various
       # backing providers for Vagrant. These expose provider-specific options.
@@ -80,6 +86,6 @@ Vagrant.configure(2) do |config|
 
    end
 
-   config.vm.post_up_message = "up&run"
+   config.vm.post_up_message = "try localhost:8080/info.php"
 
 end

@@ -1,4 +1,6 @@
-to run a VM, do following:
+This Vagrant VM definition run the setup instructions defined in /INSTALL to build a VM that runs DGS.
+
+to run a virtual DGS server, do following:
 
 1. install Vagrant (https://www.vagrantup.com/)
 2. open a shell on the vagrant/ directory
