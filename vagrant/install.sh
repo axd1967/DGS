@@ -90,7 +90,7 @@ chgrp -R $WWW_DATA_GRP $DATASTORE_FOLDER
 # WEB SERVER
 cd /vagrant
 
-cp info.php /var/www/html
+#cp info.php /var/www/html
 
 #cp apache-dgs.conf /etc/apache2/sites-available/dgs.conf
 #ln -sf /etc/apache2/sites-available/dgs.conf /etc/apache2/sites-enabled

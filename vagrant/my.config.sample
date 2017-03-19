@@ -6,13 +6,13 @@
 # TODO unfortunately, many of these values must be repeated in include/config-local.php
 # so most of the variable names have been taken from that file
 
-HOSTNAME="localhost"
+HOSTNAME="192.168.33.10"
 
-DGS_ROOT="/var/www/html/dgs"
+DGS_ROOT="/var/www/html/dgs/"
 
 # TODO: use in debconf-set-selections
 MYSQL_DBA="root"
-MYSQL_DBA_PASSWORD="guessit"
+MYSQL_DBA_PASSWORD="alex1234"
 
 DB_NAME="mydragondb"
 
