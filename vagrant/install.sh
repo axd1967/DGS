@@ -2,7 +2,7 @@
 
 # TODO :turn this file into an install script that can be used on a real server
 
-set -x
+#set -x
 set -e # exit on any error!
 
 cd /vagrant
@@ -63,7 +63,6 @@ chgrp $WWW_DATA_GRP translations
 chmod 775 translations/
 pushd scripts
 php make_all_translationfiles.php
-echo $?
 popd
 
 # TODO get latest translations
@@ -93,9 +92,9 @@ cd /vagrant
 
 cp info.php /var/www/html
 
-cp apache-dgs.conf /etc/apache2/sites-available/dgs.conf
+#cp apache-dgs.conf /etc/apache2/sites-available/dgs.conf
 #ln -sf /etc/apache2/sites-available/dgs.conf /etc/apache2/sites-enabled
-a2ensite dgs
+#a2ensite dgs
 #a2dissite 000-default.conf
 
 service apache2 restart

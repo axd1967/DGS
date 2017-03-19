@@ -1,3 +1,29 @@
-# copy as `my.config` and fill in the blanks
+# copy this file as `my.config` and fill in the blanks
+# then, copy include/config.php to include/config-local.php and edit there too
 
-MYSQL_ROOT_PASSWORD=""
+# NOTE: this file must retain a simple syntax, as it is read by various shells such as Bash as well as Ruby!
+
+# TODO unfortunately, many of these values must be repeated in include/config-local.php
+# so most of the variable names have been taken from that file
+
+HOSTNAME="localhost"
+
+DGS_ROOT="/var/www/html/dgs"
+
+# TODO: use in debconf-set-selections
+MYSQL_DBA="root"
+MYSQL_DBA_PASSWORD="guessit"
+
+DB_NAME="mydragondb"
+
+DRAGON_DB_ADMIN="dragon_admin"
+DRAGON_DB_ADMIN_PASSWORD="dgsa"
+
+# TODO review these variable names in config-local.php!
+MYSQLHOST="localhost"
+MYSQLUSER="dragon_user"
+MYSQLPASSWORD="hello"
+
+CACHE_FOLDER="/tmp/dgs/cache-directory"
+USERPIC="/tmp/dgs/userpic"
+DATASTORE_FOLDER="/tmp/dgs/datastore"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -x
+#set -x
 
 cd /vagrant
 
@@ -17,10 +17,10 @@ apt-get install -y \
 export DEBIAN_FRONTEND=noninteractive
 debconf-set-selections <<< "mysql-server-5.5 mysql-server/root_password password "$MYSQL_DBA_PASSWORD
 debconf-set-selections <<< "mysql-server-5.5 mysql-server/root_password_again password "$MYSQL_DBA_PASSWORD
-apt-get install -y \
-    mysql-server-5.5 \
-    php5-mysql \
+apt-get install -q -y \
     php5 \
+    php5-mysql \
+    mysql-server-5.5 \
     apache2 \
     \
 
@@ -31,7 +31,7 @@ apt-get install -y \
 #mysql -uroot -p -e 'USE mysql; UPDATE `user` SET `Host`="%" WHERE `User`="root" AND `Host`="localhost"; DELETE FROM `user` WHERE `Host` != "%" AND `User`="root"; FLUSH PRIVILEGES;'
 #
 
-apt-get install -y \
+apt-get install -q -y \
     git \
     tree \
     \
