@@ -3,5 +3,7 @@ This Vagrant VM definition run the setup instructions defined in /INSTALL to bui
 to run a virtual DGS server, do following:
 
 1. install Vagrant (https://www.vagrantup.com/)
-2. open a shell on the vagrant/ directory
-3. run "vagrant up"
+1. open a shell on the vagrant/ directory
+1. on Linux, chmod a+x `install.sh`, 'config-local.php' (and maybe more?). FIXME: there is something fishy here, I still get PHP errors in /var/log/apache2/error.log . check this with "vagrant provision --debug"
+1. run "vagrant up"
+1. navigate to http://192.168.33.10/dgs/

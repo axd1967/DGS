@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-#set -x
+set -x
 set -e
 
 cd /vagrant
 
+# if you were stopped here, read my.config.sample!
 source my.config
 
 apt-get -q update

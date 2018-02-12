@@ -14,15 +14,16 @@ DGS_ROOT="/var/www/html/dgs/"
 MYSQL_DBA="root"
 MYSQL_DBA_PASSWORD="alex1234"
 
-DB_NAME="mydragondb"
+DB_NAME="dragondb"
 
+# FIXME: to be used!
 DRAGON_DB_ADMIN="dragon_admin"
 DRAGON_DB_ADMIN_PASSWORD="dgsa"
 
 # TODO review these variable names in config-local.php!
 MYSQLHOST="localhost"
 MYSQLUSER="dragon_user"
-MYSQLPASSWORD="hello"
+MYSQLPASSWORD=""
 
 CACHE_FOLDER="/tmp/dgs/cache-directory"
 USERPIC="/tmp/dgs/userpic"

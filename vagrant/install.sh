@@ -2,7 +2,7 @@
 
 # TODO :turn this file into an install script that can be used on a real server
 
-#set -x
+set -x
 set -e # exit on any error!
 
 cd /vagrant
