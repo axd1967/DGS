@@ -6,15 +6,61 @@ Legend:   [ 0-recent, 1-high, 9-low, ?-needs prio];; types: ADM=admin-stuff (for
 
 Bookmarks_Admin:
 
+New_TODO_GDPR_DSGVO:   (S081) see also TODO-PRIV for refs
+- 0 SPEC: [site] (S081.0) break down features/todos for GDPR into stories
+
+New_TODO_Issues_Recent_In_Forums:
+- 3 DISC: [msg] reply to server messages: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49374#49377 -> WAIT?
+- 4 DISC: [site] refactor/new with HTML5: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49456#49484;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=49456#49713
+- 9 DISC: [game] SGF: format DGS tags into markdown: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49513#49539 -> tend not to
+- 3 DISC: [game] shape-game: why not rated? http://www.dragongoserver.net/forum/read.php?forum=2&thread=49662#49664
+- 3 DISC: [site][quick] UTF8 / unicode chars: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49714#49727
+- 6 DISC: [game] shape-game: load arbitrary shape from SGF; allow upload of larger SGF!?: http://www.dragongoserver.net/forum/read.php?forum=8&thread=49757#49761
+- 2 DISC: [faq] adjust FAQ item: http://www.dragongoserver.net/forum/read.php?forum=8&thread=49827#49827
+- 3 DISC: [game] answer needed? http://www.dragongoserver.net/forum/read.php?forum=6&thread=49738
+- 3 DISC: [feature] answer dev/high-voted features: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49846#49846
+- 2 DISC: [game] MPG: fix FAQ item about invite of player: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49879#49901;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=49879#49904
+- 5 DISC: [game] fork game; use shape-game; convenience-feature: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49906
+- 4 DISC: [app][game] shape-game bug in iphone DGS app: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49896#49907
+- 3 DISC: [dev] further development: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39135#49918
+
 New_Issues:   set prio + sort into sections
+- 5 SPEC: [site] (S082.0) PHP5.4 cleanup: adjustments for PHP5.4 after server-migration
+- 5 DEV:  [site] (S082.1) PHP5.4 cleanup: use htmlspecialchars(double_encode=false)
+- 1 BUG:  [game] my-running-games: my/opp-time remaining sometimes switched: https://www.dragongoserver.net/forum/read.php?forum=2&thread=50191
+- 1 BUG:  [tourney] user-reg-check on switching T-status INIT->PAIR must not assume $is_new_tp==true in tournaments/include/tournament_status.php:252#->checkUserRegistration: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49955#49964
+- 1 CHK:  [tourney] user-reg-check on switching T-status INIT->PAIR must not cache wrong TP-count: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49955#49967
+- 5 ADM:  [faq] adjust FAQ entry about how-rating-works: http://www.dragongoserver.net/forum/read.php?forum=3&thread=49175;; EDIT: http://www.dragongoserver.net/admin_faq.php?ot=0&view=all&edit=1&type=e&id=123
+- 8 IDEA: [game] show previous times between moves (of opponent)?;; store & show timestamp of moves: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3454819
+- 3 ADM:  [game] reduce max-games to 100?
+- 3 IDEA: [tourney] add date of tournament-started/created(?) on T-info also if not joined
 - 1 IDEA: [site] (S079.0) more community-participation?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48444#48664 -> bulletin-category for survey-announcements; do more surveys (<survey> on DGS or surveyplanet.com or Google-Forms ... check if respondents need account)
 - 2 IDEA: [feature] (S079.1) more community-participation? enable feature(-to-vote) creation for every user
 - 1 IDEA: [site] think about utilizing more JavaScript !? HTML5 !? -> strategy / guidelines / migration-plan / new-UI !?
 - 4 IDEA: [tourney] allow edit T-ladder-props in T-status REG/PAIR/PLAY as well if TD has admin-edit-rights: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3380971
 - 7 IDEA: [tourney] copy TPs to other tournaments (see also copyTournament-issue): http://www.dragongoserver.net/forum/read.php?forum=4&thread=48856#48913
 - 5 IDEA: [tourney] reserve TP-slots not to be taken for normal registrations: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48856#48914
+- 6 IDEA: [msg] provide meaningful return-page-context on sending message (send / cancel): http://www.dragongoserver.net/forum/read.php?forum=2&thread=49068#49073
+- 8 IDEA: [game] show diffs rating min/curr/max/sum in rating-changes-page: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49148#49165
+- 6 DBG:  [user] showing hero% wrong on users-page for user without rated games: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3440061;; https://www.dragongoserver.net/userinfo.php?uid=86708
+- 3 ADM:  [game][data] (A023.1) from 19-May-2017: extend export of finished games with more info: http://www.dragongoserver.net/forum/read.php?forum=5&thread=49290#49308;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3448823
+- 3 ADM:  [game][data] (A023.2) from 10-Jun-2017: update export of finished games: http://www.dragongoserver.net/message_thread.php?text=1&thread=3450108&mid=3450108&oid=0
+- 6 IDEA: [tourney] TL: ladder-view: add note in row with already challenged user (with a running game): http://www.dragongoserver.net/forum/read.php?forum=2&thread=49382#49404
+- 8 IDEA: [game] merge new-game-page for fair-komi with std one!?: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49503#49523
+- 8 IDEA: [msg] mark message "NEW" again (i.e. move into New-folder): http://www.dragongoserver.net/forum/read.php?forum=2&thread=49207#49211
+- 3 IDEA: [game] add shape-id input for invite player: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49662#49671
+- 5 CHK:  [game] increase max-size of load shape-game from SGF (check/strip away for comments; take main variation): http://www.dragongoserver.net/forum/read.php?forum=2&thread=49644#49652
+- 5 CHK:  [markup] strip away trailing comma (&more chars?) in HTTP-raw-links: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49591#49591
+- 3 BUG:  [game] goban-editor / SGF-parser: also read/parse compressed-point-list from SGF: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49798#49803
+- 7 BUG:  [game] goban-editor: also interpret labels? http://www.dragongoserver.net/forum/read.php?forum=4&thread=49798#49803
+- 7 IDEA: [forum] spam-flag/tag: enough clicks lead to auto-hide: http://www.dragongoserver.net/message_thread.php?text=1&thread=3561655&mid=3561712&oid=0#mid3561712
+- 6 BUG:  [user] field max-length limits (Players.Name): http://www.dragongoserver.net/forum/read.php?forum=2&thread=50066#50079
+- 2 TXT:  [faq] fix text consistency for 'byo-yomi / byoyomi': http://www.dragongoserver.net/forum/read.php?forum=2&thread=49926#49930
+- 2 CHK:  [site] link formatting: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49844;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=49855#49855
 
-Open_Tasks_Stack:  (max. 2 WIP), first=next  (S081) (T035) (A023) (C04) (D02) (B017) (F024) (V016)
+Open_Tasks_Stack:  (max. 2 WIP), first=next  (S083) (T035) (A024) (C04) (D02) (B017) (F024) (V016)
+- 0 IDEA: [user] forgot password / admin request -> sent mail to support@dragongoserver.net with fix info
+- 0 IDEA: [forum] allow to unsubscribe from a forum: what does that imply? (no '*' for new, but show new on viewing forum?);; -> motivation: make dev-forum public
 - 1 ADM:  [adm][user] mark for deletion: http://www.dragongoserver.net/forum/read.php?forum=2&thread=48073#48073
 - 1 ADM:  [adm][site][msg] chk failed_query.sql on server with locking query
 #--------------- OPEN:
@@ -87,11 +133,14 @@ Tournaments_Running:
 - 0 ADM:  [tourney] T#48 DDK division 2016: REG-period till 06-Mar-2016, started: 187 TP: 24x8 -> 24 = 24 PW: -> 3x8 (1..3)
 - 0 ADM:  [tourney] T#58 SDK division 2016: REG-period till 28-May-2016, started: 232 TP: 29x8 -> 29 = 29 PW (33x1) (1..1) -> 4x9 (3x8+1x9) = 33 PW (1..2)
 - 0 ADM:  [tourney] T#63 Dan division 2016: REG-period till 04-Sep-2016, started: 62 TP: 8x8 ->
+- 0 ADM:  [tourney] T#96 Sunjang 2017: REG-period till 22-Oct-2017, started: 246 TP: 31x8 -> 31x2
 
 #-------------------------------------------------------------------------
 # PLAN
 
-Backlog_1_20_0:
+Backlog_1_20_0:   GDPR / DSGVO
+
+Backlog_1_21_0:
 - 1 SPEC: [tourney] (T034.0) break down title-T-feature into stories (only TRR-types), collect reqs: best-of-oddX; start with connect to TLeague (other TRR-types later);; IDEA: might be done with invite-games with multiple-numbers (from wishlist) but with some twists on the params (like alternate color or similar)
 - 1 SPEC: [user][adm] regenerate verification-mail + fix/handle verifications for admin + handle old-unused-verification -> cleanup !?
 - 3 IDEA: [tourney] copy existing T on T-creation-wizard? -> see code copyTournament()
@@ -102,9 +151,10 @@ Backlog_1_20_0:
 - 4 DEV:  [profile] (S075) Bookmarks: php-cache bookmarks in secret-tempdir maybe or in APC-cache!;; optimization/cleanup: hide bookmark with option to save db-selects
 #---------------
 - 3 IDEA: [tourney] convenience for TD: invite players from other tournament with filters (all / specific round / next-round-mark): http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3277209
-- 4 SPEC: [site] (A008.1) new code-project-structure: ~/src|doc|specs|examples|plugins|tests|the-like|etc; use some auto-build/test/deploy(envs:sf/prod)
+- 4 SPEC: [site] (A008.1) new code-project-structure: ~/src|doc|specs|examples|plugins|tests|the-like|etc ?; use some auto-build/test/deploy(envs:sf/prod);; see also https://github.com/php-pds/skeleton
 
 Tournaments_New_Candidates:
+- 1 ADM:  [tourney] NEW League tournaments (after implemented): http://www.dragongoserver.net/forum/read.php?forum=11&thread=41787#49324
 - 3 ADM:  [tourney] NEW dgs tournament 13x13 (with ALTERNATE): http://www.dragongoserver.net/forum/read.php?forum=11&thread=44999#44999;; Open/Handicap division, F:14d+1d
 - 6 ADM:  [tourney] NEW priv tournament "Clash of the Giants 9x9", see http://www.dragongoserver.net/forum/read.php?forum=11&thread=41098#41098; private TRR invite-only;; inform all 9x9-ladder-TPs about TOP10-16 can participate in TRR with double-RR F:14d+2d + invite who wants to join + edit T-descr + start/organize
 
@@ -117,6 +167,7 @@ New_Discussions:   set prio + sort into sections
 - 2 DISC: [tourney] eval thread gokillsjob (cheating-tourney): http://www.dragongoserver.net/forum/read.php?forum=11&thread=47472
 - 3 DISC: [msg][game] continue game-discussion after game-ended, follow-up / reply on game-result-message; could utilize game-review-comments feature#5; or just add FAQ-entry describing situation and "workaround" of how to do it manually: http://www.dragongoserver.net/forum/read.php?forum=2&thread=46387#46387
 - 5 DISC: [msg] send 2nd "thread-linked" message: A>A>B http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47921 -> clarify; feasible (sounds very complex)?
+- 8 DISC: [game] reduce impact of high handicap on setting up games: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49221#49276
 
 To_Check_Discuss_Answer:
 - 3 DOC:  [tourney] adjust DOCS how to manage T about "define pools" on Pool-status(!?) than Init-status like it's described wrongly right now in: http://www.dragongoserver.net/forum/read.php?forum=2&thread=39729&edit=39803#39803;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2820302
@@ -221,7 +272,7 @@ New_Check_Issues:  BUG (=sure-bug needs fix), DBG (=is-bug, investigate if fix n
 Check_If_Bug:
 - 3 DBG:  [clock][game] weekend: timezone bug? or feature? http://www.dragongoserver.net/forum/read.php?forum=2&thread=24197#25278 -> may get rid of sleep-time !? (search doubles)
 - 4 CHK:  [site] (S077.4) check cookie-expire <-> session-expire; why is cookie-handle-expire 5x normal expire (1month)? -> use longer expire; use auto-extend-expire!? as {S077.1} only partly solves the problem.  If cookie expires, might still be a problem losing data on POSTs ?;; also http://www.dragongoserver.net/forum/read.php?forum=2&thread=47914#47924
-- 5 CHK:  [game] check proper work of move-numbering (after latest change): http://www.dragongoserver.net/forum/read.php?forum=2&thread=44024#44472;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=44726#44726
+- 5 CHK:  [game] check proper work of move-numbering (after latest change): http://www.dragongoserver.net/forum/read.php?forum=2&thread=44024#44472;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=44726#44726;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=49060#49060
 - 5 CHK:  [game] change/fix(?) mark-last-move-capture AFTER selected move (capturing stone) but BEFORE submitted move !?: http://www.dragongoserver.net/forum/read.php?forum=2&thread=45687#45757;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=31951#31951
 - 5 DBG:  [game] cut-off for max-handicap in proper-handicap-calculus: http://www.dragongoserver.net/forum/read.php?forum=2&thread=42559#43044;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=42559#43098 -> still a bug?
 - 6 DBG:  [msg] investigate + fix(?) folder-colors / transparency / alpha-channel in: (a) table-list (list_messages), (b) other places: http://www.dragongoserver.net/forum/read.php?forum=4&thread=48422#48431;; http://stackoverflow.com/questions/1419448/hex-representation-of-a-color-with-alpha-channel
@@ -273,7 +324,7 @@ KnownBugs:
 - 7 DBG:  [msg] empty (no move) email-notifications: http://www.dragongoserver.net/forum/read.php?forum=2&thread=33022#34335;; tegais empty notifications: http://www.dragongoserver.net/forum/read.php?forum=2&thread=33022#34550 + see mails
 - 8 DBG:  [site] check max-length fields, because browser allow input of longer but cuts on sending data: http://www.dragongoserver.net/forum/read.php?forum=10&thread=35610#35621
 - 9 DBG:  [markup] <note>-tag not catched everywhere with html_safe !!
-- 9 DBG:  [game] game-calc: why is rating-diff off for fin-games?;; wrong game-current if rating-change-admin done inbetween;; add fields to enter other starting-values;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=33180#34046
+- 9 DBG:  [game] game-calc: why is rating-diff off for fin-games? (perhaps end-rating is rating AFTER calc?);; wrong game-current if rating-change-admin done inbetween;; add fields to enter other starting-values;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=33180#34046
 
 KnownBugs_Not_Reproducable:
 - 2 DBG:  [game] skip to next game fails: confirm.GAH.init_globals(664628).miss_init0;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47272#47274;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=47272#47937
@@ -308,7 +359,7 @@ Feature_Voted_Simple:
 - 7 IDEA: [profile][game] (F019) sgf-download "pops up directly instead of saving" as option -> URL-arg inline=1;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=32333;; http://www.dragongoserver.net/features/vote_feature.php?fid=19
 
 Feature_F013_JS_GameViewer:  http://www.dragongoserver.net/features/vote_feature.php?fid=13 -> needs (F011)=UTF8 first
-- 1 CHK:  [gview] evaluate other frameworks: "Html5 Go Board" (L19); ngGo (Angular-based lib); EidoGo; others?
+- 1 CHK:  [gview] evaluate other frameworks: "Html5 Go Board" (L19 http://www.lifein19x19.com/forum/viewtopic.php?f=18&t=11239); ngGo (Angular-based lib); EidoGo; others?;; Go-libs (https://github.com/waltheri/go-libraries)
 - 2 SPEC: [gview] game-viewer (F013) (V15.a): play-tab (or combine with Analyze-tab?) to play a move; clicking on move will play last-move
 - 2 SPEC: [gview] game-viewer (F013) (V15.b): clicking on move will only "replace" last-move
 - 2 SPEC: [gview] game-viewer (F013) (V15.c): cancel last played (new) move
@@ -454,12 +505,12 @@ Ideas_Issues_Admin:
 - 8 DEV:  [consistency][game] (S56.g) ADMIN: adjust consistency-scripts for fair-komi-games: game-consistency, player-consistency
 
 SSL:
-- 2 DOC:  [site] write doc how to get/install SSL-certificate; "Cache-Control: public", secure-cookies, STS -> see {A018}
+- 2 DOC:  [site] write doc how to get/install SSL-certificate; "Cache-Control: public", secure-cookies, STS -> see {A018};; http://www.dragongoserver.net/forum/read.php?forum=2&thread=39023#39132;; ~/DGS-data/ssl/www.dragongoserver.net/2017-05-14/README;; superseded 08May2018 by using auto-renew letsencrypt server-certificate
+- 2 CHK:  [site] investigate http-links for 2https-redirects for messages/forum-posts/etc: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49228#49228
 - 2 ADM:  [site] set "Cache-Control: public" for images/js/css per .htaccess, b/c of 3.4 in https://www.ssllabs.com/downloads/SSL_TLS_Deployment_Best_Practices_1.3.pdf
 - 2 ADM:  [site] set "Strict-Transport-Security"-header for http-STS http://www.debian-administration.org/article/662/Enabling_HTTP_Strict_Transport_Security_on_debian_servers: appl or .htaccess !?
 - 3 ADM:  [site] write admin-bulletin about usage of SSL, add in NEWS; after Cache-Control + STS issue resolved
-- 9 ADM:  [site] (A018) renew SSL-certificate on 15-May-2017: see prev from 23-May-2016: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44343#44343;; https://cert.startcom.org/;; http://www.dragongoserver.net/forum/read.php?forum=1&thread=43965 -> sent mail to SamurajData
-
+- 9 ADM:  [site] (A018) renew SSL-certificate on 15-May-2018: CA NameCheap.com;; see ~/DGS-data/ssl/www.dragongoserver.net/2017-05-14/README;; http://www.dragongoserver.net/forum/read.php?forum=1&thread=49287
 
 #-------------------------------------------------------------------------
 # TOURNAMENT FEATURES
@@ -528,7 +579,7 @@ Tournament_Ladder:  [TL]
 - 3 CHK:  [tourney] (T022b) TL: handle inactive players; http://www.dragongoserver.net/forum/read.php?forum=2&thread=41996#42216;; need to set UserAbsenceDays to 0, then check first how good migration was (how many TP.Lastmoved=0 ?); perhaps wait with this change till 30 days or longer passed !?;; http://www.dragongoserver.net/forum/read.php?forum=11&thread=39559#39559 ;; inform "lacking" TPs first before implementing it;; STARTED: load_ladder_absent_users(): add join "INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID AND TP.ID=TL.rid" && where: "TP.Status='".TP_STATUS_REGISTER."'" && "IF(TP.Lastmoved>0,TP.Lastmoved,P.Lastaccess) < NOW() - INTERVAL (TLP.UserAbsenceDays + CEIL(P.OnVacation)) DAY"" (replace last)
 - 3 CHK:  [tourney] (T022b) TL: user-absence-removal check not P.Lastaccess but on participation in ladder better!?
 - 3 IDEA: [tourney] TL: (S14.2) option: handle long user-inactivity: notify-reminder to act -> chk double
-- 4 IDEA: [tourney] TL: add user-absence-handling#2: withdraw user that didn't move in X days: vacation difficult to handle !? -> perhaps not as vacation is difficult to handle !?
+- 4 IDEA: [tourney] (T022b) TL: add user-absence-handling#2: withdraw user that didn't move in X days: vacation difficult to handle !? -> perhaps not as vacation is difficult to handle !?
 - 4 IDEA: [tourney][adm] TL: (S18.2) notify user on removing user (ladder-admin): add checkbox to prevent notify for T-Admin
 - 6 CHK:  [tourney] TL: (T01.b) user removal: what happens with running T-games? -> 1. Games forfeited (a) immediately, (b) by choice of players; 2. games deleted, 3. games continued as std-games (no T-effect);; perhaps controlled by option { UserDelRunGames  : enum GAMES_FORFEIT, GAMES_DELETE, GAMES_STD (default) };; (3) implemented by then;; ask community if there should be a way to delete those games; perhaps managed with Games-flags req+ACK => check relations with (T004) void-result feature !? => 15-Mar-2013 for now, keep only (3) = detach + continue as unrated std-game -> may allow later to delete-game
 - 6 CHK:  [tourney] TL: add withdraw-ladder on view-tourney-page as well: http://www.dragongoserver.net/forum/read.php?forum=11&thread=38467#38481 -> likely not needed, has been added on edit-reg-page
@@ -728,7 +779,7 @@ Ideas_Issues_Forum_Related:
 - 4 IDEA: [forum] [wishlist] selective NEW-handling: (a) in either forum/search, (b) selective RSS-feed, (c) selective NEW per forums/thread?;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=40323#40323
 - 4 IDEA: [forum] forum-search or special thread-view-only-with-news for only-unread posts: http://www.dragongoserver.net/forum/read.php?forum=4&thread=35256#35277;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=35256#35281
 - 4 SPEC: [forum] mark-whole-forum read: http://www.dragongoserver.net/forum/read.php?forum=8&thread=42568#42610
-- 5 IDEA: [forum] unsubscribe/ignore forum or thread: http://www.dragongoserver.net/forum/read.php?forum=8&thread=42568#42612;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2884455
+- 5 IDEA: [forum] unsubscribe/ignore forum or thread: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49615#49615;; http://www.dragongoserver.net/forum/read.php?forum=8&thread=42568#42612;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2884455
 - 5 IDEA: [forum] RSS latest threads forum
 - 6 IDEA: [forum] observe threads of forums
 - 6 IDEA: [forum] lock-forum-thread feature -> needed?
@@ -789,6 +840,7 @@ Ideas_Issues_Statistics_Related:
 - 3 CHK:  [site] (S47) improve site-stats (informative + attracting new-players); user-registered-count-stats with filters (time-range, total, user-online within X time);; OGS-stats: http://nbviewer.ipython.org/gist/thouis/0f93643a8f14ff802f92;; https://gist.github.com/0f93643a8f14ff802f92
 - 3 SPEC: [stats] from wishlist: (server-stats) present, active, total number of users/games: -> rework statistics page
 - 5 SPEC: [stats] from wishlist: (server-stats) number of running games per day for all players together: -> enhance statistics-page by absolute-numbers instead of percentages
+- 5 IDEA: [stats] user/games-stats: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3413296;; similar to http://vatcss.info/games/gotstats/ (would require stats-api)
 - 6 IDEA: [site] db/server-load-indicator: http://www.dragongoserver.net/forum/read.php?forum=2&thread=19921#20001
 - 7 SPEC: [stats] from wishlist: (server-stats) physical data (eg MySql disc space consumption): for admin "show table status", for user show only sum of all tables
 
@@ -797,7 +849,7 @@ Ideas_Issues_Translation_Related:
 - 6 SPEC: [adm][transl] add show-translation-log (allow for translators & admins, with links to translated-texts)
 - 7 TXT:  [transl][msg] check why msg-types untranslatable; perhaps make translatable?: http://www.dragongoserver.net/forum/read.php?forum=7&thread=48757#48761
 - 7 IDEA: [transl][site] translation-editing based on JavaScript: add translator-mode -> adding control on each T_(..)-text/intro/links/buttons/etc showing "original" English + current translation + input for new/changed text + Update/Close-action
-- 8 CHK:  [site][transl] different orig-texts for 'preview' (noun/verb or so, dep. on context): http://www.dragongoserver.net/forum/read.php?forum=7&thread=44659#44674
+- 8 CHK:  [site][transl] different orig-texts for 'preview' (noun/verb or so, dep. on context): http://www.dragongoserver.net/forum/read.php?forum=7&thread=44659#44674;; http://www.dragongoserver.net/forum/read.php?forum=7&thread=49695#49710
 - 9 ADM:  [site][transl] add seed-data for translations for local server: http://www.dragongoserver.net/forum/read.php?forum=10&thread=40664#40671
 - 9 IDEA: [transl] translations for timezones !?;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=43664#45186
 - 9 CHK:  [site][transl] add translations using Transifex-external-site !? -> (-) has no DGS-tag-previewing -> !?
@@ -887,6 +939,8 @@ DocsArchive_Admin:  [NEW 1st]
 - 1 ADM:  [site] complaint about game-comments: http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=3151436;; http://www.dragongoserver.net/forum/read.php?forum=4&thread=46522#46522 -> wrote warning and voided game 08-Feb-2016 02:00 CET [2h]
 - 2 DOC:  [adm] Erik's release-script: ~/DGS-data/make_DGS_snapshot_without_pw.sh (use after branch)
 - 5 DOC:  [site] Jira/TODO: http://www.dragongoserver.net/forum/read.php?forum=2&thread=40188#41307
+- 9 ADM:  [site] (A018) renew SSL-certificate on 15-May-2017: see prev from 23-May-2016: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44343#44343;; https://www.startcomca.com/;; http://www.dragongoserver.net/forum/read.php?forum=1&thread=43965 -> sent mail to SamurajData
+- 9 ADM:  [site] (A018) renew SSL-certificate on 15-May-2017: see prev from May-2016: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44343#44343;; CA NameCheap.com;; see ~/DGS-data/ssl/www.dragongoserver.net/2017-05-14/README
 
 DocsArchive_Misc_Developer:
 - 1 DOC:  [icons] http://openclipart.org/, http://www.veryicon.com/icons/object/buuf/mind-mencia.html
@@ -907,7 +961,7 @@ DocsArchive_Misc_Developer:
 
 To_Cleanup:
 - 9 ADM:  [tourney] add survey about time-settings for ladders !?: http://www.dragongoserver.net/forum/read.php?forum=11&thread=38881#38903 -> not needed
-- 9 ADM:  [site] (A018) renew SSL-certificate on 23-May-2016: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44343#44343;; https://cert.startcom.org/;; http://www.dragongoserver.net/forum/read.php?forum=1&thread=43965 -> sent mail to SamurajData
+- 9 ADM:  [site] (A018) renew SSL-certificate on 23-May-2016: http://www.dragongoserver.net/forum/read.php?forum=2&thread=44343#44343;; https://www.startcomca.com/;; http://www.dragongoserver.net/forum/read.php?forum=1&thread=43965 -> sent mail to SamurajData
 
 Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?=clarify)
 - 1 SPEC: [forum] prevent the use of dirty-words ("wog"): https://www.dragongoserver.net/forum/read.php?forum=8&thread=47709 -> done + deployed LIVE as 1.19.11-hotfix (23-Aug-2016 06:21)

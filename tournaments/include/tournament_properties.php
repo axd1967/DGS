@@ -268,6 +268,8 @@ class TournamentProperties
       $round_max_tps = ( $tp->StartRound > 1 ) ? round( $maxTP / pow(2, $tp->StartRound - 1) ) : $maxTP;
       $tp_count = TournamentCache::count_cache_tournament_participants(
          $this->tid, /*TP-stat-ALL*/null, $tp->StartRound, /*NextR*/false );
+error_log(sprintf("TProps.checkUserRegistration: tid=%s tp_id=%s is_new_tp=%s chk_user=%s chk_type=%s chk_flags=%s maxTP=%s rnd_max_tps=%s tp_cnt=%s",
+   $tourney->ID, $tp->ID, ($is_new_tp ? 1 : 0), $check_user->ID, $check_type, $check_flags, $maxTP, $round_max_tps, $tp_count));
       if ( $is_new_tp )
          ++$tp_count;
       if ( $tp_count > $round_max_tps )

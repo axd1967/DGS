@@ -22,6 +22,7 @@ favicon.ico
 .project
 *.diff
 archive
+local-data/
 Makefile
 ref-doc
 tags
