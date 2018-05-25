@@ -336,13 +336,13 @@ class TournamentCache
       $key = "TPCount.$tid.$stat_str.$round." . ($use_next_round ? 1 : 0);
 
       $count_tps = DgsCache::fetch( $dbgmsg, CACHE_GRP_TP_COUNT, $key );
-error_log("TCache.count_cache_tps#1($tid,$tp_status,$round,$use_next_round: count_tps=$count_tps");
+//error_log("TCache.count_cache_tps#1($tid,$tp_status,$round,$use_next_round: count_tps=$count_tps");
       if ( is_null($count_tps) )
       {
          $count_tps = TournamentParticipant::count_tournament_participants($tid, $tp_status, $round, $use_next_round);
          DgsCache::store( $dbgmsg, CACHE_GRP_TP_COUNT, $key, $count_tps, SECS_PER_DAY, $group_id );
       }
-error_log("TCache.count_cache_tps#2($tid,$tp_status,$round,$use_next_round: count_tps=$count_tps");
+//error_log("TCache.count_cache_tps#2($tid,$tp_status,$round,$use_next_round: count_tps=$count_tps");
 
       return $count_tps;
    }//count_cache_tournament_participants

@@ -380,7 +380,7 @@ class TournamentParticipant
       if ( is_numeric($round) && $round > 0 )
          $qsql->add_part( SQLP_WHERE, "$round_field=$round" );
 
-error_log(sprintf("TP.count_tps($tid,$tp_status,$round,$use_next_round: SQL=[%s]", $qsql->get_select()));
+//error_log(sprintf("TP.count_tps($tid,$tp_status,$round,$use_next_round: SQL=[%s]", $qsql->get_select()));
       $row = mysql_single_fetch( "TournamentParticipant:count_TPs($tid,".implode('/',$stat_out).",$round_field=$round)",
             $qsql->get_select() );
       return ($row) ? (int)$row['X_Count'] : 0;
