@@ -4883,8 +4883,8 @@ class NextGameOrder
                "(Games.White_ID=$uid)+0 AS Color",
                //extra bits of X_Color are for sorting purposes
                //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
-               "IF(Games.ToMove_ID=$uid,0,0x10)+IF(Games.White_ID=$uid,2,0) + " .
-                  "IF(Games.White_ID=Games.ToMove_ID,1,IF(Games.Black_ID=Games.ToMove_ID,0,0x20)) AS X_Color",
+               "IF(Games.ToMove_ID=$uid,0,0+0x10)+IF(Games.White_ID=$uid,2,0) + " .
+                  "IF(Games.White_ID=Games.ToMove_ID,1,IF(Games.Black_ID=Games.ToMove_ID,0,0+0x20)) AS X_Color",
                'opp.ID AS opp_ID', 'opp.Name AS opp_Name', 'opp.Handle AS opp_Handle', 'opp.Rating2 AS opp_Rating',
                'opp.OnVacation AS opp_OnVacation', 'UNIX_TIMESTAMP(opp.Lastaccess) AS opp_Lastaccess',
             SQLP_FROM,

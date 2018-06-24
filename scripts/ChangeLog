@@ -11,6 +11,14 @@ Release [2016-08-20] - DGS 1.19.12 - tag [release-1_19_12-20160920] on branch [D
 ChangeLog
 ------------------------------------------------------------------
 
+2018-06-24 jug
+
+   * include/game_functions.php (NextGameOrder.build_status_games_query),
+     include/gamelist_control.php (GameListControl.build_games_query),
+     include/db_classes.php (EntityData.build_sql_update):
+   - fix mysql upgrade incompatibility: hex codes like 0x10 are now treated more strictly
+     as string and need casting to number
+
 2017-02-18 jug
 
    * include/game_functions.php (FairKomiNegotiation.save_komi, ~.start_fairkomi_game),

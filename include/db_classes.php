@@ -430,7 +430,7 @@ class EntityData
          $arr[] = FIELD_CHANGEDBY . '=' . $this->get_sql_value(FIELD_CHANGEDBY);
 
       if ( $incl_optlock && $this->entity->has_optimistic_locking )
-         $arr[] = sprintf( '%s=(%s+1) & 0xFF', FIELD_LOCKVERSION, FIELD_LOCKVERSION ); // 0xFF=tinyint-unsigned
+         $arr[] = sprintf( '%s=(%s+1) & (0+0xFF)', FIELD_LOCKVERSION, FIELD_LOCKVERSION ); // 0xFF=tinyint-unsigned
 
       $arr_query = array();
       $arr_query[] = 'UPDATE ' . $this->entity->table . ' SET ' . implode(', ', $arr);

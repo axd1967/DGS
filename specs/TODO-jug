@@ -27,7 +27,6 @@ New_TODO_Issues_Recent_In_Forums:
 New_Issues:   set prio + sort into sections
 - 5 SPEC: [site] (S082.0) PHP5.4 cleanup: adjustments for PHP5.4 after server-migration
 - 5 DEV:  [site] (S082.1) PHP5.4 cleanup: use htmlspecialchars(double_encode=false)
-- 1 BUG:  [game] my-running-games: my/opp-time remaining sometimes switched: https://www.dragongoserver.net/forum/read.php?forum=2&thread=50191
 - 1 BUG:  [tourney] user-reg-check on switching T-status INIT->PAIR must not assume $is_new_tp==true in tournaments/include/tournament_status.php:252#->checkUserRegistration: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49955#49964
 - 1 CHK:  [tourney] user-reg-check on switching T-status INIT->PAIR must not cache wrong TP-count: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49955#49967
 - 5 ADM:  [faq] adjust FAQ entry about how-rating-works: http://www.dragongoserver.net/forum/read.php?forum=3&thread=49175;; EDIT: http://www.dragongoserver.net/admin_faq.php?ot=0&view=all&edit=1&type=e&id=123
@@ -57,6 +56,7 @@ New_Issues:   set prio + sort into sections
 - 6 BUG:  [user] field max-length limits (Players.Name): http://www.dragongoserver.net/forum/read.php?forum=2&thread=50066#50079
 - 2 TXT:  [faq] fix text consistency for 'byo-yomi / byoyomi': http://www.dragongoserver.net/forum/read.php?forum=2&thread=49926#49930
 - 2 CHK:  [site] link formatting: http://www.dragongoserver.net/forum/read.php?forum=2&thread=49844;; http://www.dragongoserver.net/forum/read.php?forum=2&thread=49855#49855
+- 3 ADM:  [game] fix 33 inconsistent games: select ID, Moves,Handicap, Status, ToMove_ID, Black_ID, White_ID,  Lastchanged , GameSetup  from Games where ToMove_ID <= 0 and Status in ('KOMI','PLAY','PASS','SCORE','SCORE2')
 
 Open_Tasks_Stack:  (max. 2 WIP), first=next  (S083) (T035) (A024) (C04) (D02) (B017) (F024) (V016)
 - 0 IDEA: [user] forgot password / admin request -> sent mail to support@dragongoserver.net with fix info
@@ -1053,4 +1053,6 @@ Done + ToDoc (REL 1.20.0):  (L=later, x=announced-in-forum, N=not-done-posted, ?
 - 5 BUG:  [goban] (S080.3) adjust SGF-parsing to default to Go-game if "GM[1]"-properties missing according to SGF-specs
 - 1 ADM:  [adm] game-dispute: http://www.dragongoserver.net/forum/read.php?forum=5&thread=48768#48774 -> sent msg to players 17-Jan-2017 -> WAIT -> done
 - 5 SPEC: [game] fairkomi-bidding/start-game: jump to next game if other player to "move/bid", but stay on game if started and to play next: http://www.dragongoserver.net/forum/read.php?forum=4&thread=49039#49039
+- 1 BUG:  [game] my-running-games: my/opp-time remaining sometimes switched: https://www.dragongoserver.net/forum/read.php?forum=2&thread=50191;; https://www.dragongoserver.net/forum/read.php?forum=2&thread=50346#50346
+- 1 BUG:  [game] my-finished-games: color-icon shows double icon: https://www.dragongoserver.net/forum/read.php?forum=2&thread=50264
 

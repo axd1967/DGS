@@ -210,8 +210,8 @@ class GameListControl
          $qsql->add_part( SQLP_FIELDS,
             //extra bits of Color are for sorting purposes
             //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
-            "IF(G.ToMove_ID=$uid,0,0x10)+IF(G.White_ID=$uid,2,0)+"
-               . "IF(G.White_ID=G.ToMove_ID,1,IF(G.Black_ID=G.ToMove_ID,0,0x20)) AS X_Color" );
+            "IF(G.ToMove_ID=$uid,0,0+0x10)+IF(G.White_ID=$uid,2,0)+"
+               . "IF(G.White_ID=G.ToMove_ID,1,IF(G.Black_ID=G.ToMove_ID,0,0+0x20)) AS X_Color" );
 
          if ( $this->mp_game )
          {
